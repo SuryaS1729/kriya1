@@ -2,7 +2,9 @@
   "expo": {
     "scheme": "acme",
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-sqlite",
+      "expo-asset"
     ],
     "name": "kriya",
     "slug": "kriya"

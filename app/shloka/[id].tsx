@@ -1,79 +1,117 @@
 // app/shloka/[id].tsx
+import { useEffect, useMemo, useState } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
-import { getShlokaById } from '../../lib/shloka';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ScrollView, StyleSheet, Text, View, Pressable, StatusBar } from 'react-native';
+import { getShlokaById, type ShlokaRow } from '../../lib/shloka';
 
 export default function ShlokaDetail() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const row = getShlokaById(Number(id));
+  const params = useLocalSearchParams<{ id?: string | string[] }>();
+  const shlokaId = useMemo(() => {
+    const raw = Array.isArray(params.id) ? params.id[0] : params.id;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }, [params.id]);
 
+  const [row, setRow] = useState<ShlokaRow | null>(null);
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (shlokaId == null) return;
+    try { setRow(getShlokaById(shlokaId) ?? null); } catch { setRow(null); }
+  }, [shlokaId]);
+
+  if (shlokaId == null) {
+    return (
+      <SafeAreaView style={[styles.center, { backgroundColor: '#0b2946' }]}>
+        <Text style={{ color: 'white' }}>Invalid shloka id.</Text>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: 'white' }}>Go back</Text></Pressable>
+      </SafeAreaView>
+    );
+  }
   if (!row) {
     return (
-      <View style={styles.center}>
-        <Text style={{ fontSize: 16 }}>Shloka not found.</Text>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={{ color: 'white' }}>Go back</Text>
-        </Pressable>
-      </View>
+      <SafeAreaView style={[styles.center, { backgroundColor: '#0b2946' }]}>
+        <Text style={{ color: 'white' }}>Shloka not found.</Text>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}><Text style={{ color: 'white' }}>Go back</Text></Pressable>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'white' }}>
-      {/* Simple top bar */}
-      <View style={styles.topbar}>
-        <Pressable onPress={() => router.back()} style={styles.circle} />
-        <Text style={styles.title}>Adhyaya {row.chapter_number}, Shloka {row.verse_number}</Text>
-        <View style={{ width: 28 }} />
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0b2946' }}>
+      <StatusBar barStyle="light-content" backgroundColor="#0b2946" />
+      <LinearGradient colors={['#0e4570', '#0b2946']} style={StyleSheet.absoluteFill} />
 
-      <ScrollView contentContainerStyle={styles.body}>
-        <Text style={styles.section}>Sanskrit</Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingTop: insets.top + 8,   // respect status bar
+          paddingHorizontal: 24,
+          paddingBottom: 40,
+        }}
+      >
+        {/* IN-FLOW HEADER ROW (scrolls away) */}
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()} hitSlop={16}>
+            <Text style={styles.headerIcon}>✕</Text>
+          </Pressable>
+          <Text style={styles.headerTitle}>
+            Adhyaya {row.chapter_number}, Shloka {row.verse_number}
+          </Text>
+          <Pressable onPress={() => { /* TODO: play audio */ }} hitSlop={16}>
+            <Text style={styles.headerIcon}>🎧</Text>
+          </Pressable>
+        </View>
+
+        {/* BODY */}
+        <Text style={styles.section}>Shloka :</Text>
         <Text style={styles.sa}>{row.text}</Text>
 
         {row.transliteration ? (
           <>
-            <Text style={styles.section}>Transliteration</Text>
+            <Text style={styles.section}>Transliteration :</Text>
             <Text style={styles.en}>{row.transliteration}</Text>
           </>
         ) : null}
 
-        <Text style={styles.section}>Translation</Text>
+        <Text style={styles.section}>Translation :</Text>
         <Text style={styles.en}>{row.translation_2 ?? row.description ?? '—'}</Text>
 
         {row.commentary ? (
           <>
-            <Text style={styles.section}>Commentary</Text>
+            <Text style={styles.section}>Commentary :</Text>
             <Text style={styles.en}>{row.commentary}</Text>
           </>
         ) : null}
-
-        {row.word_meanings ? (
-          <>
-            <Text style={styles.section}>Word meanings</Text>
-            <Text style={styles.en}>{row.word_meanings}</Text>
-          </>
-        ) : null}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  topbar: {
-    paddingTop: 14, paddingHorizontal: 16, paddingBottom: 10,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e5e7eb',
-    backgroundColor: 'white',
+  // in-flow header (not floating)
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
-  circle: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#111827' },
-  title: { fontSize: 16, fontWeight: '700' },
+  headerIcon: { color: 'white', fontSize: 22, fontWeight: '700' },
+  headerTitle: {
+    flex: 1,
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginHorizontal: 12,
+  },
 
-  body: { padding: 16, paddingBottom: 40, gap: 10 },
-  section: { fontSize: 14, fontWeight: '700', marginTop: 6, color: '#334155' },
-  sa: { fontSize: 20, lineHeight: 30, color: '#0f172a' },
-  en: { fontSize: 16, lineHeight: 24, color: '#111827' },
+  section: { color: 'rgba(255,255,255,0.9)', fontSize: 18, fontWeight: '700', marginTop: 8 },
+  sa: { color: 'white', fontSize: 24, lineHeight: 34 },
+  en: { color: 'rgba(255,255,255,0.95)', fontSize: 18, lineHeight: 26 },
 
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: 'white' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   backBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, backgroundColor: '#111827' },
 });

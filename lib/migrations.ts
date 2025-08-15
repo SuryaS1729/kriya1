@@ -43,7 +43,34 @@ export function runMigrations(db: SQLiteDatabase) {
     );
     setVersion(db, 2);
   }
+
+  // v3: day_key = start-of-day bucket for tasks
+if (current < 3) {
+  db.execSync(`
+    ALTER TABLE tasks ADD COLUMN day_key INTEGER;  -- nullable while we backfill
+  `);
+
+  // backfill existing rows using created_at's day
+  const all = db.getAllSync<{ id: number; created_at: number }>('SELECT id, created_at FROM tasks');
+  for (const r of all) {
+    const k = startOfDay(r.created_at);
+    db.runSync('UPDATE tasks SET day_key = ? WHERE id = ?', [k, r.id]);
+  }
+
+  // make it NOT NULL going forward (SQLite can't drop; we rely on app discipline)
+  db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_day_key ON tasks(day_key);`);
+  setVersion(db, 3);
 }
+
+function startOfDay(ms: number) {
+  const d = new Date(ms);
+  d.setHours(0,0,0,0);
+  return d.getTime();
+}
+
+}
+
+
 
 function getCurrentVersion(db: SQLiteDatabase) {
   try {
@@ -55,9 +82,13 @@ function setVersion(db: SQLiteDatabase, v: number) {
   db.runSync('INSERT OR REPLACE INTO schema_migrations (version) VALUES (?)', [v]);
 }
 
+
+
 // local helper
 function startOfTodayMs(ms: number) {
   const d = new Date(ms);
   d.setHours(0, 0, 0, 0);
   return d.getTime();
 }
+
+

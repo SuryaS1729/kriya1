@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Home() {
   const init      = useKriya(s => s.init);
-  const tasks     = useKriya(s => s.tasks);
+  const tasks     = useKriya(s => s.tasksToday);
   const getShloka = useKriya(s => s.currentShloka); // select function (stable), not its return value
   const toggle    = useKriya(s => s.toggleTask);
   const remove    = useKriya(s => s.removeTask);
@@ -55,9 +55,15 @@ export default function Home() {
           </Animated.View>
         </Pressable>
       </Link>
+<Link href="/read" asChild>
+  <Pressable><Text style={{ color: '#2563eb' }}>Open Reader →</Text></Pressable>
+</Link>
 
       {/* Tasks */}
       <Text style={styles.h1}>Today</Text>
+      <Link href="/history" asChild>
+  <Pressable><Text style={{ color: '#2563eb' }}>Yesterday & History →</Text></Pressable>
+</Link>
       <FlatList
         data={tasks}
         keyExtractor={t => String(t.id)}

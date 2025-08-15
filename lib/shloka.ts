@@ -101,3 +101,57 @@ export function toCard(row: ShlokaRow): ShlokaForCard {
     en: row.translation_2 ?? row.description ?? '', // fallback if translation_2 is null
   };
 }
+
+export function getChapterCounts(): { chapter: number; verses: number }[] {
+  return db.getAllSync<{ chapter: number; verses: number }>(
+    `
+    SELECT chapter_number AS chapter, COUNT(*) AS verses
+    FROM shlokas
+    GROUP BY chapter_number
+    ORDER BY chapter_number ASC
+    `
+  );
+}
+
+export function getVersesForChapter(chapter: number): {
+  id: number; verse_number: number; text: string; translation_2: string | null; description: string | null;
+}[] {
+  return db.getAllSync(
+    `
+    SELECT id, verse_number, text, translation_2, description
+    FROM shlokas
+    WHERE chapter_number = ?
+    ORDER BY verse_number ASC
+    `,
+    [chapter]
+  );
+}
+
+export function getShlokaByChapterVerse(chapter: number, verse: number) {
+  return db.getFirstSync(
+    `
+    SELECT *
+    FROM shlokas
+    WHERE chapter_number = ? AND verse_number = ?
+    LIMIT 1
+    `,
+    [chapter, verse]
+  );
+}
+
+/** simple LIKE search across Sanskrit + translation; case-insensitive */
+export function searchShlokasLike(query: string): {
+  id: number; chapter_number: number; verse_number: number; text: string; translation_2: string | null; description: string | null;
+}[] {
+  const q = `%${query}%`;
+  return db.getAllSync(
+    `
+    SELECT id, chapter_number, verse_number, text, translation_2, description
+    FROM shlokas
+    WHERE text LIKE ? OR translation_2 LIKE ? OR description LIKE ?
+    ORDER BY chapter_number ASC, verse_number ASC
+    LIMIT 100
+    `,
+    [q, q, q]
+  );
+}

@@ -6,6 +6,7 @@ import { ensureDatabasePresent } from '../lib/preloadDb';
 import * as SQLite from 'expo-sqlite';
 import { runMigrations } from '../lib/migrations';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -42,10 +43,17 @@ export default function RootLayout() {
   if (!ready) return null;
 
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="add"   options={{ presentation: 'modal', title: 'Add Task' }} />
-      <Stack.Screen name="shloka/[id]" options={{ title: 'Shloka' }} />
+        <SafeAreaProvider>
+
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+<Stack.Screen name="add" options={{ presentation: 'card', animation: 'none', }} />
+      <Stack.Screen name="shloka/[id]" options={{ title: 'Shloka' ,animation: 'fade'}} />
+      <Stack.Screen name="history" options={{ title: 'History',animation: 'fade' }} />
+<Stack.Screen name="read" options={{ headerShown: false }} />
+
     </Stack>
+        </SafeAreaProvider>
+
   );
 }

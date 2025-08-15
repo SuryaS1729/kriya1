@@ -1,7 +1,7 @@
-// lib/store.ts
 import { create } from 'zustand';
 import {
-  getAllTasks,
+  getTasksForDay,
+  getDistinctPastDays,
   insertTask,
   setTaskCompleted,
   removeTask as dbRemoveTask,
@@ -11,49 +11,47 @@ import { getShlokaAt, getTotalShlokas } from './shloka';
 import { ensureProgressForToday, countCompletedSince } from './progress';
 
 type State = {
-  tasks: Task[];
+  tasksToday: Task[];
 
-  // Derived selector exposed as a function (so components can select the function and call it)
-  currentShloka: () => { index: number; data: ReturnType<typeof getShlokaAt> };
-
-  // Actions
+  // actions
   init: () => void;
   refresh: () => void;
   addTask: (title: string) => void;
   toggleTask: (id: number) => void;
   removeTask: (id: number) => void;
+
+  // derived
+  currentShloka: () => { index: number; data: ReturnType<typeof getShlokaAt> };
+
+  // history api
+  todayKey: () => number;
+  listHistoryDays: (limit?: number) => { day_key: number; count: number }[];
+  getTasksForDay: (dayKey: number) => Task[];
 };
 
 export const useKriya = create<State>((set, get) => ({
-  tasks: [],
+  tasksToday: [],
 
   init: () => {
-    // Load tasks into memory
-    set({ tasks: getAllTasks() });
-
-    // Ensure progress is rolled to "today" (advances base if day changed)
     const total = getTotalShlokas();
     if (total > 0) ensureProgressForToday(total);
+    set({ tasksToday: getTasksForDay(get().todayKey()) });
   },
 
-  refresh: () => set({ tasks: getAllTasks() }),
+  refresh: () => set({ tasksToday: getTasksForDay(get().todayKey()) }),
 
   addTask: (title) => {
     insertTask(title);
-    // Reload to capture new row with its auto ID
-    set({ tasks: getAllTasks() });
+    set({ tasksToday: getTasksForDay(get().todayKey()) });
   },
 
   toggleTask: (id) => {
-    const t = get().tasks.find(x => x.id === id);
+    const t = get().tasksToday.find(x => x.id === id);
     if (!t) return;
-
     const next = !t.completed;
     setTaskCompleted(id, next, null);
-
-    // Optimistic UI update
     set(state => ({
-      tasks: state.tasks.map(x =>
+      tasksToday: state.tasksToday.map(x =>
         x.id === id
           ? { ...x, completed: next, completed_at: next ? Date.now() : null }
           : x
@@ -63,36 +61,27 @@ export const useKriya = create<State>((set, get) => ({
 
   removeTask: (id) => {
     dbRemoveTask(id);
-    set(state => ({ tasks: state.tasks.filter(x => x.id !== id) }));
+    set(state => ({ tasksToday: state.tasksToday.filter(x => x.id !== id) }));
   },
 
   currentShloka: () => {
     const total = getTotalShlokas();
     if (total === 0) {
-      // Dev fallback if DB is empty
-      return {
-        index: 0,
-        data: {
-          id: 0,
-          chapter_number: 0,
-          verse_number: 0,
-          text: '—',
-          transliteration: null,
-          word_meanings: null,
-          description: null,
-          translation_2: '—',
-          commentary: null,
-        } as any,
-      };
+      return { index: 0, data: { id: 0, chapter_number: 0, verse_number: 0, text: '—', transliteration: null, word_meanings: null, description: null, translation_2: '—', commentary: null } as any };
     }
-
-    // Make sure base is correct for "today"
     const prog = ensureProgressForToday(total);
-
-    // Offset = #tasks completed since today's start
-    const offset = countCompletedSince(prog.day_start_ms);
-
+    const offset = countCompletedSince(prog.day_start_ms); // completions since midnight (any day_key)
     const idx = (prog.base_index + offset) % total;
     return { index: idx, data: getShlokaAt(idx) };
   },
+
+  todayKey: () => {
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    return d.getTime();
+  },
+
+  listHistoryDays: (limit = 30) => getDistinctPastDays(limit),
+
+  getTasksForDay: (dayKey: number) => getTasksForDay(dayKey),
 }));

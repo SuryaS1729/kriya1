@@ -1,59 +1,51 @@
 // app/_layout.tsx
 import { Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
-import * as SplashScreen from 'expo-splash-screen';
-import { ensureDatabasePresent } from '../lib/preloadDb';
-import * as SQLite from 'expo-sqlite';
-import { runMigrations } from '../lib/migrations';
-import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SQLiteProvider } from 'expo-sqlite';
+import { ensureDatabasePresent } from '../lib/preloadDb';
+import { runMigrations } from '../lib/migrations';
 
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-        <StatusBar style="light" />
-
-  const [ready, setReady] = useState(false);
+export default function Root() {
+  const [booted, setBooted] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
-        // 1) Ensure DB copied from assets on first run
+        // Make sure the bundled DB is on disk BEFORE opening it
         await ensureDatabasePresent('gita.db');
-
-        // 2) Open DB and run migrations
-        const db = SQLite.openDatabaseSync('gita.db');
-        runMigrations(db);
-
-        // (Optional) Quick smoke test — remove later
-        const row = db.getFirstSync<{ cnt: number }>(
-          "SELECT COUNT(*) AS cnt FROM sqlite_master WHERE type='table' AND name='tasks';"
-        );
-        console.log('Tasks table present?', row?.cnt === 1);
-
+        setBooted(true);
       } catch (e) {
-        console.warn('DB prepare/migrate failed:', e);
-      } finally {
-        setReady(true);
-        SplashScreen.hideAsync();
+        console.warn('ensureDatabasePresent failed:', e);
+        setBooted(true); // still render so we can see errors
       }
     })();
   }, []);
 
-  if (!ready) return null;
+  if (!booted) return null; // or a tiny splash
+
+  async function initDb(db: any) {
+    try {
+      runMigrations(db);
+      // no generic —> cast
+      const row = db.getFirstSync('SELECT COUNT(*) AS c FROM sqlite_master') as { c: number } | null;
+      console.log('DB ready. Objects:', row?.c ?? 0);
+    } catch (e) {
+      console.warn('DB prepare/migrate failed:', e);
+    }
+  }
 
   return (
-        <SafeAreaProvider>
-
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-<Stack.Screen name="add" options={{ presentation: 'card', animation: 'none', }} />
-      <Stack.Screen name="shloka/[id]" options={{ title: 'Shloka' ,animation: 'fade'}} />
-      <Stack.Screen name="history" options={{ title: 'History',animation: 'fade' }} />
-<Stack.Screen name="read" options={{ headerShown: false }} />
-
-    </Stack>
-        </SafeAreaProvider>
-
+    <SafeAreaProvider>
+      <SQLiteProvider databaseName="gita.db" onInit={initDb}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="add" options={{headerShadowVisible:false}} />
+          <Stack.Screen name="history" />
+          <Stack.Screen name="read" />
+          <Stack.Screen name="shloka/[id]" />
+        </Stack>
+      </SQLiteProvider>
+    </SafeAreaProvider>
   );
 }

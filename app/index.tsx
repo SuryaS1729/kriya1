@@ -2,32 +2,32 @@
 import { Link } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { FlatList, StyleSheet, Text, View, Pressable, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Home() {
   const init      = useKriya(s => s.init);
+  const ready     = useKriya(s => s.ready);
   const tasks     = useKriya(s => s.tasksToday);
-  const getShloka = useKriya(s => s.currentShloka); // select function (stable), not its return value
+  const getShloka = useKriya(s => s.currentShloka);
   const toggle    = useKriya(s => s.toggleTask);
   const remove    = useKriya(s => s.removeTask);
 
-  const { data: shloka } = getShloka(); // compute once per render
-
   useEffect(() => { init(); }, [init]);
+
+  // Only compute shloka after store is ready
+  const shloka = ready ? getShloka().data : null;
 
   // Fade animation for shloka card
   const fade = useRef(new Animated.Value(0)).current;
-  // initial mount
+
+  // Run fade only when we actually have a shloka
   useEffect(() => {
-    Animated.timing(fade, { toValue: 1, duration: 220, useNativeDriver: true }).start();
-  }, [fade]);
-  // on shloka change
-  useEffect(() => {
+    if (!shloka) return;
     fade.setValue(0);
     Animated.timing(fade, { toValue: 1, duration: 220, useNativeDriver: true }).start();
-  }, [shloka.id, fade]);
+  }, [shloka?.id]); // re-run when shloka changes
 
   const renderItem = ({ item }: { item: Task }) => (
     <Pressable
@@ -43,27 +43,47 @@ export default function Home() {
     </Pressable>
   );
 
+  // Minimal skeleton while DB/store warm up
+  if (!ready || !shloka) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={[styles.card, { height: 120, opacity: 0.5 }]} />
+        <Text style={styles.h1}>Today</Text>
+        <View style={[styles.row, { opacity: 0.5 }]}>
+          <View style={[styles.checkbox, styles.checkboxOff]} />
+          <View style={{ flex: 1, height: 18, backgroundColor: '#eee', borderRadius: 4 }} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Shloka Card (tappable) */}
       <Link href={{ pathname: '/shloka/[id]', params: { id: String(shloka.id) } }} asChild>
         <Pressable>
           <Animated.View style={[styles.card, { opacity: fade }]}>
-            <Text style={styles.meta}>Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}</Text>
+            <Text style={styles.meta}>
+              Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
+            </Text>
             <Text style={styles.sa} numberOfLines={4}>{shloka.text}</Text>
-            <Text style={styles.en} numberOfLines={3}>{shloka.translation_2 ?? shloka.description ?? ''}</Text>
+            <Text style={styles.en} numberOfLines={3}>
+              {shloka.translation_2 ?? shloka.description ?? ''}
+            </Text>
           </Animated.View>
         </Pressable>
       </Link>
-<Link href="/read" asChild>
-  <Pressable><Text style={{ color: '#2563eb' }}>Open Reader →</Text></Pressable>
-</Link>
+
+      {/* <Link href="/read" asChild>
+        <Pressable><Text style={{ color: '#2563eb' }}>Open Reader →</Text></Pressable>
+      </Link> */}
 
       {/* Tasks */}
       <Text style={styles.h1}>Today</Text>
       <Link href="/history" asChild>
-  <Pressable><Text style={{ color: '#2563eb' }}>Yesterday & History →</Text></Pressable>
-</Link>
+        <Pressable><Text style={{ color: '#2563eb' }}>Yesterday & History →</Text></Pressable>
+      </Link>
+
       <FlatList
         data={tasks}
         keyExtractor={t => String(t.id)}
@@ -101,7 +121,10 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute', right: 16, bottom: 24,
     width: 56, height: 56, borderRadius: 28,
-    backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center', elevation: 4
+    backgroundColor: '#111827',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4
   },
   fabText: { color: 'white', fontSize: 28, lineHeight: 28, marginTop: -2 },
 });

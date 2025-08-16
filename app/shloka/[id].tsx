@@ -5,6 +5,9 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScrollView, StyleSheet, Text, View, Pressable, StatusBar } from 'react-native';
 import { getShlokaById, type ShlokaRow } from '../../lib/shloka';
+import { Link } from "expo-router";
+import PulsatingGradient from '../../components/PulsatingGradient';
+
 
 export default function ShlokaDetail() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
@@ -42,12 +45,14 @@ export default function ShlokaDetail() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0b2946' }}>
       <StatusBar barStyle="light-content" backgroundColor="#0b2946" />
-      <LinearGradient colors={['#0e4570', '#0b2946']} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={['#0D4986', '#040320']} style={StyleSheet.absoluteFill} />
+          {/* <PulsatingGradient /> */}
+
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingTop: insets.top + 8,   // respect status bar
+          paddingTop:  28,   // respect status bar
           paddingHorizontal: 24,
           paddingBottom: 40,
         }}
@@ -57,15 +62,18 @@ export default function ShlokaDetail() {
           <Pressable onPress={() => router.back()} hitSlop={16}>
             <Text style={styles.headerIcon}>✕</Text>
           </Pressable>
-          <Text style={styles.headerTitle}>
-            Adhyaya {row.chapter_number}, Shloka {row.verse_number}
-          </Text>
-          <Pressable onPress={() => { /* TODO: play audio */ }} hitSlop={16}>
-            <Text style={styles.headerIcon}>🎧</Text>
-          </Pressable>
+          
+          <Link href="/read" asChild>
+      <Pressable hitSlop={16}>
+        <Text style={styles.headerIcon}>📖</Text>
+      </Pressable>
+    </Link>
         </View>
 
         {/* BODY */}
+        <Text style={styles.headerTitle}>
+            Adhyaya {row.chapter_number}, Shloka {row.verse_number}
+          </Text>
         <Text style={styles.section}>Shloka :</Text>
         <Text style={styles.sa}>{row.text}</Text>
 
@@ -96,7 +104,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 20,
   },
   headerIcon: { color: 'white', fontSize: 22, fontWeight: '700' },
   headerTitle: {
@@ -104,8 +112,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: '700',
-    textAlign: 'center',
-    marginHorizontal: 12,
+    textAlign: 'left',
+    marginHorizontal: 0,
   },
 
   section: { color: 'rgba(255,255,255,0.9)', fontSize: 18, fontWeight: '700', marginTop: 8 },

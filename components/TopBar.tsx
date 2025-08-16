@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#ffffffff',
     backgroundColor: 'white',
   },
   btn: { padding: 6 },

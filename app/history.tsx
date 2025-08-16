@@ -1,8 +1,9 @@
 // app/history.tsx
 import { useEffect, useMemo, useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, View, Pressable, FlatList } from 'react-native';
+import {  StyleSheet, Text, View, Pressable, FlatList } from 'react-native';
 import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 function formatDay(ms: number) {
   const d = new Date(ms);

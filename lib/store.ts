@@ -11,6 +11,8 @@ import { getShlokaAt, getTotalShlokas } from './shloka';
 import { ensureProgressForToday, countCompletedSince } from './progress';
 
 type State = {
+    ready: boolean;                 // ← NEW
+
   tasksToday: Task[];
 
   // actions
@@ -30,12 +32,20 @@ type State = {
 };
 
 export const useKriya = create<State>((set, get) => ({
+    ready: false,                   // ← start not ready
+
   tasksToday: [],
 
   init: () => {
-    const total = getTotalShlokas();
-    if (total > 0) ensureProgressForToday(total);
-    set({ tasksToday: getTasksForDay(get().todayKey()) });
+    try {
+      const total = getTotalShlokas();       // ok if DB is present
+      if (total > 0) ensureProgressForToday(total);
+      set({ tasksToday: getTasksForDay(get().todayKey()) });
+      set({ ready: true });                  // ← mark ready only at the end
+    } catch (e) {
+      console.warn('Init failed:', e);
+      set({ ready: true, tasksToday: [] });  // still let UI continue
+    }
   },
 
   refresh: () => set({ tasksToday: getTasksForDay(get().todayKey()) }),
@@ -64,15 +74,21 @@ export const useKriya = create<State>((set, get) => ({
     set(state => ({ tasksToday: state.tasksToday.filter(x => x.id !== id) }));
   },
 
-  currentShloka: () => {
-    const total = getTotalShlokas();
-    if (total === 0) {
+   currentShloka: () => {
+    try {
+      const total = getTotalShlokas();
+      if (total === 0) {
+        return { index: 0, data: { id: 0, chapter_number: 0, verse_number: 0, text: '—', transliteration: null, word_meanings: null, description: null, translation_2: '—', commentary: null } as any };
+      }
+      const prog = ensureProgressForToday(total);
+      const offset = countCompletedSince(prog.day_start_ms);
+      const idx = (prog.base_index + offset) % total;
+      return { index: idx, data: getShlokaAt(idx) };
+    } catch (e) {
+      // defensive fallback so we never crash during startup/race conditions
+      console.warn('currentShloka failed:', e);
       return { index: 0, data: { id: 0, chapter_number: 0, verse_number: 0, text: '—', transliteration: null, word_meanings: null, description: null, translation_2: '—', commentary: null } as any };
     }
-    const prog = ensureProgressForToday(total);
-    const offset = countCompletedSince(prog.day_start_ms); // completions since midnight (any day_key)
-    const idx = (prog.base_index + offset) % total;
-    return { index: idx, data: getShlokaAt(idx) };
   },
 
   todayKey: () => {

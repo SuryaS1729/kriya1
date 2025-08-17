@@ -1,10 +1,17 @@
 // app/index.tsx
 import { Link } from 'expo-router';
-import { useEffect, useRef } from 'react';
-import { FlatList, StyleSheet, Text, View, Pressable, Animated } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import { FlatList, StyleSheet, Text, View, Pressable } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  Layout,
+} from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
+import { StatusBar } from 'expo-status-bar';
 
 export default function Home() {
   const ready     = useKriya(s => s.ready);
@@ -12,24 +19,35 @@ export default function Home() {
   const getShloka = useKriya(s => s.currentShloka); // returns { index, data }
   const toggle    = useKriya(s => s.toggleTask);
   const remove    = useKriya(s => s.removeTask);
+  const insets    = useSafeAreaInsets();
 
   // Only compute shloka after store is ready
   const { index: shlokaIndex, data: shloka } = ready ? getShloka() : { index: 0, data: null as any };
 
+  // State for toggling between Sanskrit and English
+  const [showTranslation, setShowTranslation] = useState(false);
+
   // Fade animation for shloka card
-  const fade = useRef(new Animated.Value(0)).current;
+  const fade = useSharedValue(0);
   useEffect(() => {
     if (!ready || !shloka) return;
-    fade.setValue(0);
-    Animated.timing(fade, { toValue: 1, duration: 220, useNativeDriver: true }).start();
-  }, [ready, shlokaIndex, fade]); // re-run when index changes
+    fade.value = 0;
+    fade.value = withSpring(1);
+  }, [ready, shloka, fade, showTranslation]);
+
+  const fadeStyle = useAnimatedStyle(() => ({
+    opacity: fade.value,
+  }));
+
+  const handleTogglePress = () => {
+    setShowTranslation(!showTranslation);
+  };
 
   const renderItem = ({ item }: { item: Task }) => (
     <Pressable
       onPress={() => toggle(item.id)}
       onLongPress={() => remove(item.id)}
       style={styles.row}
-      android_ripple={{ color: '#eee' }}
     >
       <View style={[styles.checkbox, item.completed ? styles.checkboxOn : styles.checkboxOff]} />
       <Text style={[styles.title, item.completed ? styles.done : undefined]} numberOfLines={1}>
@@ -38,84 +56,219 @@ export default function Home() {
     </Pressable>
   );
 
+  const today = new Date().toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+
   // Minimal skeleton while DB/store warm up
   if (!ready || !shloka) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={[styles.card, { height: 120, opacity: 0.5 }]} />
-        <Text style={styles.h1}>Today</Text>
-        <View style={[styles.row, { opacity: 0.5 }]}>
-          <View style={[styles.checkbox, styles.checkboxOff]} />
-          <View style={{ flex: 1, height: 18, backgroundColor: '#eee', borderRadius: 4 }} />
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+        <StatusBar style="light" />
+        <View style={[styles.card, { height: 240, opacity: 0.5, backgroundColor: '#111827' }]} />
+        <View style={styles.tasksContainer}>
+          <Text style={styles.h1}>Today</Text>
+          <View style={[styles.row, { opacity: 0.5 }]}>
+            <View style={[styles.checkbox, styles.checkboxOff]} />
+            <View style={{ flex: 1, height: 18, backgroundColor: '#eee', borderRadius: 4 }} />
+          </View>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Shloka Card (tappable) */}
-      <Link
-        href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
-        asChild
-      >
-        <Pressable>
-          <Animated.View style={[styles.card, { opacity: fade }]}>
+    <View style={styles.container}>
+      <StatusBar style="light" />
+      <View style={[styles.topHalf, { paddingTop: insets.top }]}>
+        {/* Shloka Card */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
             <Text style={styles.meta}>
               Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
             </Text>
-            <Text style={styles.sa} numberOfLines={4}>{shloka.text}</Text>
-            <Text style={styles.en} numberOfLines={3}>
-              {shloka.translation_2 ?? shloka.description ?? ''}
-            </Text>
-          </Animated.View>
-        </Pressable>
-      </Link>
+            <Pressable onPress={() => setShowTranslation(!showTranslation)}>
+              <Animated.View style={styles.toggleButton} layout={Layout.springify()}>
+                <Text style={styles.toggleText}>
+                  {showTranslation ? 'View Sanskrit' : 'View Translation'}
+                </Text>
+              </Animated.View>
+            </Pressable>
+          </View>
 
-      {/* Tasks */}
-      <Text style={styles.h1}>Today</Text>
-      <Link href="/history" asChild>
-        <Pressable><Text style={{ color: '#2563eb' }}>Yesterday & History →</Text></Pressable>
-      </Link>
+          <Link
+            href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
+            asChild
+          >
+            <Pressable style={{ flex: 1, justifyContent: 'center', }}>
+              <Animated.View style={[fadeStyle, { flex: 1, justifyContent: 'center' }]}>
+                {showTranslation ? (
+                  <Text style={styles.en}>
+                    {shloka.translation_2 || shloka.description || 'No translation available'}
+                  </Text>
+                ) : (
+                  <Text style={styles.sa}>{shloka.text}</Text>
+                )}
+              </Animated.View>
+            </Pressable>
+          </Link>
+        </View>
+      </View>
 
-      <FlatList
-        data={tasks}
-        keyExtractor={t => String(t.id)}
-        renderItem={renderItem}
-        ItemSeparatorComponent={() => <View style={styles.sep} />}
-        ListEmptyComponent={<Text style={styles.empty}>No tasks yet. Add one →</Text>}
-        contentContainerStyle={{ paddingBottom: 80 }}
-      />
-
-      {/* Add button → /add */}
-      <Link href="/add" asChild>
-        <Pressable style={styles.fab}>
-          <Text style={styles.fabText}>＋</Text>
-        </Pressable>
-      </Link>
-    </SafeAreaView>
+      {/* Tasks Section */}
+      <View style={[styles.tasksContainer, { paddingBottom: insets.bottom }]}>
+        <View style={styles.tasksHeader}>
+          <Text style={styles.h1}>Today's Tasks</Text>
+          <Link href="/add" asChild>
+            <Pressable style={styles.addButton}>
+              <Text style={styles.addButtonText}>+</Text>
+            </Pressable>
+          </Link>
+        </View>
+        
+        <FlatList
+          data={tasks}
+          renderItem={renderItem}
+          keyExtractor={item => item.id.toString()}
+          contentContainerStyle={styles.tasksList}
+        />
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'white', paddingHorizontal: 16 },
-  card: { marginTop: 16, marginBottom: 10, borderRadius: 14, padding: 14, backgroundColor: '#f8fafc' },
-  meta: { color: '#64748b', marginBottom: 6 },
-  sa: { fontSize: 18, lineHeight: 26, color: '#0f172a', marginBottom: 8 },
-  en: { fontSize: 16, lineHeight: 22, color: '#334155' },
-  h1: { fontSize: 22, fontWeight: '700', marginVertical: 12 },
-  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 12 },
-  checkbox: { width: 18, height: 18, borderRadius: 4 },
-  checkboxOn: { backgroundColor: '#22c55e' },
-  checkboxOff: { backgroundColor: '#cbd5e1' },
-  title: { flex: 1, fontSize: 18, color: '#111827' },
-  done: { opacity: 0.6, textDecorationLine: 'line-through' },
-  sep: { height: 1, backgroundColor: '#e5e7eb' },
-  empty: { color: '#6b7280', marginTop: 8 },
-  fab: {
-    position: 'absolute', right: 16, bottom: 24,
-    width: 56, height: 56, borderRadius: 28,
-    backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center', elevation: 4
+  container: { 
+    flex: 1, 
+    backgroundColor: 'black',
   },
-  fabText: { color: 'white', fontSize: 28, lineHeight: 28, marginTop: -2 },
+  topHalf: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingVertical:0
+  },
+  card: {
+    height: 240,
+    borderRadius: 16,
+    padding: 20,
+    backgroundColor: '#111827',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  cardHeader: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  meta: { 
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#9ca3af',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  toggleButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    backgroundColor: '#374151',
+    overflow: 'hidden', // Important for reanimated layout animations
+  },
+  toggleText: {
+    color: '#e5e7eb',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  sa: { 
+    flex: 1,
+    fontSize: 20,
+    lineHeight: 30,
+    color: '#f9fafb',
+    textAlign: 'center',
+    fontFamily: 'Sanskrit-Text', // Make sure to load this font in your app
+  },
+  en: { 
+    flex: 1,
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#d1d5db',
+    textAlign: 'center',
+  },
+  tasksContainer: {
+    flex: 1.6,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 24,
+    paddingHorizontal: 20,
+  },
+  tasksHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  h1: { 
+    fontSize: 20, 
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  addButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#3b82f6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addButtonText: {
+    color: 'white',
+    fontSize: 20,
+    lineHeight: 20,
+    marginTop: -2,
+  },
+  tasksList: {
+    flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  title: { 
+    flex: 1, 
+    fontSize: 16, 
+    color: '#0f172a',
+    marginLeft: 12,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    borderWidth: 2,
+  },
+  checkboxOn: { 
+    backgroundColor: '#3b82f6', 
+    borderColor: '#3b82f6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxOff: { 
+    borderColor: '#e2e8f0',
+    backgroundColor: 'white',
+  },
+  done: { 
+    color: '#94a3b8', 
+    textDecorationLine: 'line-through' 
+  },
 });

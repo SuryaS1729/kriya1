@@ -188,18 +188,18 @@ const styles = StyleSheet.create({
   },
   sa: { 
     flex: 1,
-    fontSize: 20,
-    lineHeight: 30,
+    fontSize: 18,
+    lineHeight: 24,
     color: '#f9fafb',
-    textAlign: 'center',
+    textAlign: 'left',
     fontFamily: 'Sanskrit-Text', // Make sure to load this font in your app
   },
   en: { 
     flex: 1,
-    fontSize: 16,
+    fontSize: 17,
     lineHeight: 24,
     color: '#d1d5db',
-    textAlign: 'center',
+    textAlign: 'left',
   },
   tasksContainer: {
     flex: 1.6,

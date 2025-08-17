@@ -7,27 +7,22 @@ import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
 
 export default function Home() {
-  const init      = useKriya(s => s.init);
   const ready     = useKriya(s => s.ready);
   const tasks     = useKriya(s => s.tasksToday);
-  const getShloka = useKriya(s => s.currentShloka);
+  const getShloka = useKriya(s => s.currentShloka); // returns { index, data }
   const toggle    = useKriya(s => s.toggleTask);
   const remove    = useKriya(s => s.removeTask);
 
-  useEffect(() => { init(); }, [init]);
-
   // Only compute shloka after store is ready
-  const shloka = ready ? getShloka().data : null;
+  const { index: shlokaIndex, data: shloka } = ready ? getShloka() : { index: 0, data: null as any };
 
   // Fade animation for shloka card
   const fade = useRef(new Animated.Value(0)).current;
-
-  // Run fade only when we actually have a shloka
   useEffect(() => {
-    if (!shloka) return;
+    if (!ready || !shloka) return;
     fade.setValue(0);
     Animated.timing(fade, { toValue: 1, duration: 220, useNativeDriver: true }).start();
-  }, [shloka?.id]); // re-run when shloka changes
+  }, [ready, shlokaIndex, fade]); // re-run when index changes
 
   const renderItem = ({ item }: { item: Task }) => (
     <Pressable
@@ -60,7 +55,10 @@ export default function Home() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Shloka Card (tappable) */}
-      <Link href={{ pathname: '/shloka/[id]', params: { id: String(shloka.id) } }} asChild>
+      <Link
+        href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
+        asChild
+      >
         <Pressable>
           <Animated.View style={[styles.card, { opacity: fade }]}>
             <Text style={styles.meta}>
@@ -73,10 +71,6 @@ export default function Home() {
           </Animated.View>
         </Pressable>
       </Link>
-
-      {/* <Link href="/read" asChild>
-        <Pressable><Text style={{ color: '#2563eb' }}>Open Reader →</Text></Pressable>
-      </Link> */}
 
       {/* Tasks */}
       <Text style={styles.h1}>Today</Text>
@@ -121,10 +115,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute', right: 16, bottom: 24,
     width: 56, height: 56, borderRadius: 28,
-    backgroundColor: '#111827',
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 4
+    backgroundColor: '#111827', alignItems: 'center', justifyContent: 'center', elevation: 4
   },
   fabText: { color: 'white', fontSize: 28, lineHeight: 28, marginTop: -2 },
 });

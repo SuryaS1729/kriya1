@@ -1,29 +1,34 @@
 import * as FileSystem from 'expo-file-system';
 import { Asset } from 'expo-asset';
 
-/**
- * Ensure `gita.db` exists under the device's SQLite directory.
- * If missing, copy the bundled asset there on first run.
- * Returns the absolute path of the on-device DB.
- */
+type EnsureOpts = { forceReplace?: boolean };
+
 export async function ensureDatabasePresent(
-  dbName = 'gita.db',
-  assetModule = require('../assets/db/gita.db')
-): Promise<string> {
-  const sqliteDir = FileSystem.documentDirectory + 'SQLite/';
-  const dbPath = sqliteDir + dbName;
+  dbName: string,
+  assetModule: number,       // e.g. require('../assets/db/gita.db')
+  opts: EnsureOpts = {}
+) {
+  const sqliteDir = `${FileSystem.documentDirectory}SQLite`;
+  const dest = `${sqliteDir}/${dbName}`;
 
-  // If already copied, we're done.
-  const stat = await FileSystem.getInfoAsync(dbPath);
-  if (stat.exists) return dbPath;
+  await FileSystem.makeDirectoryAsync(sqliteDir, { intermediates: true }).catch(() => {});
 
-  // Make the SQLite dir and copy the bundled DB into it.
-  await FileSystem.makeDirectoryAsync(sqliteDir, { intermediates: true });
+  // Optional reset while debugging
+  if (opts.forceReplace) {
+    await FileSystem.deleteAsync(dest, { idempotent: true }).catch(() => {});
+  }
 
-  const asset = Asset.fromModule(assetModule);
-  await asset.downloadAsync();                 // make sure it’s available locally
-  if (!asset.localUri) throw new Error('Failed to resolve bundled DB asset path');
+  const exists = (await FileSystem.getInfoAsync(dest)).exists;
+  if (!exists) {
+    const asset = Asset.fromModule(assetModule);
+    await asset.downloadAsync(); // ensures asset.localUri is set
+    if (!asset.localUri) throw new Error('DB asset localUri missing');
+    await FileSystem.copyAsync({ from: asset.localUri, to: dest });
 
-  await FileSystem.copyAsync({ from: asset.localUri, to: dbPath });
-  return dbPath;
+    const info = await FileSystem.getInfoAsync(dest);
+    console.log('DB copied to', dest, 'size:', info.size);
+  } else {
+    const info = await FileSystem.getInfoAsync(dest);
+    console.log('DB already present at', dest, 'size:', info.size);
+  }
 }

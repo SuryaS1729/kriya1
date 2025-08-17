@@ -1,4 +1,4 @@
-import { db } from './db';
+import { getDb } from './db';
 
 export type Task = {
   id: number;
@@ -19,10 +19,14 @@ type Row = {
 };
 
 export function getAllTasks(): Task[] {
+  const db = getDb();
+
   const rows = db.getAllSync<Row>('SELECT * FROM tasks ORDER BY id DESC');
   return rows.map(r => ({ ...r, completed: !!r.completed }));
 }
 export function insertTask(title: string, shlokaId: number | null = null) {
+  const db = getDb();
+
   const now = Date.now();
   const dayKey = startOfDay(now);
   db.runSync(
@@ -39,6 +43,8 @@ function startOfDay(ms: number) {
 }
 
 export function getTasksForDay(dayKey: number): Task[] {
+  const db = getDb();
+
   const rows = db.getAllSync<Row>(
     'SELECT * FROM tasks WHERE day_key = ? ORDER BY id DESC',
     [dayKey]
@@ -47,6 +53,8 @@ export function getTasksForDay(dayKey: number): Task[] {
 }
 
 export function getDistinctPastDays(limit = 30): { day_key: number; count: number }[] {
+  const db = getDb();
+
   return db.getAllSync<{ day_key: number; count: number }>(
     'SELECT day_key, COUNT(*) as count FROM tasks WHERE day_key < ? GROUP BY day_key ORDER BY day_key DESC LIMIT ?',
     [startOfToday(Date.now()), limit]
@@ -61,6 +69,8 @@ function startOfToday(ms: number) {
 
 
 export function setTaskCompleted(id: number, completed: boolean, shlokaIdWhenDone: number | null = null) {
+  const db = getDb();
+
   if (completed) {
     const now = Date.now();
     db.runSync(
@@ -76,5 +86,7 @@ export function setTaskCompleted(id: number, completed: boolean, shlokaIdWhenDon
 }
 
 export function removeTask(id: number) {
+  const db = getDb();
+
   db.runSync('DELETE FROM tasks WHERE id = ?', [id]);
 }

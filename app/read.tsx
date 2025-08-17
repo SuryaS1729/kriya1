@@ -9,12 +9,16 @@ import {
   getChapterCounts,
   getVersesForChapter,
   searchShlokasLike,
+  getIndexOf, // 👈 compute global index from (chapter, verse)
 } from '../lib/shloka';
 
 export default function Read() {
   const chapters = useMemo(() => getChapterCounts(), []);
-  const [chapter, setChapter] = useState<number>(chapters[0]?.chapter ?? 1);
+  const initialChapter = chapters.length ? chapters[0].chapter : 1;
+
+  const [chapter, setChapter] = useState<number>(initialChapter);
   const [query, setQuery] = useState('');
+
   const verses = useMemo(() => getVersesForChapter(chapter), [chapter]);
   const results = useMemo(
     () => (query.trim() ? searchShlokasLike(query.trim()) : []),
@@ -35,30 +39,34 @@ export default function Read() {
       />
 
       {query.trim() ? (
+        // SEARCH RESULTS (use chapter/verse → index; stable key `${ch}.${v}`)
         <FlatList
           data={results}
-          keyExtractor={(r) => String(r.id)}
-          renderItem={({ item }) => (
-            <Link
-              href={{ pathname: '/shloka/[id]', params: { id: String(item.id) } }}
-              asChild
-            >
-              <Pressable style={styles.resultRow}>
-                <Text style={styles.resultMeta}>
-                  {item.chapter_number}.{item.verse_number}
-                </Text>
-                <Text style={styles.resultText} numberOfLines={2}>
-                  {item.translation_2 ?? item.description ?? item.text}
-                </Text>
-              </Pressable>
-            </Link>
-          )}
+          keyExtractor={(r) => `${r.chapter_number}.${r.verse_number}`}
+          renderItem={({ item }) => {
+            const idx = getIndexOf(item.chapter_number, item.verse_number);
+            return (
+              <Link
+                href={{ pathname: '/shloka/[id]', params: { id: String(idx) } }}
+                asChild
+              >
+                <Pressable style={styles.resultRow}>
+                  <Text style={styles.resultMeta}>
+                    {item.chapter_number}.{item.verse_number}
+                  </Text>
+                  <Text style={styles.resultText} numberOfLines={2}>
+                    {item.translation_2 ?? item.description ?? item.text}
+                  </Text>
+                </Pressable>
+              </Link>
+            );
+          }}
           ItemSeparatorComponent={() => <View style={styles.sep} />}
           contentContainerStyle={{ paddingBottom: 40 }}
         />
       ) : (
         <View style={styles.split}>
-          {/* chapters list */}
+          {/* CHAPTERS LIST */}
           <FlatList
             style={styles.left}
             data={chapters}
@@ -80,24 +88,27 @@ export default function Read() {
             ItemSeparatorComponent={() => <View style={styles.sep} />}
           />
 
-          {/* verses list */}
+          {/* VERSES LIST FOR SELECTED CHAPTER */}
           <FlatList
             style={styles.right}
             data={verses}
-            keyExtractor={(v) => String(v.id)}
-            renderItem={({ item }) => (
-              <Link
-                href={{ pathname: '/shloka/[id]', params: { id: String(item.id) } }}
-                asChild
-              >
-                <Pressable style={styles.vRow}>
-                  <Text style={styles.vNum}>{item.verse_number}</Text>
-                  <Text style={styles.vText} numberOfLines={2}>
-                    {item.translation_2 ?? item.description ?? item.text}
-                  </Text>
-                </Pressable>
-              </Link>
-            )}
+            keyExtractor={(v) => `${chapter}.${v.verse_number}`}
+            renderItem={({ item }) => {
+              const idx = getIndexOf(chapter, item.verse_number);
+              return (
+                <Link
+                  href={{ pathname: '/shloka/[id]', params: { id: String(idx) } }}
+                  asChild
+                >
+                  <Pressable style={styles.vRow}>
+                    <Text style={styles.vNum}>{item.verse_number}</Text>
+                    <Text style={styles.vText} numberOfLines={2}>
+                      {item.translation_2 ?? item.description ?? item.text}
+                    </Text>
+                  </Pressable>
+                </Link>
+              );
+            }}
             ItemSeparatorComponent={() => <View style={styles.sep} />}
           />
         </View>

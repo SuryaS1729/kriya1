@@ -1,18 +1,14 @@
 // lib/shloka.ts
-import { db } from './db';
+import { getDb } from './db';
 import { daysSinceEpoch } from './date';
+import { isDbReady } from './dbReady';
 
-/**
- * If your table name isn't "shlokas", change this constant.
- * The ORDER BY below is your canonical order (chapter → verse).
- */
 const TABLE = 'shlokas';
 
 export type ShlokaRow = {
-  id: number;
   chapter_number: number;
   verse_number: number;
-  text: string;              // Sanskrit
+  text: string;               // Sanskrit
   transliteration: string | null;
   word_meanings: string | null;
   description: string | null; // short description / summary
@@ -20,38 +16,37 @@ export type ShlokaRow = {
   commentary: string | null;
 };
 
-// Minimal shape used by the card (you can use ShlokaRow directly if you prefer)
+// Small card VM (no DB id). If you want the global index on cards,
+// compute it where you render via getIndexOf(ch, v).
 export type ShlokaForCard = {
-  id: number;
   chapter: number;
   verse: number;
   sa: string;
   en: string;
 };
 
+/** Total shlokas (0 if DB not ready). */
 export function getTotalShlokas(): number {
-  const row = db.getFirstSync<{ total: number }>(
-    `SELECT COUNT(*) AS total FROM ${TABLE}`
-  );
-  return row?.total ?? 0;
+  if (!isDbReady()) return 0;
+  const db = getDb();
+  const row = db.getFirstSync<{ c: number }>(`SELECT COUNT(*) AS c FROM ${TABLE}`) as { c: number } | null;
+  return row?.c ?? 0;
 }
 
-/**
- * Deterministic “daily base” index from date.
- * Use this with (base + completedToday) % total to pick the active shloka.
- */
+/** Deterministic base index for a date (rotate daily). */
 export function baseIndexForToday(date = new Date()): number {
   const total = getTotalShlokas();
   if (total === 0) return 0;
   return daysSinceEpoch(date) % total;
 }
 
-/** Get the Nth shloka in canonical order (0‑based). */
-export function getShlokaAt(index: number): ShlokaRow {
-  const row = db.getFirstSync<ShlokaRow>(
+/** Get the Nth shloka in canonical order (0-based). */
+export function getShlokaAt(index: number): ShlokaRow | null {
+  if (!isDbReady()) return null;
+  const db = getDb();
+  return db.getFirstSync(
     `
     SELECT
-      id,
       chapter_number,
       verse_number,
       text,
@@ -65,17 +60,84 @@ export function getShlokaAt(index: number): ShlokaRow {
     LIMIT 1 OFFSET ?
     `,
     [index]
-  );
-  if (!row) throw new Error(`Shloka not found at index ${index}`);
-  return row;
+  ) as ShlokaRow | null;
 }
 
-/** Convenience: fetch by primary key id. */
-export function getShlokaById(id: number): ShlokaRow | undefined {
-  return db.getFirstSync<ShlokaRow>(
+/** Map a row into the small card VM. */
+export function toCard(row: ShlokaRow): ShlokaForCard {
+  return {
+    chapter: row.chapter_number,
+    verse: row.verse_number,
+    sa: row.text,
+    en: row.translation_2 ?? row.description ?? '',
+  };
+}
+
+/** Zero-based global index for (chapter, verse). */
+export function getIndexOf(chapter: number, verse: number): number {
+  if (!isDbReady()) return 0;
+  const db = getDb();
+  const r = db.getFirstSync(
+    `
+    SELECT COUNT(*) AS idx
+    FROM ${TABLE}
+    WHERE chapter_number < ?
+       OR (chapter_number = ? AND verse_number <= ?)
+    `,
+    [chapter, chapter, verse]
+  ) as { idx: number } | null;
+  const idx = (r?.idx ?? 1) - 1;
+  return Math.max(0, idx);
+}
+
+/** Prev/next indices around a given index. */
+export function getPrevNextIndices(index: number, total: number) {
+  return {
+    prevIndex: index > 0 ? index - 1 : null,
+    nextIndex: index + 1 < total ? index + 1 : null,
+  };
+}
+
+/** Chapter counts for the reader. */
+export function getChapterCounts(): { chapter: number; verses: number }[] {
+  if (!isDbReady()) return [];
+  const db = getDb();
+  return db.getAllSync<{ chapter: number; verses: number }>(
+    `
+    SELECT chapter_number AS chapter, COUNT(*) AS verses
+    FROM ${TABLE}
+    GROUP BY chapter_number
+    ORDER BY chapter_number ASC
+    `
+  );
+}
+
+/** Verses for a chapter (no id column). */
+export function getVersesForChapter(chapter: number): {
+  verse_number: number; text: string; translation_2: string | null; description: string | null;
+}[] {
+  if (!isDbReady()) return [];
+  const db = getDb();
+  return db.getAllSync(
+    `
+    SELECT verse_number, text, translation_2, description
+    FROM ${TABLE}
+    WHERE chapter_number = ?
+    ORDER BY verse_number ASC
+    `,
+    [chapter]
+  ) as {
+    verse_number: number; text: string; translation_2: string | null; description: string | null;
+  }[];
+}
+
+/** Fetch by (chapter, verse). */
+export function getShlokaByChapterVerse(chapter: number, verse: number): ShlokaRow | null {
+  if (!isDbReady()) return null;
+  const db = getDb();
+  return db.getFirstSync(
     `
     SELECT
-      id,
       chapter_number,
       verse_number,
       text,
@@ -85,73 +147,41 @@ export function getShlokaById(id: number): ShlokaRow | undefined {
       translation_2,
       commentary
     FROM ${TABLE}
-    WHERE id = ?
-    `,
-    [id]
-  ) ?? undefined;
-}
-
-/** Map a full row into the small card view model. */
-export function toCard(row: ShlokaRow): ShlokaForCard {
-  return {
-    id: row.id,
-    chapter: row.chapter_number,
-    verse: row.verse_number,
-    sa: row.text,
-    en: row.translation_2 ?? row.description ?? '', // fallback if translation_2 is null
-  };
-}
-
-export function getChapterCounts(): { chapter: number; verses: number }[] {
-  return db.getAllSync<{ chapter: number; verses: number }>(
-    `
-    SELECT chapter_number AS chapter, COUNT(*) AS verses
-    FROM shlokas
-    GROUP BY chapter_number
-    ORDER BY chapter_number ASC
-    `
-  );
-}
-
-export function getVersesForChapter(chapter: number): {
-  id: number; verse_number: number; text: string; translation_2: string | null; description: string | null;
-}[] {
-  return db.getAllSync(
-    `
-    SELECT id, verse_number, text, translation_2, description
-    FROM shlokas
-    WHERE chapter_number = ?
-    ORDER BY verse_number ASC
-    `,
-    [chapter]
-  );
-}
-
-export function getShlokaByChapterVerse(chapter: number, verse: number) {
-  return db.getFirstSync(
-    `
-    SELECT *
-    FROM shlokas
     WHERE chapter_number = ? AND verse_number = ?
     LIMIT 1
     `,
     [chapter, verse]
-  );
+  ) as ShlokaRow | null;
 }
 
-/** simple LIKE search across Sanskrit + translation; case-insensitive */
+/** Simple LIKE search across Sanskrit + translation (no id). */
 export function searchShlokasLike(query: string): {
-  id: number; chapter_number: number; verse_number: number; text: string; translation_2: string | null; description: string | null;
+  chapter_number: number; verse_number: number; text: string; translation_2: string | null; description: string | null;
 }[] {
+  if (!isDbReady()) return [];
+  const db = getDb();
   const q = `%${query}%`;
   return db.getAllSync(
     `
-    SELECT id, chapter_number, verse_number, text, translation_2, description
-    FROM shlokas
+    SELECT chapter_number, verse_number, text, translation_2, description
+    FROM ${TABLE}
     WHERE text LIKE ? OR translation_2 LIKE ? OR description LIKE ?
     ORDER BY chapter_number ASC, verse_number ASC
     LIMIT 100
     `,
     [q, q, q]
-  );
+  ) as {
+    chapter_number: number; verse_number: number; text: string; translation_2: string | null; description: string | null;
+  }[];
+}
+
+/** Prev/next indices from a given (chapter, verse). */
+export function getPrevNextIndicesFromChapterVerse(
+  chapter: number,
+  verse: number
+): { prevIndex: number | null; nextIndex: number | null } {
+  const total = getTotalShlokas();
+  if (total === 0) return { prevIndex: null, nextIndex: null };
+  const idx = getIndexOf(chapter, verse);
+  return getPrevNextIndices(idx, total);
 }

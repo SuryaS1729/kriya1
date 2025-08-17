@@ -1,12 +1,18 @@
 {
   "expo": {
-    "scheme": "acme",
-    "plugins": [
-      "expo-router",
-      "expo-sqlite",
-      "expo-asset"
-    ],
     "name": "kriya",
-    "slug": "kriya"
+    "slug": "kriya",
+    "scheme": "acme",
+    "plugins": ["expo-router", "expo-sqlite", "expo-asset"],
+    "assetBundlePatterns": ["**/*"],
+
+    "android": {
+      "package": "com.surya7314.kriya",
+      "softwareKeyboardLayoutMode": "pan"
+    },
+
+    "ios": {
+      "bundleIdentifier": "com.surya7314.kriya"
+    }
   }
 }

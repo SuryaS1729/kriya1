@@ -7,11 +7,46 @@ import Animated, {
   useSharedValue,
   withSpring,
   Layout,
+  LinearTransition,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
 import { StatusBar } from 'expo-status-bar';
+import { Feather } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+
+const AnimatedFeather = Animated.createAnimatedComponent(Feather);
+
+function Checkbox({ completed }: { completed: boolean }) {
+  // You can tweak these values to change the animation
+  const springConfig = { stiffness: 900, damping: 30, mass: 1 };
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      backgroundColor: withSpring(completed ? '#3b82f6' : 'white', springConfig),
+      borderColor: withSpring(completed ? '#3b82f6' : '#e2e8f0', springConfig),
+    };
+  });
+
+  const checkmarkStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: withSpring(completed ? 1 : 0, springConfig) }],
+      opacity: withSpring(completed ? 1 : 0, springConfig),
+    };
+  });
+
+  return (
+    <Animated.View style={[styles.checkbox, animatedStyle]}>
+      <AnimatedFeather
+        name="check"
+        size={14}
+        color="white"
+        style={checkmarkStyle}
+      />
+    </Animated.View>
+  );
+}
 
 export default function Home() {
   const ready     = useKriya(s => s.ready);
@@ -44,16 +79,21 @@ export default function Home() {
   };
 
   const renderItem = ({ item }: { item: Task }) => (
-    <Pressable
-      onPress={() => toggle(item.id)}
-      onLongPress={() => remove(item.id)}
-      style={styles.row}
-    >
-      <View style={[styles.checkbox, item.completed ? styles.checkboxOn : styles.checkboxOff]} />
-      <Text style={[styles.title, item.completed ? styles.done : undefined]} numberOfLines={1}>
-        {item.title}
-      </Text>
-    </Pressable>
+    <Animated.View layout={LinearTransition.duration(100)}>
+      <Pressable
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          toggle(item.id);
+        }}
+        onLongPress={() => remove(item.id)}
+        style={styles.row}
+      >
+        <Checkbox completed={item.completed} />
+        <Text style={[styles.title, item.completed ? styles.done : undefined]} numberOfLines={1}>
+          {item.title}
+        </Text>
+      </Pressable>
+    </Animated.View>
   );
 
   const today = new Date().toLocaleDateString('en-US', { 
@@ -90,7 +130,7 @@ export default function Home() {
               Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
             </Text>
             <Pressable onPress={() => setShowTranslation(!showTranslation)}>
-              <Animated.View style={styles.toggleButton} layout={Layout.springify()}>
+              <Animated.View style={styles.toggleButton} layout={LinearTransition.springify()}>
                 <Text style={styles.toggleText}>
                   {showTranslation ? 'View Sanskrit' : 'View Translation'}
                 </Text>
@@ -121,19 +161,26 @@ export default function Home() {
       <View style={[styles.tasksContainer, { paddingBottom: insets.bottom }]}>
         <View style={styles.tasksHeader}>
           <Text style={styles.h1}>Today's Tasks</Text>
-          <Link href="/add" asChild>
-            <Pressable style={styles.addButton}>
-              <Text style={styles.addButtonText}>+</Text>
-            </Pressable>
-          </Link>
+          <Link href="/history" asChild>
+          <Pressable><Text style={{ color: '#2563eb' }}>Yesterday & History →</Text></Pressable>
+        </Link>
         </View>
+        
         
         <FlatList
           data={tasks}
           renderItem={renderItem}
           keyExtractor={item => item.id.toString()}
           contentContainerStyle={styles.tasksList}
+          
         />
+        <Link href="/add" asChild>
+              <Pressable style={styles.addTaskButton}>
+                
+                <Feather style={{backgroundColor:'grey', borderRadius:50,}} name="plus" size={25} color="white" />
+                <Text style={styles.addTaskText}>Add a task . . .</Text>
+              </Pressable>
+            </Link>
       </View>
     </View>
   );
@@ -208,34 +255,24 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     paddingTop: 24,
     paddingHorizontal: 20,
+    overflow: 'hidden',
   },
   tasksHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 8,
   },
   h1: { 
     fontSize: 20, 
     fontWeight: '700',
     color: '#0f172a',
   },
-  addButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#3b82f6',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: 'white',
-    fontSize: 20,
-    lineHeight: 20,
-    marginTop: -2,
-  },
   tasksList: {
-    flex: 1,
+    flexGrow: 1,
+    padding: 10,
+    
+
   },
   row: {
     flexDirection: 'row',
@@ -256,12 +293,12 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 6,
     borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   checkboxOn: { 
     backgroundColor: '#3b82f6', 
     borderColor: '#3b82f6',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   checkboxOff: { 
     borderColor: '#e2e8f0',
@@ -270,5 +307,23 @@ const styles = StyleSheet.create({
   done: { 
     color: '#94a3b8', 
     textDecorationLine: 'line-through' 
+  },
+  addTaskButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    paddingVertical: 14,
+    paddingHorizontal: 11,
+    marginTop: 30,
+    marginBottom: 20,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: 'white',
+    backgroundColor: 'white',
+  },
+  addTaskText: {
+    marginLeft: 12,
+    fontSize: 17,
+    color: '#64748b',
   },
 });

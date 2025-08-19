@@ -19,7 +19,9 @@ import {
   type ShlokaRow,
 } from '../../lib/shloka';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-
+import Ionicons from '@expo/vector-icons/Ionicons';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 const PILL_W = 180;
 
 export default function ShlokaDetail() {
@@ -114,14 +116,14 @@ export default function ShlokaDetail() {
   const loading = !row && !invalidIndex;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#0b2946' }}>
-      <StatusBar barStyle="light-content" backgroundColor="#0b2946" />
+    <SafeAreaView style={{ flex: 1 }} edges={['right', 'bottom', 'left']}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <LinearGradient colors={['#0D4986', '#040320']} style={StyleSheet.absoluteFill} />
 
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingTop: 28,
+          paddingTop: insets.top + 28,
           paddingHorizontal: 24,
           paddingBottom: 120,
         }}
@@ -138,7 +140,8 @@ export default function ShlokaDetail() {
           </Pressable>
           <Link href="/read" asChild>
             <Pressable hitSlop={16}>
-              <Text style={styles.headerIcon}>📖</Text>
+            <FontAwesome5 name="scroll" size={20} color="white" />
+
             </Pressable>
           </Link>
         </View>
@@ -199,12 +202,14 @@ export default function ShlokaDetail() {
             hitSlop={12}
             style={[styles.pillBtn, prevIndex == null && styles.disabled]}
           >
-            <Text style={styles.pillIcon}>◀</Text>
+            {/* <Text style={styles.pillIcon}>◀</Text> */}
+            <AntDesign style={styles.pillIcon} name="arrowleft" size={32} color="green" />
+
           </Pressable>
 
           <Link href="/read" asChild>
             <Pressable hitSlop={12} style={styles.pillBtn}>
-              <Text style={styles.pillIcon}>📖</Text>
+              <FontAwesome5 name="scroll" size={20} color="white" />
             </Pressable>
           </Link>
 
@@ -214,7 +219,9 @@ export default function ShlokaDetail() {
             hitSlop={12}
             style={[styles.pillBtn, nextIndex == null && styles.disabled]}
           >
-            <Text style={styles.pillIcon}>▶</Text>
+            {/* <Text style={styles.pillIcon} >▶</Text> */}
+            <AntDesign style={styles.pillIcon} name="arrowright" size={32} color="green" />
+
           </Pressable>
         </Animated.View>
       )}
@@ -245,18 +252,21 @@ const styles = StyleSheet.create({
 
   pillWrap: {
     position: 'absolute',
-    left: '50%',
+    left: '26%',
     width: PILL_W,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: 'rgba(4, 37, 77, 0.81)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-evenly',
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     transform: [{ translateX: -PILL_W / 2 }],
+   
+    borderColor: 'rgba(255, 255, 255, 0.43)',
+    borderWidth: 2,
   },
   pillBtn: { paddingHorizontal: 8, paddingVertical: 6 },
-  pillIcon: { color: 'white', fontSize: 18, fontWeight: '700' },
-  disabled: { opacity: 0.35 },
+  pillIcon: { color: 'white', fontSize: 21, fontWeight: '700' },
+  disabled: { opacity: 1 },
 });

@@ -70,7 +70,7 @@ export default function Add() {
         // iOS uses 'padding' (best), Android prefers 'height' to avoid jumpiness
         behavior={Platform.select({ ios: 'padding', android: 'height' })}
         // Offset by the custom header height so iOS calculates correctly
-        keyboardVerticalOffset={Platform.OS === 'ios' ? HEADER_HEIGHT + insets.top : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ?  HEADER_HEIGHT + insets.top : 0}
         style={{ flex: 1 }}
       >
         <TopBar
@@ -99,7 +99,7 @@ export default function Add() {
           />
 
           {/* INPUT BAR — stays at the bottom, lifted by KeyboardAvoidingView */}
-          <View style={[styles.inputBar, { paddingBottom: 8 + insets.bottom }]}>
+          <View style={[styles.inputBar, { paddingBottom: 8}]}>
             <TextInput
               ref={inputRef}
               value={text}
@@ -108,6 +108,7 @@ export default function Add() {
               style={styles.input}
               returnKeyType="done"
               onSubmitEditing={addAndStay}
+              placeholderTextColor="red"
             />
             {/* <Pressable style={styles.addBtn} onPress={addAndStay}>
               <Text style={styles.addBtnText}>Add</Text>
@@ -143,9 +144,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     borderWidth: 1,
     borderColor: '#e5e7eb',
-    borderRadius: 10,
+    borderRadius: 50,
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 15,
+    color:"red",
   },
   addBtn: {
     alignSelf: 'flex-end',

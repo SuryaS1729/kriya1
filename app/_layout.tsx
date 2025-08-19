@@ -6,6 +6,8 @@ import { ensureDatabasePresent } from '../lib/preloadDb';
 import { setDbReady } from '../lib/dbReady';
 import { useKriya } from '../lib/store';
 import { setDb } from '../lib/db';
+import * as NavigationBar from 'expo-navigation-bar';
+import { Platform } from 'react-native';
 
 const DB_NAME = 'gita.db';
 // NOTE: this file is in /app, assets is one level up:
@@ -13,8 +15,13 @@ const DB_ASSET = require('../assets/db/gita.db');
 
 export default function Root() {
   const [booted, setBooted] = useState(false);
+  
 
   useEffect(() => {
+    if (Platform.OS === 'android') {
+      // Set the navigation bar style
+      NavigationBar.setStyle('auto');
+    }
     (async () => {
       try {
         // While debugging, set forceReplace:true ONCE to guarantee a fresh copy

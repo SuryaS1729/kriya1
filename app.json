@@ -8,13 +8,14 @@
 
     "android": {
       "package": "com.surya7314.kriya",
-      "softwareKeyboardLayoutMode": "pan",
-      "androidStatusBar": {
-        "translucent": true
-      },
-      "androidNavigationBar": {
-        "visible": "sticky-immersive"
-      }
+      "edgeToEdgeEnabled": true,
+      "softwareKeyboardLayoutMode": "resize"
+      // "androidStatusBar": {
+      //   "translucent": true
+      // },
+      // "androidNavigationBar": {
+      //   "visible": "sticky-immersive"
+      // }
     },
 
     "ios": {

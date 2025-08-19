@@ -1,6 +1,6 @@
 // app/index.tsx
 import { Link } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { FlatList, StyleSheet, Text, View, Pressable } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -15,6 +15,7 @@ import type { Task } from '../lib/tasks';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
@@ -78,8 +79,22 @@ export default function Home() {
     setShowTranslation(!showTranslation);
   };
 
+  // Add this sorted tasks computation
+  const sortedTasks = useMemo(() => {
+    return [...tasks].sort((a, b) => {
+      if (a.completed === b.completed) return 0;
+      return a.completed ? 1 : -1;
+    });
+  }, [tasks]);
+
   const renderItem = ({ item }: { item: Task }) => (
-    <Animated.View layout={LinearTransition.duration(100)}>
+    <Animated.View 
+      layout={LinearTransition
+        .duration(100)
+        .springify()
+        .delay(50)
+      }
+    >
       <Pressable
         onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -120,41 +135,46 @@ export default function Home() {
   }
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={['#ffffffff', '#9FABC8']}
+      style={[styles.container]}
+    >
       <StatusBar style="light" />
+      
       <View style={[styles.topHalf, { paddingTop: insets.top }]}>
         {/* Shloka Card */}
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.meta}>
-              Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
-            </Text>
-            <Pressable onPress={() => setShowTranslation(!showTranslation)}>
+        <Link
+            href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
+            asChild
+          >
+          <Pressable style={{ flex: 1, justifyContent: 'center', }}>
+             <View style={styles.card}>
+                    <View style={styles.headerSection}>
+                      <Text style={styles.meta}>
+                        Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
+                      </Text>
+                    </View>
+
+            
+                    <Animated.View style={[fadeStyle, styles.contentSection]}>
+                          {showTranslation ? (
+                            <Text style={styles.en}>
+                              {shloka.translation_2 || shloka.description || 'No translation available'}
+                            </Text>
+                          ) : (
+                            <Text style={styles.sa}>{shloka.text}</Text>
+                          )}
+                    </Animated.View>
+                    <Pressable onPress={() => setShowTranslation(!showTranslation)}>
               <Animated.View style={styles.toggleButton} layout={LinearTransition.springify()}>
                 <Text style={styles.toggleText}>
                   {showTranslation ? 'View Sanskrit' : 'View Translation'}
                 </Text>
               </Animated.View>
             </Pressable>
-          </View>
-
-          <Link
-            href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
-            asChild
-          >
-            <Pressable style={{ flex: 1, justifyContent: 'center', }}>
-              <Animated.View style={[fadeStyle, { flex: 1, justifyContent: 'center' }]}>
-                {showTranslation ? (
-                  <Text style={styles.en}>
-                    {shloka.translation_2 || shloka.description || 'No translation available'}
-                  </Text>
-                ) : (
-                  <Text style={styles.sa}>{shloka.text}</Text>
-                )}
-              </Animated.View>
-            </Pressable>
-          </Link>
-        </View>
+              </View>
+         </Pressable>
+        </Link>
       </View>
 
       {/* Tasks Section */}
@@ -168,7 +188,7 @@ export default function Home() {
         
         
         <FlatList
-          data={tasks}
+          data={sortedTasks}  // <- Change this from tasks to sortedTasks
           renderItem={renderItem}
           keyExtractor={item => item.id.toString()}
           contentContainerStyle={styles.tasksList}
@@ -182,40 +202,47 @@ export default function Home() {
               </Pressable>
             </Link>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: { 
-    flex: 1, 
-    backgroundColor: 'black',
+    flex: 1,
   },
   topHalf: {
     flex: 1,
     justifyContent: 'center',
+
+
     paddingHorizontal: 16,
     paddingVertical:0
   },
   card: {
-    height: 240,
-    borderRadius: 16,
-    padding: 20,
-    backgroundColor: '#111827',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  cardHeader: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
     alignItems: 'center',
-    marginBottom: 16,
+    justifyContent: 'space-between', // This will create maximum space between children
+    height: 300,
+    borderRadius: 16,
+    padding: 30,
+    backgroundColor: '#dded45ff',
+  },
+  headerSection: {
+    width: '100%',
+    marginBottom: 40,
+    alignItems:'center',
+
+    // Add significant bottom margin to create space
+  },
+  contentSection: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    paddingTop: 20,
+ // Add some top padding for additional spacing
   },
   meta: { 
-    fontSize: 12,
+    fontSize: 18,
     fontWeight: '600',
     color: '#9ca3af',
     textTransform: 'uppercase',
@@ -235,24 +262,24 @@ const styles = StyleSheet.create({
   },
   sa: { 
     flex: 1,
-    fontSize: 18,
+    fontSize: 22,
     lineHeight: 24,
-    color: '#f9fafb',
-    textAlign: 'left',
+    color: '#565657ff',
+    textAlign: 'center',
     fontFamily: 'Sanskrit-Text', // Make sure to load this font in your app
   },
   en: { 
     flex: 1,
     fontSize: 17,
     lineHeight: 24,
-    color: '#d1d5db',
-    textAlign: 'left',
+    color: '#434343ff',
+    textAlign: 'center',
   },
   tasksContainer: {
-    flex: 1.6,
+    flex: 1.37,
     backgroundColor: 'white',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 41,
+    borderTopRightRadius: 43,
     paddingTop: 24,
     paddingHorizontal: 20,
     overflow: 'hidden',
@@ -279,7 +306,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     paddingHorizontal: 4,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.7,
     borderBottomColor: '#f1f5f9',
   },
   title: { 
@@ -291,7 +318,7 @@ const styles = StyleSheet.create({
   checkbox: {
     width: 20,
     height: 20,
-    borderRadius: 6,
+    borderRadius: 4,
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',

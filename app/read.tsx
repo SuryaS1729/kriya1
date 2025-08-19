@@ -11,6 +11,7 @@ import {
   searchShlokasLike,
   getIndexOf, // 👈 compute global index from (chapter, verse)
 } from '../lib/shloka';
+import { LinearGradient } from 'react-native-svg';
 
 export default function Read() {
   const chapters = useMemo(() => getChapterCounts(), []);
@@ -27,6 +28,7 @@ export default function Read() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      
       <Text style={styles.title}>Bhagavad Gita</Text>
 
       <TextInput

@@ -118,7 +118,7 @@ export default function ShlokaDetail() {
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['right', 'bottom', 'left']}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      <LinearGradient colors={['#0D4986', '#040320']} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={['#ffffffff', '#9FABC8']} style={StyleSheet.absoluteFill} />
 
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
@@ -236,17 +236,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 20,
   },
-  headerIcon: { color: 'white', fontSize: 22, fontWeight: '700' },
-  headerTitle: { color: 'white', fontSize: 18, fontWeight: '700' },
+  headerIcon: { color: '##545454', fontSize: 22, fontWeight: '700' },
+  headerTitle: { color: '#545454', fontSize: 18, fontWeight: '700' },
 
   section: {
-    color: 'rgba(255,255,255,0.9)',
+    color: '#545454',
     fontSize: 18,
     fontWeight: '700',
     marginTop: 8,
   },
-  sa: { color: 'white', fontSize: 24, lineHeight: 34 },
-  en: { color: 'rgba(255,255,255,0.95)', fontSize: 18, lineHeight: 26 },
+  sa: { color: '#545454', fontSize: 24, lineHeight: 34 },
+  en: { color: '#545454', fontSize: 18, lineHeight: 26 },
 
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
 

@@ -121,7 +121,7 @@ export default function Home() {
   if (!ready || !shloka) {
     return (
       <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <StatusBar style="light" />
+        <StatusBar style="auto" />
         <View style={[styles.card, { height: 240, opacity: 0.5, backgroundColor: '#111827' }]} />
         <View style={styles.tasksContainer}>
           <Text style={styles.h1}>Today</Text>
@@ -143,11 +143,7 @@ export default function Home() {
       
       <View style={[styles.topHalf, { paddingTop: insets.top }]}>
         {/* Shloka Card */}
-        <Link
-            href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
-            asChild
-          >
-          <Pressable style={{ flex: 1, justifyContent: 'center', }}>
+        
              <View style={styles.card}>
                     <View style={styles.headerSection}>
                       <Text style={styles.meta}>
@@ -155,7 +151,11 @@ export default function Home() {
                       </Text>
                     </View>
 
-            
+            <Link
+            href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
+            asChild
+          >
+          <Pressable style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Animated.View style={[fadeStyle, styles.contentSection]}>
                           {showTranslation ? (
                             <Text style={styles.en}>
@@ -165,16 +165,17 @@ export default function Home() {
                             <Text style={styles.sa}>{shloka.text}</Text>
                           )}
                     </Animated.View>
-                    <Pressable onPress={() => setShowTranslation(!showTranslation)}>
-              <Animated.View style={styles.toggleButton} layout={LinearTransition.springify()}>
-                <Text style={styles.toggleText}>
-                  {showTranslation ? 'View Sanskrit' : 'View Translation'}
-                </Text>
-              </Animated.View>
-            </Pressable>
-              </View>
-         </Pressable>
+ </Pressable>
         </Link>
+                    <Pressable onPress={() => setShowTranslation(!showTranslation)}>
+                        <Animated.View style={styles.toggleButton} layout={LinearTransition.springify()}>
+                       <Text style={styles.toggleText}>
+                         {showTranslation ? 'View Sanskrit' : 'View Translation'}
+                         </Text>
+                         </Animated.View>
+                  </Pressable>
+              </View>
+        
       </View>
 
       {/* Tasks Section */}
@@ -223,7 +224,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between', // This will create maximum space between children
     height: 300,
     borderRadius: 16,
-    padding: 30,
+    paddingTop: 20,
+    paddingHorizontal: 13,
+    paddingBottom: 10,
+
+
 
   },
   headerSection: {
@@ -239,6 +244,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     paddingTop: 20,
+marginTop: 20,
+
+
   
  // Add some top padding for additional spacing
   },
@@ -255,11 +263,13 @@ fontStyle: 'italic',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 16,
-    backgroundColor: '#374151',
-    overflow: 'hidden', // Important for reanimated layout animations
+    backgroundColor: '#ffffffff',
+    overflow: 'hidden',
+    marginTop: 0, 
+    // Important for reanimated layout animations
   },
   toggleText: {
-    color: '#e5e7eb',
+    color: '#000000ff',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -271,14 +281,16 @@ fontStyle: 'italic',
     color: '#565657ff',
     textAlign: 'center',
     fontFamily:"Samanya",
-    fontWeight:"700",
+    fontWeight:"100",
     fontStyle:"normal",
-    backgroundColor:'red',
-   // Make sure to load this font in your app
+    paddingTop: 10,
+    
+
+
   },
   en: { 
     flex: 1,
-    fontSize: 17,
+    fontSize: 18,
     lineHeight: 24,
     color: '#434343ff',
     textAlign: 'center',

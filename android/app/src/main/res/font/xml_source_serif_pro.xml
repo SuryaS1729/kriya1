@@ -1,0 +1,8 @@
+<font-family xmlns:app="http://schemas.android.com/apk/res-auto">
+  <font app:font="@font/source_serif_pro_extra_light" app:fontStyle="normal" app:fontWeight="200"/>
+  <font app:font="@font/source_serif_pro_light" app:fontStyle="normal" app:fontWeight="300"/>
+  <font app:font="@font/source_serif_pro_regular" app:fontStyle="normal" app:fontWeight="400"/>
+  <font app:font="@font/source_serif_pro_it" app:fontStyle="italic" app:fontWeight="400"/>
+  <font app:font="@font/source_serif_pro_semibold" app:fontStyle="normal" app:fontWeight="600"/>
+  <font app:font="@font/source_serif_pro_semibold_it" app:fontStyle="italic" app:fontWeight="600"/>
+</font-family>

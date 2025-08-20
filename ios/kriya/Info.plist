@@ -45,9 +45,22 @@
       <key>NSAllowsLocalNetworking</key>
       <true/>
     </dict>
-    <key>NSUserActivityTypes</key>
+    <key>UIAppFonts</key>
     <array>
-      <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
+      <string>Alegreya-Black.otf</string>
+      <string>Alegreya-Italic.otf</string>
+      <string>Alegreya-Regular.otf</string>
+      <string>SourceSerifPro-ExtraLight.otf</string>
+      <string>SourceSerifPro-It.otf</string>
+      <string>SourceSerifPro-Light.otf</string>
+      <string>SourceSerifPro-Regular.otf</string>
+      <string>SourceSerifPro-Semibold.otf</string>
+      <string>SourceSerifPro-SemiboldIt.otf</string>
+      <string>spacemono_bold.ttf</string>
+      <string>spacemono_bolditalic.ttf</string>
+      <string>spacemono_italic.ttf</string>
+      <string>spacemono_regular.ttf</string>
+      <string>AMS-Samanya-Bold.ttf</string>
     </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>

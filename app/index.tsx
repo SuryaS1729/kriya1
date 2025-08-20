@@ -25,8 +25,8 @@ function Checkbox({ completed }: { completed: boolean }) {
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      backgroundColor: withSpring(completed ? '#3b82f6' : 'white', springConfig),
-      borderColor: withSpring(completed ? '#3b82f6' : '#e2e8f0', springConfig),
+      backgroundColor: withSpring(completed ? '#AADBA3' : 'white', springConfig),
+      borderColor: withSpring(completed ? '#AADBA3' : '#e2e8f0', springConfig),
     };
   });
 
@@ -224,11 +224,11 @@ const styles = StyleSheet.create({
     height: 300,
     borderRadius: 16,
     padding: 30,
-    backgroundColor: '#dded45ff',
+
   },
   headerSection: {
     width: '100%',
-    marginBottom: 40,
+    marginBottom: 10,
     alignItems:'center',
 
     // Add significant bottom margin to create space
@@ -239,14 +239,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     paddingTop: 20,
+  
  // Add some top padding for additional spacing
   },
   meta: { 
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#9ca3af',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    fontFamily:"SourceSerifPro",
+
+    fontSize: 23,
+fontStyle: 'italic',
+    color: '#545454',
+
+    // letterSpacing: 0.5,
   },
   toggleButton: {
     paddingVertical: 8,
@@ -261,12 +264,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   sa: { 
+  
     flex: 1,
-    fontSize: 22,
+    fontSize: 18,
     lineHeight: 24,
     color: '#565657ff',
     textAlign: 'center',
-    fontFamily: 'Sanskrit-Text', // Make sure to load this font in your app
+    fontFamily:"Samanya",
+    fontWeight:"700",
+    fontStyle:"normal",
+    backgroundColor:'red',
+   // Make sure to load this font in your app
   },
   en: { 
     flex: 1,
@@ -274,6 +282,9 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     color: '#434343ff',
     textAlign: 'center',
+    fontFamily:"Alegreya",
+    fontWeight:"400",
+    fontStyle:"normal"
   },
   tasksContainer: {
     flex: 1.37,
@@ -311,9 +322,13 @@ const styles = StyleSheet.create({
   },
   title: { 
     flex: 1, 
-    fontSize: 16, 
-    color: '#0f172a',
+    fontSize: 18, 
+    color: '#000000ff',
     marginLeft: 12,
+    fontFamily:"SourceSerifPro",
+    fontWeight:"300",
+    fontStyle:"normal"
+
   },
   checkbox: {
     width: 20,
@@ -324,8 +339,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   checkboxOn: { 
-    backgroundColor: '#3b82f6', 
-    borderColor: '#3b82f6',
+    backgroundColor: '#AADBA3', 
+    borderColor: '#AADBA3',
   },
   checkboxOff: { 
     borderColor: '#e2e8f0',

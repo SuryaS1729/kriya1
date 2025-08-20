@@ -1,0 +1,5 @@
+<font-family xmlns:app="http://schemas.android.com/apk/res-auto">
+  <font app:font="@font/alegreya_black" app:fontStyle="normal" app:fontWeight="900"/>
+  <font app:font="@font/alegreya_regular" app:fontStyle="normal" app:fontWeight="400"/>
+  <font app:font="@font/alegreya_italic" app:fontStyle="italic" app:fontWeight="400"/>
+</font-family>

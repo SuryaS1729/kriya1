@@ -158,9 +158,11 @@ export default function Home() {
           <Pressable style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Animated.View style={[fadeStyle, styles.contentSection]}>
                           {showTranslation ? (
-                            <Text style={styles.en}>
+                            <View style ={styles.englishSection}>
+                            <Text style={[styles.en, {lineHeight:(shloka.translation_2 || "").length < 350 ? 24 : 18,}, ]} adjustsFontSizeToFit>
                               {shloka.translation_2 || shloka.description || 'No translation available'}
                             </Text>
+                            </View>
                           ) : (
                             <Text style={styles.sa}>{shloka.text}</Text>
                           )}
@@ -168,7 +170,7 @@ export default function Home() {
  </Pressable>
         </Link>
                     <Pressable onPress={() => setShowTranslation(!showTranslation)}>
-                        <Animated.View style={styles.toggleButton} layout={LinearTransition.springify()}>
+                        <Animated.View style={styles.toggleButton}>
                        <Text style={styles.toggleText}>
                          {showTranslation ? 'View Sanskrit' : 'View Translation'}
                          </Text>
@@ -227,14 +229,16 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 13,
     paddingBottom: 10,
+    // backgroundColor:'grey'
 
 
 
   },
   headerSection: {
     width: '100%',
-    marginBottom: 10,
+    marginBottom: 0,
     alignItems:'center',
+    // backgroundColor:"yellow"
 
     // Add significant bottom margin to create space
   },
@@ -243,8 +247,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
+
     paddingTop: 20,
 marginTop: 20,
+paddingBottom: 20,
+// backgroundColor:'white'
+
 
 
   
@@ -273,6 +281,18 @@ fontStyle: 'italic',
     fontSize: 12,
     fontWeight: '600',
   },
+  englishSection: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+
+    paddingHorizontal: 16,
+    paddingBottom: 0,
+    paddingTop: 10,
+
+    // backgroundColor: 'red'
+  },
   sa: { 
   
     flex: 1,
@@ -283,7 +303,8 @@ fontStyle: 'italic',
     fontFamily:"Samanya",
     fontWeight:"100",
     fontStyle:"normal",
-    paddingTop: 10,
+    paddingTop: 20,
+
     
 
 

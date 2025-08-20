@@ -163,8 +163,9 @@ export default function Home() {
                               {shloka.translation_2 || shloka.description || 'No translation available'}
                             </Text>
                             </View>
-                          ) : (
-                            <Text style={styles.sa}>{shloka.text}</Text>
+                          ) : (<View >
+                            <Text style={[styles.sa, {lineHeight:(shloka.translation_2 || "").length < 90 ? 24 : 20,},]}adjustsFontSizeToFit>{shloka.text}</Text>
+                          </View>
                           )}
                     </Animated.View>
  </Pressable>
@@ -304,6 +305,8 @@ fontStyle: 'italic',
     fontWeight:"100",
     fontStyle:"normal",
     paddingTop: 20,
+
+    // backgroundColor:'red'
 
     
 

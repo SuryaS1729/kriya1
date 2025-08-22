@@ -12,36 +12,92 @@
               {
                 "fontFamily": "Alegreya",
                 "fontDefinitions": [
-                  { "path": "./assets/fonts/Alegreya-Black.otf",   "weight": 900, "style": "normal" },
-                  { "path": "./assets/fonts/Alegreya-Regular.otf", "weight": 400, "style": "normal" },
-                  { "path": "./assets/fonts/Alegreya-Italic.otf",  "weight": 400, "style": "italic" }
+                  {
+                    "path": "./assets/fonts/Alegreya-Black.otf",
+                    "weight": 900,
+                    "style": "normal"
+                  },
+                  {
+                    "path": "./assets/fonts/Alegreya-Regular.otf",
+                    "weight": 400,
+                    "style": "normal"
+                  },
+                  {
+                    "path": "./assets/fonts/Alegreya-Italic.otf",
+                    "weight": 400,
+                    "style": "italic"
+                  }
                 ]
               },
               {
                 "fontFamily": "SourceSerifPro",
                 "fontDefinitions": [
-                  { "path": "./assets/fonts/SourceSerifPro-ExtraLight.otf", "weight": 200, "style": "normal" },
-                  { "path": "./assets/fonts/SourceSerifPro-Light.otf",      "weight": 300, "style": "normal" },
-                  { "path": "./assets/fonts/SourceSerifPro-Regular.otf",    "weight": 400, "style": "normal" },
-                  { "path": "./assets/fonts/SourceSerifPro-It.otf",         "weight": 400, "style": "italic" },
-                  { "path": "./assets/fonts/SourceSerifPro-Semibold.otf",   "weight": 600, "style": "normal" },
-                  { "path": "./assets/fonts/SourceSerifPro-SemiboldIt.otf", "weight": 600, "style": "italic" }
+                  {
+                    "path": "./assets/fonts/SourceSerifPro-ExtraLight.otf",
+                    "weight": 200,
+                    "style": "normal"
+                  },
+                  {
+                    "path": "./assets/fonts/SourceSerifPro-Light.otf",
+                    "weight": 300,
+                    "style": "normal"
+                  },
+                  {
+                    "path": "./assets/fonts/SourceSerifPro-Regular.otf",
+                    "weight": 400,
+                    "style": "normal"
+                  },
+                  {
+                    "path": "./assets/fonts/SourceSerifPro-It.otf",
+                    "weight": 400,
+                    "style": "italic"
+                  },
+                  {
+                    "path": "./assets/fonts/SourceSerifPro-Semibold.otf",
+                    "weight": 600,
+                    "style": "normal"
+                  },
+                  {
+                    "path": "./assets/fonts/SourceSerifPro-SemiboldIt.otf",
+                    "weight": 600,
+                    "style": "italic"
+                  }
                 ]
               },
               {
                 "fontFamily": "SpaceMono",
                 "fontDefinitions": [
-                  { "path": "./assets/fonts/spacemono_regular.ttf",     "weight": 400, "style": "normal" },
-                  { "path": "./assets/fonts/spacemono_italic.ttf",      "weight": 400, "style": "italic" },
-                  { "path": "./assets/fonts/spacemono_bold.ttf",        "weight": 700, "style": "normal" },
-                  { "path": "./assets/fonts/spacemono_bolditalic.ttf",  "weight": 700, "style": "italic" }
+                  {
+                    "path": "./assets/fonts/spacemono_regular.ttf",
+                    "weight": 400,
+                    "style": "normal"
+                  },
+                  {
+                    "path": "./assets/fonts/spacemono_italic.ttf",
+                    "weight": 400,
+                    "style": "italic"
+                  },
+                  {
+                    "path": "./assets/fonts/spacemono_bold.ttf",
+                    "weight": 700,
+                    "style": "normal"
+                  },
+                  {
+                    "path": "./assets/fonts/spacemono_bolditalic.ttf",
+                    "weight": 700,
+                    "style": "italic"
+                  }
                 ]
               },
               {
                 "fontFamily": "Samanya",
                 "fontDefinitions": [
-                  { "path": "./assets/fonts/AMS-Samanya-Bold.ttf",     "weight": 700, "style": "normal" },
-                  ]
+                  {
+                    "path": "./assets/fonts/AMS-Samanya-Bold.ttf",
+                    "weight": 700,
+                    "style": "normal"
+                  }
+                ]
               }
             ]
           },
@@ -60,13 +116,15 @@
               "./assets/fonts/spacemono_bolditalic.ttf",
               "./assets/fonts/spacemono_italic.ttf",
               "./assets/fonts/spacemono_regular.ttf",
-               "./assets/fonts/AMS-Samanya-Bold.ttf"
+              "./assets/fonts/AMS-Samanya-Bold.ttf"
             ]
           }
         }
       ]
     ],
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "android": {
       "package": "com.surya7314.kriya",
       "edgeToEdgeEnabled": true,
@@ -74,6 +132,12 @@
     },
     "ios": {
       "bundleIdentifier": "com.surya7314.kriya"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3d4eb143-ca08-4c6a-8561-143653d4c80f"
+      }
+    },
+    "owner": "surya7314"
   }
 }

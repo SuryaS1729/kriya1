@@ -21,7 +21,7 @@ const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
 function Checkbox({ completed }: { completed: boolean }) {
   // You can tweak these values to change the animation
-  const springConfig = { stiffness: 900, damping: 30, mass: 1 };
+  const springConfig = { stiffness: 1200, damping: 35, mass: 0.8};
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -33,7 +33,11 @@ function Checkbox({ completed }: { completed: boolean }) {
   const checkmarkStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: withSpring(completed ? 1 : 0, springConfig) }],
-      opacity: withSpring(completed ? 1 : 0, springConfig),
+      opacity: withSpring(completed ? 1 : 0, { 
+        ...springConfig, 
+        // Add a small delay for the checkmark to appear after background
+        ...(completed ? { delay: 50 } : {})
+      }),
     };
   });
 
@@ -90,9 +94,9 @@ export default function Home() {
   const renderItem = ({ item }: { item: Task }) => (
     <Animated.View 
       layout={LinearTransition
-        .duration(100)
+        .duration(300)
         .springify()
-        .delay(50)
+        .delay(200)
       }
     >
       <Pressable
@@ -186,7 +190,7 @@ export default function Home() {
         <View style={styles.tasksHeader}>
           <Text style={styles.h1}>Today's Tasks</Text>
           <Link href="/history" asChild>
-          <Pressable><Text style={{ color: '#2563eb' }}>Yesterday & History →</Text></Pressable>
+          <Pressable><Text style={{ color: '#7493d7ff' }}>Yesterday & History →</Text></Pressable>
         </Link>
         </View>
         
@@ -200,9 +204,10 @@ export default function Home() {
         />
         <Link href="/add" asChild>
               <Pressable style={styles.addTaskButton}>
-                
-                <Feather style={{backgroundColor:'grey', borderRadius:50,}} name="plus" size={25} color="white" />
-                <Text style={styles.addTaskText}>Add a task . . .</Text>
+                <View style={styles.addTaskIcon}>
+                  <Feather name="plus" size={20} color="#606060" />
+                </View>
+    <Text style={styles.addTaskText}>Add a task . . .</Text>
               </Pressable>
             </Link>
       </View>
@@ -336,11 +341,12 @@ fontStyle: 'italic',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+    marginLeft:3
   },
   h1: { 
-    fontSize: 20, 
+    fontSize: 17, 
     fontWeight: '700',
-    color: '#0f172a',
+    color: '#848fa9ff',
   },
   tasksList: {
     flexGrow: 1,
@@ -392,16 +398,28 @@ fontStyle: 'italic',
 
     paddingVertical: 14,
     paddingHorizontal: 11,
-    marginTop: 30,
+    marginTop: 10,
     marginBottom: 20,
     borderRadius: 12,
     borderWidth: 1.5,
     borderColor: 'white',
-    backgroundColor: 'white',
+    backgroundColor: '#efefef83',
+    marginLeft:-5.8
   },
   addTaskText: {
     marginLeft: 12,
-    fontSize: 17,
+    fontSize: 15,
     color: '#64748b',
+      fontFamily:"SpaceMono",
+    fontWeight:"400",
+    fontStyle:"normal"
+  },
+  addTaskIcon: {
+    width: 32, // Make it bigger than checkbox (20px)
+    height: 32, // Make it bigger than checkbox (20px)
+    backgroundColor: '#E6E6E6',
+    borderRadius: 16, // Half of width/height for perfect circle
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

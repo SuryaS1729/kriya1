@@ -143,7 +143,7 @@ export default function Home() {
       colors={['#ffffffff', '#9FABC8']}
       style={[styles.container]}
     >
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       
       <View style={[styles.topHalf, { paddingTop: insets.top }]}>
         {/* Shloka Card */}
@@ -400,10 +400,10 @@ fontStyle: 'italic',
     paddingHorizontal: 11,
     marginTop: 10,
     marginBottom: 20,
-    borderRadius: 12,
+    borderRadius: 30,
     borderWidth: 1.5,
     borderColor: 'white',
-    backgroundColor: '#efefef83',
+    backgroundColor: '#efefef37',
     marginLeft:-5.8
   },
   addTaskText: {

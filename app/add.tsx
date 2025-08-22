@@ -15,6 +15,17 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TopBar } from '../components/TopBar';
 import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
+import { Feather } from '@expo/vector-icons';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withSpring,
+  interpolate
+} from 'react-native-reanimated';
+import { InteractionManager } from 'react-native';
+
+// Create animated Feather component
+const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
 const HEADER_HEIGHT = 54; // approx TopBar height (tweak if needed)
 
@@ -23,22 +34,55 @@ export default function Add() {
   const [text, setText] = useState('');
   const inputRef = useRef<TextInput>(null);
 
+  // Reanimated shared value for rotation
+  const rotationValue = useSharedValue(0);
+
   const tasksToday = useKriya(s => s.tasksToday);
   const addTask    = useKriya(s => s.addTask);
   const toggle     = useKriya(s => s.toggleTask);
   const remove     = useKriya(s => s.removeTask);
 
   useEffect(() => {
-    const t = setTimeout(() => inputRef.current?.focus(), 50);
+    const t = setTimeout(() => inputRef.current?.focus(), 150);
     return () => clearTimeout(t);
+  //    const interaction = InteractionManager.runAfterInteractions(() => {
+  //   inputRef.current?.focus();
+  // });
+  
+  // return () => interaction.cancel();
   }, []);
+
+  // Animate rotation when text changes
+  useEffect(() => {
+    rotationValue.value = withSpring(text.length > 0 ? 1 : 0, {
+      damping: 9,
+      stiffness: 300,
+      mass: 0.3
+    });
+  }, [text]);
+
+  // Animated style for rotation
+  const animatedIconStyle = useAnimatedStyle(() => {
+    const rotation = interpolate(
+      rotationValue.value,
+      [0, 1],
+      [0, -90] // Rotate from 0° to -90° (right arrow becomes up arrow)
+    );
+    
+    return {
+      transform: [{ rotate: `${rotation}deg` }],
+    };
+  });
 
   function addAndStay() {
     const t = text.trim();
     if (!t) return;
     addTask(t);
     setText('');
-    requestAnimationFrame(() => inputRef.current?.focus());
+    // requestAnimationFrame(() => inputRef.current?.focus());
+      setTimeout(() => {
+    inputRef.current?.focus();
+  }, 0);
   }
   function doneAndClose() {
     Keyboard.dismiss();
@@ -93,13 +137,21 @@ export default function Add() {
             renderItem={renderItem}
             ItemSeparatorComponent={() => <View style={styles.sep} />}
             // Give the list bottom padding so last items aren't hidden behind the input bar
-            contentContainerStyle={{ paddingBottom: 16 + 56 + insets.bottom }}
+            contentContainerStyle={{  flexGrow: 1,padding: 12,  paddingBottom: 16 + 56 + insets.bottom  }}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={Platform.OS === 'ios' ? 'on-drag' : 'none'}
           />
 
           {/* INPUT BAR — stays at the bottom, lifted by KeyboardAvoidingView */}
           <View style={[styles.inputBar, { paddingBottom: 8}]}>
+            <View style={styles.addTaskIcon}>
+              <AnimatedFeather 
+                name="arrow-right" 
+                size={20} 
+                color="#606060" 
+                style={animatedIconStyle}
+              />
+            </View>
             <TextInput
               ref={inputRef}
               value={text}
@@ -108,11 +160,10 @@ export default function Add() {
               style={styles.input}
               returnKeyType="done"
               onSubmitEditing={addAndStay}
-              placeholderTextColor="red"
+              placeholderTextColor="#9ca3af"
+                blurOnSubmit={false} // Add this - prevents keyboard from closing on submit
+
             />
-            {/* <Pressable style={styles.addBtn} onPress={addAndStay}>
-              <Text style={styles.addBtnText}>Add</Text>
-            </Pressable> */}
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -126,7 +177,7 @@ const styles = StyleSheet.create({
 
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, gap: 12, paddingHorizontal: 16 },
   checkbox: { width: 18, height: 18, borderRadius: 4 },
-  checkboxOn: { backgroundColor: '#22c55e' },
+  checkboxOn: { backgroundColor: '#AADBA3' },
   checkboxOff: { backgroundColor: '#cbd5e1' },
   title: { flex: 1, fontSize: 16, color: '#111827' },
   done: { opacity: 0.6, textDecorationLine: 'line-through' },
@@ -134,29 +185,50 @@ const styles = StyleSheet.create({
 
   // bottom input bar
   inputBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: 8,
-    backgroundColor: 'white',
+    backgroundColor: 'white', // Change from pink to white
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#ffffffff',
+    borderTopColor: '#e5e7eb', // Change from red to gray
+    gap:8,
+  
   },
   input: {
-    fontSize: 18,
-    borderWidth: 1,
+    flex:1,
+    fontSize: 16,
+    borderWidth: 0,
     borderColor: '#e5e7eb',
-    borderRadius: 50,
+    backgroundColor: 'transparent',
+
     paddingHorizontal: 12,
     paddingVertical: 15,
-    color:"red",
+    color:"#111827",
+
   },
-  addBtn: {
-    alignSelf: 'flex-end',
-    marginTop: 8,
-    backgroundColor: '#111827',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
+  // addBtn: {
+  //   alignSelf: 'flex-end',
+  //   marginTop: 8,
+  //   backgroundColor: '#111827',
+  //   paddingHorizontal: 14,
+  //   paddingVertical: 10,
+  //   borderRadius: 10,
+  // },
   addBtnText: { color: 'white', fontSize: 16, fontWeight: '600' },
   link: { color: '#2563eb', fontSize: 16 },
+  addTaskIcon: {
+    width: 40, // Make it bigger than checkbox (20px)
+    height: 40, // Make it bigger than checkbox (20px)
+    backgroundColor: '#E6E6E6',
+    borderRadius: 20, // Half of width/height for perfect circle
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+   tasksList: {
+    flexGrow: 1,
+    padding: 10,
+    
+
+  },
 });

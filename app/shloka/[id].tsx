@@ -10,7 +10,7 @@ import {
   Text,
   View,
   Pressable,
-  StatusBar,
+
 } from 'react-native';
 import {
   getShlokaAt,
@@ -19,6 +19,8 @@ import {
   type ShlokaRow,
 } from '../../lib/shloka';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
+
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
@@ -117,7 +119,7 @@ export default function ShlokaDetail() {
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['right', 'bottom', 'left']}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar style="dark" />
       <LinearGradient colors={['#ffffffff', '#9FABC8']} style={StyleSheet.absoluteFill} />
 
       <Animated.ScrollView
@@ -237,16 +239,33 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   headerIcon: { color: '##545454', fontSize: 22, fontWeight: '700' },
-  headerTitle: { color: '#545454', fontSize: 18, fontWeight: '700' },
+  headerTitle: { 
+    color: '#545454',
+    fontSize: 24, 
+    fontWeight: '600' , 
+    fontFamily:"SourceSerifPro", 
+    fontStyle:"normal",
+    // backgroundColor:"red",
+    paddingVertical:20,
+    marginVertical:10
+  },
 
   section: {
-    color: '#545454',
+    color: '#4a4a4aff',
     fontSize: 18,
-    fontWeight: '700',
+
     marginTop: 8,
+    fontFamily:"SourceSerifPro",
+    fontWeight:"600",
+    fontStyle:"normal",
+    // backgroundColor:"yellow",
+    paddingVertical:10,
+    marginVertical:10
   },
-  sa: { color: '#545454', fontSize: 24, lineHeight: 34 },
-  en: { color: '#545454', fontSize: 18, lineHeight: 26 },
+  sa: { color: '#545454', fontSize: 18, lineHeight: 14 },
+  en: { color: '#545454', fontSize: 20, lineHeight: 26 ,fontFamily:"Alegreya",
+    fontWeight:"400",
+    fontStyle:"normal"},
 
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
 

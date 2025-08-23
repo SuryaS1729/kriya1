@@ -195,14 +195,21 @@ const styles = StyleSheet.create({
   checkbox: { 
     width: 18, 
     height: 18, 
-    borderRadius: 4,
+    borderRadius: 3,
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxOn: { backgroundColor: '#AADBA3' },
   checkboxOff: { backgroundColor: '#cbd5e1' },
-  title: { flex: 1, fontSize: 16, color: '#111827' },
-  done: { opacity: 0.6, textDecorationLine: 'line-through' },
+  title: { 
+    flex: 1, 
+    fontSize: 18, 
+    color: '#111827',
+    fontFamily:"SourceSerifPro",
+    fontWeight:"300",
+    fontStyle:"normal" },
+  done: { opacity: 0.6, textDecorationLine: 'line-through',    color: '#94a3b8', 
+ },
   sep: { height: 1, backgroundColor: '#f1f5f9', marginLeft: 16 },
 
   // bottom input bar

@@ -381,12 +381,7 @@ fontStyle: 'italic',
     fontWeight:"100",
     fontStyle:"normal",
     paddingTop: 20,
-
     // backgroundColor:'red'
-
-    
-
-
   },
   en: { 
     flex: 1,
@@ -446,7 +441,7 @@ fontStyle: 'italic',
   checkbox: {
     width: 20,
     height: 20,
-    borderRadius: 4,
+    borderRadius: 3,
     borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',

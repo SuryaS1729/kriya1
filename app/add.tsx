@@ -42,6 +42,11 @@ export default function Add() {
   const toggle     = useKriya(s => s.toggleTask);
   const remove     = useKriya(s => s.removeTask);
 
+  // Calculate dynamic placeholder text
+  const placeholderText = useMemo(() => {
+    return tasksToday.length > 6 ? "Easy there, overachiever 😅" : "Add a task…";
+  }, [tasksToday.length]);
+
   useEffect(() => {
     const t = setTimeout(() => inputRef.current?.focus(), 150);
     return () => clearTimeout(t);
@@ -132,7 +137,8 @@ export default function Add() {
           </View>
 
           <FlatList
-            data={tasksToday}
+            // data={tasksToday}
+            data={[...tasksToday].reverse()}
             keyExtractor={t => String(t.id)}
             renderItem={renderItem}
             ItemSeparatorComponent={() => <View style={styles.sep} />}
@@ -144,19 +150,21 @@ export default function Add() {
 
           {/* INPUT BAR — stays at the bottom, lifted by KeyboardAvoidingView */}
           <View style={[styles.inputBar, { paddingBottom: 8}]}>
+            <Pressable onPress={addAndStay}>
             <View style={styles.addTaskIcon}>
               <AnimatedFeather 
                 name="arrow-right" 
                 size={20} 
-                color="#606060" 
+                color="#606060ff" 
                 style={animatedIconStyle}
               />
             </View>
+            </Pressable>
             <TextInput
               ref={inputRef}
               value={text}
               onChangeText={setText}
-              placeholder="Add a task…"
+              placeholder={placeholderText}
               style={styles.input}
               returnKeyType="done"
               onSubmitEditing={addAndStay}
@@ -193,6 +201,7 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#e5e7eb', // Change from red to gray
     gap:8,
+
   
   },
   input: {

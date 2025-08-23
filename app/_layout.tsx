@@ -124,7 +124,7 @@ async function runMigrationsSafe(db: any) {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" options={{animation:'fade'}}/>
           <Stack.Screen name="add" options={{ presentation: 'modal', animation:'none' }} />
-          <Stack.Screen name="history" options={{}}/>
+          <Stack.Screen name="history" options={{animation:'none'}}/>
           <Stack.Screen name="read" options={{animation:'fade'}} />
           <Stack.Screen name="shloka/[id]" options={{animation:'fade'}}/>
         </Stack>

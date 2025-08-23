@@ -240,11 +240,12 @@ const styles = StyleSheet.create({
   },
   headerIcon: { color: '##545454', fontSize: 22, fontWeight: '700' },
   headerTitle: { 
+    fontFamily:"SourceSerifPro",
+
+    fontSize: 23,
+fontStyle: 'italic',
     color: '#545454',
-    fontSize: 24, 
-    fontWeight: '600' , 
-    fontFamily:"SourceSerifPro", 
-    fontStyle:"normal",
+    fontWeight:600,
     // backgroundColor:"red",
     paddingVertical:20,
     marginVertical:10

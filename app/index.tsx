@@ -8,6 +8,8 @@ import Animated, {
   withSpring,
   Layout,
   LinearTransition,
+  interpolateColor,
+  interpolate,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useKriya } from '../lib/store';
@@ -16,28 +18,44 @@ import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Circle, G, Path } from 'react-native-svg';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
 function Checkbox({ completed }: { completed: boolean }) {
-  // You can tweak these values to change the animation
-  const springConfig = { stiffness: 1200, damping: 35, mass: 0.8};
+  const progress = useSharedValue(completed ? 1 : 0);
+
+  useEffect(() => {
+    progress.value = withSpring(completed ? 1 : 0, {
+      stiffness: 600,
+      damping: 25,
+      mass: 1,
+    });
+  }, [completed]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      backgroundColor: withSpring(completed ? '#AADBA3' : 'white', springConfig),
-      borderColor: withSpring(completed ? '#AADBA3' : '#e2e8f0', springConfig),
+      backgroundColor: interpolateColor(
+        progress.value,
+        [0, 1],
+        ['white', '#AADBA3']
+      ),
+      borderColor: interpolateColor(
+        progress.value,
+        [0, 1],
+        ['#e2e8f0', '#AADBA3']
+      ),
     };
   });
 
   const checkmarkStyle = useAnimatedStyle(() => {
+    // Only show checkmark when progress is > 0.7 (background is mostly filled)
+    const checkOpacity = interpolate(progress.value, [0, 0.7, 1], [0, 0, 1]);
+    const checkScale = interpolate(progress.value,[0, 0.7, 0.9, 1], [0, 0, 1.3, 1]);
+    
     return {
-      transform: [{ scale: withSpring(completed ? 1 : 0, springConfig) }],
-      opacity: withSpring(completed ? 1 : 0, { 
-        ...springConfig, 
-        // Add a small delay for the checkmark to appear after background
-        ...(completed ? { delay: 50 } : {})
-      }),
+      opacity: checkOpacity,
+      transform: [{ scale: checkScale }],
     };
   });
 
@@ -52,6 +70,54 @@ function Checkbox({ completed }: { completed: boolean }) {
     </Animated.View>
   );
 }
+
+// Add this Mandala component after your imports
+const Mandala = ({ size = 200, opacity = 0.1 }: { size?: number; opacity?: number }) => (
+  <Svg width={size} height={size} viewBox="0 0 200 200" style={{ position: 'absolute' }}>
+    <G transform="translate(100,100)">
+      {/* Outer petals */}
+      <G opacity={opacity}>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Path
+            key={`outer-${i}`}
+            d="M0,-60 Q20,-40 0,-20 Q-20,-40 0,-60"
+            fill="#0044ffff"
+            transform={`rotate(${i * 45})`}
+          />
+        ))}
+      </G>
+      
+      {/* Middle ring */}
+      <G opacity={opacity * 0.8}>
+        {Array.from({ length: 12 }).map((_, i) => (
+          <Circle
+            key={`middle-${i}`}
+            cx={Math.cos((i * 30) * Math.PI / 180) * 35}
+            cy={Math.sin((i * 30) * Math.PI / 180) * 35}
+            r="3"
+            fill="#7b00ffff"
+          />
+        ))}
+      </G>
+      
+      {/* Inner petals */}
+      <G opacity={opacity * 0.6}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Path
+            key={`inner-${i}`}
+            d="M0,-25 Q10,-15 0,-5 Q-10,-15 0,-25"
+            fill="#5c10ffff"
+            transform={`rotate(${i * 60})`}
+          />
+        ))}
+      </G>
+      
+      {/* Center circle */}
+      <Circle cx="0" cy="0" r="8" fill="#3305ffff" opacity={opacity * 0.5} />
+      <Circle cx="0" cy="0" r="4" fill="#21f4ffff" opacity={opacity * 0.3} />
+    </G>
+  </Svg>
+);
 
 export default function Home() {
   const ready     = useKriya(s => s.ready);
@@ -149,6 +215,11 @@ export default function Home() {
         {/* Shloka Card */}
         
              <View style={styles.card}>
+                    {/* Add the mandala background */}
+                    {/* <View style={styles.mandalaContainer}>
+                      <Mandala size={250} opacity={0.08} />
+                    </View>
+                     */}
                     <View style={styles.headerSection}>
                       <Text style={styles.meta}>
                         Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
@@ -235,7 +306,6 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 13,
     paddingBottom: 10,
-    // backgroundColor:'grey'
 
 
 
@@ -421,5 +491,16 @@ fontStyle: 'italic',
     borderRadius: 16, // Half of width/height for perfect circle
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  mandalaContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    borderRadius: 16,
   },
 });

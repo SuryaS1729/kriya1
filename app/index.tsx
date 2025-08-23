@@ -61,12 +61,14 @@ function Checkbox({ completed }: { completed: boolean }) {
 
   return (
     <Animated.View style={[styles.checkbox, animatedStyle]}>
-      <AnimatedFeather
-        name="check"
-        size={14}
-        color="white"
-        style={checkmarkStyle}
-      />
+      {completed && (
+        <AnimatedFeather
+          name="check"
+          size={14}
+          color="white"
+          style={checkmarkStyle}
+        />
+      )}
     </Animated.View>
   );
 }
@@ -149,12 +151,11 @@ export default function Home() {
     setShowTranslation(!showTranslation);
   };
 
-  // Add this sorted tasks computation
+  // Fix the sorted tasks computation
   const sortedTasks = useMemo(() => {
-    return [...tasks].sort((a, b) => {
-      if (a.completed === b.completed) return 0;
-      return a.completed ? 1 : -1;
-    });
+    const incomplete = tasks.filter(t => !t.completed).reverse(); // Newest incomplete first
+    const completed = tasks.filter(t => t.completed).reverse();   // Newest completed first
+    return [...incomplete, ...completed]; // Incomplete tasks first, then completed
   }, [tasks]);
 
   const renderItem = ({ item }: { item: Task }) => (

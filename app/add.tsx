@@ -44,7 +44,7 @@ export default function Add() {
 
   // Calculate dynamic placeholder text
   const placeholderText = useMemo(() => {
-    return tasksToday.length > 6 ? "Easy there, overachiever 😅" : "Add a task…";
+    return tasksToday.length > 6 ? "Easy there, overachiever 😅" : "Fulfill your dharma today... Parth!";
   }, [tasksToday.length]);
 
   useEffect(() => {
@@ -106,7 +106,15 @@ export default function Add() {
       style={styles.row}
       android_ripple={{ color: '#eee' }}
     >
-      <View style={[styles.checkbox, item.completed ? styles.checkboxOn : styles.checkboxOff]} />
+      <View style={[styles.checkbox, item.completed ? styles.checkboxOn : styles.checkboxOff]}>
+        {item.completed && (
+          <Feather
+            name="check"
+            size={14}
+            color="white"
+          />
+        )}
+      </View>
       <Text style={[styles.title, item.completed && styles.done]} numberOfLines={2}>
         {item.title}
       </Text>
@@ -154,7 +162,7 @@ export default function Add() {
             <View style={styles.addTaskIcon}>
               <AnimatedFeather 
                 name="arrow-right" 
-                size={20} 
+                size={22} 
                 color="#606060ff" 
                 style={animatedIconStyle}
               />
@@ -184,7 +192,13 @@ const styles = StyleSheet.create({
   subhead: { color: '#64748b' },
 
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, gap: 12, paddingHorizontal: 16 },
-  checkbox: { width: 18, height: 18, borderRadius: 4 },
+  checkbox: { 
+    width: 18, 
+    height: 18, 
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   checkboxOn: { backgroundColor: '#AADBA3' },
   checkboxOff: { backgroundColor: '#cbd5e1' },
   title: { flex: 1, fontSize: 16, color: '#111827' },
@@ -230,7 +244,7 @@ const styles = StyleSheet.create({
     width: 40, // Make it bigger than checkbox (20px)
     height: 40, // Make it bigger than checkbox (20px)
     backgroundColor: '#E6E6E6',
-    borderRadius: 20, // Half of width/height for perfect circle
+    borderRadius: 30, // Half of width/height for perfect circle
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -222,6 +222,7 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#e5e7eb', // Change from red to gray
     gap:8,
+    marginBottom:0
 
   
   },

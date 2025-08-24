@@ -73,54 +73,6 @@ function Checkbox({ completed }: { completed: boolean }) {
   );
 }
 
-// Add this Mandala component after your imports
-const Mandala = ({ size = 200, opacity = 0.1 }: { size?: number; opacity?: number }) => (
-  <Svg width={size} height={size} viewBox="0 0 200 200" style={{ position: 'absolute' }}>
-    <G transform="translate(100,100)">
-      {/* Outer petals */}
-      <G opacity={opacity}>
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Path
-            key={`outer-${i}`}
-            d="M0,-60 Q20,-40 0,-20 Q-20,-40 0,-60"
-            fill="#0044ffff"
-            transform={`rotate(${i * 45})`}
-          />
-        ))}
-      </G>
-      
-      {/* Middle ring */}
-      <G opacity={opacity * 0.8}>
-        {Array.from({ length: 12 }).map((_, i) => (
-          <Circle
-            key={`middle-${i}`}
-            cx={Math.cos((i * 30) * Math.PI / 180) * 35}
-            cy={Math.sin((i * 30) * Math.PI / 180) * 35}
-            r="3"
-            fill="#7b00ffff"
-          />
-        ))}
-      </G>
-      
-      {/* Inner petals */}
-      <G opacity={opacity * 0.6}>
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Path
-            key={`inner-${i}`}
-            d="M0,-25 Q10,-15 0,-5 Q-10,-15 0,-25"
-            fill="#5c10ffff"
-            transform={`rotate(${i * 60})`}
-          />
-        ))}
-      </G>
-      
-      {/* Center circle */}
-      <Circle cx="0" cy="0" r="8" fill="#3305ffff" opacity={opacity * 0.5} />
-      <Circle cx="0" cy="0" r="4" fill="#21f4ffff" opacity={opacity * 0.3} />
-    </G>
-  </Svg>
-);
-
 export default function Home() {
   const ready     = useKriya(s => s.ready);
   const tasks     = useKriya(s => s.tasksToday);
@@ -261,9 +213,14 @@ export default function Home() {
       <View style={[styles.tasksContainer, { paddingBottom: insets.bottom }]}>
         <View style={styles.tasksHeader}>
           <Text style={styles.h1}>Today's Tasks</Text>
-          <Link href="/history" asChild>
+          {/* <Link href="/history" asChild>
           <Pressable><Text style={{ color: '#7493d7ff' }}>Yesterday & History →</Text></Pressable>
-        </Link>
+        </Link> */}
+         <Link href="/history" asChild>
+            <Pressable style={styles.profileButton}>
+              <Feather name="user" size={20} color="#7493d7ff" />
+            </Pressable>
+          </Link>
         </View>
         
         
@@ -370,6 +327,16 @@ fontStyle: 'italic',
 
     // backgroundColor: 'red'
   },
+   profileButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#f8fafc',
+    borderWidth: 0,
+    borderColor: '#e2e8f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   sa: { 
   
     flex: 1,
@@ -425,7 +392,7 @@ fontStyle: 'italic',
     alignItems: 'center',
     paddingVertical: 16,
     paddingHorizontal: 4,
-    borderBottomWidth: 0.7,
+    borderBottomWidth: 0.6,
     borderBottomColor: '#f1f5f9',
   },
   title: { 

@@ -11,6 +11,7 @@ import { getShlokaAt, getTotalShlokas } from './shloka';
 import { ensureProgressForToday, countCompletedSince } from './progress';
 import { isDbReady } from './dbReady';
 import type { ShlokaRow } from './shloka';
+import { persist } from 'zustand/middleware';
 
 type State = {
   ready: boolean;
@@ -31,84 +32,100 @@ type State = {
   todayKey: () => number;
   listHistoryDays: (limit?: number) => { day_key: number; count: number }[];
   getTasksForDay: (dayKey: number) => Task[];
+
+  // dark mode
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
 };
 
-export const useKriya = create<State>((set, get) => ({
-  ready: false,
-  tasksToday: [],
+export const useKriya = create<State>()(
+  persist(
+    (set, get) => ({
+      ready: false,
+      tasksToday: [],
+      isDarkMode: false, // Default to light mode
 
-  init: () => {
-    if (!isDbReady()) {
-      // _layout will call init() again after DB is ready
-      return;
+      init: () => {
+        if (!isDbReady()) {
+          // _layout will call init() again after DB is ready
+          return;
+        }
+        try {
+          const total = getTotalShlokas();
+          if (total > 0) ensureProgressForToday(total);
+          set({ tasksToday: getTasksForDay(get().todayKey()) });
+          set({ ready: true });
+        } catch (e) {
+          console.warn('Init failed:', e);
+          set({ ready: true, tasksToday: [] });
+        }
+      },
+
+      refresh: () => set({ tasksToday: getTasksForDay(get().todayKey()) }),
+
+      addTask: (title) => {
+        insertTask(title);
+        set({ tasksToday: getTasksForDay(get().todayKey()) });
+      },
+
+      toggleTask: (id) => {
+        const t = get().tasksToday.find(x => x.id === id);
+        if (!t) return;
+        const next = !t.completed;
+        setTaskCompleted(id, next, null);
+        set(state => ({
+          tasksToday: state.tasksToday.map(x =>
+            x.id === id
+              ? { ...x, completed: next, completed_at: next ? Date.now() : null }
+              : x
+          ),
+        }));
+      },
+
+      removeTask: (id) => {
+        dbRemoveTask(id);
+        set(state => ({ tasksToday: state.tasksToday.filter(x => x.id !== id) }));
+      },
+
+      currentShloka: () => {
+        // Never query DB if not ready
+        if (!isDbReady()) {
+          return {
+            index: 0,
+            data: null, // <- no placeholder with id
+          };
+        }
+        try {
+          const total = getTotalShlokas();
+          if (total === 0) {
+            return { index: 0, data: null };
+          }
+          const prog = ensureProgressForToday(total);
+          const offset = countCompletedSince(prog.day_start_ms);
+          const idx = (prog.base_index + offset) % total;
+          return { index: idx, data: getShlokaAt(idx) };
+        } catch (e) {
+          console.warn('currentShloka failed:', e);
+          return { index: 0, data: null };
+        }
+      },
+
+      todayKey: () => {
+        const d = new Date();
+        d.setHours(0,0,0,0);
+        return d.getTime();
+      },
+
+      listHistoryDays: (limit = 30) => getDistinctPastDays(limit),
+
+      getTasksForDay: (dayKey: number) => getTasksForDay(dayKey),
+
+      toggleDarkMode: () => {
+        set((state) => ({ isDarkMode: !state.isDarkMode }));
+      },
+    }),
+    {
+      name: 'kriya-storage',
     }
-    try {
-      const total = getTotalShlokas();
-      if (total > 0) ensureProgressForToday(total);
-      set({ tasksToday: getTasksForDay(get().todayKey()) });
-      set({ ready: true });
-    } catch (e) {
-      console.warn('Init failed:', e);
-      set({ ready: true, tasksToday: [] });
-    }
-  },
-
-  refresh: () => set({ tasksToday: getTasksForDay(get().todayKey()) }),
-
-  addTask: (title) => {
-    insertTask(title);
-    set({ tasksToday: getTasksForDay(get().todayKey()) });
-  },
-
-  toggleTask: (id) => {
-    const t = get().tasksToday.find(x => x.id === id);
-    if (!t) return;
-    const next = !t.completed;
-    setTaskCompleted(id, next, null);
-    set(state => ({
-      tasksToday: state.tasksToday.map(x =>
-        x.id === id
-          ? { ...x, completed: next, completed_at: next ? Date.now() : null }
-          : x
-      ),
-    }));
-  },
-
-  removeTask: (id) => {
-    dbRemoveTask(id);
-    set(state => ({ tasksToday: state.tasksToday.filter(x => x.id !== id) }));
-  },
-
-  currentShloka: () => {
-    // Never query DB if not ready
-    if (!isDbReady()) {
-      return {
-        index: 0,
-        data: null, // <- no placeholder with id
-      };
-    }
-    try {
-      const total = getTotalShlokas();
-      if (total === 0) {
-        return { index: 0, data: null };
-      }
-      const prog = ensureProgressForToday(total);
-      const offset = countCompletedSince(prog.day_start_ms);
-      const idx = (prog.base_index + offset) % total;
-      return { index: idx, data: getShlokaAt(idx) };
-    } catch (e) {
-      console.warn('currentShloka failed:', e);
-      return { index: 0, data: null };
-    }
-  },
-
-  todayKey: () => {
-    const d = new Date();
-    d.setHours(0,0,0,0);
-    return d.getTime();
-  },
-
-  listHistoryDays: (limit = 30) => getDistinctPastDays(limit),
-
-  getTasksForDay: (dayKey: number) => getTasksForDay(dayKey),
-}));
+  )
+);

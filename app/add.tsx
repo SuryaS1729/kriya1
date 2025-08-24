@@ -44,7 +44,7 @@ export default function Add() {
 
   // Calculate dynamic placeholder text
   const placeholderText = useMemo(() => {
-    return tasksToday.length > 6 ? "Easy there, overachiever 😅" : "Fulfill your dharma today... Parth!";
+    return tasksToday.length > 6 ? "Easy there, overachiever 😅" : "Fulfill your dharma today 🚀";
   }, [tasksToday.length]);
 
   useEffect(() => {

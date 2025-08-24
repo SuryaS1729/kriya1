@@ -5,7 +5,7 @@ import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, Link } from 'expo-router';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { Feather } from '@expo/vector-icons';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -23,11 +23,10 @@ function getDateKey(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
-
-
 // Activity Heatmap Component
 function ActivityHeatmap() {
   const getForDay = useKriya(s => s.getTasksForDay);
+  const isDarkMode = useKriya(s => s.isDarkMode);
   
   const activityData = useMemo(() => {
     const today = new Date();
@@ -91,8 +90,13 @@ function ActivityHeatmap() {
   }, [activityData]);
 
   const getIntensityColor = (intensity: number) => {
-    const colors = ['#f1f5f9', '#c7d2fe', '#818cf8', '#4338ca', '#312e81'];
-    return colors[intensity] || colors[0];
+    if (isDarkMode) {
+      const colors = ['#374151', '#4c1d95', '#6d28d9', '#7c3aed', '#8b5cf6'];
+      return colors[intensity] || colors[0];
+    } else {
+      const colors = ['#f1f5f9', '#c7d2fe', '#818cf8', '#4338ca', '#312e81'];
+      return colors[intensity] || colors[0];
+    }
   };
 
   const showDayDetails = (day: any) => {
@@ -123,13 +127,15 @@ function ActivityHeatmap() {
     return streak;
   }, [activityData]);
 
+  const themeStyles = isDarkMode ? darkHeatmapStyles : lightHeatmapStyles;
+
   return (
-    <View style={styles.heatmapContainer}>
+    <View style={[styles.heatmapContainer, themeStyles.heatmapContainer]}>
       <View style={styles.heatmapHeader}>
-        <Text style={styles.heatmapTitle}>Your Journey</Text>
+        <Text style={[styles.heatmapTitle, themeStyles.heatmapTitle]}>Your Journey</Text>
         <View style={styles.statsRow}>
-          <Text style={styles.statText}>{totalCompleted} tasks completed</Text>
-          <Text style={styles.statText}>{currentStreak} day streak</Text>
+          <Text style={[styles.statText, themeStyles.statText]}>{totalCompleted} tasks completed</Text>
+          <Text style={[styles.statText, themeStyles.statText]}>{currentStreak} day streak</Text>
         </View>
       </View>
       
@@ -137,7 +143,7 @@ function ActivityHeatmap() {
         <View style={styles.heatmap}>
           <View style={styles.weekLabels}>
             {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-              <Text key={i} style={styles.weekLabel}>{day}</Text>
+              <Text key={i} style={[styles.weekLabel, themeStyles.weekLabel]}>{day}</Text>
             ))}
           </View>
           
@@ -162,14 +168,14 @@ function ActivityHeatmap() {
       </ScrollView>
       
       <View style={styles.legend}>
-        <Text style={styles.legendText}>Less</Text>
+        <Text style={[styles.legendText, themeStyles.legendText]}>Less</Text>
         {[0, 1, 2, 3, 4].map(intensity => (
           <View
             key={intensity}
             style={[styles.legendSquare, { backgroundColor: getIntensityColor(intensity) }]}
           />
         ))}
-        <Text style={styles.legendText}>More</Text>
+        <Text style={[styles.legendText, themeStyles.legendText]}>More</Text>
       </View>
     </View>
   );
@@ -178,6 +184,8 @@ function ActivityHeatmap() {
 export default function History() {
   const listDays = useKriya(s => s.listHistoryDays);
   const getForDay = useKriya(s => s.getTasksForDay);
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  const toggleDarkMode = useKriya(s => s.toggleDarkMode);
 
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
 
@@ -186,38 +194,43 @@ export default function History() {
   const renderDay = ({ item }: { item: { day_key: number; count: number } }) => {
     const isOpen = !!expanded[item.day_key];
     const tasks: Task[] = isOpen ? getForDay(item.day_key) : [];
+    const themeStyles = isDarkMode ? darkStyles : lightStyles;
 
     return (
-      <View style={styles.section}>
+      <View style={[styles.section, themeStyles.section]}>
         <Pressable onPress={() => setExpanded(s => ({ ...s, [item.day_key]: !s[item.day_key] }))} style={styles.header}>
-          <Text style={styles.headerText}>{formatDay(item.day_key)}</Text>
-          <Text style={styles.headerMeta}>{item.count} task{item.count !== 1 ? 's' : ''} • {isOpen ? 'Hide' : 'Show'}</Text>
+          <Text style={[styles.headerText, themeStyles.headerText]}>{formatDay(item.day_key)}</Text>
+          <Text style={[styles.headerMeta, themeStyles.headerMeta]}>{item.count} task{item.count !== 1 ? 's' : ''} • {isOpen ? 'Hide' : 'Show'}</Text>
         </Pressable>
 
         {isOpen && tasks.map(t => (
           <View key={t.id} style={styles.row}>
             <View style={[styles.dot, t.completed ? styles.dotOn : styles.dotOff]} />
-            <Text style={[styles.title, t.completed && styles.done]} numberOfLines={2}>{t.title}</Text>
+            <Text style={[styles.title, t.completed && styles.done, themeStyles.title]} numberOfLines={2}>{t.title}</Text>
           </View>
         ))}
       </View>
     );
   };
 
+  const themeStyles = isDarkMode ? darkStyles : lightStyles;
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, themeStyles.container]}>
       <View style={styles.headerRow}>
         <Pressable onPress={() => router.back()} hitSlop={16}>
-          <Text style={styles.headerIcon}>✕</Text>
+          <Text style={[styles.headerIcon, themeStyles.headerIcon]}>✕</Text>
         </Pressable>
-        <Link href="/read" asChild>
-          <Pressable hitSlop={16}>
-            <FontAwesome5 name="scroll" size={20} color="white" />
-          </Pressable>
-        </Link>
+        <Pressable onPress={toggleDarkMode} hitSlop={16} style={[styles.darkModeToggle, themeStyles.darkModeToggle]}>
+          <Feather 
+            name={isDarkMode ? "sun" : "moon"} 
+            size={20} 
+            color={isDarkMode ? "#fbbf24" : "#6b7280"} 
+          />
+        </Pressable>
       </View>
       
-      <Text style={styles.h1}>History</Text>
+      <Text style={[styles.h1, themeStyles.h1]}>Hey There !</Text>
       
       <ActivityHeatmap />
 
@@ -232,17 +245,17 @@ export default function History() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'white', paddingHorizontal: 16 },
+  container: { flex: 1, paddingHorizontal: 16 },
   h1: { fontSize: 22, fontWeight: '700', marginVertical: 12 },
-  section: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#e5e7eb', paddingVertical: 8 },
+  section: { borderBottomWidth: StyleSheet.hairlineWidth, paddingVertical: 8 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
-  headerText: { fontSize: 16, fontWeight: '600', color: '#0f172a' },
-  headerMeta: { fontSize: 12, color: '#64748b' },
+  headerText: { fontSize: 16, fontWeight: '600' },
+  headerMeta: { fontSize: 12 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 },
   dot: { width: 8, height: 8, borderRadius: 4 },
   dotOn: { backgroundColor: '#22c55e' },
   dotOff: { backgroundColor: '#cbd5e1' },
-  title: { flex: 1, fontSize: 16, color: '#111827' },
+  title: { flex: 1, fontSize: 16 },
   done: { opacity: 0.6, textDecorationLine: 'line-through' },
   headerRow: {
     flexDirection: 'row',
@@ -251,11 +264,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginTop: 20,
   },
-  headerIcon: { color: '#545454', fontSize: 22, fontWeight: '700' },
+  headerIcon: { fontSize: 22, fontWeight: '700' },
+  darkModeToggle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   
   // Heatmap styles
   heatmapContainer: {
-    backgroundColor: '#f8fafc',
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
@@ -266,7 +285,6 @@ const styles = StyleSheet.create({
   heatmapTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1e293b',
     marginBottom: 4,
   },
   statsRow: {
@@ -275,7 +293,6 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 12,
-    color: '#64748b',
   },
   heatmapScroll: {
     marginBottom: 12,
@@ -290,7 +307,6 @@ const styles = StyleSheet.create({
   },
   weekLabel: {
     fontSize: 9,
-    color: '#64748b',
     textAlign: 'center',
     height: 12,
     lineHeight: 12,
@@ -316,7 +332,6 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 9,
-    color: '#64748b',
     marginHorizontal: 2,
   },
   legendSquare: {
@@ -324,4 +339,45 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 1,
   },
+});
+
+// Light theme styles
+const lightStyles = StyleSheet.create({
+  container: { backgroundColor: 'white' },
+  h1: { color: '#111827' },
+  headerIcon: { color: '#545454' },
+  darkModeToggle: { backgroundColor: '#f1f5f9' },
+  section: { borderBottomColor: '#e5e7eb' },
+  headerText: { color: '#0f172a' },
+  headerMeta: { color: '#64748b' },
+  title: { color: '#111827' },
+});
+
+// Dark theme styles
+const darkStyles = StyleSheet.create({
+  container: { backgroundColor: '#1f2937' },
+  h1: { color: '#f9fafb' },
+  headerIcon: { color: '#d1d5db' },
+  darkModeToggle: { backgroundColor: '#374151' },
+  section: { borderBottomColor: '#374151' },
+  headerText: { color: '#f9fafb' },
+  headerMeta: { color: '#9ca3af' },
+  title: { color: '#f9fafb' },
+});
+
+// Heatmap theme styles
+const lightHeatmapStyles = StyleSheet.create({
+  heatmapContainer: { backgroundColor: '#f8fafc' },
+  heatmapTitle: { color: '#1e293b' },
+  statText: { color: '#64748b' },
+  weekLabel: { color: '#64748b' },
+  legendText: { color: '#64748b' },
+});
+
+const darkHeatmapStyles = StyleSheet.create({
+  heatmapContainer: { backgroundColor: '#374151' },
+  heatmapTitle: { color: '#f9fafb' },
+  statText: { color: '#d1d5db' },
+  weekLabel: { color: '#d1d5db' },
+  legendText: { color: '#d1d5db' },
 });

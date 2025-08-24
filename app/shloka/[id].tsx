@@ -140,12 +140,11 @@ export default function ShlokaDetail() {
           <Pressable onPress={() => router.back()} hitSlop={16}>
             <Text style={styles.headerIcon}>✕</Text>
           </Pressable>
-          <Link href="/read" asChild>
-            <Pressable hitSlop={16}>
-            <FontAwesome5 name="scroll" size={20} color="white" />
-
-            </Pressable>
-          </Link>
+         <Link href={`/share?shlokaId=${currentIndex}`} asChild>
+  <Pressable hitSlop={16}>
+    <FontAwesome5 name="share" size={20} color="#696969ff" />
+  </Pressable>
+</Link>
         </View>
 
         {/* Body states */}
@@ -238,7 +237,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 20,
   },
-  headerIcon: { color: '##545454', fontSize: 22, fontWeight: '700' },
+  headerIcon: { color: '#545454', fontSize: 22, fontWeight: '700' },
   headerTitle: { 
     fontFamily:"SourceSerifPro",
 

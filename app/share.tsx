@@ -6,7 +6,8 @@ import {
   Pressable, 
   Dimensions,
   Alert,
-  Platform
+  Platform,
+  ScrollView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,14 +20,37 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getShlokaAt, type ShlokaRow } from '../lib/shloka';
 
-const { width: screenWidth } = Dimensions.get('window');
-const cardWidth = screenWidth - 40;
-const cardHeight = cardWidth * 1.25;
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
+// Platform configurations
+const PLATFORMS = {
+  story: {
+    name: 'Instagram Story',
+    icon: 'instagram',
+    ratio: 9/16,
+    description: '9:16'
+  },
+  post: {
+    name: 'Instagram Post',
+    icon: 'instagram',
+    ratio: 1,
+    description: '1:1'
+  },
+  twitter: {
+    name: 'Twitter/X Post',
+    icon: 'twitter',
+    ratio: 16/9,
+    description: '16:9'
+  }
+} as const;
+
+type PlatformType = keyof typeof PLATFORMS;
 
 export default function SharePage() {
   const params = useGlobalSearchParams();
   const [shloka, setShloka] = useState<ShlokaRow | null>(null);
   const [gradientIndex, setGradientIndex] = useState(0);
+  const [platform, setPlatform] = useState<PlatformType>('story');
   const cardRef = useRef<ViewShot>(null);
 
   const gradients = [
@@ -39,6 +63,23 @@ export default function SharePage() {
     ['#ff9a9e', '#fecfef'] as const,
     ['#ffecd2', '#fcb69f'] as const,
   ] as const;
+
+  // Calculate card dimensions to fit in the top half
+  const availableHeight = screenHeight * 0.4; // Leave some margin
+  const availableWidth = screenWidth * 0.8;
+  
+  const cardConfig = PLATFORMS[platform];
+  let cardWidth, cardHeight;
+  
+  if (cardConfig.ratio > 1) {
+    // Landscape (Twitter)
+    cardWidth = availableWidth;
+    cardHeight = cardWidth / cardConfig.ratio;
+  } else {
+    // Portrait or Square
+    cardHeight = availableHeight;
+    cardWidth = cardHeight * cardConfig.ratio;
+  }
 
   useEffect(() => {
     const shlokaId = params.shlokaId as string;
@@ -57,7 +98,7 @@ export default function SharePage() {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, {
           mimeType: 'image/png',
-          dialogTitle: 'Share this beautiful shloka',
+          dialogTitle: `Share to ${cardConfig.name}`,
         });
       } else {
         Alert.alert('Sharing not available', 'Sharing is not supported on this device');
@@ -82,12 +123,27 @@ export default function SharePage() {
       const asset = await MediaLibrary.createAssetAsync(uri);
       await MediaLibrary.createAlbumAsync('Kriya', asset, false);
       
-      Alert.alert('Success!', 'Beautiful shloka card saved to your gallery ✨');
+      Alert.alert('Success!', `${cardConfig.name} card saved to gallery ✨`);
     } catch (error) {
       console.error('Save error:', error);
       Alert.alert('Error', 'Failed to save card to gallery');
     }
   };
+
+  // Dynamic font sizes based on card size
+  const getFontSizes = () => {
+    const scale = Math.min(cardWidth, cardHeight) / 300;
+    return {
+      om: Math.max(24, 40 * scale),
+      chapter: Math.max(10, 14 * scale),
+      sanskrit: Math.max(12, 18 * scale),
+      translation: Math.max(11, 16 * scale),
+      footer: Math.max(8, 12 * scale),
+      app: Math.max(10, 16 * scale)
+    };
+  };
+
+  const fontSizes = getFontSizes();
 
   if (!shloka) {
     return (
@@ -117,81 +173,153 @@ export default function SharePage() {
         <View style={{ width: 24 }} />
       </View>
 
-      {/* Card Preview */}
-      <View style={styles.cardContainer}>
-        <ViewShot 
-          ref={cardRef} 
-          options={{ 
-            format: "png", 
-            quality: 0.9,
-            result: 'tmpfile'
-          }}
-          style={styles.card}
-        >
-          <LinearGradient
-            colors={gradients[gradientIndex]}
-            style={styles.cardGradient}
+      {/* Fixed 50:50 Layout */}
+      <View style={styles.mainContent}>
+        {/* Top Half - Card Preview (Fixed) */}
+        <View style={styles.previewSection}>
+          <ViewShot 
+            ref={cardRef} 
+            options={{ 
+              format: "png", 
+              quality: 0.9,
+              result: 'tmpfile'
+            }}
+            style={[styles.card, { width: cardWidth, height: cardHeight }]}
           >
-            {/* Decorative elements */}
-            <View style={styles.decorativeTop}>
-              <Text style={styles.om}>ॐ</Text>
-            </View>
-
-            {/* Chapter and verse */}
-            <Text style={styles.chapterText}>
-              Adhyaya {shloka.chapter_number} • Shloka {shloka.verse_number}
-            </Text>
-
-            {/* Sanskrit text */}
-            <Text style={styles.sanskritText}>{shloka.text}</Text>
-
-            {/* Translation */}
-            <Text style={styles.translationText}>
-              "{shloka.translation_2 || shloka.description}"
-            </Text>
-
-            {/* Footer */}
-            <View style={styles.cardFooter}>
-              <Text style={styles.footerText}>Bhagavad Gita</Text>
-              <Text style={styles.appName}>Kriya</Text>
-            </View>
-          </LinearGradient>
-        </ViewShot>
-      </View>
-
-      {/* Color Picker */}
-      <View style={styles.colorPicker}>
-        <Text style={styles.colorPickerTitle}>Choose Background</Text>
-        <View style={styles.colorRow}>
-          {gradients.map((gradient, index) => (
-            <Pressable
-              key={index}
-              onPress={() => setGradientIndex(index)}
-              style={[
-                styles.colorOption,
-                gradientIndex === index && styles.colorOptionSelected
-              ]}
+            <LinearGradient
+              colors={gradients[gradientIndex]}
+              style={styles.cardGradient}
             >
-              <LinearGradient
-                colors={gradient}
-                style={styles.colorGradient}
-              />
-            </Pressable>
-          ))}
-        </View>
-      </View>
+              {platform === 'twitter' ? (
+                // Horizontal layout for Twitter
+                <View style={styles.twitterLayout}>
+                  <View style={styles.twitterLeft}>
+                    <Text style={[styles.om, { fontSize: fontSizes.om }]}>ॐ</Text>
+                    <Text style={[styles.chapterText, { fontSize: fontSizes.chapter }]}>
+                      Adhyaya {shloka.chapter_number} • Shloka {shloka.verse_number}
+                    </Text>
+                  </View>
+                  <View style={styles.twitterRight}>
+                    <Text style={[styles.sanskritText, { fontSize: fontSizes.sanskrit }]}>
+                      {shloka.text}
+                    </Text>
+                    <Text style={[styles.translationText, { fontSize: fontSizes.translation }]}>
+                      "{shloka.translation_2 || shloka.description}"
+                    </Text>
+                    <View style={styles.cardFooter}>
+                      <Text style={[styles.footerText, { fontSize: fontSizes.footer }]}>
+                        Bhagavad Gita
+                      </Text>
+                      <Text style={[styles.appName, { fontSize: fontSizes.app }]}>Kriya</Text>
+                    </View>
+                  </View>
+                </View>
+              ) : (
+                // Vertical layout for Instagram
+                <>
+                  <View style={styles.decorativeTop}>
+                    <Text style={[styles.om, { fontSize: fontSizes.om }]}>ॐ</Text>
+                  </View>
 
-      {/* Action Buttons */}
-      <View style={styles.actions}>
-        <Pressable style={styles.actionBtn} onPress={saveCard}>
-          <FontAwesome5 name="download" size={18} color="white" />
-          <Text style={styles.actionText}>Save</Text>
-        </Pressable>
-        
-        <Pressable style={[styles.actionBtn, styles.shareBtn]} onPress={shareCard}>
-          <FontAwesome5 name="share" size={18} color="white" />
-          <Text style={styles.actionText}>Share</Text>
-        </Pressable>
+                  <Text style={[styles.chapterText, { fontSize: fontSizes.chapter }]}>
+                    Adhyaya {shloka.chapter_number} • Shloka {shloka.verse_number}
+                  </Text>
+
+                  <Text style={[styles.sanskritText, { fontSize: fontSizes.sanskrit }]}>
+                    {shloka.text}
+                  </Text>
+
+                  <Text style={[styles.translationText, { fontSize: fontSizes.translation }]}>
+                    "{shloka.translation_2 || shloka.description}"
+                  </Text>
+
+                  <View style={styles.cardFooter}>
+                    <Text style={[styles.footerText, { fontSize: fontSizes.footer }]}>
+                      Bhagavad Gita
+                    </Text>
+                    <Text style={[styles.appName, { fontSize: fontSizes.app }]}>Kriya</Text>
+                  </View>
+                </>
+              )}
+            </LinearGradient>
+          </ViewShot>
+        </View>
+
+        {/* Bottom Half - Options (Scrollable) */}
+        <View style={styles.optionsSection}>
+          <ScrollView 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.optionsContent}
+          >
+            {/* Platform Selector */}
+            <View style={styles.optionGroup}>
+              <Text style={styles.sectionTitle}>Choose Platform</Text>
+              <View style={styles.platformRow}>
+                {(Object.keys(PLATFORMS) as PlatformType[]).map((platformKey) => {
+                  const config = PLATFORMS[platformKey];
+                  return (
+                    <Pressable
+                      key={platformKey}
+                      onPress={() => setPlatform(platformKey)}
+                      style={[
+                        styles.platformOption,
+                        platform === platformKey && styles.platformOptionSelected
+                      ]}
+                    >
+                      <FontAwesome5 
+                        name={config.icon as any} 
+                        size={18} 
+                        color={platform === platformKey ? '#007AFF' : '#666'} 
+                      />
+                      <Text style={[
+                        styles.platformName,
+                        platform === platformKey && styles.platformNameSelected
+                      ]}>
+                        {config.name}
+                      </Text>
+                      <Text style={styles.platformDesc}>{config.description}</Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* Color Picker */}
+            <View style={styles.optionGroup}>
+              <Text style={styles.sectionTitle}>Choose Background</Text>
+              <View style={styles.colorRow}>
+                {gradients.map((gradient, index) => (
+                  <Pressable
+                    key={index}
+                    onPress={() => setGradientIndex(index)}
+                    style={[
+                      styles.colorOption,
+                      gradientIndex === index && styles.colorOptionSelected
+                    ]}
+                  >
+                    <LinearGradient
+                      colors={gradient}
+                      style={styles.colorGradient}
+                    />
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.actions}>
+              <Pressable style={styles.actionBtn} onPress={saveCard}>
+                <FontAwesome5 name="download" size={18} color="white" />
+                <Text style={styles.actionText}>Save to Gallery</Text>
+              </Pressable>
+              
+              <Pressable style={[styles.actionBtn, styles.shareBtn]} onPress={shareCard}>
+                <FontAwesome5 name="share" size={18} color="white" />
+                <Text style={styles.actionText}>Share Now</Text>
+              </Pressable>
+            </View>
+          </ScrollView>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -220,94 +348,97 @@ const styles = StyleSheet.create({
     marginTop: 100,
     fontSize: 16,
   },
-  cardContainer: {
+  mainContent: {
+    flex: 1,
+  },
+  // Top Half - Fixed Preview
+  previewSection: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 20,
+    backgroundColor: '#1a1a1a',
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
   },
   card: {
-    width: cardWidth,
-    height: cardHeight,
-    borderRadius: 20,
+    borderRadius: 16,
     overflow: 'hidden',
-    elevation: 10,
+    elevation: 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 15,
   },
   cardGradient: {
     flex: 1,
-    padding: 30,
+    padding: 24,
     justifyContent: 'space-between',
   },
-  decorativeTop: {
-    alignItems: 'center',
+  // Bottom Half - Scrollable Options
+  optionsSection: {
+    flex: 1,
+    backgroundColor: '#1a1a1a',
   },
-  om: {
-    fontSize: 40,
-    color: 'rgba(255,255,255,0.8)',
-    fontWeight: 'bold',
+  optionsContent: {
+    paddingVertical: 20,
+    paddingBottom: 40,
   },
-  chapterText: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 14,
-    textAlign: 'center',
-    fontWeight: '500',
-    letterSpacing: 1,
-  },
-  sanskritText: {
-    color: 'white',
-    fontSize: 18,
-    lineHeight: 28,
-    textAlign: 'center',
-    fontFamily: 'SourceSerifPro',
-    fontWeight: '400',
-    marginVertical: 20,
-  },
-  translationText: {
-    color: 'rgba(255,255,255,0.95)',
-    fontSize: 16,
-    lineHeight: 24,
-    textAlign: 'center',
-    fontFamily: 'Alegreya',
-    fontStyle: 'italic',
-    marginVertical: 20,
-  },
-  cardFooter: {
-    alignItems: 'center',
-    gap: 5,
-  },
-  footerText: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  appName: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-  },
-  colorPicker: {
+  optionGroup: {
+    marginBottom: 24,
     paddingHorizontal: 20,
-    marginBottom: 20,
   },
-  colorPickerTitle: {
+  sectionTitle: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 12,
   },
+  // Platform Options
+  platformRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  platformOption: {
+    flex: 1,
+    backgroundColor: '#2a2a2a',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  platformOptionSelected: {
+    borderColor: '#007AFF',
+    backgroundColor: '#1a1a2e',
+  },
+  platformName: {
+    color: '#ccc',
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  platformNameSelected: {
+    color: 'white',
+  },
+  platformDesc: {
+    color: '#666',
+    fontSize: 9,
+    marginTop: 1,
+    textAlign: 'center',
+  },
+  // Color Options
   colorRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
   },
   colorOption: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 2,
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+    borderWidth: 3,
     borderColor: 'transparent',
   },
   colorOptionSelected: {
@@ -315,13 +446,72 @@ const styles = StyleSheet.create({
   },
   colorGradient: {
     flex: 1,
-    borderRadius: 18,
+    borderRadius: 19.5,
   },
+  // Twitter Layout
+  twitterLayout: {
+    flexDirection: 'row',
+    flex: 1,
+    gap: 16,
+  },
+  twitterLeft: {
+    flex: 0.3,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  twitterRight: {
+    flex: 0.7,
+    justifyContent: 'center',
+  },
+  // Card Content
+  decorativeTop: {
+    alignItems: 'center',
+  },
+  om: {
+    color: 'rgba(255,255,255,0.8)',
+    fontWeight: 'bold',
+  },
+  chapterText: {
+    color: 'rgba(255,255,255,0.9)',
+    textAlign: 'center',
+    fontWeight: '500',
+    letterSpacing: 1,
+  },
+  sanskritText: {
+    color: 'white',
+    lineHeight: 1.6,
+    textAlign: 'center',
+    fontFamily: 'SourceSerifPro',
+    fontWeight: '400',
+    marginVertical: 12,
+  },
+  translationText: {
+    color: 'rgba(255,255,255,0.95)',
+    lineHeight: 1.5,
+    textAlign: 'center',
+    fontFamily: 'Alegreya',
+    fontStyle: 'italic',
+    marginVertical: 12,
+  },
+  cardFooter: {
+    alignItems: 'center',
+    gap: 3,
+  },
+  footerText: {
+    color: 'rgba(255,255,255,0.8)',
+    fontWeight: '500',
+  },
+  appName: {
+    color: 'white',
+    fontWeight: 'bold',
+    letterSpacing: 2,
+  },
+  // Action Buttons
   actions: {
     flexDirection: 'row',
     paddingHorizontal: 20,
     gap: 12,
-    marginBottom: 20,
+    marginTop: 8,
   },
   actionBtn: {
     flex: 1,
@@ -338,7 +528,7 @@ const styles = StyleSheet.create({
   },
   actionText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
   },
 });

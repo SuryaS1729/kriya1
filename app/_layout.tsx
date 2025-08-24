@@ -127,6 +127,8 @@ async function runMigrationsSafe(db: any) {
           <Stack.Screen name="history" options={{animation:'none'}}/>
           <Stack.Screen name="read" options={{animation:'fade'}} />
           <Stack.Screen name="shloka/[id]" options={{animation:'fade'}}/>
+          <Stack.Screen name="share" options={{animation:'slide_from_bottom'}}/>
+
         </Stack>
       </SQLiteProvider>
     </SafeAreaProvider>

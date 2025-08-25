@@ -7,7 +7,8 @@ import {
   Dimensions,
   Alert,
   Platform,
-  ScrollView
+  ScrollView,
+  ImageBackground // Add this import
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -46,23 +47,27 @@ const PLATFORMS = {
 
 type PlatformType = keyof typeof PLATFORMS;
 
+// Remove the backgroundImages array and replace with platform-specific backgrounds
+const getBackgroundForPlatform = (platform: PlatformType) => {
+  switch (platform) {
+    case 'story':
+      return require('../assets/images/krishna-1.jpeg');
+    case 'twitter':
+      return require('../assets/images/krishna-2.jpeg');
+    case 'post':
+      // You can add krishna-3.jpeg here when you find the right image
+      return require('../assets/images/krishna-1.jpeg'); // Temporary fallback
+    default:
+      return require('../assets/images/krishna-1.jpeg');
+  }
+};
+
 export default function SharePage() {
   const params = useGlobalSearchParams();
   const [shloka, setShloka] = useState<ShlokaRow | null>(null);
-  const [gradientIndex, setGradientIndex] = useState(0);
   const [platform, setPlatform] = useState<PlatformType>('story');
+  // Remove backgroundIndex state - no longer needed
   const cardRef = useRef<ViewShot>(null);
-
-  const gradients = [
-    ['#667eea', '#764ba2'] as const,
-    ['#f093fb', '#f5576c'] as const,
-    ['#4facfe', '#00f2fe'] as const,
-    ['#43e97b', '#38f9d7'] as const,
-    ['#fa709a', '#fee140'] as const,
-    ['#a8edea', '#fed6e3'] as const,
-    ['#ff9a9e', '#fecfef'] as const,
-    ['#ffecd2', '#fcb69f'] as const,
-  ] as const;
 
   // Calculate card dimensions to fit in the top half
   const availableHeight = screenHeight * 0.4; // Leave some margin
@@ -100,8 +105,6 @@ export default function SharePage() {
           mimeType: 'image/png',
           dialogTitle: `Share to ${cardConfig.name}`,
         });
-      } else {
-        Alert.alert('Sharing not available', 'Sharing is not supported on this device');
       }
     } catch (error) {
       console.error('Share error:', error);
@@ -119,7 +122,9 @@ export default function SharePage() {
 
       if (!cardRef.current) return;
       
+      // capture() method takes no arguments
       const uri = await cardRef.current.capture();
+      
       const asset = await MediaLibrary.createAssetAsync(uri);
       await MediaLibrary.createAlbumAsync('Kriya', asset, false);
       
@@ -179,69 +184,73 @@ export default function SharePage() {
         <View style={styles.previewSection}>
           <ViewShot 
             ref={cardRef} 
-            options={{ 
-              format: "png", 
-              quality: 0.9,
-              result: 'tmpfile'
+            options={{
+              format: "png",
+              quality: 1.0,
+
             }}
             style={[styles.card, { width: cardWidth, height: cardHeight }]}
           >
-            <LinearGradient
-              colors={gradients[gradientIndex]}
-              style={styles.cardGradient}
+            <ImageBackground
+              source={getBackgroundForPlatform(platform)}
+              style={styles.cardBackground}
+              imageStyle={styles.backgroundImage}
             >
+              {/* Dark overlay for better text readability */}
+              <View style={styles.overlay} />
+              
               {platform === 'twitter' ? (
                 // Horizontal layout for Twitter
                 <View style={styles.twitterLayout}>
                   <View style={styles.twitterLeft}>
                     <Text style={[styles.om, { fontSize: fontSizes.om }]}>ॐ</Text>
                     <Text style={[styles.chapterText, { fontSize: fontSizes.chapter }]}>
-                      Adhyaya {shloka.chapter_number} • Shloka {shloka.verse_number}
+                      Bhagavad Gita {shloka.chapter_number}.{shloka.verse_number}
                     </Text>
                   </View>
                   <View style={styles.twitterRight}>
-                    <Text style={[styles.sanskritText, { fontSize: fontSizes.sanskrit }]}>
-                      {shloka.text}
-                    </Text>
-                    <Text style={[styles.translationText, { fontSize: fontSizes.translation }]}>
-                      "{shloka.translation_2 || shloka.description}"
-                    </Text>
-                    <View style={styles.cardFooter}>
-                      <Text style={[styles.footerText, { fontSize: fontSizes.footer }]}>
-                        Bhagavad Gita
+                    <View style={styles.textContainer}>
+                      <Text style={[styles.sanskritText, { fontSize: fontSizes.sanskrit }]}>
+                        {shloka.text}
                       </Text>
-                      <Text style={[styles.appName, { fontSize: fontSizes.app }]}>Kriya</Text>
+                      <Text style={[styles.translationText, { fontSize: fontSizes.translation }]}>
+                        {shloka.translation_2 || shloka.description}
+                      </Text>
+                    </View>
+                    <View style={styles.cardFooter}>
+                      <Text style={[styles.appName, { fontSize: fontSizes.app }]}>kriya</Text>
                     </View>
                   </View>
                 </View>
               ) : (
                 // Vertical layout for Instagram
-                <>
-                  <View style={styles.decorativeTop}>
-                    <Text style={[styles.om, { fontSize: fontSizes.om }]}>ॐ</Text>
-                  </View>
-
-                  <Text style={[styles.chapterText, { fontSize: fontSizes.chapter }]}>
-                    Adhyaya {shloka.chapter_number} • Shloka {shloka.verse_number}
-                  </Text>
-
-                  <Text style={[styles.sanskritText, { fontSize: fontSizes.sanskrit }]}>
-                    {shloka.text}
-                  </Text>
-
-                  <Text style={[styles.translationText, { fontSize: fontSizes.translation }]}>
-                    "{shloka.translation_2 || shloka.description}"
-                  </Text>
-
-                  <View style={styles.cardFooter}>
-                    <Text style={[styles.footerText, { fontSize: fontSizes.footer }]}>
-                      Bhagavad Gita
+                <View style={styles.verticalLayout}>
+                  <View style={styles.topSection}>
+                    <Text style={[styles.chapterText, { fontSize: fontSizes.chapter }]}>
+                      Bhagavad Gita {shloka.chapter_number}.{shloka.verse_number}
                     </Text>
-                    <Text style={[styles.appName, { fontSize: fontSizes.app }]}>Kriya</Text>
                   </View>
-                </>
+
+                  <View style={styles.contentSection}>
+                    <View style={styles.textContainer}>
+                      <Text style={[styles.sanskritText, { fontSize: fontSizes.sanskrit }]}>
+                        {shloka.text}
+                      </Text>
+                      <Text style={[styles.translationText, { fontSize: fontSizes.translation }]}>
+                        {shloka.translation_2 || shloka.description}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.bottomSection}>
+                    <View style={styles.brandContainer}>
+                      <Text style={[styles.appName, { fontSize: fontSizes.app }]}>kriya</Text>
+                      
+                    </View>
+                  </View>
+                </View>
               )}
-            </LinearGradient>
+            </ImageBackground>
           </ViewShot>
         </View>
 
@@ -284,27 +293,7 @@ export default function SharePage() {
               </View>
             </View>
 
-            {/* Color Picker */}
-            <View style={styles.optionGroup}>
-              <Text style={styles.sectionTitle}>Choose Background</Text>
-              <View style={styles.colorRow}>
-                {gradients.map((gradient, index) => (
-                  <Pressable
-                    key={index}
-                    onPress={() => setGradientIndex(index)}
-                    style={[
-                      styles.colorOption,
-                      gradientIndex === index && styles.colorOptionSelected
-                    ]}
-                  >
-                    <LinearGradient
-                      colors={gradient}
-                      style={styles.colorGradient}
-                    />
-                  </Pressable>
-                ))}
-              </View>
-            </View>
+            {/* Remove the entire "Choose Background" section */}
 
             {/* Action Buttons */}
             <View style={styles.actions}>
@@ -325,7 +314,8 @@ export default function SharePage() {
   );
 }
 
-const styles = StyleSheet.create({
+// Update styles - remove background picker related styles
+const newStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1a1a1a',
@@ -351,7 +341,6 @@ const styles = StyleSheet.create({
   mainContent: {
     flex: 1,
   },
-  // Top Half - Fixed Preview
   previewSection: {
     flex: 1,
     justifyContent: 'center',
@@ -369,12 +358,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 15,
   },
-  cardGradient: {
+  cardBackground: {
     flex: 1,
-    padding: 24,
     justifyContent: 'space-between',
   },
-  // Bottom Half - Scrollable Options
+  backgroundImage: {
+    borderRadius: 16,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderRadius: 16,
+  },
   optionsSection: {
     flex: 1,
     backgroundColor: '#1a1a1a',
@@ -393,7 +388,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 12,
   },
-  // Platform Options
   platformRow: {
     flexDirection: 'row',
     gap: 8,
@@ -428,31 +422,11 @@ const styles = StyleSheet.create({
     marginTop: 1,
     textAlign: 'center',
   },
-  // Color Options
-  colorRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  colorOption: {
-    width: 45,
-    height: 45,
-    borderRadius: 22.5,
-    borderWidth: 3,
-    borderColor: 'transparent',
-  },
-  colorOptionSelected: {
-    borderColor: 'white',
-  },
-  colorGradient: {
-    flex: 1,
-    borderRadius: 19.5,
-  },
-  // Twitter Layout
   twitterLayout: {
     flexDirection: 'row',
     flex: 1,
     gap: 16,
+    padding: 20,
   },
   twitterLeft: {
     flex: 0.3,
@@ -463,50 +437,92 @@ const styles = StyleSheet.create({
     flex: 0.7,
     justifyContent: 'center',
   },
-  // Card Content
-  decorativeTop: {
+  verticalLayout: {
+    flex: 1,
+    justifyContent: 'space-between',
+    padding: 24,
+  },
+  topSection: {
+    alignItems: 'flex-start',
+  },
+  contentSection: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+  },
+  bottomSection: {
+    alignItems: 'center',
+  },
+  textContainer: {
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginVertical: 8,
+  },
+  brandContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 8,
+  },
+  playIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playSymbol: {
+    color: 'black',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   om: {
     color: 'rgba(255,255,255,0.8)',
     fontWeight: 'bold',
   },
   chapterText: {
-    color: 'rgba(255,255,255,0.9)',
-    textAlign: 'center',
-    fontWeight: '500',
+    color: 'white',
+    fontWeight: '600',
     letterSpacing: 1,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
   sanskritText: {
     color: 'white',
     lineHeight: 1.6,
     textAlign: 'center',
     fontFamily: 'SourceSerifPro',
-    fontWeight: '400',
-    marginVertical: 12,
+    fontWeight: '500',
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
   translationText: {
-    color: 'rgba(255,255,255,0.95)',
+    color: 'white',
     lineHeight: 1.5,
     textAlign: 'center',
     fontFamily: 'Alegreya',
-    fontStyle: 'italic',
-    marginVertical: 12,
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+    marginTop: 8,
   },
   cardFooter: {
     alignItems: 'center',
     gap: 3,
-  },
-  footerText: {
-    color: 'rgba(255,255,255,0.8)',
-    fontWeight: '500',
   },
   appName: {
     color: 'white',
     fontWeight: 'bold',
     letterSpacing: 2,
   },
-  // Action Buttons
   actions: {
     flexDirection: 'row',
     paddingHorizontal: 20,
@@ -532,3 +548,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+
+const styles = newStyles;

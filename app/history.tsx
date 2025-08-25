@@ -91,7 +91,7 @@ function ActivityHeatmap() {
 
   const getIntensityColor = (intensity: number) => {
     if (isDarkMode) {
-      const colors = ['#374151', '#4c1d95', '#6d28d9', '#7c3aed', '#8b5cf6'];
+      const colors = ['#4b5563', '#4c1d95', '#6d28d9', '#7c3aed', '#8b5cf6'];
       return colors[intensity] || colors[0];
     } else {
       const colors = ['#f1f5f9', '#c7d2fe', '#818cf8', '#4338ca', '#312e81'];
@@ -132,7 +132,7 @@ function ActivityHeatmap() {
   return (
     <View style={[styles.heatmapContainer, themeStyles.heatmapContainer]}>
       <View style={styles.heatmapHeader}>
-        <Text style={[styles.heatmapTitle, themeStyles.heatmapTitle]}>Your Journey</Text>
+        <Text style={[styles.heatmapTitle, themeStyles.heatmapTitle]}>Your journey so far</Text>
         <View style={styles.statsRow}>
           <Text style={[styles.statText, themeStyles.statText]}>{totalCompleted} tasks completed</Text>
           <Text style={[styles.statText, themeStyles.statText]}>{currentStreak} day streak</Text>
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 2,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#4b5563',
   },
   legend: {
     flexDirection: 'row',
@@ -368,7 +368,7 @@ const darkStyles = StyleSheet.create({
 // Heatmap theme styles
 const lightHeatmapStyles = StyleSheet.create({
   heatmapContainer: { backgroundColor: '#f8fafc' },
-  heatmapTitle: { color: '#1e293b' },
+  heatmapTitle: { color: '#54647dff' },
   statText: { color: '#64748b' },
   weekLabel: { color: '#64748b' },
   legendText: { color: '#64748b' },

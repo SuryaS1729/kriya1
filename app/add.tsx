@@ -150,10 +150,20 @@ export default function Add() {
             keyExtractor={t => String(t.id)}
             renderItem={renderItem}
             ItemSeparatorComponent={() => <View style={styles.sep} />}
+             ListEmptyComponent={() => (
+            <View style={styles.emptyState}>
+              <Feather name="sunrise" size={48} color="#cbd5e1" />
+              <Text style={styles.emptyStateTitle}>Fresh Start</Text>
+              <Text style={styles.emptyStateSubtitle}>
+                No tasks yet. Add your first task to begin your day.
+              </Text>
+            </View>
+          )}
             // Give the list bottom padding so last items aren't hidden behind the input bar
             contentContainerStyle={{  flexGrow: 1,padding: 12,  paddingBottom: 16 + 56 + insets.bottom  }}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={Platform.OS === 'ios' ? 'on-drag' : 'none'}
+            
           />
 
           {/* INPUT BAR — stays at the bottom, lifted by KeyboardAvoidingView */}
@@ -262,4 +272,28 @@ const styles = StyleSheet.create({
     
 
   },
+  // ...existing code...
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 20,
+  },
+  emptyStateTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#64748b',
+    marginTop: 16,
+    marginBottom: 8,
+    fontFamily: "SourceSerifPro",
+  },
+  emptyStateSubtitle: {
+    fontSize: 16,
+    color: '#94a3b8',
+    textAlign: 'center',
+    lineHeight: 22,
+    fontFamily: "Alegreya",
+  },
+// ...existing code...
 });

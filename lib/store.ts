@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getTasksForDay,
   getDistinctPastDays,
@@ -11,7 +13,6 @@ import { getShlokaAt, getTotalShlokas } from './shloka';
 import { ensureProgressForToday, countCompletedSince } from './progress';
 import { isDbReady } from './dbReady';
 import type { ShlokaRow } from './shloka';
-import { persist } from 'zustand/middleware';
 
 type State = {
   ready: boolean;
@@ -126,6 +127,10 @@ export const useKriya = create<State>()(
     }),
     {
       name: 'kriya-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({ 
+        isDarkMode: state.isDarkMode 
+      }), // Only persist the dark mode setting
     }
   )
 );

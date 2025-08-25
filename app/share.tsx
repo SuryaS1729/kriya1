@@ -140,9 +140,9 @@ export default function SharePage() {
     const scale = Math.min(cardWidth, cardHeight) / 300;
     return {
       om: Math.max(24, 40 * scale),
-      chapter: Math.max(10, 14 * scale),
-      sanskrit: Math.max(12, 18 * scale),
-      translation: Math.max(11, 16 * scale),
+      chapter: Math.max(7, 8 * scale),
+      sanskrit: Math.max(7, 10 * scale),
+      translation: Math.max(7, 8 * scale),
       footer: Math.max(8, 12 * scale),
       app: Math.max(10, 16 * scale)
     };
@@ -203,7 +203,7 @@ export default function SharePage() {
                 // Horizontal layout for Twitter
                 <View style={styles.twitterLayout}>
                   <View style={styles.twitterLeft}>
-                    <Text style={[styles.om, { fontSize: fontSizes.om }]}>ॐ</Text>
+                    {/* <Text style={[styles.om, { fontSize: fontSizes.om }]}>ॐ</Text> */}
                     <Text style={[styles.chapterText, { fontSize: fontSizes.chapter }]}>
                       Bhagavad Gita {shloka.chapter_number}.{shloka.verse_number}
                     </Text>
@@ -225,14 +225,15 @@ export default function SharePage() {
               ) : (
                 // Vertical layout for Instagram
                 <View style={styles.verticalLayout}>
-                  <View style={styles.topSection}>
-                    <Text style={[styles.chapterText, { fontSize: fontSizes.chapter }]}>
-                      Bhagavad Gita {shloka.chapter_number}.{shloka.verse_number}
-                    </Text>
-                  </View>
 
                   <View style={styles.contentSection}>
                     <View style={styles.textContainer}>
+
+                      <Text style={[styles.chapterText, { fontSize: fontSizes.chapter }]}>
+                      Bhagavad Gita {shloka.chapter_number}.{shloka.verse_number}
+                    </Text>
+
+                    
                       <Text style={[styles.sanskritText, { fontSize: fontSizes.sanskrit }]}>
                         {shloka.text}
                       </Text>
@@ -342,7 +343,7 @@ const newStyles = StyleSheet.create({
     flex: 1,
   },
   previewSection: {
-    flex: 1,
+    flex: 1.8,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#1a1a1a',
@@ -488,6 +489,8 @@ const newStyles = StyleSheet.create({
   },
   chapterText: {
     color: 'white',
+        textAlign: 'left',
+
     fontWeight: '600',
     letterSpacing: 1,
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
@@ -496,18 +499,20 @@ const newStyles = StyleSheet.create({
   },
   sanskritText: {
     color: 'white',
-    lineHeight: 1.6,
-    textAlign: 'center',
+
+    lineHeight: 9,
+    textAlign: 'left',
     fontFamily: 'SourceSerifPro',
-    fontWeight: '500',
+    fontWeight: '200',
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
+    marginTop: 4,
   },
   translationText: {
     color: 'white',
-    lineHeight: 1.5,
-    textAlign: 'center',
+    lineHeight: 15,
+    textAlign: 'left',
     fontFamily: 'Alegreya',
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 1, height: 1 },

@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 2,
-    backgroundColor: '#4b5563',
+    backgroundColor: '#f1f5f9',
   },
   legend: {
     flexDirection: 'row',

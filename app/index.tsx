@@ -76,9 +76,10 @@ function Checkbox({ completed }: { completed: boolean }) {
 export default function Home() {
   const ready     = useKriya(s => s.ready);
   const tasks     = useKriya(s => s.tasksToday);
-  const getShloka = useKriya(s => s.currentShloka); // returns { index, data }
+  const getShloka = useKriya(s => s.currentShloka);
   const toggle    = useKriya(s => s.toggleTask);
   const remove    = useKriya(s => s.removeTask);
+  const isDarkMode = useKriya(s => s.isDarkMode);
   const insets    = useSafeAreaInsets();
 
   // Only compute shloka after store is ready
@@ -112,11 +113,7 @@ export default function Home() {
 
   const renderItem = ({ item }: { item: Task }) => (
     <Animated.View 
-      layout={LinearTransition
-        .duration(300)
-        .springify()
-        .delay(200)
-      }
+      layout={LinearTransition.duration(300).springify().delay(200)}
     >
       <Pressable
         onPress={() => {
@@ -124,33 +121,34 @@ export default function Home() {
           toggle(item.id);
         }}
         onLongPress={() => remove(item.id)}
-        style={styles.row}
+        style={[styles.row, { borderBottomColor: isDarkMode ? '#374151' : '#f1f5f9' }]}
       >
         <Checkbox completed={item.completed} />
-        <Text style={[styles.title, item.completed ? styles.done : undefined]} numberOfLines={1}>
+        <Text 
+          style={[
+            styles.title, 
+            item.completed ? styles.done : undefined,
+            { color: isDarkMode ? '#f9fafb' : '#000000ff' }
+          ]} 
+          numberOfLines={1}
+        >
           {item.title}
         </Text>
       </Pressable>
     </Animated.View>
   );
 
-  const today = new Date().toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    month: 'long', 
-    day: 'numeric' 
-  });
-
   // Minimal skeleton while DB/store warm up
   if (!ready || !shloka) {
     return (
       <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <StatusBar style="auto" />
-        <View style={[styles.card, { height: 240, opacity: 0.5, backgroundColor: '#111827' }]} />
-        <View style={styles.tasksContainer}>
-          <Text style={styles.h1}>Today</Text>
+        <StatusBar style={isDarkMode ? "light" : "auto"} />
+        <View style={[styles.card, { height: 240, opacity: 0.5, backgroundColor: isDarkMode ? '#374151' : '#111827' }]} />
+        <View style={[styles.tasksContainer, { backgroundColor: isDarkMode ? '#1f2937' : 'white' }]}>
+          <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#848fa9ff' }]}>Today</Text>
           <View style={[styles.row, { opacity: 0.5 }]}>
             <View style={[styles.checkbox, styles.checkboxOff]} />
-            <View style={{ flex: 1, height: 18, backgroundColor: '#eee', borderRadius: 4 }} />
+            <View style={{ flex: 1, height: 18, backgroundColor: isDarkMode ? '#4b5563' : '#eee', borderRadius: 4 }} />
           </View>
         </View>
       </View>
@@ -159,95 +157,119 @@ export default function Home() {
 
   return (
     <LinearGradient
-      colors={['#ffffffff', '#9FABC8']}
+      colors={isDarkMode ? ['#344c67ff', '#000000ff'] : ['#ffffffff', '#9FABC8']}
       style={[styles.container]}
     >
-      <StatusBar style="dark" />
+      <StatusBar style={isDarkMode ? "light" : "dark"} />
       
       <View style={[styles.topHalf, { paddingTop: insets.top }]}>
         {/* Shloka Card */}
-        
-             <View style={styles.card}>
-                    {/* Add the mandala background */}
-                    {/* <View style={styles.mandalaContainer}>
-                      <Mandala size={250} opacity={0.08} />
-                    </View>
-                     */}
-                    <View style={styles.headerSection}>
-                      <Text style={styles.meta}>
-                        Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
-                      </Text>
-                    </View>
+        <View style={styles.card}>
+          <View style={styles.headerSection}>
+            <Text style={[styles.meta, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>
+              Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
+            </Text>
+          </View>
 
-            <Link
+          <Link
             href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
             asChild
           >
-          <Pressable style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Animated.View style={[fadeStyle, styles.contentSection]}>
-                          {showTranslation ? (
-                            <View style ={styles.englishSection}>
-                            <Text style={[styles.en, {lineHeight:(shloka.translation_2 || "").length < 350 ? 24 : 18,}, ]} adjustsFontSizeToFit>
-                              {shloka.translation_2 || shloka.description || 'No translation available'}
-                            </Text>
-                            </View>
-                          ) : (<View >
-                            <Text style={[styles.sa, {lineHeight:(shloka.translation_2 || "").length < 90 ? 24 : 20,},]}adjustsFontSizeToFit>{shloka.text}</Text>
-                          </View>
-                          )}
-                    </Animated.View>
- </Pressable>
-        </Link>
-                    <Pressable onPress={() => setShowTranslation(!showTranslation)}>
-                        <Animated.View style={styles.toggleButton}>
-                       <Text style={styles.toggleText}>
-                         {showTranslation ? 'View Sanskrit' : 'View Translation'}
-                         </Text>
-                         </Animated.View>
-                  </Pressable>
-              </View>
-        
+            <Pressable style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Animated.View style={[fadeStyle, styles.contentSection]}>
+                {showTranslation ? (
+                  <View style={styles.englishSection}>
+                    <Text 
+                      style={[
+                        styles.en, 
+                        {lineHeight:(shloka.translation_2 || "").length < 350 ? 24 : 18},
+                        { color: isDarkMode ? '#d1d5db' : '#434343ff' }
+                      ]} 
+                      adjustsFontSizeToFit
+                    >
+                      {shloka.translation_2 || shloka.description || 'No translation available'}
+                    </Text>
+                  </View>
+                ) : (
+                  <View>
+                    <Text 
+                      style={[
+                        styles.sa, 
+                        {lineHeight:(shloka.translation_2 || "").length < 90 ? 24 : 20},
+                        { color: isDarkMode ? '#e5e7eb' : '#565657ff' }
+                      ]}
+                      adjustsFontSizeToFit
+                    >
+                      {shloka.text}
+                    </Text>
+                  </View>
+                )}
+              </Animated.View>
+            </Pressable>
+          </Link>
+          
+          <Pressable onPress={handleTogglePress}>
+            <Animated.View style={[
+              styles.toggleButton,
+              { backgroundColor: isDarkMode ? '#4b5563' : '#ffffffff' }
+            ]}>
+              <Text style={[
+                styles.toggleText,
+                { color: isDarkMode ? '#f9fafb' : '#000000ff' }
+              ]}>
+                {showTranslation ? 'View Sanskrit' : 'View Translation'}
+              </Text>
+            </Animated.View>
+          </Pressable>
+        </View>
       </View>
 
       {/* Tasks Section */}
-      <View style={[styles.tasksContainer, { paddingBottom: insets.bottom }]}>
+      <View style={[
+        styles.tasksContainer,
+        { backgroundColor: isDarkMode ? '#232d3bff' : 'white', paddingBottom: insets.bottom }
+      ]}>
         <View style={styles.tasksHeader}>
-          <Text style={styles.h1}>Today's Tasks</Text>
-          {/* <Link href="/history" asChild>
-          <Pressable><Text style={{ color: '#7493d7ff' }}>Yesterday & History →</Text></Pressable>
-        </Link> */}
-         <Link href="/history" asChild>
+          <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#848fa9ff' }]}>Today's Tasks</Text>
+          <Link href="/history" asChild>
             <Pressable style={styles.profileButton}>
-              <Feather name="user" size={20} color="#7493d7ff" />
+              <Feather name="user" size={20} color={isDarkMode ? "#d1d5db" : "#7493d7ff"} />
             </Pressable>
           </Link>
         </View>
         
-        
         <FlatList
-          data={sortedTasks}  // <- Change this from tasks to sortedTasks
+          data={sortedTasks}
           renderItem={renderItem}
           keyExtractor={item => item.id.toString()}
           contentContainerStyle={styles.tasksList}
-            ListEmptyComponent={() => (
+          ListEmptyComponent={() => (
             <View style={styles.emptyState}>
-              <Feather name="sunrise" size={48} color="#cbd5e1" />
-              <Text style={styles.emptyStateTitle}>Fresh Start</Text>
-              <Text style={styles.emptyStateSubtitle}>
+              <Feather name="sunrise" size={48} color={isDarkMode ? "#6b7280" : "#cbd5e1"} />
+              <Text style={[
+                styles.emptyStateTitle,
+                { color: isDarkMode ? '#9ca3af' : '#64748b' }
+              ]}>Fresh Start</Text>
+              <Text style={[
+                styles.emptyStateSubtitle,
+                { color: isDarkMode ? '#6b7280' : '#94a3b8' }
+              ]}>
                 No tasks yet. Add your first task to begin your day.
               </Text>
             </View>
           )}
-          
         />
+        
         <Link href="/add" asChild>
-              <Pressable style={styles.addTaskButton}>
-                <View style={styles.addTaskIcon}>
-                  <Feather name="plus" size={20} color="#606060" />
-                </View>
-    <Text style={styles.addTaskText}>Add a task . . .</Text>
-              </Pressable>
-            </Link>
+          <Pressable style={styles.addTaskButton}>
+            <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#4b5563' : '#E6E6E6' }]}>
+              <Feather name="plus" size={20} color={isDarkMode ? "#d1d5db" : "#606060"} />
+            </View>
+            <Text style={[styles.addTaskText, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
+              Add a task . . .
+            </Text>
+          </Pressable>
+        </Link>
       </View>
     </LinearGradient>
   );
@@ -260,55 +282,37 @@ const styles = StyleSheet.create({
   topHalf: {
     flex: 1,
     justifyContent: 'center',
-
-
     paddingHorizontal: 16,
     paddingVertical:0
   },
   card: {
     alignItems: 'center',
-    justifyContent: 'space-between', // This will create maximum space between children
+    justifyContent: 'space-between',
     height: 300,
     borderRadius: 16,
     paddingTop: 20,
     paddingHorizontal: 13,
     paddingBottom: 10,
-
-
-
   },
   headerSection: {
     width: '100%',
     marginBottom: 0,
     alignItems:'center',
-    // backgroundColor:"yellow"
-
-    // Add significant bottom margin to create space
   },
   contentSection: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-
     paddingTop: 20,
-marginTop: 20,
-paddingBottom: 20,
-// backgroundColor:'white'
-
-
-
-  
- // Add some top padding for additional spacing
+    marginTop: 20,
+    paddingBottom: 20,
   },
   meta: { 
     fontFamily:"SourceSerifPro",
-
     fontSize: 23,
-fontStyle: 'italic',
+    fontStyle: 'italic',
     color: '#545454',
-
-    // letterSpacing: 0.5,
   },
   toggleButton: {
     paddingVertical: 8,
@@ -317,7 +321,6 @@ fontStyle: 'italic',
     backgroundColor: '#ffffffff',
     overflow: 'hidden',
     marginTop: 0, 
-    // Important for reanimated layout animations
   },
   toggleText: {
     color: '#000000ff',
@@ -329,12 +332,9 @@ fontStyle: 'italic',
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-
     paddingHorizontal: 16,
     paddingBottom: 0,
     paddingTop: 10,
-
-    // backgroundColor: 'red'
   },
    profileButton: {
     width: 36,
@@ -347,7 +347,6 @@ fontStyle: 'italic',
     alignItems: 'center',
   },
   sa: { 
-  
     flex: 1,
     fontSize: 18,
     lineHeight: 24,
@@ -357,7 +356,6 @@ fontStyle: 'italic',
     fontWeight:"100",
     fontStyle:"normal",
     paddingTop: 20,
-    // backgroundColor:'red'
   },
   en: { 
     flex: 1,
@@ -393,8 +391,6 @@ fontStyle: 'italic',
   tasksList: {
     flexGrow: 1,
     padding: 10,
-    
-
   },
   row: {
     flexDirection: 'row',
@@ -412,7 +408,6 @@ fontStyle: 'italic',
     fontFamily:"SourceSerifPro",
     fontWeight:"300",
     fontStyle:"normal"
-
   },
   checkbox: {
     width: 20,
@@ -437,7 +432,6 @@ fontStyle: 'italic',
   addTaskButton: {
     flexDirection: 'row',
     alignItems: 'center',
-
     paddingVertical: 14,
     paddingHorizontal: 11,
     marginTop: 10,
@@ -452,19 +446,18 @@ fontStyle: 'italic',
     marginLeft: 12,
     fontSize: 15,
     color: '#64748b',
-      fontFamily:"SpaceMono",
+    fontFamily:"SpaceMono",
     fontWeight:"400",
     fontStyle:"normal"
   },
   addTaskIcon: {
-    width: 32, // Make it bigger than checkbox (20px)
-    height: 32, // Make it bigger than checkbox (20px)
+    width: 32,
+    height: 32,
     backgroundColor: '#E6E6E6',
-    borderRadius: 16, // Half of width/height for perfect circle
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  // ...existing code...
   emptyState: {
     flex: 1,
     justifyContent: 'center',
@@ -487,5 +480,4 @@ fontStyle: 'italic',
     lineHeight: 22,
     fontFamily: "Alegreya",
   },
-// ...existing code...
 });

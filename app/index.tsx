@@ -22,7 +22,7 @@ import Svg, { Circle, G, Path } from 'react-native-svg';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
-function Checkbox({ completed }: { completed: boolean }) {
+function Checkbox({ completed, isDarkMode }: { completed: boolean, isDarkMode: boolean }) {
   const progress = useSharedValue(completed ? 1 : 0);
 
   useEffect(() => {
@@ -38,12 +38,16 @@ function Checkbox({ completed }: { completed: boolean }) {
       backgroundColor: interpolateColor(
         progress.value,
         [0, 1],
-        ['white', '#AADBA3']
+         isDarkMode 
+          ? ['#1f2937', '#65a30d'] // Dark mode: dark bg to darker green
+          : ['white', '#AADBA3']   // Light mode: white to light green
       ),
       borderColor: interpolateColor(
         progress.value,
         [0, 1],
-        ['#e2e8f0', '#AADBA3']
+        isDarkMode 
+          ? ['#4b5563', '#65a30d'] // Dark mode: dark border to darker green
+          : ['#e2e8f0', '#AADBA3']  // Light mode: light gray to light green
       ),
     };
   });
@@ -123,17 +127,17 @@ export default function Home() {
         onLongPress={() => remove(item.id)}
         style={[styles.row, { borderBottomColor: isDarkMode ? '#374151' : '#f1f5f9' }]}
       >
-        <Checkbox completed={item.completed} />
-        <Text 
-          style={[
-            styles.title, 
-            item.completed ? styles.done : undefined,
-            { color: isDarkMode ? '#f9fafb' : '#000000ff' }
-          ]} 
-          numberOfLines={1}
-        >
-          {item.title}
-        </Text>
+        <Checkbox completed={item.completed} isDarkMode={isDarkMode} />
+       <Text style={[styles.title, 
+       { color: item.completed ? (isDarkMode ? '#94a3b8' : '#94a3b8')  // Same gray for completed tasks in both modes
+: (isDarkMode ? '#f9fafb' : '#000000ff') // Different colors for active tasks
+    },
+    item.completed ? { textDecorationLine: 'line-through' } : undefined,
+  ]} 
+  numberOfLines={1}
+>
+  {item.title}
+</Text>
       </Pressable>
     </Animated.View>
   );
@@ -227,13 +231,15 @@ export default function Home() {
       {/* Tasks Section */}
       <View style={[
         styles.tasksContainer,
-        { backgroundColor: isDarkMode ? '#232d3bff' : 'white', paddingBottom: insets.bottom }
+        { backgroundColor: isDarkMode ? '#131f31ff' : 'white', paddingBottom: insets.bottom }
       ]}>
         <View style={styles.tasksHeader}>
           <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#848fa9ff' }]}>Today's Tasks</Text>
           <Link href="/history" asChild>
-            <Pressable style={styles.profileButton}>
-              <Feather name="user" size={20} color={isDarkMode ? "#d1d5db" : "#7493d7ff"} />
+            <Pressable >
+              <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#374151' : '#e2e8f0' }]}>
+              <Feather name="user" size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
+              </View>
             </Pressable>
           </Link>
         </View>
@@ -261,13 +267,15 @@ export default function Home() {
         />
         
         <Link href="/add" asChild>
-          <Pressable style={styles.addTaskButton}>
-            <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#4b5563' : '#E6E6E6' }]}>
-              <Feather name="plus" size={20} color={isDarkMode ? "#d1d5db" : "#606060"} />
+          <Pressable>
+            <View style={[styles.addTaskButton, {backgroundColor: isDarkMode ? '#1b293dff' : '#f9fafb', borderColor: isDarkMode ? '#374151' : 'white'}]}>
+            <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#161c22ff' : '#E6E6E6' }]}>
+              <Feather name="plus" size={20} color={isDarkMode ? "#ffffffff" : "#606060"} />
             </View>
             <Text style={[styles.addTaskText, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
               Add a task . . .
             </Text>
+            </View>
           </Pressable>
         </Link>
       </View>
@@ -341,7 +349,7 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 18,
     backgroundColor: '#f8fafc',
-    borderWidth: 1,
+    borderWidth: 0.5,
     borderColor: '#e2e8f0',
     justifyContent: 'center',
     alignItems: 'center',
@@ -438,7 +446,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 30,
     borderWidth: 1.5,
-    borderColor: 'white',
+    borderColor: 'transparent',
     backgroundColor: '#efefef37',
     marginLeft:-5.8
   },

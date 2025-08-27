@@ -65,6 +65,9 @@
       <string>spacemono_italic.ttf</string>
       <string>spacemono_regular.ttf</string>
       <string>AMS-Samanya-Bold.ttf</string>
+      <string>Tillana-Regular.ttf</string>
+      <string>Kalam-Regular.ttf</string>
+      <string>Kalam-Light.ttf</string>
     </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>

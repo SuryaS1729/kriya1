@@ -1,0 +1,4 @@
+<font-family xmlns:app="http://schemas.android.com/apk/res-auto">
+  <font app:font="@font/kalam_regular" app:fontStyle="normal" app:fontWeight="400"/>
+  <font app:font="@font/kalam_light" app:fontStyle="normal" app:fontWeight="300"/>
+</font-family>

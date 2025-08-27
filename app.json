@@ -10,6 +10,16 @@
           "android": {
             "fonts": [
               {
+                "fontFamily": "Tillana",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/Tillana-Regular.ttf",
+                    "weight": 400,
+                    "style": "normal"
+                  }
+                ]
+              },
+              {
                 "fontFamily": "Alegreya",
                 "fontDefinitions": [
                   {
@@ -98,6 +108,22 @@
                     "style": "normal"
                   }
                 ]
+              },
+              
+              {
+                "fontFamily": "Kalam",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/Kalam-Regular.ttf",
+                    "weight": 400,
+                    "style": "normal"
+                  },
+                  {
+                    "path": "./assets/fonts/Kalam-Light.ttf",
+                    "weight": 300,
+                    "style": "normal"
+                  }
+                ]
               }
             ]
           },
@@ -116,7 +142,11 @@
               "./assets/fonts/spacemono_bolditalic.ttf",
               "./assets/fonts/spacemono_italic.ttf",
               "./assets/fonts/spacemono_regular.ttf",
-              "./assets/fonts/AMS-Samanya-Bold.ttf"
+              "./assets/fonts/AMS-Samanya-Bold.ttf",
+              "./assets/fonts/Tillana-Regular.ttf",
+              "./assets/fonts/Kalam-Regular.ttf",
+              "./assets/fonts/Kalam-Light.ttf"
+
             ]
           }
         }

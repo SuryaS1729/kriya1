@@ -39,14 +39,14 @@ function Checkbox({ completed, isDarkMode }: { completed: boolean, isDarkMode: b
         progress.value,
         [0, 1],
          isDarkMode 
-          ? ['#1f2937', '#65a30d'] // Dark mode: dark bg to darker green
+          ? ['#1f2937', '#65a25cff'] // Dark mode: dark bg to darker green
           : ['white', '#AADBA3']   // Light mode: white to light green
       ),
       borderColor: interpolateColor(
         progress.value,
         [0, 1],
         isDarkMode 
-          ? ['#4b5563', '#65a30d'] // Dark mode: dark border to darker green
+          ? ['#4b5563', '#65a25cff'] // Dark mode: dark border to darker green
           : ['#e2e8f0', '#AADBA3']  // Light mode: light gray to light green
       ),
     };
@@ -69,7 +69,7 @@ function Checkbox({ completed, isDarkMode }: { completed: boolean, isDarkMode: b
         <AnimatedFeather
           name="check"
           size={14}
-          color="white"
+          color={isDarkMode ? "#020639ff" : "#ffffff"}
           style={checkmarkStyle}
         />
       )}
@@ -125,7 +125,7 @@ export default function Home() {
           toggle(item.id);
         }}
         onLongPress={() => remove(item.id)}
-        style={[styles.row, { borderBottomColor: isDarkMode ? '#374151' : '#f1f5f9' }]}
+        style={[styles.row, { borderBottomColor: isDarkMode ? '#1a2535ff' : '#d8dde1ff' }]}
       >
         <Checkbox completed={item.completed} isDarkMode={isDarkMode} />
        <Text style={[styles.title, 
@@ -231,13 +231,13 @@ export default function Home() {
       {/* Tasks Section */}
       <View style={[
         styles.tasksContainer,
-        { backgroundColor: isDarkMode ? '#131f31ff' : 'white', paddingBottom: insets.bottom }
+        { backgroundColor: isDarkMode ? '#021923ff' : 'white', paddingBottom: insets.bottom }
       ]}>
         <View style={styles.tasksHeader}>
           <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#848fa9ff' }]}>Today's Tasks</Text>
           <Link href="/history" asChild>
             <Pressable >
-              <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#374151' : '#e2e8f0' }]}>
+              <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
               <Feather name="user" size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
               </View>
             </Pressable>
@@ -268,8 +268,8 @@ export default function Home() {
         
         <Link href="/add" asChild>
           <Pressable>
-            <View style={[styles.addTaskButton, {backgroundColor: isDarkMode ? '#1b293dff' : '#f9fafb', borderColor: isDarkMode ? '#374151' : 'white'}]}>
-            <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#161c22ff' : '#E6E6E6' }]}>
+            <View style={[styles.addTaskButton, {backgroundColor: isDarkMode ? '#1b293dff' : '#f9fafb'}]}>
+            <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#112130ff' : '#E6E6E6' }]}>
               <Feather name="plus" size={20} color={isDarkMode ? "#ffffffff" : "#606060"} />
             </View>
             <Text style={[styles.addTaskText, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
@@ -355,13 +355,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sa: { 
-    flex: 1,
+    // flex: 1,
+    // fontSize: 18,
+    // lineHeight: 24,
+    // color: '#565657ff',
+    // textAlign: 'center',
+    // fontFamily:"Samanya",
+    // fontWeight:"100",
+    // fontStyle:"normal",
+    // paddingTop: 20,
+
+     flex: 1,
     fontSize: 18,
     lineHeight: 24,
     color: '#565657ff',
     textAlign: 'center',
-    fontFamily:"Samanya",
-    fontWeight:"100",
+    fontFamily:"Kalam",
+    fontWeight:"300",
     fontStyle:"normal",
     paddingTop: 20,
   },
@@ -405,7 +415,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     paddingHorizontal: 4,
-    borderBottomWidth: 0.6,
+    borderBottomWidth: 0.3,
     borderBottomColor: '#f1f5f9',
   },
   title: { 

@@ -28,6 +28,9 @@
 		D5AACA5FEEB5E55E21F8AFAE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5526D0960A0E6813E4E351C5 /* PrivacyInfo.xcprivacy */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 		7426FFDBFEB64CD392F1CF9D /* AMS-Samanya-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C4423020C46440F8BE0B4125 /* AMS-Samanya-Bold.ttf */; };
+		DDDAC187532045EBAE621063 /* Tillana-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E055843442744C9CAE6AEFE8 /* Tillana-Regular.ttf */; };
+		C9862D232C314F6B86E375EA /* Kalam-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1DEF642DBFC3427FAD4074DD /* Kalam-Regular.ttf */; };
+		0EEDECE605494AC7ABAE703B /* Kalam-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7BB15321E4C14ABE946D3BFD /* Kalam-Light.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +61,9 @@
 		F11748442D0722820044C1D9 /* kriya-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "kriya-Bridging-Header.h"; path = "kriya/kriya-Bridging-Header.h"; sourceTree = "<group>"; };
 		FB6FD31F88BB42B987708350 /* SourceSerifPro-Semibold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-Semibold.otf"; path = "../assets/fonts/SourceSerifPro-Semibold.otf"; sourceTree = "<group>"; };
 		C4423020C46440F8BE0B4125 /* AMS-Samanya-Bold.ttf */ = {isa = PBXFileReference; name = "AMS-Samanya-Bold.ttf"; path = "../assets/fonts/AMS-Samanya-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		E055843442744C9CAE6AEFE8 /* Tillana-Regular.ttf */ = {isa = PBXFileReference; name = "Tillana-Regular.ttf"; path = "../assets/fonts/Tillana-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		1DEF642DBFC3427FAD4074DD /* Kalam-Regular.ttf */ = {isa = PBXFileReference; name = "Kalam-Regular.ttf"; path = "../assets/fonts/Kalam-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		7BB15321E4C14ABE946D3BFD /* Kalam-Light.ttf */ = {isa = PBXFileReference; name = "Kalam-Light.ttf"; path = "../assets/fonts/Kalam-Light.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +176,9 @@
 				C8A965036F20461BB74F9C2E /* spacemono_italic.ttf */,
 				BE622D3CC2ED42A382C9C66B /* spacemono_regular.ttf */,
 				C4423020C46440F8BE0B4125 /* AMS-Samanya-Bold.ttf */,
+				E055843442744C9CAE6AEFE8 /* Tillana-Regular.ttf */,
+				1DEF642DBFC3427FAD4074DD /* Kalam-Regular.ttf */,
+				7BB15321E4C14ABE946D3BFD /* Kalam-Light.ttf */,
 			);
 			name = Resources;
 			path = "";
@@ -262,6 +271,9 @@
 				4F96210F76114B848D4A28E0 /* spacemono_regular.ttf in Resources */,
 				D5AACA5FEEB5E55E21F8AFAE /* PrivacyInfo.xcprivacy in Resources */,
 				7426FFDBFEB64CD392F1CF9D /* AMS-Samanya-Bold.ttf in Resources */,
+				DDDAC187532045EBAE621063 /* Tillana-Regular.ttf in Resources */,
+				C9862D232C314F6B86E375EA /* Kalam-Regular.ttf in Resources */,
+				0EEDECE605494AC7ABAE703B /* Kalam-Light.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

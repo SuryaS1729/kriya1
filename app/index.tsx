@@ -121,7 +121,7 @@ export default function Home() {
     >
       <Pressable
         onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
           toggle(item.id);
         }}
         onLongPress={() => remove(item.id)}
@@ -238,7 +238,7 @@ export default function Home() {
           <Link href="/history" asChild>
             <Pressable >
               <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
-              <Feather name="user" size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
+              <Feather name='user' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
               </View>
             </Pressable>
           </Link>

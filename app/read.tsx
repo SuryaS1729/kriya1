@@ -32,12 +32,13 @@ export default function Read() {
       <Text style={styles.title}>Bhagavad Gita</Text>
 
       <TextInput
-        placeholder="Search shlokas… (Sanskrit or English)"
+        placeholder="Search shlokas . . ."
         value={query}
         onChangeText={setQuery}
         style={styles.search}
         returnKeyType="search"
         autoCorrect={false}
+        placeholderTextColor={"black"}
       />
 
       {query.trim() ? (

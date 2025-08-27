@@ -126,7 +126,7 @@ export default function ShlokaDetail() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingTop: insets.top + 28,
-          paddingHorizontal: 24,
+          paddingHorizontal: 22,
           paddingBottom: 120,
         }}
         onScroll={Animated.event(
@@ -162,7 +162,7 @@ export default function ShlokaDetail() {
               Adhyaya {row!.chapter_number}, Shloka {row!.verse_number}
             </Text>
 
-            <Text style={styles.section}>Shloka :</Text>
+
             <Text style={styles.sa}>{row!.text}</Text>
 
             {row!.transliteration ? (
@@ -246,8 +246,8 @@ fontStyle: 'italic',
     color: '#545454',
     fontWeight:600,
     // backgroundColor:"red",
-    paddingVertical:20,
-    marginVertical:10
+marginBottom: 42,
+    textAlign:'center'
   },
 
   section: {
@@ -262,8 +262,10 @@ fontStyle: 'italic',
     paddingVertical:10,
     marginVertical:10
   },
-  sa: { color: '#545454', fontSize: 18, lineHeight: 14 },
-  en: { color: '#545454', fontSize: 20, lineHeight: 26 ,fontFamily:"Alegreya",
+  sa: { color: '#545454', fontSize: 20, lineHeight: 20,fontFamily:"Kalam",
+    fontWeight:"400",
+    fontStyle:"normal", paddingTop:6 , textAlign:'center', marginBottom:10},
+  en: { color: '#545454', fontSize: 19, lineHeight: 26 ,fontFamily:"Alegreya",
     fontWeight:"400",
     fontStyle:"normal"},
 

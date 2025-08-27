@@ -5,17 +5,18 @@ type Props = {
   title?: string;
   variant?: 'back' | 'close' | 'none'; // back arrow vs. close (for modals)
   right?: React.ReactNode;            // e.g., a Save button
+  isDarkMode?: boolean;
 };
 
-export function TopBar({ title, variant = 'back', right }: Props) {
+export function TopBar({ title, variant = 'back', right, isDarkMode }: Props) {
   return (
     <View style={styles.wrap}>
       {variant === 'none' ? <View style={styles.side} /> : (
         <Pressable onPress={() => router.back()} hitSlop={12} style={styles.btn}>
-          <Text style={styles.icon}>{variant === 'back' ? '←' : '✕'}</Text>
+          <Text style={[styles.icon, { color: isDarkMode ? '#f9fafb' : '#111827' }]}>{variant === 'back' ? '←' : '✕'}</Text>
         </Pressable>
       )}
-      <Text style={styles.title} numberOfLines={1}>{title ?? ''}</Text>
+      <Text style={[styles.title, { color: isDarkMode ? '#f9fafb' : '#111827' }]} numberOfLines={1}>{title ?? ''}</Text>
       <View style={styles.side}>{right}</View>
     </View>
   );
@@ -30,8 +31,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#ffffffff',
-    backgroundColor: 'white',
+    borderBottomColor: 'transparent',
+    backgroundColor: 'transparent',
   },
   btn: { padding: 6 },
   icon: { fontSize: 20, color: '#111827' },

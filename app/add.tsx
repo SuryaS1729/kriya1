@@ -41,6 +41,7 @@ export default function Add() {
   const addTask    = useKriya(s => s.addTask);
   const toggle     = useKriya(s => s.toggleTask);
   const remove     = useKriya(s => s.removeTask);
+  const isDarkMode = useKriya(s => s.isDarkMode);
 
   // Calculate dynamic placeholder text
   const placeholderText = useMemo(() => {
@@ -50,11 +51,6 @@ export default function Add() {
   useEffect(() => {
     const t = setTimeout(() => inputRef.current?.focus(), 150);
     return () => clearTimeout(t);
-  //    const interaction = InteractionManager.runAfterInteractions(() => {
-  //   inputRef.current?.focus();
-  // });
-  
-  // return () => interaction.cancel();
   }, []);
 
   // Animate rotation when text changes
@@ -84,11 +80,11 @@ export default function Add() {
     if (!t) return;
     addTask(t);
     setText('');
-    // requestAnimationFrame(() => inputRef.current?.focus());
-      setTimeout(() => {
-    inputRef.current?.focus();
-  }, 0);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   }
+  
   function doneAndClose() {
     Keyboard.dismiss();
     router.back();
@@ -103,10 +99,14 @@ export default function Add() {
     <Pressable
       onPress={() => toggle(item.id)}
       onLongPress={() => remove(item.id)}
-      style={styles.row}
+      style={[styles.row, { borderBottomColor: isDarkMode ? '#374151' : '#f1f5f9' }]}
       android_ripple={{ color: '#eee' }}
     >
-      <View style={[styles.checkbox, item.completed ? styles.checkboxOn : styles.checkboxOff]}>
+      <View style={[
+        styles.checkbox, 
+        item.completed ? styles.checkboxOn : styles.checkboxOff,
+        isDarkMode && !item.completed && { backgroundColor: '#4b5563', borderColor: '#6b7280' }
+      ]}>
         {item.completed && (
           <Feather
             name="check"
@@ -115,51 +115,61 @@ export default function Add() {
           />
         )}
       </View>
-      <Text style={[styles.title, item.completed && styles.done]} numberOfLines={2}>
+      <Text style={[
+        styles.title, 
+        { color: item.completed 
+          ? (isDarkMode ? '#94a3b8' : '#94a3b8')  // Same gray for completed tasks
+          : (isDarkMode ? '#f9fafb' : '#111827')   // Different colors for active tasks
+        },
+        item.completed && { textDecorationLine: 'line-through' }
+      ]} numberOfLines={2}>
         {item.title}
       </Text>
     </Pressable>
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }} edges={['top']}>
+    <SafeAreaView style={[{ flex: 1 }, { backgroundColor: isDarkMode ? '#021923ff' : 'white' }]} edges={['top']}>
       <KeyboardAvoidingView
-        // iOS uses 'padding' (best), Android prefers 'height' to avoid jumpiness
         behavior={Platform.select({ ios: 'padding', android: 'height' })}
-        // Offset by the custom header height so iOS calculates correctly
         keyboardVerticalOffset={Platform.OS === 'ios' ?  HEADER_HEIGHT + insets.top : 0}
         style={{ flex: 1 }}
       >
         <TopBar
           title="Quick Add"
           variant="close"
-          right={<Pressable onPress={doneAndClose}><Text style={styles.link}>Done</Text></Pressable>}
+          right={<Pressable onPress={doneAndClose}><Text style={[styles.link, { color: isDarkMode ? '#60a5fa' : '#2563eb' }]}>Done</Text></Pressable>}
+          isDarkMode={isDarkMode}
         />
 
         {/* Main content column: list grows, input bar sits at the bottom */}
         <View style={{ flex: 1 }}>
           <View style={styles.headerRow}>
-            <Text style={styles.subhead}>
+            <Text style={[styles.subhead, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
               Today • {tasksToday.length} total, {remaining} remaining
             </Text>
           </View>
 
           <FlatList
-            // data={tasksToday}
             data={[...tasksToday].reverse()}
             keyExtractor={t => String(t.id)}
             renderItem={renderItem}
-            ItemSeparatorComponent={() => <View style={styles.sep} />}
-             ListEmptyComponent={() => (
-            <View style={styles.emptyState}>
-              <Feather name="sunrise" size={48} color="#cbd5e1" />
-              <Text style={styles.emptyStateTitle}>Fresh Start</Text>
-              <Text style={styles.emptyStateSubtitle}>
-                No tasks yet. Add your first task to begin your day.
-              </Text>
-            </View>
-          )}
-            // Give the list bottom padding so last items aren't hidden behind the input bar
+            ItemSeparatorComponent={() => <View style={[styles.sep, { backgroundColor: isDarkMode ? '#1a2535ff' : '#f1f5f9' }]} />}
+            ListEmptyComponent={() => (
+              <View style={styles.emptyState}>
+                <Feather name="sunrise" size={48} color={isDarkMode ? "#6b7280" : "#cbd5e1"} />
+                <Text style={[
+                  styles.emptyStateTitle,
+                  { color: isDarkMode ? '#9ca3af' : '#64748b' }
+                ]}>Fresh Start</Text>
+                <Text style={[
+                  styles.emptyStateSubtitle,
+                  { color: isDarkMode ? '#6b7280' : '#94a3b8' }
+                ]}>
+                  No tasks yet. Add your first task to begin your day.
+                </Text>
+              </View>
+            )}
             contentContainerStyle={{  flexGrow: 1,padding: 12,  paddingBottom: 16 + 56 + insets.bottom  }}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={Platform.OS === 'ios' ? 'on-drag' : 'none'}
@@ -167,7 +177,7 @@ export default function Add() {
           />
 
           {/* INPUT BAR — stays at the bottom, lifted by KeyboardAvoidingView */}
-          <View style={[styles.inputBar, { paddingBottom: 8}]}>
+          <View style={[styles.inputBar,{ backgroundColor: isDarkMode ? '#021923ff' : 'white' }, { paddingBottom: 8}]}>
             <Pressable onPress={addAndStay}>
             <View style={styles.addTaskIcon}>
               <AnimatedFeather 
@@ -183,7 +193,7 @@ export default function Add() {
               value={text}
               onChangeText={setText}
               placeholder={placeholderText}
-              style={styles.input}
+              style={[styles.input, { color: isDarkMode ? '#f9fafb' : '#111827' }]}
               returnKeyType="done"
               onSubmitEditing={addAndStay}
               placeholderTextColor="#9ca3af"
@@ -209,7 +219,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  checkboxOn: { backgroundColor: '#AADBA3' },
+  checkboxOn: {  backgroundColor: '#AADBA3' },
   checkboxOff: { backgroundColor: '#cbd5e1' },
   title: { 
     flex: 1, 
@@ -220,7 +230,7 @@ const styles = StyleSheet.create({
     fontStyle:"normal" },
   done: { opacity: 0.6, textDecorationLine: 'line-through',    color: '#94a3b8', 
  },
-  sep: { height: 1, backgroundColor: '#f1f5f9', marginLeft: 16 },
+  sep: { height: 0.5, backgroundColor: '#f1f5f9', marginLeft: 16 },
 
   // bottom input bar
   inputBar: {
@@ -230,7 +240,7 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     backgroundColor: 'white', // Change from pink to white
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#e5e7eb', // Change from red to gray
+    borderTopColor: 'transparent', // Change from red to gray
     gap:8,
     marginBottom:0
 
@@ -272,7 +282,6 @@ const styles = StyleSheet.create({
     
 
   },
-  // ...existing code...
   emptyState: {
     flex: 1,
     justifyContent: 'center',
@@ -295,5 +304,4 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     fontFamily: "Alegreya",
   },
-// ...existing code...
 });

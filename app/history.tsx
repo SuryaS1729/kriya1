@@ -5,7 +5,7 @@ import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, Link } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialIcons } from '@expo/vector-icons';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -240,6 +240,13 @@ export default function History() {
         renderItem={renderDay}
         contentContainerStyle={{ paddingBottom: 40 }}
       />
+
+      <Link href="/bookmarks" asChild>
+        <Pressable style={styles.bookmarksButton}>
+          <MaterialIcons name="bookmark" size={24} color="#f59e0b" />
+          <Text style={styles.bookmarksText}>View Bookmarks</Text>
+        </Pressable>
+      </Link>
     </SafeAreaView>
   );
 }
@@ -271,6 +278,21 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  bookmarksButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#fef9c3',
+    marginTop: 16,
+  },
+  bookmarksText: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginLeft: 8,
+    color: '#f59e0b',
   },
   
   // Heatmap styles

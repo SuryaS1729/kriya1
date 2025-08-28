@@ -37,7 +37,25 @@ type State = {
   // dark mode
   isDarkMode: boolean;
   toggleDarkMode: () => void;
+
+  // bookmarks
+  bookmarks: Bookmark[];
+  addBookmark: (shlokaIndex: number, shlokaData: ShlokaRow) => void;
+  removeBookmark: (shlokaIndex: number) => void;
+  isBookmarked: (shlokaIndex: number) => boolean;
+  getBookmarks: () => Bookmark[];
 };
+
+// Add bookmark interface
+export interface Bookmark {
+  id: number;
+  shlokaIndex: number;
+  chapter: number;
+  verse: number;
+  text: string;
+  translation: string;
+  createdAt: string;
+}
 
 export const useKriya = create<State>()(
   persist(
@@ -45,6 +63,7 @@ export const useKriya = create<State>()(
       ready: false,
       tasksToday: [],
       isDarkMode: false, // Default to light mode
+      bookmarks: [],
 
       init: () => {
         if (!isDbReady()) {
@@ -124,13 +143,45 @@ export const useKriya = create<State>()(
       toggleDarkMode: () => {
         set((state) => ({ isDarkMode: !state.isDarkMode }));
       },
+
+      addBookmark: (shlokaIndex, shlokaData) => {
+        const existing = get().bookmarks.find(b => b.shlokaIndex === shlokaIndex);
+        if (existing) return; // Already bookmarked
+        
+        const newBookmark: Bookmark = {
+          id: Date.now(), // Simple ID generation
+          shlokaIndex,
+          chapter: shlokaData.chapter_number,
+          verse: shlokaData.verse_number,
+          text: shlokaData.text,
+          translation: shlokaData.translation_2,
+          createdAt: new Date().toISOString(),
+        };
+        
+        set(state => ({
+          bookmarks: [...state.bookmarks, newBookmark]
+        }));
+      },
+
+      removeBookmark: (shlokaIndex) => {
+        set(state => ({ bookmarks: state.bookmarks.filter(b => b.shlokaIndex !== shlokaIndex) }));
+      },
+
+      isBookmarked: (shlokaIndex) => {
+        return get().bookmarks.some(b => b.shlokaIndex === shlokaIndex);
+      },
+
+      getBookmarks: () => {
+        return get().bookmarks;
+      },
     }),
     {
       name: 'kriya-storage',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({ 
-        isDarkMode: state.isDarkMode 
-      }), // Only persist the dark mode setting
+        isDarkMode: state.isDarkMode,
+        bookmarks: state.bookmarks  // Add this line!
+      }),
     }
   )
 );

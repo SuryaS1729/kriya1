@@ -24,6 +24,8 @@ import { useKriya } from '../../lib/store';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+
 const PILL_W = 180;
 
 export default function ShlokaDetail() {
@@ -112,6 +114,23 @@ export default function ShlokaDetail() {
   const invalidIndex = currentIndex == null;
   const loading = !row && !invalidIndex;
 
+  const addBookmark = useKriya(s => s.addBookmark);
+  const removeBookmark = useKriya(s => s.removeBookmark);
+  
+  // Use a more reactive approach - directly access the bookmarks array
+  const bookmarks = useKriya(s => s.bookmarks || []);
+  const bookmarked = currentIndex !== null ? bookmarks.some(b => b.shlokaIndex === currentIndex) : false;
+
+  const toggleBookmark = () => {
+    if (currentIndex === null || !row) return;
+    
+    if (bookmarked) {
+      removeBookmark(currentIndex);
+    } else {
+      addBookmark(currentIndex, row);
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['right', 'bottom', 'left']}>
       <StatusBar style={isDarkMode ? "light" : "dark"} />
@@ -133,11 +152,25 @@ export default function ShlokaDetail() {
           <Pressable onPress={() => router.back()} hitSlop={16}>
             <Text style={[styles.headerIcon, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>✕</Text>
           </Pressable>
-          <Link href={`/share?shlokaId=${currentIndex}`} asChild>
-            <Pressable hitSlop={16}>
-              <FontAwesome5 name="share" size={20} color={isDarkMode ? '#9ca3af' : '#696969ff'} />
+          
+          <View style={styles.headerActions}>
+            <Pressable onPress={toggleBookmark} hitSlop={16} style={styles.actionButton}>
+              <MaterialIcons 
+                name={bookmarked ? "bookmark" : "bookmark-border"} 
+                size={24} 
+                color={bookmarked 
+                  ? (isDarkMode ? '#fbbf24' : '#f59e0b') 
+                  : (isDarkMode ? '#9ca3af' : '#696969ff')
+                } 
+              />
             </Pressable>
-          </Link>
+            
+            <Link href={`/share?shlokaId=${currentIndex}`} asChild>
+              <Pressable hitSlop={16} style={styles.actionButton}>
+                <FontAwesome5 name="share" size={20} color={isDarkMode ? '#9ca3af' : '#696969ff'} />
+              </Pressable>
+            </Link>
+          </View>
         </View>
 
         {/* Body states */}
@@ -299,4 +332,12 @@ const styles = StyleSheet.create({
   pillBtn: { paddingHorizontal: 8, paddingVertical: 6 },
   pillIcon: { fontSize: 21, fontWeight: '700' },
   disabled: { opacity: 1 },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  actionButton: {
+    padding: 4,
+  },
 });

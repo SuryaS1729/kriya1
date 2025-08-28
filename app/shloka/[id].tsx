@@ -20,6 +20,7 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { useKriya } from '../../lib/store';
+import * as Haptics from 'expo-haptics';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -121,15 +122,49 @@ export default function ShlokaDetail() {
   const bookmarks = useKriya(s => s.bookmarks || []);
   const bookmarked = currentIndex !== null ? bookmarks.some(b => b.shlokaIndex === currentIndex) : false;
 
+  // Add animation ref (remove rotation ref)
+  const bookmarkScale = useRef(new Animated.Value(1)).current;
+
   const toggleBookmark = () => {
     if (currentIndex === null || !row) return;
     
+    // Haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    // Snappier animation sequence - no rotation
+    const scaleAnimation = Animated.sequence([
+      Animated.timing(bookmarkScale, {
+        toValue: 0.7,
+        duration: 80,
+        useNativeDriver: true,
+      }),
+      Animated.spring(bookmarkScale, {
+        toValue: 1.2,
+        useNativeDriver: true,
+        tension: 200,
+        friction: 4,
+      }),
+      Animated.spring(bookmarkScale, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 200,
+        friction: 6,
+      }),
+    ]);
+
+    // Run animation
+    scaleAnimation.start();
+    
+    // Update state
     if (bookmarked) {
       removeBookmark(currentIndex);
     } else {
       addBookmark(currentIndex, row);
     }
   };
+
+  // Create interpolated values
+  const animatedScale = bookmarkScale;
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['right', 'bottom', 'left']}>
@@ -155,14 +190,20 @@ export default function ShlokaDetail() {
           
           <View style={styles.headerActions}>
             <Pressable onPress={toggleBookmark} hitSlop={16} style={styles.actionButton}>
-              <MaterialIcons 
-                name={bookmarked ? "bookmark" : "bookmark-border"} 
-                size={24} 
-                color={bookmarked 
-                  ? (isDarkMode ? '#fbbf24' : '#f59e0b') 
-                  : (isDarkMode ? '#9ca3af' : '#696969ff')
-                } 
-              />
+              <Animated.View
+                style={{
+                  transform: [{ scale: bookmarkScale }],
+                }}
+              >
+                <MaterialIcons 
+                  name={bookmarked ? "bookmark" : "bookmark-border"} 
+                  size={24} 
+                  color={bookmarked 
+                    ? (isDarkMode ? '#fbbf24' : '#f59e0b') 
+                    : (isDarkMode ? '#9ca3af' : '#696969ff')
+                  } 
+                />
+              </Animated.View>
             </Pressable>
             
             <Link href={`/share?shlokaId=${currentIndex}`} asChild>

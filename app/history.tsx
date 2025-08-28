@@ -242,9 +242,11 @@ export default function History() {
       />
 
       <Link href="/bookmarks" asChild>
-        <Pressable style={styles.bookmarksButton}>
+        <Pressable >
+          <View style={styles.bookmarksButton}>
           <MaterialIcons name="bookmark" size={24} color="#f59e0b" />
           <Text style={styles.bookmarksText}>View Bookmarks</Text>
+          </View>
         </Pressable>
       </Link>
     </SafeAreaView>
@@ -287,6 +289,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#fef9c3',
     marginTop: 16,
+    marginBottom: 16,
   },
   bookmarksText: {
     fontSize: 16,

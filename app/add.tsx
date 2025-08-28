@@ -23,6 +23,7 @@ import Animated, {
   interpolate
 } from 'react-native-reanimated';
 import { InteractionManager } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Create animated Feather component
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
@@ -129,7 +130,13 @@ export default function Add() {
   );
 
   return (
-    <SafeAreaView style={[{ flex: 1 }, { backgroundColor: isDarkMode ? '#021923ff' : 'white' }]} edges={['top']}>
+    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+      {/* Add gradient background */}
+      <LinearGradient 
+        colors={isDarkMode ? ['#031d31e7', '#000000ff'] : ['#ffffffff', '#9FABC8']} 
+        style={StyleSheet.absoluteFill} 
+      />
+      
       <KeyboardAvoidingView
         behavior={Platform.select({ ios: 'padding', android: 'height' })}
         keyboardVerticalOffset={Platform.OS === 'ios' ?  HEADER_HEIGHT + insets.top : 0}
@@ -170,23 +177,35 @@ export default function Add() {
                 </Text>
               </View>
             )}
-            contentContainerStyle={{  flexGrow: 1,padding: 12,  paddingBottom: 16 + 56 + insets.bottom  }}
+            contentContainerStyle={{  
+              flexGrow: 1,
+              padding: 12,  
+              paddingBottom: 16 + 56 + insets.bottom  
+            }}
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={Platform.OS === 'ios' ? 'on-drag' : 'none'}
-            
           />
 
           {/* INPUT BAR — stays at the bottom, lifted by KeyboardAvoidingView */}
-          <View style={[styles.inputBar,{ backgroundColor: isDarkMode ? '#021923ff' : 'white' }, { paddingBottom: 8}]}>
+          <View style={[
+            styles.inputBar,
+            { 
+              backgroundColor: 'transparent', // Make transparent to show gradient
+              paddingBottom: 8
+            }
+          ]}>
             <Pressable onPress={addAndStay}>
-            <View style={styles.addTaskIcon}>
-              <AnimatedFeather 
-                name="arrow-right" 
-                size={22} 
-                color="#606060ff" 
-                style={animatedIconStyle}
-              />
-            </View>
+              <View style={[
+                styles.addTaskIcon,
+                { backgroundColor: isDarkMode ? '#374151' : '#E6E6E6' }
+              ]}>
+                <AnimatedFeather 
+                  name="arrow-right" 
+                  size={22} 
+                  color={isDarkMode ? '#9ca3b8' : '#606060ff'} 
+                  style={animatedIconStyle}
+                />
+              </View>
             </Pressable>
             <TextInput
               ref={inputRef}
@@ -196,9 +215,8 @@ export default function Add() {
               style={[styles.input, { color: isDarkMode ? '#f9fafb' : '#111827' }]}
               returnKeyType="done"
               onSubmitEditing={addAndStay}
-              placeholderTextColor="#9ca3af"
-                blurOnSubmit={false} // Add this - prevents keyboard from closing on submit
-
+              placeholderTextColor={isDarkMode ? '#6b7280' : '#9ca3af'}
+              blurOnSubmit={false}
             />
           </View>
         </View>
@@ -238,9 +256,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: 8,
-    backgroundColor: 'white', // Change from pink to white
+    backgroundColor: 'transparent', // Changed from white to transparent
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'transparent', // Change from red to gray
+    borderTopColor: 'transparent',
     gap:8,
     marginBottom:0
 

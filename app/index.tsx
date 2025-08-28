@@ -19,6 +19,7 @@ import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, G, Path } from 'react-native-svg';
+import { AnimatedFlashList, FlashList } from '@shopify/flash-list';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
@@ -138,6 +139,24 @@ export default function Home() {
 >
   {item.title}
 </Text>
+
+ {/* Delete button */}
+      <Pressable
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          remove(item.id);
+        }}
+        hitSlop={8}
+        style={styles.deleteButton}
+      >
+        <Text style={[
+          styles.deleteIcon, 
+          { color: isDarkMode ? '#6b7280' : '#94a3b8' }
+        ]}>
+          ✕
+        </Text>
+      </Pressable>
+
       </Pressable>
     </Animated.View>
   );
@@ -290,7 +309,7 @@ const styles = StyleSheet.create({
   topHalf: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 1,
     paddingVertical:0
   },
   card: {
@@ -299,12 +318,13 @@ const styles = StyleSheet.create({
     height: 300,
     borderRadius: 16,
     paddingTop: 20,
-    paddingHorizontal: 13,
+    paddingHorizontal: 1,
     paddingBottom: 10,
   },
   headerSection: {
     width: '100%',
     marginBottom: 0,
+    marginTop:6,
     alignItems:'center',
   },
   contentSection: {
@@ -340,9 +360,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    paddingHorizontal: 16,
+    paddingHorizontal: 6,
     paddingBottom: 0,
-    paddingTop: 10,
+    paddingTop: 5,
   },
    profileButton: {
     width: 36,
@@ -366,7 +386,7 @@ const styles = StyleSheet.create({
     // paddingTop: 20,
 
      flex: 1,
-    fontSize: 18,
+    fontSize: 20,
     lineHeight: 24,
     color: '#565657ff',
     textAlign: 'center',
@@ -426,6 +446,18 @@ const styles = StyleSheet.create({
     fontFamily:"SourceSerifPro",
     fontWeight:"300",
     fontStyle:"normal"
+  },
+  deleteButton: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  deleteIcon: {
+    fontSize: 11,
+    fontWeight: '600',
+    opacity: 0.5,
   },
   checkbox: {
     width: 20,

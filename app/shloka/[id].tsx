@@ -211,7 +211,7 @@ export default function ShlokaDetail() {
               bottom: insets.bottom + 20,
               transform: [{ translateY: pillTranslateY }],
               opacity: pillOpacity,
-              backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(4, 37, 77, 0.81)',
+              backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(148, 168, 193, 0.81)',
               borderColor: isDarkMode ? 'rgba(71, 85, 105, 0.6)' : 'rgba(255, 255, 255, 0.43)',
             },
           ]}
@@ -223,7 +223,7 @@ export default function ShlokaDetail() {
             style={[styles.pillBtn, prevIndex == null && styles.disabled]}
           >
             <AntDesign 
-              style={[styles.pillIcon, { color: prevIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#65a25cff' : 'green') }]} 
+              style={[styles.pillIcon, { color: prevIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 
               name="arrowleft" 
               size={32} 
             />
@@ -231,7 +231,7 @@ export default function ShlokaDetail() {
 
           <Link href="/read" asChild>
             <Pressable hitSlop={12} style={styles.pillBtn}>
-              <FontAwesome5 name="scroll" size={20} color={isDarkMode ? '#f9fafb' : 'white'} />
+              <FontAwesome5 name="book" size={20} color={isDarkMode ? '#f9fafb' : '#18464aff'} />
             </Pressable>
           </Link>
 
@@ -242,7 +242,7 @@ export default function ShlokaDetail() {
             style={[styles.pillBtn, nextIndex == null && styles.disabled]}
           >
             <AntDesign 
-              style={[styles.pillIcon, { color: nextIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#65a25cff' : 'green') }]} 
+              style={[styles.pillIcon, { color: nextIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 
               name="arrowright" 
               size={32} 
             />

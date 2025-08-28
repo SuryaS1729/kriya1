@@ -100,7 +100,7 @@ export default function Add() {
       onPress={() => toggle(item.id)}
       onLongPress={() => remove(item.id)}
       style={[styles.row, { borderBottomColor: isDarkMode ? '#374151' : '#f1f5f9' }]}
-      android_ripple={{ color: '#eee' }}
+      android_ripple={{ color: '#eeeeee1c' }}
     >
       <View style={[
         styles.checkbox, 
@@ -138,7 +138,7 @@ export default function Add() {
         <TopBar
           title="Quick Add"
           variant="close"
-          right={<Pressable onPress={doneAndClose}><Text style={[styles.link, { color: isDarkMode ? '#60a5fa' : '#2563eb' }]}>Done</Text></Pressable>}
+          right={<Pressable onPress={doneAndClose}><Text style={[styles.link, { color: isDarkMode ? '#60a5fa' : '#2563eb' }]}></Text></Pressable>}
           isDarkMode={isDarkMode}
         />
 

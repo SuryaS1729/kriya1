@@ -109,12 +109,6 @@ export default function ShlokaDetail() {
     router.setParams({ id: String(nextIndex) });
   };
 
-  // auto-hide pill on scroll
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const clamped = Animated.diffClamp(scrollY, 0, 60);
-  const pillTranslateY = clamped.interpolate({ inputRange: [0, 60], outputRange: [0, 64] });
-  const pillOpacity = clamped.interpolate({ inputRange: [0, 60], outputRange: [1, 0] });
-
   const invalidIndex = currentIndex == null;
   const loading = !row && !invalidIndex;
 
@@ -133,11 +127,6 @@ export default function ShlokaDetail() {
           paddingHorizontal: 22,
           paddingBottom: 120,
         }}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
-        )}
-        scrollEventThrottle={16}
       >
         {/* Header row */}
         <View style={styles.headerRow}>
@@ -202,15 +191,13 @@ export default function ShlokaDetail() {
         )}
       </Animated.ScrollView>
 
-      {/* Floating pill: ◀  📖  ▶  (auto-hides on scroll) */}
+      {/* Floating pill: ◀  📖  ▶  (now fixed in position) */}
       {!invalidIndex && (
         <Animated.View
           style={[
             styles.pillWrap,
             {
               bottom: insets.bottom + 20,
-              transform: [{ translateY: pillTranslateY }],
-              opacity: pillOpacity,
               backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(148, 168, 193, 0.81)',
               borderColor: isDarkMode ? 'rgba(71, 85, 105, 0.6)' : 'rgba(255, 255, 255, 0.43)',
             },
@@ -298,7 +285,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   pillWrap: {
     position: 'absolute',
-    left: '26%',
+    left: '50%',
     width: PILL_W,
     height: 48,
     borderRadius: 24,

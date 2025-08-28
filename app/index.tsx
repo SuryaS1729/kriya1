@@ -234,7 +234,7 @@ export default function Home() {
           <Pressable onPress={handleTogglePress}>
             <Animated.View style={[
               styles.toggleButton,
-              { backgroundColor: isDarkMode ? '#4b5563' : '#ffffffff' }
+              { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' }
             ]}>
               <Text style={[
                 styles.toggleText,
@@ -250,7 +250,7 @@ export default function Home() {
       {/* Tasks Section */}
       <View style={[
         styles.tasksContainer,
-        { backgroundColor: isDarkMode ? '#021923ff' : 'white', paddingBottom: insets.bottom }
+        { backgroundColor: isDarkMode ? '#03233181' : '#ffffffe0', paddingBottom: insets.bottom }
       ]}>
         <View style={styles.tasksHeader}>
           <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#848fa9ff' }]}>Today's Tasks</Text>
@@ -287,7 +287,7 @@ export default function Home() {
         
         <Link href="/add" asChild>
           <Pressable>
-            <View style={[styles.addTaskButton, {backgroundColor: isDarkMode ? '#1b293dff' : '#f9fafb'}]}>
+            <View style={[styles.addTaskButton, {backgroundColor: isDarkMode ? '#1b293d91' : '#f9fafb'}]}>
             <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#112130ff' : '#E6E6E6' }]}>
               <Feather name="plus" size={20} color={isDarkMode ? "#ffffffff" : "#606060"} />
             </View>
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   topHalf: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 1,
+    paddingHorizontal: 8,
     paddingVertical:0
   },
   card: {
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
     height: 300,
     borderRadius: 16,
     paddingTop: 20,
-    paddingHorizontal: 1,
+    paddingHorizontal: 5,
     paddingBottom: 10,
   },
   headerSection: {
@@ -346,9 +346,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 16,
-    backgroundColor: '#ffffffff',
+    backgroundColor: '#fffffffe',
     overflow: 'hidden',
     marginTop: 0, 
+
   },
   toggleText: {
     color: '#000000ff',
@@ -360,7 +361,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
     paddingBottom: 0,
     paddingTop: 5,
   },

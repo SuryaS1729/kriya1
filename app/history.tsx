@@ -355,7 +355,7 @@ const lightStyles = StyleSheet.create({
 
 // Dark theme styles
 const darkStyles = StyleSheet.create({
-  container: { backgroundColor: '#1f2937' },
+  container: { backgroundColor: '#1f2937ff' },
   h1: { color: '#f9fafb' },
   headerIcon: { color: '#d1d5db' },
   darkModeToggle: { backgroundColor: '#374151' },

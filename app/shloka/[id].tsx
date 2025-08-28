@@ -10,7 +10,6 @@ import {
   Text,
   View,
   Pressable,
-
 } from 'react-native';
 import {
   getShlokaAt,
@@ -20,6 +19,7 @@ import {
 } from '../../lib/shloka';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
+import { useKriya } from '../../lib/store';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -32,6 +32,7 @@ export default function ShlokaDetail() {
   const navigation = useNavigation();
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const allowExitRef = useRef(false);
+  const isDarkMode = useKriya(s => s.isDarkMode);
 
   // Intercept any "go back" gesture/button → go Home (and avoid loops)
   useEffect(() => {
@@ -119,8 +120,11 @@ export default function ShlokaDetail() {
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['right', 'bottom', 'left']}>
-      <StatusBar style="dark" />
-      <LinearGradient colors={['#ffffffff', '#9FABC8']} style={StyleSheet.absoluteFill} />
+      <StatusBar style={isDarkMode ? "light" : "dark"} />
+      <LinearGradient 
+        colors={isDarkMode ? ['#344c67ff', '#000000ff'] : ['#ffffffff', '#9FABC8']} 
+        style={StyleSheet.absoluteFill} 
+      />
 
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
@@ -138,47 +142,60 @@ export default function ShlokaDetail() {
         {/* Header row */}
         <View style={styles.headerRow}>
           <Pressable onPress={() => router.back()} hitSlop={16}>
-            <Text style={styles.headerIcon}>✕</Text>
+            <Text style={[styles.headerIcon, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>✕</Text>
           </Pressable>
-         <Link href={`/share?shlokaId=${currentIndex}`} asChild>
-  <Pressable hitSlop={16}>
-    <FontAwesome5 name="share" size={20} color="#696969ff" />
-  </Pressable>
-</Link>
+          <Link href={`/share?shlokaId=${currentIndex}`} asChild>
+            <Pressable hitSlop={16}>
+              <FontAwesome5 name="share" size={20} color={isDarkMode ? '#9ca3af' : '#696969ff'} />
+            </Pressable>
+          </Link>
         </View>
 
         {/* Body states */}
         {invalidIndex ? (
           <View style={styles.center}>
-            <Text style={{ color: 'white' }}>Invalid shloka index.</Text>
+            <Text style={{ color: isDarkMode ? '#d1d5db' : '#545454' }}>Invalid shloka index.</Text>
           </View>
         ) : loading ? (
           <View style={styles.center}>
-            <Text style={{ color: 'white' }}>Loading…</Text>
+            <Text style={{ color: isDarkMode ? '#d1d5db' : '#545454' }}>Loading…</Text>
           </View>
         ) : (
           <Animated.View style={{ opacity: fade }}>
-            <Text style={styles.headerTitle}>
+            <Text style={[styles.headerTitle, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>
               Adhyaya {row!.chapter_number}, Shloka {row!.verse_number}
             </Text>
 
-
-            <Text style={styles.sa}>{row!.text}</Text>
+            <Text style={[styles.sa, { color: isDarkMode ? '#e5e7eb' : '#545454' }]}>
+              {row!.text}
+            </Text>
 
             {row!.transliteration ? (
               <>
-                <Text style={styles.section}>Transliteration :</Text>
-                <Text style={styles.en}>{row!.transliteration}</Text>
+                <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
+                  Transliteration :
+                </Text>
+                <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>
+                  {row!.transliteration}
+                </Text>
               </>
             ) : null}
 
-            <Text style={styles.section}>Translation :</Text>
-            <Text style={styles.en}>{row!.translation_2 ?? row!.description ?? '—'}</Text>
+            <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
+              Translation :
+            </Text>
+            <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>
+              {row!.translation_2 ?? row!.description ?? '—'}
+            </Text>
 
             {row!.commentary ? (
               <>
-                <Text style={styles.section}>Commentary :</Text>
-                <Text style={styles.en}>{row!.commentary}</Text>
+                <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
+                  Commentary :
+                </Text>
+                <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>
+                  {row!.commentary}
+                </Text>
               </>
             ) : null}
           </Animated.View>
@@ -194,6 +211,8 @@ export default function ShlokaDetail() {
               bottom: insets.bottom + 20,
               transform: [{ translateY: pillTranslateY }],
               opacity: pillOpacity,
+              backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(4, 37, 77, 0.81)',
+              borderColor: isDarkMode ? 'rgba(71, 85, 105, 0.6)' : 'rgba(255, 255, 255, 0.43)',
             },
           ]}
         >
@@ -203,14 +222,16 @@ export default function ShlokaDetail() {
             hitSlop={12}
             style={[styles.pillBtn, prevIndex == null && styles.disabled]}
           >
-            {/* <Text style={styles.pillIcon}>◀</Text> */}
-            <AntDesign style={styles.pillIcon} name="arrowleft" size={32} color="green" />
-
+            <AntDesign 
+              style={[styles.pillIcon, { color: prevIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#65a25cff' : 'green') }]} 
+              name="arrowleft" 
+              size={32} 
+            />
           </Pressable>
 
           <Link href="/read" asChild>
             <Pressable hitSlop={12} style={styles.pillBtn}>
-              <FontAwesome5 name="scroll" size={20} color="white" />
+              <FontAwesome5 name="scroll" size={20} color={isDarkMode ? '#f9fafb' : 'white'} />
             </Pressable>
           </Link>
 
@@ -220,9 +241,11 @@ export default function ShlokaDetail() {
             hitSlop={12}
             style={[styles.pillBtn, nextIndex == null && styles.disabled]}
           >
-            {/* <Text style={styles.pillIcon} >▶</Text> */}
-            <AntDesign style={styles.pillIcon} name="arrowright" size={32} color="green" />
-
+            <AntDesign 
+              style={[styles.pillIcon, { color: nextIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#65a25cff' : 'green') }]} 
+              name="arrowright" 
+              size={32} 
+            />
           </Pressable>
         </Animated.View>
       )}
@@ -237,57 +260,56 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 20,
   },
-  headerIcon: { color: '#545454', fontSize: 22, fontWeight: '700' },
+  headerIcon: { fontSize: 22, fontWeight: '700' },
   headerTitle: { 
     fontFamily:"SourceSerifPro",
-
     fontSize: 23,
-fontStyle: 'italic',
-    color: '#545454',
-    fontWeight:600,
-    // backgroundColor:"red",
-marginBottom: 42,
+    fontStyle: 'italic',
+    fontWeight: '600',
+    marginBottom: 42,
     textAlign:'center'
   },
-
   section: {
-    color: '#4a4a4aff',
     fontSize: 18,
-
     marginTop: 8,
     fontFamily:"SourceSerifPro",
     fontWeight:"600",
     fontStyle:"normal",
-    // backgroundColor:"yellow",
     paddingVertical:10,
     marginVertical:10
   },
-  sa: { color: '#545454', fontSize: 20, lineHeight: 20,fontFamily:"Kalam",
+  sa: { 
+    fontSize: 20, 
+    lineHeight: 20,
+    fontFamily:"Kalam",
     fontWeight:"400",
-    fontStyle:"normal", paddingTop:6 , textAlign:'center', marginBottom:10},
-  en: { color: '#545454', fontSize: 19, lineHeight: 26 ,fontFamily:"Alegreya",
+    fontStyle:"normal", 
+    paddingTop:6, 
+    textAlign:'center', 
+    marginBottom:10
+  },
+  en: { 
+    fontSize: 19, 
+    lineHeight: 26,
+    fontFamily:"Alegreya",
     fontWeight:"400",
-    fontStyle:"normal"},
-
+    fontStyle:"normal"
+  },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-
   pillWrap: {
     position: 'absolute',
     left: '26%',
     width: PILL_W,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(4, 37, 77, 0.81)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-evenly',
     paddingHorizontal: 10,
     transform: [{ translateX: -PILL_W / 2 }],
-   
-    borderColor: 'rgba(255, 255, 255, 0.43)',
     borderWidth: 2,
   },
   pillBtn: { paddingHorizontal: 8, paddingVertical: 6 },
-  pillIcon: { color: 'white', fontSize: 21, fontWeight: '700' },
+  pillIcon: { fontSize: 21, fontWeight: '700' },
   disabled: { opacity: 1 },
 });

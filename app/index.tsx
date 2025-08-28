@@ -1,6 +1,6 @@
 // app/index.tsx
 import { Link } from 'expo-router';
-import { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { FlatList, StyleSheet, Text, View, Pressable } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -22,7 +22,7 @@ import Svg, { Circle, G, Path } from 'react-native-svg';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
-function Checkbox({ completed, isDarkMode }: { completed: boolean, isDarkMode: boolean }) {
+const Checkbox = React.memo(({ completed, isDarkMode }: { completed: boolean, isDarkMode: boolean }) => {
   const progress = useSharedValue(completed ? 1 : 0);
 
   useEffect(() => {
@@ -75,7 +75,7 @@ function Checkbox({ completed, isDarkMode }: { completed: boolean, isDarkMode: b
       )}
     </Animated.View>
   );
-}
+})
 
 export default function Home() {
   const ready     = useKriya(s => s.ready);

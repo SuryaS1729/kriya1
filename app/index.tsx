@@ -1,6 +1,6 @@
 // app/index.tsx
 import { Link } from 'expo-router';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { FlatList, StyleSheet, Text, View, Pressable } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -21,16 +21,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, G, Path } from 'react-native-svg';
 import { AnimatedFlashList, FlashList } from '@shopify/flash-list';
 
+import { router } from 'expo-router';
+
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
+
+// Update the Checkbox component for better timing
 
 const Checkbox = React.memo(({ completed, isDarkMode }: { completed: boolean, isDarkMode: boolean }) => {
   const progress = useSharedValue(completed ? 1 : 0);
 
-  useEffect(() => {
+  React.useEffect(() => {
+    // Slightly slower spring so you can see the check animation
     progress.value = withSpring(completed ? 1 : 0, {
-      stiffness: 600,
-      damping: 25,
-      mass: 1,
+      stiffness: 300, // Reduced from 400
+      damping: 25,    // Reduced from 30
+      mass: 0.8,
     });
   }, [completed]);
 
@@ -39,30 +44,28 @@ const Checkbox = React.memo(({ completed, isDarkMode }: { completed: boolean, is
       backgroundColor: interpolateColor(
         progress.value,
         [0, 1],
-         isDarkMode 
-          ? ['#1f2937', '#65a25cff'] // Dark mode: dark bg to darker green
-          : ['white', '#AADBA3']   // Light mode: white to light green
+        isDarkMode 
+          ? ['#1f2937', '#65a25cff']
+          : ['white', '#AADBA3']
       ),
       borderColor: interpolateColor(
         progress.value,
         [0, 1],
         isDarkMode 
-          ? ['#4b5563', '#65a25cff'] // Dark mode: dark border to darker green
-          : ['#e2e8f0', '#AADBA3']  // Light mode: light gray to light green
+          ? ['#4b5563', '#65a25cff']
+          : ['#e2e8f0', '#AADBA3']
       ),
     };
-  });
+  }, [isDarkMode]);
 
   const checkmarkStyle = useAnimatedStyle(() => {
-    // Only show checkmark when progress is > 0.7 (background is mostly filled)
-    const checkOpacity = interpolate(progress.value, [0, 0.7, 1], [0, 0, 1]);
-    const checkScale = interpolate(progress.value,[0, 0.7, 0.9, 1], [0, 0, 1.3, 1]);
-    
     return {
-      opacity: checkOpacity,
-      transform: [{ scale: checkScale }],
+      opacity: interpolate(progress.value, [0, 0.6, 1], [0, 0, 1]), // Slower fade in
+      transform: [{ 
+        scale: interpolate(progress.value, [0, 0.6, 0.8, 1], [0, 0, 1.2, 1]) // More bounce
+      }],
     };
-  });
+  }, []);
 
   return (
     <Animated.View style={[styles.checkbox, animatedStyle]}>
@@ -76,7 +79,9 @@ const Checkbox = React.memo(({ completed, isDarkMode }: { completed: boolean, is
       )}
     </Animated.View>
   );
-})
+}, (prevProps, nextProps) => {
+  return prevProps.completed === nextProps.completed && prevProps.isDarkMode === nextProps.isDarkMode;
+});
 
 export default function Home() {
   const ready     = useKriya(s => s.ready);
@@ -85,7 +90,14 @@ export default function Home() {
   const toggle    = useKriya(s => s.toggleTask);
   const remove    = useKriya(s => s.removeTask);
   const isDarkMode = useKriya(s => s.isDarkMode);
+  const hasCompletedOnboarding = useKriya(s => s.hasCompletedOnboarding);
   const insets    = useSafeAreaInsets();
+  const navigationRef = useRef(false); // Prevent multiple navigations
+
+  const [hasCheckedOnboarding, setHasCheckedOnboarding] = useState(false);
+
+    console.log('🔍 Debug - ready:', ready, 'hasCompletedOnboarding:', hasCompletedOnboarding, 'hasCheckedOnboarding:', hasCheckedOnboarding);
+
 
   // Only compute shloka after store is ready
   const { index: shlokaIndex, data: shloka } = ready ? getShloka() : { index: 0, data: null as any };
@@ -109,57 +121,132 @@ export default function Home() {
     setShowTranslation(!showTranslation);
   };
 
-  // Fix the sorted tasks computation
+  // Optimized sorting - avoid double reverse
   const sortedTasks = useMemo(() => {
-    const incomplete = tasks.filter(t => !t.completed).reverse(); // Newest incomplete first
-    const completed = tasks.filter(t => t.completed).reverse();   // Newest completed first
-    return [...incomplete, ...completed]; // Incomplete tasks first, then completed
+    const incomplete: Task[] = [];
+    const completed: Task[] = [];
+    
+    // Single pass through tasks
+    for (const task of tasks) {
+      if (task.completed) {
+        completed.push(task);
+      } else {
+        incomplete.push(task);
+      }
+    }
+    
+    return [...incomplete, ...completed];
   }, [tasks]);
 
-  const renderItem = ({ item }: { item: Task }) => (
-    <Animated.View 
-      layout={LinearTransition.duration(300).springify().delay(200)}
-    >
-      <Pressable
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          toggle(item.id);
-        }}
-        onLongPress={() => remove(item.id)}
-        style={[styles.row, { borderBottomColor: isDarkMode ? '#1a2535ff' : '#d8dde1ff' }]}
-      >
-        <Checkbox completed={item.completed} isDarkMode={isDarkMode} />
-       <Text style={[styles.title, 
-       { color: item.completed ? (isDarkMode ? '#94a3b8' : '#94a3b8')  // Same gray for completed tasks in both modes
-: (isDarkMode ? '#f9fafb' : '#000000ff') // Different colors for active tasks
-    },
-    item.completed ? { textDecorationLine: 'line-through' } : undefined,
-  ]} 
-  numberOfLines={1}
->
-  {item.title}
-</Text>
+  // Memoized callbacks to prevent unnecessary re-renders
+  const onToggle = React.useCallback((id: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    toggle(id);
+  }, [toggle]);
 
- {/* Delete button */}
-      <Pressable
-        onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          remove(item.id);
-        }}
-        hitSlop={8}
-        style={styles.deleteButton}
-      >
-        <Text style={[
-          styles.deleteIcon, 
-          { color: isDarkMode ? '#6b7280' : '#94a3b8' }
-        ]}>
-          ✕
-        </Text>
-      </Pressable>
+  const onRemove = React.useCallback((id: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    remove(id);
+  }, [remove]);
 
-      </Pressable>
-    </Animated.View>
+  // Replace your TaskRow component with this version that delays the layout animation
+
+  const TaskRow = React.memo(({ 
+    item, 
+    isDarkMode, 
+    onToggle, 
+    onRemove 
+  }: { 
+    item: Task; 
+    isDarkMode: boolean; 
+    onToggle: (id: number) => void; 
+    onRemove: (id: number) => void 
+  }) => {
+    const handleToggle = React.useCallback(() => onToggle(item.id), [onToggle, item.id]);
+    const handleRemove = React.useCallback(() => onRemove(item.id), [onRemove, item.id]);
+    
+    return (
+      <View style={[styles.row, { borderBottomColor: isDarkMode ? '#1a2535ff' : '#d8dde1ff' }]}>
+        <Pressable 
+          onPress={handleToggle} 
+          onLongPress={handleRemove} 
+          hitSlop={12}
+          style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+        >
+          <Checkbox completed={item.completed} isDarkMode={isDarkMode} />
+          <Text
+            style={[
+              styles.title,
+              {
+                color: item.completed ? '#94a3b8' : (isDarkMode ? '#f9fafb' : '#000000ff'),
+                textDecorationLine: item.completed ? 'line-through' : 'none',
+              },
+            ]}
+            numberOfLines={1}
+          >
+            {item.title}
+          </Text>
+        </Pressable>
+        <Pressable onPress={handleRemove} hitSlop={8} style={styles.deleteButton}>
+          <Text style={[styles.deleteIcon, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>✕</Text>
+        </Pressable>
+      </View>
+    );
+  }, (prevProps, nextProps) => {
+    return (
+      prevProps.item.id === nextProps.item.id &&
+      prevProps.item.completed === nextProps.item.completed &&
+      prevProps.item.title === nextProps.item.title &&
+      prevProps.isDarkMode === nextProps.isDarkMode
+    );
+  });
+
+  const keyExtractor = React.useCallback((item: Task) => item.id.toString(), []);
+
+  // Update the renderItem to add a delay to the layout animation
+  const renderItem = React.useCallback(
+    ({ item }: { item: Task }) => (
+      // Delayed layout animation - starts after checkbox animation
+      <Animated.View layout={LinearTransition.duration(150).delay(200)}>
+        <TaskRow 
+          item={item} 
+          isDarkMode={isDarkMode} 
+          onToggle={onToggle} 
+          onRemove={onRemove} 
+        />
+      </Animated.View>
+    ),
+    [isDarkMode, onToggle, onRemove]
   );
+
+  // Handle onboarding redirect - only once when ready
+  useEffect(() => {
+    if (ready && !navigationRef.current) {
+      navigationRef.current = true;
+      console.log('🔍 Checking onboarding status:', hasCompletedOnboarding);
+      
+      if (!hasCompletedOnboarding) {
+        console.log('🔍 Redirecting to onboarding...');
+        router.replace('/onboarding');
+      } else {
+        console.log('🔍 Onboarding already completed, staying on main app');
+      }
+    }
+  }, [ready, hasCompletedOnboarding]);
+
+  // Show loading while not ready
+  if (!ready) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  // Don't render main content if going to onboarding
+  if (!hasCompletedOnboarding) {
+    return null;
+  }
 
   // Minimal skeleton while DB/store warm up
   if (!ready || !shloka) {
@@ -263,22 +350,20 @@ export default function Home() {
           </Link>
         </View>
         
-        <FlatList
+        <FlashList
           data={sortedTasks}
           renderItem={renderItem}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={keyExtractor}
+
+          removeClippedSubviews={true}
           contentContainerStyle={styles.tasksList}
           ListEmptyComponent={() => (
             <View style={styles.emptyState}>
               <Feather name="sunrise" size={48} color={isDarkMode ? "#6b7280" : "#cbd5e1"} />
-              <Text style={[
-                styles.emptyStateTitle,
-                { color: isDarkMode ? '#9ca3af' : '#64748b' }
-              ]}>Fresh Start</Text>
-              <Text style={[
-                styles.emptyStateSubtitle,
-                { color: isDarkMode ? '#6b7280' : '#94a3b8' }
-              ]}>
+              <Text style={[styles.emptyStateTitle, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
+                Fresh Start
+              </Text>
+              <Text style={[styles.emptyStateSubtitle, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>
                 No tasks yet. Add your first task to begin your day.
               </Text>
             </View>

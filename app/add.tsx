@@ -10,6 +10,7 @@ import {
   TextInput,
   View,
   FlatList,
+  BackHandler
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '../components/TopBar';
@@ -90,6 +91,18 @@ export default function Add() {
     Keyboard.dismiss();
     router.back();
   }
+
+  // Handle Android hardware back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      // Always dismiss keyboard and close screen together
+      Keyboard.dismiss();
+      router.back();
+      return true; // Prevent default behavior
+    });
+
+    return () => backHandler.remove();
+  }, []);
 
   const remaining = useMemo(
     () => tasksToday.filter(t => !t.completed).length,
@@ -323,3 +336,4 @@ const styles = StyleSheet.create({
     fontFamily: "Alegreya",
   },
 });
+

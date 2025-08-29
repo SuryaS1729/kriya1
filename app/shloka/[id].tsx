@@ -163,6 +163,15 @@ export default function ShlokaDetail() {
     }
   };
 
+  // Add long press handler
+  const handleLongPressBookmark = () => {
+    // Stronger haptic feedback for long press
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
+    // Navigate to bookmarks page
+    router.push('/bookmarks');
+  };
+
   // Create interpolated values
   const animatedScale = bookmarkScale;
 
@@ -189,7 +198,12 @@ export default function ShlokaDetail() {
           </Pressable>
           
           <View style={styles.headerActions}>
-            <Pressable onPress={toggleBookmark} hitSlop={16} style={styles.actionButton}>
+            <Pressable 
+              onPress={toggleBookmark} 
+              onLongPress={handleLongPressBookmark}
+              hitSlop={16} 
+              style={styles.actionButton}
+            >
               <Animated.View
                 style={{
                   transform: [{ scale: bookmarkScale }],

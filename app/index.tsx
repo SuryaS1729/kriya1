@@ -288,7 +288,7 @@ export default function Home() {
         <Link href="/add" asChild>
           <Pressable>
             <View style={[styles.addTaskButton, {backgroundColor: isDarkMode ? '#1b293d91' : '#f9fafb'}]}>
-            <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#112130ff' : '#E6E6E6' }]}>
+            <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#081623ff' : '#E6E6E6' }]}>
               <Feather name="plus" size={20} color={isDarkMode ? "#ffffffff" : "#606060"} />
             </View>
             <Text style={[styles.addTaskText, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>

@@ -243,9 +243,9 @@ export default function History() {
 
       <Link href="/bookmarks" asChild>
         <Pressable >
-          <View style={styles.bookmarksButton}>
-          <MaterialIcons name="bookmark" size={24} color="#f59e0b" />
-          <Text style={styles.bookmarksText}>View Bookmarks</Text>
+          <View style={[styles.bookmarksButton, themeStyles.bookmarksButton]}>
+          <MaterialIcons name="bookmark" size={24} color={isDarkMode ? "#fbbf24" : "#f59e0b"} />
+          <Text style={[styles.bookmarksText, themeStyles.bookmarksText]}>View Bookmarks</Text>
           </View>
         </Pressable>
       </Link>
@@ -376,6 +376,8 @@ const lightStyles = StyleSheet.create({
   headerText: { color: '#0f172a' },
   headerMeta: { color: '#64748b' },
   title: { color: '#111827' },
+  bookmarksButton: { backgroundColor: '#fef9c3' },
+  bookmarksText: { color: '#f59e0b' },
 });
 
 // Dark theme styles
@@ -388,6 +390,8 @@ const darkStyles = StyleSheet.create({
   headerText: { color: '#f9fafb' },
   headerMeta: { color: '#9ca3af' },
   title: { color: '#f9fafb' },
+  bookmarksButton: { backgroundColor: '#058394fd' },
+  bookmarksText: { color: '#f8b200ff' },
 });
 
 // Heatmap theme styles

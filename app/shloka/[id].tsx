@@ -132,28 +132,22 @@ export default function ShlokaDetail() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
     // Snappier animation sequence - no rotation
-    const scaleAnimation = Animated.sequence([
+     // Simple bounce animation
+    const bounceAnimation = Animated.sequence([
       Animated.timing(bookmarkScale, {
-        toValue: 0.7,
-        duration: 80,
-        useNativeDriver: true,
-      }),
-      Animated.spring(bookmarkScale, {
         toValue: 1.2,
+        duration: 100,
         useNativeDriver: true,
-        tension: 200,
-        friction: 4,
       }),
-      Animated.spring(bookmarkScale, {
+      Animated.timing(bookmarkScale, {
         toValue: 1,
+        duration: 100,
         useNativeDriver: true,
-        tension: 200,
-        friction: 6,
       }),
     ]);
 
     // Run animation
-    scaleAnimation.start();
+    bounceAnimation.start();
     
     // Update state
     if (bookmarked) {

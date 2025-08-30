@@ -107,14 +107,22 @@ export default function Add() {
     >
       <View style={[
         styles.checkbox, 
-        item.completed ? styles.checkboxOn : styles.checkboxOff,
-        isDarkMode && !item.completed && { backgroundColor: '#4b5563', borderColor: '#6b7280' }
+        item.completed 
+          ? [
+              styles.checkboxOn,
+              // Different green shades for dark/light mode
+              { backgroundColor: isDarkMode ? '#65a25cff' : '#AADBA3' }
+            ]
+          : [
+              styles.checkboxOff,
+              isDarkMode && { backgroundColor: '#4b5563', borderColor: '#6b7280' }
+            ]
       ]}>
         {item.completed && (
           <Feather
             name="check"
             size={14}
-            color="white"
+          color={isDarkMode ? "#17481bff" : "#ffffff"}
           />
         )}
       </View>
@@ -167,16 +175,17 @@ export default function Add() {
             ItemSeparatorComponent={() => <View style={[styles.sep, { backgroundColor: isDarkMode ? '#1a2535ff' : '#f1f5f9' }]} />}
             ListEmptyComponent={() => (
               <View style={styles.emptyState}>
-                <Feather name="sunrise" size={48} color={isDarkMode ? "#6b7280" : "#cbd5e1"} />
+                {/* <Feather name="sunrise" size={48} color={isDarkMode ? "#6b7280" : "#cbd5e1"} /> */}
                 <Text style={[
                   styles.emptyStateTitle,
                   { color: isDarkMode ? '#9ca3af' : '#64748b' }
-                ]}>Fresh Start</Text>
+                ]}>It's a Fresh Start</Text>
+                <View style={{ height: 16 }}></View>
                 <Text style={[
                   styles.emptyStateSubtitle,
                   { color: isDarkMode ? '#6b7280' : '#94a3b8' }
                 ]}>
-                  No tasks yet. Add your first task to begin your day.
+                  add your tasks for today!
                 </Text>
               </View>
             )}
@@ -200,12 +209,12 @@ export default function Add() {
             <Pressable onPress={addAndStay}>
               <View style={[
                 styles.addTaskIcon,
-                { backgroundColor: isDarkMode ? '#374151' : '#E6E6E6' }
+                { backgroundColor: isDarkMode ? '#0a3a4bff' : '#E6E6E6' }
               ]}>
                 <AnimatedFeather 
                   name="arrow-right" 
-                  size={22} 
-                  color={isDarkMode ? '#9ca3b8' : '#606060ff'} 
+                  size={25} 
+                  color={isDarkMode ? '#ffffffff' : '#606060ff'} 
                   style={animatedIconStyle}
                 />
               </View>
@@ -293,9 +302,10 @@ const styles = StyleSheet.create({
     width: 40, // Make it bigger than checkbox (20px)
     height: 40, // Make it bigger than checkbox (20px)
     backgroundColor: '#E6E6E6',
-    borderRadius: 30, // Half of width/height for perfect circle
+    borderRadius: 20, // Half of width/height for perfect circle
     justifyContent: 'center',
     alignItems: 'center',
+
   },
    tasksList: {
     flexGrow: 1,
@@ -309,6 +319,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 60,
     paddingHorizontal: 20,
+    marginTop: 50,
   },
   emptyStateTitle: {
     fontSize: 20,
@@ -316,14 +327,16 @@ const styles = StyleSheet.create({
     color: '#64748b',
     marginTop: 16,
     marginBottom: 8,
-    fontFamily: "SourceSerifPro",
+    fontFamily: "Kalam",
   },
   emptyStateSubtitle: {
     fontSize: 16,
     color: '#94a3b8',
     textAlign: 'center',
     lineHeight: 22,
-    fontFamily: "Alegreya",
+    fontFamily: "SourceSerifPro",
+    fontWeight:"300",
+
   },
 });
 

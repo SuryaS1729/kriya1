@@ -74,8 +74,9 @@ const Checkbox = React.memo(({ completed, isDarkMode }: { completed: boolean, is
         <AnimatedFeather
           name="check"
           size={14}
-          color={isDarkMode ? "#020639ff" : "#ffffff"}
+          color={isDarkMode ? "#17481bff" : "#ffffff"}
           style={checkmarkStyle}
+          
         />
       )}
     </Animated.View>
@@ -166,8 +167,7 @@ export default function Home() {
     remove(id);
   }, [remove]);
 
-  // Replace your TaskRow component with this version that delays the layout animation
-
+  // Enhanced TaskRow with cleanup
   const TaskRow = React.memo(({ 
     item, 
     isDarkMode, 
@@ -183,33 +183,45 @@ export default function Home() {
     const handleRemove = React.useCallback(() => onRemove(item.id), [onRemove, item.id]);
     
     return (
-      <View style={[styles.row, { borderBottomColor: isDarkMode ? '#1a2535ff' : '#d8dde1ff' }]}>
-        <Pressable 
-          onPress={handleToggle} 
-          onLongPress={handleRemove} 
-          hitSlop={12}
-          style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
-        >
-          <Checkbox completed={item.completed} isDarkMode={isDarkMode} />
-          <Text
-            style={[
-              styles.title,
-              {
-                color: item.completed ? '#94a3b8' : (isDarkMode ? '#f9fafb' : '#000000ff'),
-                textDecorationLine: item.completed ? 'line-through' : 'none',
-              },
-            ]}
-            numberOfLines={1}
+       <View style={[styles.row, { borderBottomColor: isDarkMode ? '#1a2535ff' : '#d8dde1ff' }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          {/* Separate Pressable for checkbox with hitSlop */}
+          <Pressable 
+            onPress={handleToggle}
+            hitSlop={12}
+            style={{ padding: 4 }} // Optional: add some padding for better touch area
           >
-            {item.title}
-          </Text>
-        </Pressable>
+            <Checkbox completed={item.completed} isDarkMode={isDarkMode} />
+          </Pressable>
+          
+          {/* Pressable for the text area */}
+          <Pressable 
+            onPress={handleToggle} 
+            onLongPress={handleRemove}
+            style={{ flex: 1, paddingVertical: 5, paddingLeft: 8 }}
+          >
+            <Text
+              style={[
+                styles.title,
+                {
+                  color: item.completed ? '#94a3b8' : (isDarkMode ? '#f9fafb' : '#000000ff'),
+                  textDecorationLine: item.completed ? 'line-through' : 'none',
+                },
+              ]}
+              numberOfLines={1}
+            >
+              {item.title}
+            </Text>
+          </Pressable>
+        </View>
+        
         <Pressable onPress={handleRemove} hitSlop={8} style={styles.deleteButton}>
           <Text style={[styles.deleteIcon, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>✕</Text>
         </Pressable>
       </View>
     );
   }, (prevProps, nextProps) => {
+    // More strict comparison to prevent unnecessary re-renders
     return (
       prevProps.item.id === nextProps.item.id &&
       prevProps.item.completed === nextProps.item.completed &&
@@ -218,13 +230,13 @@ export default function Home() {
     );
   });
 
-  const keyExtractor = React.useCallback((item: Task) => item.id.toString(), []);
-
-  // Update the renderItem to add a delay to the layout animation
+  // Enhanced renderItem with cleanup
   const renderItem = React.useCallback(
     ({ item }: { item: Task }) => (
-      // Delayed layout animation - starts after checkbox animation
-      <Animated.View layout={LinearTransition.springify().duration(300).delay(200)}>
+      <Animated.View 
+        layout={LinearTransition.springify().duration(200).delay(200)}
+        key={`task-${item.id}`} // Explicit key for better reconciliation
+      >
         <TaskRow 
           item={item} 
           isDarkMode={isDarkMode} 
@@ -235,6 +247,16 @@ export default function Home() {
     ),
     [isDarkMode, onToggle, onRemove]
   );
+
+    const keyExtractor = React.useCallback((item: Task) => `task-${item.id}`, []);
+
+  // Clear animation states when component unmounts
+  React.useEffect(() => {
+    return () => {
+      // Cleanup when component unmounts
+      fade.value = 0;
+    };
+  }, [fade]);
 
   // Handle onboarding redirect - only once when ready
   useEffect(() => {
@@ -293,7 +315,7 @@ export default function Home() {
         {/* Shloka Card */}
         <View style={styles.card}>
           <View style={styles.headerSection}>
-            <Text style={[styles.meta, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>
+            <Text style={[styles.meta, { color: isDarkMode ? '#eef1f4ff' : '#545454' }]}>
               Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
             </Text>
           </View>
@@ -323,7 +345,7 @@ export default function Home() {
                       style={[
                         styles.sa, 
                         {lineHeight:(shloka.translation_2 || "").length < 90 ? 24 : 20},
-                        { color: isDarkMode ? '#e5e7eb' : '#565657ff' }
+                        { color: isDarkMode ? '#eaecf1ff' : '#565657ff' }
                       ]}
                       adjustsFontSizeToFit
                     >
@@ -373,15 +395,22 @@ export default function Home() {
           keyExtractor={keyExtractor}
           contentContainerStyle={styles.tasksList}
           ListEmptyComponent={() => (
+            <Pressable onPress={() => router.push('/add')}>
             <View style={styles.emptyState}>
-              <Feather name="sunrise" size={48} color={isDarkMode ? "#6b7280" : "#cbd5e1"} />
-              <Text style={[styles.emptyStateTitle, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
-                Fresh Start
-              </Text>
-              <Text style={[styles.emptyStateSubtitle, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>
-                No tasks yet. Add your first task to begin your day.
-              </Text>
-            </View>
+                            <Feather name="sun" size={48} color={isDarkMode ? "#6b7280" : "#cbd5e1"} />
+                            <Text style={[
+                              styles.emptyStateTitle,
+                              { color: isDarkMode ? '#9ca3af' : '#64748b' }
+                            ]}>It's a Fresh Start</Text>
+                            <View style={{ height: 16 }}></View>
+                            <Text style={[
+                              styles.emptyStateSubtitle,
+                              { color: isDarkMode ? '#6b7280' : '#94a3b8' }
+                            ]}>
+                             add your tasks for today!
+                            </Text>
+                          </View>
+                          </Pressable>
           )}
         />
         
@@ -609,26 +638,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  emptyState: {
+emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 60,
     paddingHorizontal: 20,
+
   },
   emptyStateTitle: {
     fontSize: 20,
     fontWeight: '600',
     color: '#64748b',
-    marginTop: 16,
+    marginTop: 26,
     marginBottom: 8,
-    fontFamily: "SourceSerifPro",
+    fontFamily: "Kalam",
   },
   emptyStateSubtitle: {
     fontSize: 16,
     color: '#94a3b8',
     textAlign: 'center',
     lineHeight: 22,
-    fontFamily: "Alegreya",
+    fontFamily: "SourceSerifPro",
+    fontWeight:"300",
+
   },
 });

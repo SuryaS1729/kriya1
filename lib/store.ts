@@ -44,10 +44,6 @@ type State = {
   removeBookmark: (shlokaIndex: number) => void;
   isBookmarked: (shlokaIndex: number) => boolean;
   getBookmarks: () => Bookmark[];
-
-  // onboarding
-  hasCompletedOnboarding: boolean;
-  completeOnboarding: () => void;
 };
 
 // Add bookmark interface
@@ -61,50 +57,13 @@ export interface Bookmark {
   createdAt: string;
 }
 
-interface KriyaState {
-  ready: boolean;
-
-  tasksToday: Task[];
-
-  // actions
-  init: () => void;
-  refresh: () => void;
-  addTask: (title: string) => void;
-  toggleTask: (id: number) => void;
-  removeTask: (id: number) => void;
-
-  // derived (index-based; no id)
-  currentShloka: () => { index: number; data: ShlokaRow | null };
-
-  // history api
-  todayKey: () => number;
-  listHistoryDays: (limit?: number) => { day_key: number; count: number }[];
-  getTasksForDay: (dayKey: number) => Task[];
-
-  // dark mode
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
-
-  // bookmarks
-  bookmarks: Bookmark[];
-  addBookmark: (shlokaIndex: number, shlokaData: ShlokaRow) => void;
-  removeBookmark: (shlokaIndex: number) => void;
-  isBookmarked: (shlokaIndex: number) => boolean;
-  getBookmarks: () => Bookmark[];
-
-  // onboarding
-  hasCompletedOnboarding: boolean;
-  completeOnboarding: () => void;
-}
-
-export const useKriya = create<KriyaState>()(
+export const useKriya = create<State>()(
   persist(
     (set, get) => ({
       ready: false,
       tasksToday: [],
-      isDarkMode: false,
+      isDarkMode: false, // Default to light mode
       bookmarks: [],
-      hasCompletedOnboarding: false,
 
       init: () => {
         if (!isDbReady()) {
@@ -215,20 +174,13 @@ export const useKriya = create<KriyaState>()(
       getBookmarks: () => {
         return get().bookmarks;
       },
-
-      completeOnboarding: () => {
-        console.log('🎯 Store: Completing onboarding...');
-        set({ hasCompletedOnboarding: true });
-        console.log('🎯 Store: New state after completion:', get().hasCompletedOnboarding);
-      },
     }),
     {
       name: 'kriya-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({
+      partialize: (state) => ({ 
         isDarkMode: state.isDarkMode,
-        bookmarks: state.bookmarks,
-        hasCompletedOnboarding: state.hasCompletedOnboarding,
+        bookmarks: state.bookmarks  // Add this line!
       }),
     }
   )

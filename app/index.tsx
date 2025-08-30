@@ -85,15 +85,140 @@ const Checkbox = React.memo(({ completed, isDarkMode }: { completed: boolean, is
   return prevProps.completed === nextProps.completed && prevProps.isDarkMode === nextProps.isDarkMode;
 });
 
+// Add this new component before the Home component
+const YesterdayTasksBanner = React.memo(({ 
+  tasks, 
+  isDarkMode, 
+  onImportTasks 
+}: { 
+  tasks: Task[]; 
+  isDarkMode: boolean; 
+  onImportTasks: (tasks: Task[]) => void;
+}) => {
+  const [selectedTasks, setSelectedTasks] = useState<Set<number>>(new Set());
+  const [showAll, setShowAll] = useState(false);
+
+  const displayTasks = showAll ? tasks : tasks.slice(0, 3);
+
+  const toggleTask = (taskId: number) => {
+    setSelectedTasks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(taskId)) {
+        newSet.delete(taskId);
+      } else {
+        newSet.add(taskId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleImport = () => {
+    const tasksToImport = tasks.filter(task => selectedTasks.has(task.id));
+    if (tasksToImport.length > 0) {
+      onImportTasks(tasksToImport);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+  };
+
+  return (
+    <View style={[
+      styles.yesterdayBanner, 
+      { backgroundColor: isDarkMode ? '#1f2937' : '#f8fafc', borderColor: isDarkMode ? '#374151' : '#e2e8f0' }
+    ]}>
+      <View style={styles.bannerHeader}>
+        <Text style={[styles.bannerTitle, { color: isDarkMode ? '#f9fafb' : '#1f2937' }]}>
+          📋 {tasks.length} unfinished task{tasks.length > 1 ? 's' : ''} from yesterday
+        </Text>
+        <Text style={[styles.bannerSubtitle, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
+          Select which ones to bring forward:
+        </Text>
+      </View>
+
+      <View style={styles.taskSelection}>
+        {displayTasks.map((task) => (
+          <Pressable
+            key={task.id}
+            onPress={() => toggleTask(task.id)}
+            style={[
+              styles.selectableTask,
+              { 
+                backgroundColor: selectedTasks.has(task.id) 
+                  ? (isDarkMode ? '#065f46' : '#dcfce7') 
+                  : 'transparent'
+              }
+            ]}
+          >
+            <View style={[
+              styles.selectionCheckbox,
+              {
+                backgroundColor: selectedTasks.has(task.id)
+                  ? (isDarkMode ? '#10b981' : '#22c55e')
+                  : 'transparent',
+                borderColor: isDarkMode ? '#4b5563' : '#d1d5db'
+              }
+            ]}>
+              {selectedTasks.has(task.id) && (
+                <Feather name="check" size={12} color="white" />
+              )}
+            </View>
+            <Text 
+              style={[
+                styles.selectableTaskText, 
+                { color: isDarkMode ? '#e5e7eb' : '#374151' }
+              ]} 
+              numberOfLines={1}
+            >
+              {task.title}
+            </Text>
+          </Pressable>
+        ))}
+
+        {tasks.length > 3 && (
+          <Pressable onPress={() => setShowAll(!showAll)} style={styles.showMoreButton}>
+            <Text style={[styles.showMoreText, { color: isDarkMode ? '#60a5fa' : '#3b82f6' }]}>
+              {showAll ? 'Show less' : `Show ${tasks.length - 3} more...`}
+            </Text>
+          </Pressable>
+        )}
+      </View>
+
+      <View style={styles.bannerActions}>
+        <Pressable
+          onPress={handleImport}
+          disabled={selectedTasks.size === 0}
+          style={[
+            styles.importButton,
+            {
+              backgroundColor: selectedTasks.size > 0 
+                ? (isDarkMode ? '#059669' : '#10b981') 
+                : (isDarkMode ? '#374151' : '#e5e7eb'),
+              opacity: selectedTasks.size > 0 ? 1 : 0.5
+            }
+          ]}
+        >
+          <Text style={[
+            styles.importButtonText,
+            { color: selectedTasks.size > 0 ? 'white' : (isDarkMode ? '#6b7280' : '#9ca3af') }
+          ]}>
+            Import {selectedTasks.size > 0 ? `${selectedTasks.size} ` : ''}Task{selectedTasks.size !== 1 ? 's' : ''}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+});
+
 export default function Home() {
   const ready     = useKriya(s => s.ready);
   const tasks     = useKriya(s => s.tasksToday);
   const getShloka = useKriya(s => s.currentShloka);
   const toggle    = useKriya(s => s.toggleTask);
   const remove    = useKriya(s => s.removeTask);
+  const addTask   = useKriya(s => s.addTask); // Add this
+  const getTasksForDay = useKriya(s => s.getTasksForDay); // Add this
   const isDarkMode = useKriya(s => s.isDarkMode);
   const hasCompletedOnboarding = useKriya(s => s.hasCompletedOnboarding);
-  const refresh   = useKriya(s => s.refresh); // Add this
+  const refresh   = useKriya(s => s.refresh);
   const insets    = useSafeAreaInsets();
   const navigationRef = useRef(false);
 
@@ -219,8 +344,8 @@ export default function Home() {
           <Text style={[styles.deleteIcon, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>✕</Text>
         </Pressable>
       </View>
-    );
-  }, (prevProps, nextProps) => {
+    )
+    }, (prevProps, nextProps) => {
     // More strict comparison to prevent unnecessary re-renders
     return (
       prevProps.item.id === nextProps.item.id &&
@@ -272,6 +397,27 @@ export default function Home() {
       }
     }
   }, [ready, hasCompletedOnboarding]);
+
+  // Add function to get yesterday's unfinished tasks
+  const getYesterdayUnfinishedTasks = React.useCallback(() => {
+    if (!ready) return [];
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayKey = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate()).getTime();
+    
+    const yesterdayTasks = getTasksForDay(yesterdayKey);
+    return yesterdayTasks.filter(task => !task.completed);
+  }, [ready, getTasksForDay]);
+
+  const yesterdayUnfinishedTasks = getYesterdayUnfinishedTasks();
+
+  // Handle importing tasks from yesterday
+  const handleImportTasks = React.useCallback((tasksToImport: Task[]) => {
+    tasksToImport.forEach(task => {
+      addTask(task.title); // This will create a new task for today
+    });
+  }, [addTask]);
 
   // Show loading while not ready
   if (!ready) {
@@ -395,22 +541,33 @@ export default function Home() {
           keyExtractor={keyExtractor}
           contentContainerStyle={styles.tasksList}
           ListEmptyComponent={() => (
-            <Pressable onPress={() => router.push('/add')}>
-            <View style={styles.emptyState}>
-                            <Feather name="sun" size={48} color={isDarkMode ? "#6b7280" : "#cbd5e1"} />
-                            <Text style={[
-                              styles.emptyStateTitle,
-                              { color: isDarkMode ? '#9ca3af' : '#64748b' }
-                            ]}>It's a Fresh Start</Text>
-                            <View style={{ height: 16 }}></View>
-                            <Text style={[
-                              styles.emptyStateSubtitle,
-                              { color: isDarkMode ? '#6b7280' : '#94a3b8' }
-                            ]}>
-                             add your tasks for today!
-                            </Text>
-                          </View>
-                          </Pressable>
+            <View>
+              <Pressable onPress={() => router.push('/add')}>
+                <View style={styles.emptyState}>
+                  <Feather name="sun" size={48} color={isDarkMode ? "#6b7280" : "#cbd5e1"} />
+                  <Text style={[
+                    styles.emptyStateTitle,
+                    { color: isDarkMode ? '#9ca3af' : '#64748b' }
+                  ]}>It's a Fresh Start</Text>
+                  <View style={{ height: 16 }}></View>
+                  <Text style={[
+                    styles.emptyStateSubtitle,
+                    { color: isDarkMode ? '#6b7280' : '#94a3b8' }
+                  ]}>
+                   add your tasks for today!
+                  </Text>
+                </View>
+              </Pressable>
+              
+              {/* Show yesterday's tasks banner if available */}
+              {yesterdayUnfinishedTasks.length > 0 && (
+                <YesterdayTasksBanner
+                  tasks={yesterdayUnfinishedTasks}
+                  isDarkMode={isDarkMode}
+                  onImportTasks={handleImportTasks}
+                />
+              )}
+            </View>
           )}
         />
         
@@ -638,7 +795,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-emptyState: {
+  emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -662,5 +819,71 @@ emptyState: {
     fontFamily: "SourceSerifPro",
     fontWeight:"300",
 
+  },
+
+  // Add these new styles for the banner
+  yesterdayBanner: {
+    marginTop: 20,
+    marginHorizontal: 4,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  bannerHeader: {
+    marginBottom: 12,
+  },
+  bannerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  bannerSubtitle: {
+    fontSize: 14,
+    opacity: 0.8,
+  },
+  taskSelection: {
+    marginBottom: 16,
+  },
+  selectableTask: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginVertical: 2,
+  },
+  selectionCheckbox: {
+    width: 16,
+    height: 16,
+    borderRadius: 3,
+    borderWidth: 1.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  selectableTaskText: {
+    flex: 1,
+    fontSize: 14,
+  },
+  showMoreButton: {
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  showMoreText: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  bannerActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  importButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  importButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

@@ -10,6 +10,8 @@ import Animated, {
   LinearTransition,
   interpolateColor,
   interpolate,
+  FadeIn,
+  BounceIn,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useKriya } from '../lib/store';
@@ -123,7 +125,7 @@ const YesterdayTasksBanner = React.memo(({
   return (
     <View style={[
       styles.yesterdayBanner, 
-      { backgroundColor: isDarkMode ? '#1f2937' : '#f8fafc', borderColor: isDarkMode ? '#374151' : '#e2e8f0' }
+      { backgroundColor: isDarkMode ? '#1f293789' : '#f8fafc', borderColor: isDarkMode ? '#526d7071' : '#e2e8f0' }
     ]}>
       <View style={styles.bannerHeader}>
         <Text style={[styles.bannerTitle, { color: isDarkMode ? '#f9fafb' : '#1f2937' }]}>
@@ -143,7 +145,7 @@ const YesterdayTasksBanner = React.memo(({
               styles.selectableTask,
               { 
                 backgroundColor: selectedTasks.has(task.id) 
-                  ? (isDarkMode ? '#065f46' : '#dcfce7') 
+                  ? (isDarkMode ? '#0c4f3c36' : '#dcfce7') 
                   : 'transparent'
               }
             ]}
@@ -358,7 +360,8 @@ export default function Home() {
   // Enhanced renderItem with cleanup
   const renderItem = React.useCallback(
     ({ item }: { item: Task }) => (
-      <Animated.View 
+      <Animated.View  
+        entering={FadeIn.duration(200).delay(100)}
         layout={LinearTransition.springify().duration(200).delay(200)}
         key={`task-${item.id}`} // Explicit key for better reconciliation
       >
@@ -823,9 +826,9 @@ const styles = StyleSheet.create({
 
   // Add these new styles for the banner
   yesterdayBanner: {
-    marginTop: 20,
+    marginTop: 0,
     marginHorizontal: 4,
-    padding: 16,
+    padding: 13,
     borderRadius: 12,
     borderWidth: 1,
   },

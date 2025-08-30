@@ -59,6 +59,10 @@ interface KriyaState {
   // onboarding
   hasCompletedOnboarding: boolean;
   completeOnboarding: () => void;
+
+  // Enhanced refresh
+  clearCache: () => void;
+  hardRefresh: () => void;
 }
 
 export const useKriya = create<KriyaState>()(
@@ -86,7 +90,36 @@ export const useKriya = create<KriyaState>()(
         }
       },
 
-      refresh: () => set({ tasksToday: getTasksForDay(get().todayKey()) }),
+      refresh: () => {
+        try {
+          set({ tasksToday: getTasksForDay(get().todayKey()) });
+        } catch (e) {
+          console.warn('Refresh failed:', e);
+        }
+      },
+
+      clearCache: () => {
+        console.log('🧹 Clearing in-memory cache');
+        // Clear tasks array to force fresh load
+        set({ tasksToday: [] });
+      },
+
+      hardRefresh: () => {
+        console.log('🧹 Hard refresh - clearing cache and reloading');
+        try {
+          // Clear cache first
+          set({ tasksToday: [] });
+          
+          // Force garbage collection of old references
+          const todayKey = get().todayKey();
+          const freshTasks = getTasksForDay(todayKey);
+          
+          set({ tasksToday: freshTasks });
+        } catch (e) {
+          console.warn('Hard refresh failed:', e);
+          set({ tasksToday: [] });
+        }
+      },
 
       addTask: (title) => {
         insertTask(title);

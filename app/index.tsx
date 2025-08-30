@@ -20,6 +20,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, G, Path } from 'react-native-svg';
 import { AnimatedFlashList, FlashList } from '@shopify/flash-list';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { router } from 'expo-router';
 
@@ -91,22 +92,34 @@ export default function Home() {
   const remove    = useKriya(s => s.removeTask);
   const isDarkMode = useKriya(s => s.isDarkMode);
   const hasCompletedOnboarding = useKriya(s => s.hasCompletedOnboarding);
+  const refresh   = useKriya(s => s.refresh); // Add this
   const insets    = useSafeAreaInsets();
-  const navigationRef = useRef(false); // Prevent multiple navigations
+  const navigationRef = useRef(false);
 
   const [hasCheckedOnboarding, setHasCheckedOnboarding] = useState(false);
 
-    console.log('🔍 Debug - ready:', ready, 'hasCompletedOnboarding:', hasCompletedOnboarding, 'hasCheckedOnboarding:', hasCheckedOnboarding);
+  // Fade animation for shloka card
+  const fade = useSharedValue(0);
 
+  // Clear cache and refresh when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      if (ready) {
+        console.log('🧹 Home screen focused - refreshing state');
+        refresh(); // This will reload tasks from SQLite
+        
+        // Reset animation values to prevent accumulation
+        fade.value = 0;
+        fade.value = withSpring(1);
+      }
+    }, [ready, refresh, fade])
+  );
 
   // Only compute shloka after store is ready
   const { index: shlokaIndex, data: shloka } = ready ? getShloka() : { index: 0, data: null as any };
 
   // State for toggling between Sanskrit and English
   const [showTranslation, setShowTranslation] = useState(false);
-
-  // Fade animation for shloka card
-  const fade = useSharedValue(0);
   useEffect(() => {
     if (!ready || !shloka) return;
     fade.value = 0;

@@ -14,7 +14,18 @@ import { ensureProgressForToday, countCompletedSince } from './progress';
 import { isDbReady } from './dbReady';
 import type { ShlokaRow } from './shloka';
 
-type State = {
+// Add bookmark interface
+export interface Bookmark {
+  id: number;
+  shlokaIndex: number;
+  chapter: number;
+  verse: number;
+  text: string;
+  translation: string;
+  createdAt: string;
+}
+
+interface KriyaState {
   ready: boolean;
 
   tasksToday: Task[];
@@ -44,26 +55,20 @@ type State = {
   removeBookmark: (shlokaIndex: number) => void;
   isBookmarked: (shlokaIndex: number) => boolean;
   getBookmarks: () => Bookmark[];
-};
 
-// Add bookmark interface
-export interface Bookmark {
-  id: number;
-  shlokaIndex: number;
-  chapter: number;
-  verse: number;
-  text: string;
-  translation: string;
-  createdAt: string;
+  // onboarding
+  hasCompletedOnboarding: boolean;
+  completeOnboarding: () => void;
 }
 
-export const useKriya = create<State>()(
+export const useKriya = create<KriyaState>()(
   persist(
     (set, get) => ({
       ready: false,
       tasksToday: [],
-      isDarkMode: false, // Default to light mode
+      isDarkMode: false,
       bookmarks: [],
+      hasCompletedOnboarding: false,
 
       init: () => {
         if (!isDbReady()) {
@@ -174,13 +179,20 @@ export const useKriya = create<State>()(
       getBookmarks: () => {
         return get().bookmarks;
       },
+
+      completeOnboarding: () => {
+        console.log('🎯 Store: Completing onboarding...');
+        set({ hasCompletedOnboarding: true });
+        console.log('🎯 Store: New state after completion:', get().hasCompletedOnboarding);
+      },
     }),
     {
       name: 'kriya-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({ 
+      partialize: (state) => ({
         isDarkMode: state.isDarkMode,
-        bookmarks: state.bookmarks  // Add this line!
+        bookmarks: state.bookmarks,
+        hasCompletedOnboarding: state.hasCompletedOnboarding,
       }),
     }
   )

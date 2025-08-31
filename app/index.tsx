@@ -49,7 +49,7 @@ const Checkbox = React.memo(({ completed, isDarkMode }: { completed: boolean, is
         [0, 1],
         isDarkMode 
           ? ['#1f2937', '#65a25cff']
-          : ['white', '#AADBA3']
+          : ['white', '#98d590ff']
       ),
       borderColor: interpolateColor(
         progress.value,
@@ -455,7 +455,7 @@ export default function Home() {
 
   return (
     <LinearGradient
-      colors={isDarkMode ? ['#344c67ff', '#000000ff'] : ['#ffffffff', '#9FABC8']}
+      colors={isDarkMode ? ['#344c67ff', '#000000ff'] : ['#ffffffd2', '#8ba5e1ff']}
       style={[styles.container]}
     >
       <StatusBar style={isDarkMode ? "light" : "dark"} />
@@ -525,10 +525,10 @@ export default function Home() {
       {/* Tasks Section */}
       <View style={[
         styles.tasksContainer,
-        { backgroundColor: isDarkMode ? '#03233181' : '#ffffffe0', paddingBottom: insets.bottom }
+        { backgroundColor: isDarkMode ? '#03233181' : '#ffffffdd', paddingBottom: insets.bottom }
       ]}>
         <View style={styles.tasksHeader}>
-          <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#848fa9ff' }]}>Today's Tasks</Text>
+          <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#5a6173ff' }]}>Today's Tasks</Text>
           <Link href="/history" asChild>
             <Pressable >
               <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>

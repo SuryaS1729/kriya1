@@ -86,6 +86,20 @@ export default function Add() {
       inputRef.current?.focus();
     }, 0);
   }
+  function addAndStayOrGoHome() {
+  const t = text.trim();
+  if (!t) {
+    // If empty, go back to homescreen
+    doneAndClose();
+    return;
+  }
+  // If not empty, add task and stay
+  addTask(t);
+  setText('');
+  setTimeout(() => {
+    inputRef.current?.focus();
+  }, 0);
+}
   
   function doneAndClose() {
     Keyboard.dismiss();
@@ -143,7 +157,7 @@ export default function Add() {
     <SafeAreaView style={{ flex: 1 }} edges={['top']}>
       {/* Add gradient background */}
       <LinearGradient 
-        colors={isDarkMode ? ['#031d31e7', '#000000ff'] : ['#ffffffff', '#9FABC8']} 
+        colors={isDarkMode ? ['#031d31e7', '#000000ff'] : ['#ffffffff', '#f0f2f8ff']} 
         style={StyleSheet.absoluteFill} 
       />
       
@@ -209,7 +223,7 @@ export default function Add() {
             <Pressable onPress={addAndStay}>
               <View style={[
                 styles.addTaskIcon,
-                { backgroundColor: isDarkMode ? '#0a3a4bff' : '#E6E6E6' }
+                { backgroundColor: isDarkMode ? '#0a3a4bff' : '#ebebebff' }
               ]}>
                 <AnimatedFeather 
                   name="arrow-right" 
@@ -226,7 +240,7 @@ export default function Add() {
               placeholder={placeholderText}
               style={[styles.input, { color: isDarkMode ? '#f9fafb' : '#111827' }]}
               returnKeyType="done"
-              onSubmitEditing={addAndStay}
+              onSubmitEditing={addAndStayOrGoHome}
               placeholderTextColor={isDarkMode ? '#6b7280' : '#9ca3af'}
               blurOnSubmit={false}
             />

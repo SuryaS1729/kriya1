@@ -237,7 +237,7 @@ export default function ShlokaDetail() {
               Adhyaya {row!.chapter_number}, Shloka {row!.verse_number}
             </Text>
 
-            <Text style={[styles.sa, { color: isDarkMode ? '#e5e7eb' : '#545454' }]}>
+            <Text style={[styles.sa, { color: isDarkMode ? '#e5e7eb' : '#545454' }]} selectable>
               {row!.text}
             </Text>
 
@@ -246,7 +246,7 @@ export default function ShlokaDetail() {
                 <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
                   Transliteration :
                 </Text>
-                <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>
+                <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable>
                   {row!.transliteration}
                 </Text>
               </>
@@ -255,7 +255,7 @@ export default function ShlokaDetail() {
             <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
               Translation :
             </Text>
-            <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>
+            <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable={true}>
               {row!.translation_2 ?? row!.description ?? '—'}
             </Text>
 
@@ -264,7 +264,7 @@ export default function ShlokaDetail() {
                 <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
                   Commentary :
                 </Text>
-                <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>
+                <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable>
                   {row!.commentary}
                 </Text>
               </>

@@ -31,12 +31,6 @@
           <string>com.surya7314.kriya</string>
         </array>
       </dict>
-      <dict>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>exp+kriya</string>
-        </array>
-      </dict>
     </array>
     <key>CFBundleVersion</key>
     <string>1</string>
@@ -74,6 +68,8 @@
       <string>Tillana-Regular.ttf</string>
       <string>Kalam-Regular.ttf</string>
       <string>Kalam-Light.ttf</string>
+      <string>InstrumentSerif-Italic.ttf</string>
+      <string>InstrumentSerif-Regular.ttf</string>
     </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>

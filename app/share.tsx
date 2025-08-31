@@ -66,11 +66,10 @@ export default function SharePage() {
   const params = useGlobalSearchParams();
   const [shloka, setShloka] = useState<ShlokaRow | null>(null);
   const [platform, setPlatform] = useState<PlatformType>('story');
-  // Remove backgroundIndex state - no longer needed
   const cardRef = useRef<ViewShot>(null);
 
   // Calculate card dimensions to fit in the top half
-  const availableHeight = screenHeight * 0.4; // Leave some margin
+  const availableHeight = screenHeight * 0.4;
   const availableWidth = screenWidth * 0.8;
   
   const cardConfig = PLATFORMS[platform];
@@ -85,6 +84,15 @@ export default function SharePage() {
     cardHeight = availableHeight;
     cardWidth = cardHeight * cardConfig.ratio;
   }
+
+  // Calculate square text container size
+  const getSquareTextContainerSize = () => {
+    // Use 60% of the smaller card dimension for the square
+    const smallerDimension = Math.min(cardWidth, cardHeight);
+    return smallerDimension * 0.6;
+  };
+
+  const squareSize = getSquareTextContainerSize();
 
   useEffect(() => {
     const shlokaId = params.shlokaId as string;
@@ -135,9 +143,9 @@ export default function SharePage() {
     }
   };
 
-  // Dynamic font sizes based on card size
+  // Dynamic font sizes based on square container size
   const getFontSizes = () => {
-    const scale = Math.min(cardWidth, cardHeight) / 300;
+    const scale = squareSize / 200; // Base scale on square size instead of card size
     return {
       om: Math.max(24, 40 * scale),
       chapter: Math.max(7, 8 * scale),
@@ -227,7 +235,14 @@ export default function SharePage() {
                 <View style={styles.verticalLayout}>
 
                   <View style={styles.contentSection}>
-                    <View style={styles.textContainer}>
+                    <View style={[
+                      styles.textContainer,
+                      {
+                        width: squareSize,
+                        height: squareSize,
+                        justifyContent: 'center'
+                      }
+                    ]}>
 
                       <Text style={[styles.chapterText, { fontSize: fontSizes.chapter }]}>
                       Bhagavad Gita {shloka.chapter_number}.{shloka.verse_number}
@@ -244,7 +259,7 @@ export default function SharePage() {
                   </View>
 
                   <View style={styles.bottomSection}>
-                    <View style={styles.brandContainer}>
+                    <View>
                       <Text style={[styles.appName, { fontSize: fontSizes.app }]}>kriya</Text>
                       
                     </View>
@@ -327,11 +342,13 @@ const newStyles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
+    backgroundColor: '#802828ff',
   },
   headerTitle: {
     color: 'white',
     fontSize: 18,
     fontWeight: '600',
+    backgroundColor: 'green'
   },
   loadingText: {
     color: 'white',
@@ -341,12 +358,13 @@ const newStyles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
+    backgroundColor:"pink"
   },
   previewSection: {
     flex: 1.8,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#871616ff',
     borderBottomWidth: 1,
     borderBottomColor: '#333',
   },
@@ -450,6 +468,9 @@ const newStyles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor:"pink",
+   
+
   },
   bottomSection: {
     alignItems: 'center',
@@ -460,6 +481,7 @@ const newStyles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     marginVertical: 8,
+    
   },
   brandContainer: {
     flexDirection: 'row',
@@ -502,7 +524,7 @@ const newStyles = StyleSheet.create({
 
     lineHeight: 9,
     textAlign: 'left',
-    fontFamily: 'SourceSerifPro',
+    fontFamily: 'Kalam',
     fontWeight: '200',
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 1, height: 1 },
@@ -513,7 +535,7 @@ const newStyles = StyleSheet.create({
     color: 'white',
     lineHeight: 15,
     textAlign: 'left',
-    fontFamily: 'Alegreya',
+    fontFamily: 'Instrument',
     textShadowColor: 'rgba(0, 0, 0, 0.8)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
@@ -525,8 +547,11 @@ const newStyles = StyleSheet.create({
   },
   appName: {
     color: 'white',
-    fontWeight: 'bold',
-    letterSpacing: 2,
+    fontFamily: 'Instrument',
+    fontStyle: 'italic',
+    textShadowColor: 'rgba(0, 0, 0, 0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
   actions: {
     flexDirection: 'row',

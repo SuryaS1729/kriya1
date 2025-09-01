@@ -18,10 +18,12 @@
 		56CD359CC5AD4956BB3E8388 /* SourceSerifPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = A965B643C21A43698ECDF2B9 /* SourceSerifPro-Regular.otf */; };
 		577AA8C8AEC4477CBB9BC001 /* SourceSerifPro-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = B07C2389B8194677A4787197 /* SourceSerifPro-ExtraLight.otf */; };
 		5A29E2439AB447DFB481B4AA /* spacemono_italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C8A965036F20461BB74F9C2E /* spacemono_italic.ttf */; };
+		5BD77FEB9100423F8083C337 /* InstrumentSerif-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7193E5F4D1CE47BEAAFE754A /* InstrumentSerif-Regular.ttf */; };
 		645E21F2E2A6B2CEB16DAD7B /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0AC37BBA4C04E6EFDEB62C9 /* ExpoModulesProvider.swift */; };
 		6A71C1A9CDD142B984281CA1 /* spacemono_bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8A23A667F9EB41B881F4DEAD /* spacemono_bold.ttf */; };
 		7426FFDBFEB64CD392F1CF9D /* AMS-Samanya-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C4423020C46440F8BE0B4125 /* AMS-Samanya-Bold.ttf */; };
 		8FB7D0B1C4BA8C6847990FC9 /* libPods-kriya.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7314A7D71BA207929562680D /* libPods-kriya.a */; };
+		90DBB83C83B9473192D140ED /* InstrumentSerif-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 15EE7EF40C1741C0A13B828B /* InstrumentSerif-Italic.ttf */; };
 		968A5D189DDF428CADAB7715 /* SourceSerifPro-SemiboldIt.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6DAC6E949243417F84BE0105 /* SourceSerifPro-SemiboldIt.otf */; };
 		A9012510AC7D47019545A32F /* SourceSerifPro-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = FB6FD31F88BB42B987708350 /* SourceSerifPro-Semibold.otf */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
@@ -31,8 +33,6 @@
 		D5AACA5FEEB5E55E21F8AFAE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5526D0960A0E6813E4E351C5 /* PrivacyInfo.xcprivacy */; };
 		DDDAC187532045EBAE621063 /* Tillana-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E055843442744C9CAE6AEFE8 /* Tillana-Regular.ttf */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
-		90DBB83C83B9473192D140ED /* InstrumentSerif-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 15EE7EF40C1741C0A13B828B /* InstrumentSerif-Italic.ttf */; };
-		5BD77FEB9100423F8083C337 /* InstrumentSerif-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7193E5F4D1CE47BEAAFE754A /* InstrumentSerif-Regular.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,12 +40,14 @@
 		13B07F961A680F5B00A75B9A /* kriya.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kriya.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = kriya/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = kriya/Info.plist; sourceTree = "<group>"; };
+		15EE7EF40C1741C0A13B828B /* InstrumentSerif-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "InstrumentSerif-Italic.ttf"; path = "../assets/fonts/InstrumentSerif-Italic.ttf"; sourceTree = "<group>"; };
 		198C01DF22C84CC39C9432E4 /* SourceSerifPro-It.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-It.otf"; path = "../assets/fonts/SourceSerifPro-It.otf"; sourceTree = "<group>"; };
 		1DEF642DBFC3427FAD4074DD /* Kalam-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Kalam-Regular.ttf"; path = "../assets/fonts/Kalam-Regular.ttf"; sourceTree = "<group>"; };
 		5526D0960A0E6813E4E351C5 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = kriya/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		5720F7ECAB784E91A3F9F81F /* SourceSerifPro-Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-Light.otf"; path = "../assets/fonts/SourceSerifPro-Light.otf"; sourceTree = "<group>"; };
 		57F7CAC4DE4AB9B91F9930F9 /* Pods-kriya.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kriya.release.xcconfig"; path = "Target Support Files/Pods-kriya/Pods-kriya.release.xcconfig"; sourceTree = "<group>"; };
 		6DAC6E949243417F84BE0105 /* SourceSerifPro-SemiboldIt.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-SemiboldIt.otf"; path = "../assets/fonts/SourceSerifPro-SemiboldIt.otf"; sourceTree = "<group>"; };
+		7193E5F4D1CE47BEAAFE754A /* InstrumentSerif-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "InstrumentSerif-Regular.ttf"; path = "../assets/fonts/InstrumentSerif-Regular.ttf"; sourceTree = "<group>"; };
 		7314A7D71BA207929562680D /* libPods-kriya.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-kriya.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		73BE1E733F7247F694FAE8AF /* Alegreya-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Alegreya-Regular.otf"; path = "../assets/fonts/Alegreya-Regular.otf"; sourceTree = "<group>"; };
 		7BB15321E4C14ABE946D3BFD /* Kalam-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Kalam-Light.ttf"; path = "../assets/fonts/Kalam-Light.ttf"; sourceTree = "<group>"; };
@@ -66,8 +68,6 @@
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = kriya/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* kriya-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "kriya-Bridging-Header.h"; path = "kriya/kriya-Bridging-Header.h"; sourceTree = "<group>"; };
 		FB6FD31F88BB42B987708350 /* SourceSerifPro-Semibold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-Semibold.otf"; path = "../assets/fonts/SourceSerifPro-Semibold.otf"; sourceTree = "<group>"; };
-		15EE7EF40C1741C0A13B828B /* InstrumentSerif-Italic.ttf */ = {isa = PBXFileReference; name = "InstrumentSerif-Italic.ttf"; path = "../assets/fonts/InstrumentSerif-Italic.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
-		7193E5F4D1CE47BEAAFE754A /* InstrumentSerif-Regular.ttf */ = {isa = PBXFileReference; name = "InstrumentSerif-Regular.ttf"; path = "../assets/fonts/InstrumentSerif-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -442,11 +442,11 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.surya7314.kriya;
-				PRODUCT_NAME = "kriya";
+				PRODUCT_NAME = kriya;
 				SWIFT_OBJC_BRIDGING_HEADER = "kriya/kriya-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -473,10 +473,10 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.surya7314.kriya;
-				PRODUCT_NAME = "kriya";
+				PRODUCT_NAME = kriya;
 				SWIFT_OBJC_BRIDGING_HEADER = "kriya/kriya-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1";
+				TARGETED_DEVICE_FAMILY = 1;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;

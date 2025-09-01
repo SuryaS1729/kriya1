@@ -185,6 +185,7 @@ const styles = StyleSheet.create({
     right: 0,
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
+
   },
   safeArea: {
     flex: 1,
@@ -227,10 +228,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 52,
+    fontSize: 82,
     color: 'white',
     textAlign: 'center',
-    marginBottom: 12,
     fontFamily: 'Instrument',
     fontStyle:'italic',
     letterSpacing: 1,

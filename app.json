@@ -3,22 +3,20 @@
     "name": "kriya",
     "slug": "kriya",
     "scheme": "acme",
+    "icon": "./assets/icons/adaptive-icon.png",
     "plugins": [
 
-      [
+       [
         "expo-splash-screen",
         {
-          "resizeMode": "contain",
-          "backgroundColor": "#FFFFFF",
-          "image": "./assets/icons/splash-icon-dark.png",
-          "imageWidth": 200,
+          "backgroundColor": "#232323",
+          "image": "./assets/icons/splash-icon-light.png",
           "dark": {
-            "image": "./assets/icons/splash-icon-light.png",
+            "image": "./assets/icons/splash-icon-dark.png",
             "backgroundColor": "#000000"
           },
+          "imageWidth": 200
         }
-
-
       ],
 
 
@@ -193,8 +191,8 @@
     "android": {
       "package": "com.surya7314.kriya",
       "edgeToEdgeEnabled": true,
-      "softwareKeyboardLayoutMode": "resize",
-      "adaptiveIcon": {"backgroundColor": "#FFFFFF", "foregroundImage": "./assets/icons/adaptive-icon.png"}
+      "softwareKeyboardLayoutMode": "resize"
+
     },
     "ios": {
       "bundleIdentifier": "com.surya7314.kriya"

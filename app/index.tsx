@@ -283,6 +283,8 @@ export default function Home() {
     return [...incomplete, ...completed];
   }, [tasks]);
 
+
+
   // Memoized callbacks to prevent unnecessary re-renders
   const onToggle = React.useCallback((id: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -294,20 +296,34 @@ export default function Home() {
     remove(id);
   }, [remove]);
 
+
+const onFocus = React.useCallback((task: Task) => {
+  router.push({
+    pathname: '/focus',
+    params: { 
+       id: String(task.id), 
+      title: task.title,   
+     },
+  });
+}, []);
+
+
   // Enhanced TaskRow with cleanup
   const TaskRow = React.memo(({ 
     item, 
     isDarkMode, 
     onToggle, 
-    onRemove 
+    onFocus 
   }: { 
     item: Task; 
     isDarkMode: boolean; 
     onToggle: (id: number) => void; 
-    onRemove: (id: number) => void 
+  onFocus: (task: Task) => void; 
   }) => {
     const handleToggle = React.useCallback(() => onToggle(item.id), [onToggle, item.id]);
     const handleRemove = React.useCallback(() => onRemove(item.id), [onRemove, item.id]);
+    const handleFocus = React.useCallback(() => onFocus(item), [onFocus, item]); // Handle long press
+
     
     return (
        <View style={[styles.row, { borderBottomColor: isDarkMode ? '#1a2535ff' : '#d8dde1ff' }]}>
@@ -324,7 +340,7 @@ export default function Home() {
           {/* Pressable for the text area */}
           <Pressable 
             onPress={handleToggle} 
-            onLongPress={handleRemove}
+            onLongPress={handleFocus}
             style={{ flex: 1, paddingVertical: 5, paddingLeft: 8 }}
           >
             <Text
@@ -357,6 +373,8 @@ export default function Home() {
     );
   });
 
+
+
   // Enhanced renderItem with cleanup
   const renderItem = React.useCallback(
     ({ item }: { item: Task }) => (
@@ -369,7 +387,7 @@ export default function Home() {
           item={item} 
           isDarkMode={isDarkMode} 
           onToggle={onToggle} 
-          onRemove={onRemove} 
+          onFocus={onFocus} 
         />
       </Animated.View>
     ),

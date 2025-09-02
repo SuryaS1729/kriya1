@@ -4,13 +4,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useSharedValue, withTiming, useAnimatedStyle, interpolateColor } from 'react-native-reanimated';
+import { useSharedValue, withTiming, useAnimatedStyle, interpolateColor, Easing } from 'react-native-reanimated';
 import Animated from 'react-native-reanimated';
 
 // Import components
 import BlurBackground from '../components/BlurBackground';
 import BlurEdge from '../components/BlurEdge';
 import { StatusBar } from 'expo-status-bar';
+
+const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
 export default function FocusMode() {
   const { id, title } = useLocalSearchParams();
@@ -36,8 +38,14 @@ export default function FocusMode() {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           setIsRunning(false);
           // Restore full opacity when session completes
-          contentOpacity.value = withTiming(1, { duration: 500 });
-          buttonColorProgress.value = withTiming(0, { duration: 500 });
+          contentOpacity.value = withTiming(1, {
+            duration: 300, // Reduced from 500 to 300
+            easing: Easing.out(Easing.cubic), // Smooth easing
+          });
+          buttonColorProgress.value = withTiming(0, {
+            duration: 300, // Reduced from 500 to 300
+            easing: Easing.out(Easing.cubic), // Smooth easing
+          });
         }
         return newTime;
       });
@@ -57,8 +65,14 @@ export default function FocusMode() {
 
     // Set new fade timeout
     fadeTimeoutRef.current = setTimeout(() => {
-      contentOpacity.value = withTiming(0.2, { duration: 1000 });
-      buttonColorProgress.value = withTiming(1, { duration: 1000 });
+      contentOpacity.value = withTiming(0.2, {
+        duration: 700, // Reduced from 1000 to 700
+        easing: Easing.inOut(Easing.quad), // Smooth fade in/out
+      });
+      buttonColorProgress.value = withTiming(1, {
+        duration: 700, // Reduced from 1000 to 700
+        easing: Easing.inOut(Easing.quad), // Smooth fade in/out
+      });
     }, 5000);
 
     return () => {
@@ -74,8 +88,14 @@ export default function FocusMode() {
     
     if (isRunning) {
       // If pausing, restore full opacity immediately
-      contentOpacity.value = withTiming(1, { duration: 300 });
-      buttonColorProgress.value = withTiming(0, { duration: 300 });
+      contentOpacity.value = withTiming(1, {
+        duration: 200, // Reduced from 300 to 200
+        easing: Easing.out(Easing.cubic), // Smooth easing
+      });
+      buttonColorProgress.value = withTiming(0, {
+        duration: 200, // Reduced from 300 to 200
+        easing: Easing.out(Easing.cubic), // Smooth easing
+      });
     }
     // If resuming (isRunning becomes true), the useEffect will handle the 5-second fade
   };
@@ -97,7 +117,8 @@ export default function FocusMode() {
     const backgroundColor = interpolateColor(
       buttonColorProgress.value,
       [0, 1],
-      ['#2563eb', '#1e293b'] // Blue to dark slate
+      // ['#2563eb', '#1e293b'] // Blue to dark slate
+      ['#2563eb', '#132138ff']
     );
     
     return {
@@ -105,18 +126,33 @@ export default function FocusMode() {
     };
   });
 
+  
+
   const animatedButtonBorderStyle = useAnimatedStyle(() => {
     const borderColor = interpolateColor(
       buttonColorProgress.value,
       [0, 1],
-      ['#2563eb', '#334155'] // Blue to slate border
+      // ['#2563eb', '#334155'] // Blue to slate border
+      ['#2563eb', '#273241ff']
     );
     
-    const borderWidth = buttonColorProgress.value * 1; // 0 to 1px border
+    const borderWidth = buttonColorProgress.value * 0; // 0 to 1px border
     
     return {
       borderColor,
       borderWidth,
+    };
+  });
+
+  const animatedIconStyle = useAnimatedStyle(() => {
+    const color = interpolateColor(
+      buttonColorProgress.value,
+      [0, 1],
+      ['#ffffff', '#a0b4bcff'] // Transition from white to #a0b4bcff
+    );
+
+    return {
+      color, // Apply the interpolated color
     };
   });
 
@@ -145,31 +181,36 @@ export default function FocusMode() {
 
       {/* Content */}
       <View style={[styles.content, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        {/* Task Title and Timer with opacity control */}
-        <Animated.View style={[styles.textContent, animatedContentStyle]}>
+        {/* Task Title - Positioned at the top */}
+        <Animated.View style={[styles.titleContainer, animatedContentStyle]}>
           <Text style={styles.taskTitle}>
             {title || 'Focus Session'}
           </Text>
-
-          <View style={styles.timerContainer}>
-            <Text style={styles.timerText}>
-              {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-            </Text>
-            <Text style={styles.timerLabel}>
-              {timeLeft === 0 ? 'Session Complete!' : isRunning ? 'Focus Time' : 'Paused'}
-            </Text>
-          </View>
         </Animated.View>
 
-        {/* Actions - These stay at full opacity */}
+        {/* Timer - Centered */}
+        <Animated.View style={[styles.timerContainer, animatedContentStyle]}>
+          <Text style={styles.timerText}>
+            {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+          </Text>
+          <Text style={styles.timerLabel}>
+            {timeLeft === 0 ? 'Session Complete!' : isRunning ? 'Focus Time' : 'Paused'}
+          </Text>
+        </Animated.View>
+
+        {/* Actions - Positioned at the bottom */}
         <View style={styles.actions}>
           <Pressable onPress={toggleTimer}>
             <Animated.View style={[styles.actionButton, animatedButtonStyle, animatedButtonBorderStyle]}>
-              <Feather name={isRunning ? 'pause' : 'play'} size={24} color="white" />
+              <AnimatedFeather
+                name={isRunning ? 'pause' : 'play'}
+                size={24}
+                style={animatedIconStyle} // Apply animated style for color transition
+              />
             </Animated.View>
           </Pressable>
           <Pressable onPress={() => router.back()} style={[styles.actionButton, styles.secondaryButton]}>
-            <Feather name="x" size={24} color="#64748b" />
+            <AnimatedFeather name="x" size={24} style={animatedIconStyle} />
           </Pressable>
         </View>
       </View>
@@ -184,9 +225,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-evenly', // Center everything vertically
     alignItems: 'center',
     zIndex: 1,
+    paddingVertical: 20, // Reduce vertical padding
+  },
+  titleContainer: {
+    alignItems: 'center',
+    marginBottom: 5, // Reduce spacing below the title
   },
   textContent: {
     alignItems: 'center',
@@ -207,15 +253,15 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#f8fafc', // Light text
-    marginBottom: 20,
     textAlign: 'center',
     letterSpacing: 0.5,
     fontFamily: "Instrument",
-    fontStyle: "italic"
+    fontStyle: "italic",
   },
   timerContainer: {
-    marginBottom: 40,
+    justifyContent: 'center',
     alignItems: 'center',
+    marginVertical: 10, // Reduce spacing above and below the timer
   },
   timerText: {
     fontSize: 64,
@@ -236,6 +282,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 20,
     width: '100%',
+    marginTop: 10, // Reduce spacing above the action buttons
   },
   actionButton: {
     width: 64,
@@ -248,10 +295,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
+
   },
   secondaryButton: {
-    backgroundColor: '#1e293b', // Dark slate
-    borderWidth: 1,
-    borderColor: '#334155',
+    backgroundColor: '#122035ff', // Dark slate
+
+    borderColor: '#273241ff',
   },
 });

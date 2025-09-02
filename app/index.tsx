@@ -477,6 +477,8 @@ const onFocus = React.useCallback((task: Task) => {
       style={[styles.container]}
     >
       <StatusBar style={isDarkMode ? "light" : "dark"} />
+            {/* <StatusBar hidden={true} /> */}
+      
       
       <View style={[styles.topHalf, { paddingTop: insets.top }]}>
         {/* Shloka Card */}

@@ -7,51 +7,23 @@ import {
   Pressable,
   StatusBar,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { useKriya } from '../../lib/store';
-import { Feather } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import BlurBackground from '../../components/BlurBackground';
+import Animated from 'react-native-reanimated';
+import BlurEdge from '../../components/BlurEdge';
+import { Canvas, Blur, RoundedRect, Fill } from '@shopify/react-native-skia';
 
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const onboardingSteps = [
-  {
-    title: "Welcome to Kriya",
-    subtitle: "Your daily spiritual companion",
-    description: "Start each day with ancient wisdom and purposeful action",
-    icon: "sunrise",
-    overlayColors: ['#667eea', '#764ba2'],
-  },
-  {
-    title: "Ancient Wisdom",
-    subtitle: "Bhagavad Gita verses daily",
-    description: "Discover timeless teachings that guide your dharma",
-    icon: "book-open",
-    overlayColors: ['#f093fb', '#f5576c'],
-  },
-  {
-    title: "Mindful Tasks",
-    subtitle: "Organize with purpose",
-    description: "Transform daily activities into spiritual practice",
-    icon: "check-circle",
-    overlayColors: ['#4facfe', '#00f2fe'],
-  },
-  {
-    title: "Begin Your Journey",
-    subtitle: "Ready to start?",
-    description: "Let's create your first meaningful day together",
-    icon: "arrow-right",
-    overlayColors: ['#43e97b', '#38f9d7'],
-  },
-];
-
 export default function Onboarding() {
   console.log('🎯 Onboarding component rendering');
+    const insets = useSafeAreaInsets();
   
-  const [currentStep, setCurrentStep] = useState(0);
   const completeOnboarding = useKriya(s => s.completeOnboarding);
 
   // Video player setup
@@ -61,21 +33,7 @@ export default function Onboarding() {
     player.play();
   });
 
-  const isLastStep = currentStep === onboardingSteps.length - 1;
-
-  const goToNext = () => {
-    if (currentStep < onboardingSteps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const goToPrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleComplete = () => {
+  const handleGetStarted = () => {
     console.log('🎯 Completing onboarding...');
     if (completeOnboarding) {
       completeOnboarding();
@@ -83,89 +41,72 @@ export default function Onboarding() {
     router.replace('/');
   };
 
-  const currentStepData = onboardingSteps[currentStep];
-  console.log('🎯 Current step data:', currentStepData);
-
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       
       {/* Video Background */}
-      <VideoView
-        style={styles.video}
-        player={player}
-        allowsFullscreen={false}
-        allowsPictureInPicture={false}
-        showsTimecodes={false}
-        requiresLinearPlayback={false}
-        contentFit="cover"
-      />
+       <Animated.View style={[StyleSheet.absoluteFill]}>
+        <BlurBackground />
+        
+        {/* Top Edge Blur */}
+        <BlurEdge
+          height={80 + insets.top}
+          colors={["#00000088", "#00000000"]}
+          style={[styles.blur, styles.topBlur, { top: 0 }]}
+        />
+
+        {/* Bottom Edge Blur */}
+        <BlurEdge
+          height={50 + insets.bottom}
+          colors={["#00000000", "#00000064"]}
+          style={[styles.blur, styles.bottomBlur, { bottom: 0 }]}
+        />
+      </Animated.View>
       
       {/* Dark overlay for better text readability */}
-      <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.6)']}
-        style={StyleSheet.absoluteFill}
-      />
+      <View style={styles.overlay} />
       
       <SafeAreaView style={styles.safeArea}>
-        {/* Skip button */}
-        {!isLastStep && (
-          <Pressable onPress={handleComplete} style={styles.skipButton}>
-            <Text style={styles.skipText}>Skip</Text>
-          </Pressable>
-        )}
-
-        {/* Main content */}
         <View style={styles.content}>
-          <View style={styles.titleContainer}><Text style={styles.title}>kriya</Text></View>
-          {/* <View style={styles.iconContainer}>
-            <View style={styles.iconBackground}>
-              <Feather name={currentStepData.icon as any} size={60} color="white" />
-            </View>
-          </View> */}
-
-          <View style={styles.textContainer}>
-
-            <Text style={styles.subtitle}>{currentStepData.subtitle}</Text>
-            <Text style={styles.description}>{currentStepData.description}</Text>
+          {/* Main title - positioned in upper portion */}
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>kriya</Text>
           </View>
         </View>
 
-        {/* Progress indicators */}
-        <View style={styles.progressContainer}>
-          {onboardingSteps.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.progressDot,
-                index === currentStep && styles.progressDotActive,
-              ]}
-            />
-          ))}
-        </View>
+        {/* Bottom modal card with Skia blur */}
+        <View style={styles.bottomCard}>
+          <Canvas style={StyleSheet.absoluteFill}>
+            <RoundedRect
+              x={0}
+              y={0}
+              width={SCREEN_WIDTH}
+              height={SCREEN_HEIGHT * 0.35}
+              r={24}
+            >
+              <Fill color="transparent" />
+              <Blur blur={100} />
+            </RoundedRect>
+          </Canvas>
+          
+          <View style={styles.cardContent}>
+            {/* Subtitle text */}
+            <View style={styles.subtitleContainer}>
+              <Text style={styles.subtitle}>free • offline • no signup • open source</Text>
+            </View>
 
-        {/* Navigation buttons */}
-        <View style={styles.navigationContainer}>
-          {currentStep > 0 ? (
-            <Pressable onPress={goToPrevious} style={styles.navButton}>
-              <Feather name="arrow-left" size={24} color="white" />
+            {/* Action button */}
+            <Pressable onPress={handleGetStarted} style={styles.actionButton}>
+              <Text style={styles.buttonText}>step into action</Text>
+              <AntDesign 
+                style={styles.buttonArrow} 
+                name="arrowright" 
+                size={24} 
+                color="white"
+              />
             </Pressable>
-          ) : (
-            <View style={styles.navButton} />
-          )}
-
-          <View style={styles.navButtonSpacer} />
-
-          {isLastStep ? (
-            <Pressable onPress={handleComplete} style={styles.completeButton}>
-              <Text style={styles.completeButtonText}>Get Started</Text>
-              <Feather name="arrow-right" size={20} color="#2563eb" style={{ marginLeft: 8 }} />
-            </Pressable>
-          ) : (
-            <Pressable onPress={goToNext} style={styles.navButton}>
-              <Feather name="arrow-right" size={24} color="white" />
-            </Pressable>
-          )}
+          </View>
         </View>
       </SafeAreaView>
     </View>
@@ -175,7 +116,7 @@ export default function Onboarding() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#021047ff',
   },
   video: {
     position: 'absolute',
@@ -185,121 +126,98 @@ const styles = StyleSheet.create({
     right: 0,
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: 20,
-  },
-  skipButton: {
-    alignSelf: 'flex-end',
-    paddingTop: 10,
-    paddingHorizontal: 15,
-    paddingBottom: 10,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 20,
-    marginTop: 10,
-  },
-  skipText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '500',
   },
   content: {
     flex: 1,
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  iconContainer: {
-    marginBottom: 60,
-  },
-  iconBackground: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    paddingHorizontal: 40,
   },
-  textContainer: {
-    alignItems: 'center',
+  titleContainer: {
+    marginTop: -200, // Move title slightly up to accommodate bottom card
   },
   title: {
-    fontSize: 82,
+    fontSize: 120,
     color: 'white',
     textAlign: 'center',
     fontFamily: 'Instrument',
-    fontStyle:'italic',
-    letterSpacing: 1,
+    fontStyle: 'italic',
+    letterSpacing: 2,
+    fontWeight: '200',
   },
-  subtitle: {
-    fontSize: 20,
-    color: 'rgba(255, 255, 255, 0.95)',
-    textAlign: 'center',
-    marginBottom: 16,
+  bottomCard: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: SCREEN_HEIGHT * 0.35, // Bottom third
+    // Remove backgroundColor since Skia handles it
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+
+
+    overflow: 'hidden', // Ensure rounded corners work properly
   },
-  description: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  progressContainer: {
-    flexDirection: 'row',
+  cardContent: {
+    flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    paddingVertical: 40,
+  },
+  subtitleContainer: {
+    padding:10,
     alignItems: 'center',
     marginBottom: 40,
-    paddingVertical: 10,
+    borderWidth:1,
+    borderColor:"white",
+    borderRadius:30,
+    paddingHorizontal:13
   },
-  progressDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    marginHorizontal: 4,
+  subtitle: {
+    fontSize: 10,
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+    letterSpacing: 1,
+    fontWeight: '300',
   },
-  progressDotActive: {
-    backgroundColor: 'white',
-    width: 24,
-  },
-  navigationContainer: {
+  actionButton: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingBottom: 20,
-  },
-  navButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 230,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },
-  navButtonSpacer: {
-    flex: 1,
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '400',
+    letterSpacing: 1,
+    marginRight: 12,
   },
-  completeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 25,
+  buttonArrow: {
+    color: 'white',
   },
-  completeButtonText: {
-    color: '#2563eb',
-    fontSize: 16,
-    fontWeight: '600',
+  blur: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    zIndex: 2,
   },
-  titleContainer: {
-    marginBottom: 22,
-    padding: 10,
+  topBlur: {
+    top: 0,
   },
-  
+  bottomBlur: {
+    bottom: 0,
+  },
 });

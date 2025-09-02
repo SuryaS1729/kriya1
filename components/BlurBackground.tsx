@@ -13,7 +13,7 @@ const BlurBackground: React.FC = () => {
   return (
     <Canvas style={styles.background}>
       <Group>
-        <BlurMask blur={30} style="normal" />
+        <BlurMask blur={60} style="normal" />
         {circles.map((_, index) => (
           <BlurCircle
             key={index}

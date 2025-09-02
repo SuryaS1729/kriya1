@@ -70,7 +70,7 @@ export const useKriya = create<KriyaState>()(
     (set, get) => ({
       ready: false,
       tasksToday: [],
-      isDarkMode: false,
+      isDarkMode: true,
       bookmarks: [],
       hasCompletedOnboarding: false,
 

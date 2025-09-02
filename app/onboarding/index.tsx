@@ -6,6 +6,7 @@ import {
   Dimensions,
   Pressable,
   StatusBar,
+  ImageBackground,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -15,14 +16,12 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import BlurBackground from '../../components/BlurBackground';
 import Animated from 'react-native-reanimated';
 import BlurEdge from '../../components/BlurEdge';
-import { Canvas, Blur, RoundedRect, Fill } from '@shopify/react-native-skia';
-
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function Onboarding() {
   console.log('🎯 Onboarding component rendering');
-    const insets = useSafeAreaInsets();
+  const insets = useSafeAreaInsets();
   
   const completeOnboarding = useKriya(s => s.completeOnboarding);
 
@@ -43,25 +42,20 @@ export default function Onboarding() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      
+      <StatusBar hidden={true} />
+
       {/* Video Background */}
-       <Animated.View style={[StyleSheet.absoluteFill]}>
+      <Animated.View style={[StyleSheet.absoluteFill]}>
         <BlurBackground />
         
-        {/* Top Edge Blur */}
-        <BlurEdge
-          height={80 + insets.top}
-          colors={["#00000088", "#00000000"]}
-          style={[styles.blur, styles.topBlur, { top: 0 }]}
-        />
 
+        
         {/* Bottom Edge Blur */}
-        <BlurEdge
+        {/* <BlurEdge
           height={50 + insets.bottom}
-          colors={["#00000000", "#00000064"]}
+          colors={["rgba(0, 0, 0, 0)", "#000000cd"]}
           style={[styles.blur, styles.bottomBlur, { bottom: 0 }]}
-        />
+        /> */}
       </Animated.View>
       
       {/* Dark overlay for better text readability */}
@@ -72,29 +66,19 @@ export default function Onboarding() {
           {/* Main title - positioned in upper portion */}
           <View style={styles.titleContainer}>
             <Text style={styles.title}>kriya</Text>
+            <Text style={styles.tagline}>ancient wisdom, modern rhythm</Text>
+            
           </View>
-        </View>
-
-        {/* Bottom modal card with Skia blur */}
-        <View style={styles.bottomCard}>
-          <Canvas style={StyleSheet.absoluteFill}>
-            <RoundedRect
-              x={0}
-              y={0}
-              width={SCREEN_WIDTH}
-              height={SCREEN_HEIGHT * 0.35}
-              r={24}
-            >
-              <Fill color="transparent" />
-              <Blur blur={100} />
-            </RoundedRect>
-          </Canvas>
-          
-          <View style={styles.cardContent}>
-            {/* Subtitle text */}
-            <View style={styles.subtitleContainer}>
+          <View style={styles.subtitleContainer}>
               <Text style={styles.subtitle}>free • offline • no signup • open source</Text>
             </View>
+        </View>
+
+        {/* Bottom modal card */}
+        <View style={styles.bottomCard}>
+          <View style={styles.cardContent}>
+            {/* Subtitle text */}
+            
 
             {/* Action button */}
             <Pressable onPress={handleGetStarted} style={styles.actionButton}>
@@ -116,7 +100,7 @@ export default function Onboarding() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#021047ff',
+    backgroundColor: '#023747e0',
   },
   video: {
     position: 'absolute',
@@ -136,15 +120,15 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
     paddingHorizontal: 40,
   },
   titleContainer: {
-    marginTop: -200, // Move title slightly up to accommodate bottom card
+    marginTop: -160, // Move title slightly up to accommodate bottom card
   },
   title: {
-    fontSize: 120,
+    fontSize: 80,
     color: 'white',
     textAlign: 'center',
     fontFamily: 'Instrument',
@@ -152,18 +136,26 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     fontWeight: '200',
   },
+  tagline: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+    letterSpacing: 1.5,
+    fontWeight: '300',
+    marginTop: 10,
+    fontFamily: 'SourceSerifPro',
+  },
   bottomCard: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: SCREEN_HEIGHT * 0.35, // Bottom third
-    // Remove backgroundColor since Skia handles it
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    height: SCREEN_HEIGHT * 0.30, // Bottom third
+    backgroundColor: 'rgba(0, 12, 26, 0.34)',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    overflow: 'hidden',
 
-
-    overflow: 'hidden', // Ensure rounded corners work properly
   },
   cardContent: {
     flex: 1,
@@ -173,23 +165,25 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   subtitleContainer: {
-    padding:10,
+    padding: 10,
     alignItems: 'center',
-    marginBottom: 40,
-    borderWidth:1,
-    borderColor:"white",
-    borderRadius:30,
-    paddingHorizontal:13
+
+    borderWidth: 0.5,
+    borderColor: "white",
+    borderRadius: 30,
+    paddingHorizontal: 13,
   },
   subtitle: {
-    fontSize: 10,
+    fontSize: 8,
     color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
     letterSpacing: 1,
     fontWeight: '300',
+    fontFamily: 'SpaceMono',
   },
   actionButton: {
     flexDirection: 'row',
+    justifyContent:"center",
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     paddingHorizontal: 32,
@@ -197,6 +191,8 @@ const styles = StyleSheet.create({
     borderRadius: 230,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
+    marginTop: 16,
+    marginBottom: 20,
   },
   buttonText: {
     color: 'white',
@@ -204,6 +200,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     letterSpacing: 1,
     marginRight: 12,
+
   },
   buttonArrow: {
     color: 'white',

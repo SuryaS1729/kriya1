@@ -16,8 +16,8 @@ const BlurCircleColors = [
   "#0f172a80",  // Dark slate
   "#64748ba0",  // Light slate
   "#2563eb60",  // Blue accent (matching your button)
-  "#603d2660",
-  "#1d7c77a0"
+  "#bb5b1bcb",
+  "#1cd1c8a0"
 ];
 
 interface BlurCircleProps {
@@ -32,10 +32,10 @@ const BlurCircle: React.FC<BlurCircleProps> = ({ cx, cy, r, delay = 0 }) => {
     [...BlurCircleColors].sort(() => Math.random() - 0.5)
   ).current;
 
-  const colorAnimationDuration = useRef(colors.length * 4000).current; // Slower transition
+  const colorAnimationDuration = useRef(colors.length * 3000).current; // Faster: 1000ms instead of 4000ms
   const color = useSharedValue(0);
   const radius = useSharedValue(r);
-  const radiusAnimationSize = useRef(r + r * 0.15).current; // Smaller pulsing
+  const radiusAnimationSize = useRef(r + r * 0.15).current;
 
   const animatedColor = useDerivedValue(() =>
     interpolateColor(
@@ -50,8 +50,8 @@ const BlurCircle: React.FC<BlurCircleProps> = ({ cx, cy, r, delay = 0 }) => {
       delay,
       withRepeat(
         withSequence(
-          withTiming(radiusAnimationSize, { duration: 6000 }), // Slower animation
-          withTiming(r, { duration: 6000 })
+          withTiming(radiusAnimationSize, { duration: 3000 }), // Faster: 100ms instead of 6000ms
+          withTiming(r, { duration: 3000 })
         ),
         -1
       )
@@ -75,7 +75,7 @@ const BlurCircle: React.FC<BlurCircleProps> = ({ cx, cy, r, delay = 0 }) => {
       cy={cy} 
       r={radius} 
       color={animatedColor}
-      opacity={0.5} // Reduced opacity for subtlety
+      opacity={0.5}
     />
   );
 };

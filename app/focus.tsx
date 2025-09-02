@@ -11,12 +11,14 @@ import Animated from 'react-native-reanimated';
 import BlurBackground from '../components/BlurBackground';
 import BlurEdge from '../components/BlurEdge';
 import { StatusBar } from 'expo-status-bar';
+import { useKriya } from '../lib/store';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
 export default function FocusMode() {
   const { id, title } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
+  const isDarkMode = useKriya(s => s.isDarkMode);
 
   const [timeLeft, setTimeLeft] = React.useState(25 * 60);
   const [isRunning, setIsRunning] = React.useState(true);
@@ -39,12 +41,12 @@ export default function FocusMode() {
           setIsRunning(false);
           // Restore full opacity when session completes
           contentOpacity.value = withTiming(1, {
-            duration: 300, // Reduced from 500 to 300
-            easing: Easing.out(Easing.cubic), // Smooth easing
+            duration: 300,
+            easing: Easing.out(Easing.cubic),
           });
           buttonColorProgress.value = withTiming(0, {
-            duration: 300, // Reduced from 500 to 300
-            easing: Easing.out(Easing.cubic), // Smooth easing
+            duration: 300,
+            easing: Easing.out(Easing.cubic),
           });
         }
         return newTime;
@@ -66,12 +68,12 @@ export default function FocusMode() {
     // Set new fade timeout
     fadeTimeoutRef.current = setTimeout(() => {
       contentOpacity.value = withTiming(0.2, {
-        duration: 700, // Reduced from 1000 to 700
-        easing: Easing.inOut(Easing.quad), // Smooth fade in/out
+        duration: 700,
+        easing: Easing.inOut(Easing.quad),
       });
       buttonColorProgress.value = withTiming(1, {
-        duration: 700, // Reduced from 1000 to 700
-        easing: Easing.inOut(Easing.quad), // Smooth fade in/out
+        duration: 700,
+        easing: Easing.inOut(Easing.quad),
       });
     }, 5000);
 
@@ -89,19 +91,49 @@ export default function FocusMode() {
     if (isRunning) {
       // If pausing, restore full opacity immediately
       contentOpacity.value = withTiming(1, {
-        duration: 200, // Reduced from 300 to 200
-        easing: Easing.out(Easing.cubic), // Smooth easing
+        duration: 200,
+        easing: Easing.out(Easing.cubic),
       });
       buttonColorProgress.value = withTiming(0, {
-        duration: 200, // Reduced from 300 to 200
-        easing: Easing.out(Easing.cubic), // Smooth easing
+        duration: 200,
+        easing: Easing.out(Easing.cubic),
       });
     }
-    // If resuming (isRunning becomes true), the useEffect will handle the 5-second fade
   };
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
+
+  // Get theme-specific colors
+  const getThemeColors = () => {
+    if (isDarkMode) {
+      return {
+        container: '#0f172a',
+        text: '#f8fafc',
+        mutedText: '#94a3b8',
+        primaryButton: ['#2563eb', '#132138ff'],
+        secondaryButton: '#122035ff',
+        buttonBorder: ['#2563eb', '#273241ff'],
+        iconColor: ['#ffffff', '#a0b4bcff'],
+        blurOverlay: ["#00000088", "#00000000"],
+        blurOverlayBottom: ["#00000000", "#00000064"],
+      };
+    } else {
+      return {
+        container: '#ffffffb2',
+        text: '#1e293bb9',
+        mutedText: '#64748b',
+        primaryButton: ['#96a9f5ff', '#d1d1d1ff'],
+        secondaryButton: '#d1d1d1ff',
+        buttonBorder: ['#3b82f6', '#cbd5e1'],
+        iconColor: ['#ffffffff', '#7b7b7bff'],
+        blurOverlay: ["#ffffff88", "#ffffff00"],
+        blurOverlayBottom: ["#ffffff00", "#ffffff64"],
+      };
+    }
+  };
+
+  const themeColors = getThemeColors();
 
   // Animated styles for background and content (not buttons)
   const animatedBackgroundStyle = useAnimatedStyle(() => ({
@@ -117,8 +149,7 @@ export default function FocusMode() {
     const backgroundColor = interpolateColor(
       buttonColorProgress.value,
       [0, 1],
-      // ['#2563eb', '#1e293b'] // Blue to dark slate
-      ['#2563eb', '#132138ff']
+      themeColors.primaryButton
     );
     
     return {
@@ -126,17 +157,14 @@ export default function FocusMode() {
     };
   });
 
-  
-
   const animatedButtonBorderStyle = useAnimatedStyle(() => {
     const borderColor = interpolateColor(
       buttonColorProgress.value,
       [0, 1],
-      // ['#2563eb', '#334155'] // Blue to slate border
-      ['#2563eb', '#273241ff']
+      themeColors.buttonBorder
     );
     
-    const borderWidth = buttonColorProgress.value * 0; // 0 to 1px border
+    const borderWidth = buttonColorProgress.value * 0;
     
     return {
       borderColor,
@@ -148,16 +176,50 @@ export default function FocusMode() {
     const color = interpolateColor(
       buttonColorProgress.value,
       [0, 1],
-      ['#ffffff', '#a0b4bcff'] // Transition from white to #a0b4bcff
+      themeColors.iconColor
     );
 
     return {
-      color, // Apply the interpolated color
+      color,
     };
   });
 
+  const dynamicStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: themeColors.container,
+    },
+    taskTitle: {
+      fontSize: 28,
+      fontWeight: '700',
+      color: themeColors.text,
+      textAlign: 'center',
+      letterSpacing: 0.5,
+      fontFamily: "Instrument",
+      fontStyle: "italic",
+    
+    },
+    timerText: {
+      fontSize: 64,
+      fontWeight: '300',
+      color: themeColors.text,
+      fontVariant: ['tabular-nums'],
+    },
+    timerLabel: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: themeColors.mutedText,
+      marginTop: 8,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    secondaryButton: {
+      backgroundColor: themeColors.secondaryButton,
+    },
+  });
+
   return (
-    <View style={styles.container}>
+    <View style={dynamicStyles.container}>
       <StatusBar hidden={true} />
 
       {/* Animated Background with opacity control */}
@@ -167,14 +229,14 @@ export default function FocusMode() {
         {/* Top Edge Blur */}
         <BlurEdge
           height={80 + insets.top}
-          colors={["#00000088", "#00000000"]}
+          colors={themeColors.blurOverlay}
           style={[styles.blur, styles.topBlur, { top: 0 }]}
         />
 
         {/* Bottom Edge Blur */}
         <BlurEdge
           height={50 + insets.bottom}
-          colors={["#00000000", "#00000064"]}
+          colors={themeColors.blurOverlayBottom}
           style={[styles.blur, styles.bottomBlur, { bottom: 0 }]}
         />
       </Animated.View>
@@ -183,17 +245,17 @@ export default function FocusMode() {
       <View style={[styles.content, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         {/* Task Title - Positioned at the top */}
         <Animated.View style={[styles.titleContainer, animatedContentStyle]}>
-          <Text style={styles.taskTitle}>
+          <Text style={dynamicStyles.taskTitle}>
             {title || 'Focus Session'}
           </Text>
         </Animated.View>
 
         {/* Timer - Centered */}
         <Animated.View style={[styles.timerContainer, animatedContentStyle]}>
-          <Text style={styles.timerText}>
+          <Text style={dynamicStyles.timerText}>
             {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
           </Text>
-          <Text style={styles.timerLabel}>
+          <Text style={dynamicStyles.timerLabel}>
             {timeLeft === 0 ? 'Session Complete!' : isRunning ? 'Focus Time' : 'Paused'}
           </Text>
         </Animated.View>
@@ -205,11 +267,11 @@ export default function FocusMode() {
               <AnimatedFeather
                 name={isRunning ? 'pause' : 'play'}
                 size={24}
-                style={animatedIconStyle} // Apply animated style for color transition
+                style={animatedIconStyle}
               />
             </Animated.View>
           </Pressable>
-          <Pressable onPress={() => router.back()} style={[styles.actionButton, styles.secondaryButton]}>
+          <Pressable onPress={() => router.back()} style={[styles.actionButton, dynamicStyles.secondaryButton]}>
             <AnimatedFeather name="x" size={24} style={animatedIconStyle} />
           </Pressable>
         </View>
@@ -219,23 +281,16 @@ export default function FocusMode() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0f172a', // Dark slate background
-  },
   content: {
     flex: 1,
-    justifyContent: 'space-evenly', // Center everything vertically
+    justifyContent: 'space-evenly',
     alignItems: 'center',
     zIndex: 1,
-    paddingVertical: 20, // Reduce vertical padding
+    paddingVertical: 20,
   },
   titleContainer: {
     alignItems: 'center',
-    marginBottom: 5, // Reduce spacing below the title
-  },
-  textContent: {
-    alignItems: 'center',
+    marginBottom: 5,
   },
   blur: {
     position: 'absolute',
@@ -249,40 +304,17 @@ const styles = StyleSheet.create({
   bottomBlur: {
     bottom: 0,
   },
-  taskTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#f8fafc', // Light text
-    textAlign: 'center',
-    letterSpacing: 0.5,
-    fontFamily: "Instrument",
-    fontStyle: "italic",
-  },
   timerContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 10, // Reduce spacing above and below the timer
-  },
-  timerText: {
-    fontSize: 64,
-    fontWeight: '300', // Lighter weight for elegance
-    color: '#f8fafc',
-    fontVariant: ['tabular-nums'], // Better number alignment
-  },
-  timerLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#94a3b8', // Muted text
-    marginTop: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+    marginVertical: 10,
   },
   actions: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 20,
     width: '100%',
-    marginTop: 10, // Reduce spacing above the action buttons
+    marginTop: 10,
   },
   actionButton: {
     width: 64,
@@ -295,11 +327,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
-
-  },
-  secondaryButton: {
-    backgroundColor: '#122035ff', // Dark slate
-
-    borderColor: '#273241ff',
   },
 });

@@ -9,10 +9,10 @@
        [
         "expo-splash-screen",
         {
-          "backgroundColor": "#232323",
-          "image": "./assets/icons/splash-icon-light.png",
+          "backgroundColor": "#ffffff",
+          "image": "./assets/icons/splash-icon-dark.png",
           "dark": {
-            "image": "./assets/icons/splash-icon-dark.png",
+            "image": "./assets/icons/splash-icon-light.png",
             "backgroundColor": "#000000"
           },
           "imageWidth": 200
@@ -26,44 +26,20 @@
         {
           "android": {
             "fonts": [
-              {
-                "fontFamily": "Tillana",
-                "fontDefinitions": [
-                  {
-                    "path": "./assets/fonts/Tillana-Regular.ttf",
-                    "weight": 400,
-                    "style": "normal"
-                  }
-                ]
-              },
+              
               {
                 "fontFamily": "Alegreya",
                 "fontDefinitions": [
                   {
-                    "path": "./assets/fonts/Alegreya-Black.otf",
-                    "weight": 900,
-                    "style": "normal"
-                  },
-                  {
                     "path": "./assets/fonts/Alegreya-Regular.otf",
                     "weight": 400,
                     "style": "normal"
-                  },
-                  {
-                    "path": "./assets/fonts/Alegreya-Italic.otf",
-                    "weight": 400,
-                    "style": "italic"
                   }
                 ]
               },
               {
                 "fontFamily": "SourceSerifPro",
                 "fontDefinitions": [
-                  {
-                    "path": "./assets/fonts/SourceSerifPro-ExtraLight.otf",
-                    "weight": 200,
-                    "style": "normal"
-                  },
                   {
                     "path": "./assets/fonts/SourceSerifPro-Light.otf",
                     "weight": 300,
@@ -103,26 +79,6 @@
                     "path": "./assets/fonts/spacemono_italic.ttf",
                     "weight": 400,
                     "style": "italic"
-                  },
-                  {
-                    "path": "./assets/fonts/spacemono_bold.ttf",
-                    "weight": 700,
-                    "style": "normal"
-                  },
-                  {
-                    "path": "./assets/fonts/spacemono_bolditalic.ttf",
-                    "weight": 700,
-                    "style": "italic"
-                  }
-                ]
-              },
-              {
-                "fontFamily": "Samanya",
-                "fontDefinitions": [
-                  {
-                    "path": "./assets/fonts/AMS-Samanya-Bold.ttf",
-                    "weight": 700,
-                    "style": "normal"
                   }
                 ]
               },
@@ -160,21 +116,14 @@
           },
           "ios": {
             "fonts": [
-              "./assets/fonts/Alegreya-Black.otf",
-              "./assets/fonts/Alegreya-Italic.otf",
               "./assets/fonts/Alegreya-Regular.otf",
-              "./assets/fonts/SourceSerifPro-ExtraLight.otf",
               "./assets/fonts/SourceSerifPro-It.otf",
               "./assets/fonts/SourceSerifPro-Light.otf",
               "./assets/fonts/SourceSerifPro-Regular.otf",
               "./assets/fonts/SourceSerifPro-Semibold.otf",
               "./assets/fonts/SourceSerifPro-SemiboldIt.otf",
-              "./assets/fonts/spacemono_bold.ttf",
-              "./assets/fonts/spacemono_bolditalic.ttf",
               "./assets/fonts/spacemono_italic.ttf",
               "./assets/fonts/spacemono_regular.ttf",
-              "./assets/fonts/AMS-Samanya-Bold.ttf",
-              "./assets/fonts/Tillana-Regular.ttf",
               "./assets/fonts/Kalam-Regular.ttf",
               "./assets/fonts/Kalam-Light.ttf",
               "./assets/fonts/InstrumentSerif-Italic.ttf",
@@ -182,8 +131,7 @@
             ]
           }
         }
-      ],
-      "expo-video"
+      ]
     ],
     "assetBundlePatterns": [
       "**/*"
@@ -192,7 +140,7 @@
       "package": "com.surya7314.kriya",
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "resize"
-
+      
     },
     "ios": {
       "bundleIdentifier": "com.surya7314.kriya"

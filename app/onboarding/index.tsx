@@ -6,11 +6,11 @@ import {
   Dimensions,
   Pressable,
   StatusBar,
-  ImageBackground,
+
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { VideoView, useVideoPlayer } from 'expo-video';
+
 import { useKriya } from '../../lib/store';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import BlurBackground from '../../components/BlurBackground';
@@ -20,9 +20,9 @@ import Animated, {
   withTiming, 
   withRepeat,
   withSequence,
-  runOnJS 
+
 } from 'react-native-reanimated';
-import BlurEdge from '../../components/BlurEdge';
+
 import { Feather } from '@expo/vector-icons';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -72,11 +72,7 @@ export default function Onboarding() {
   const iconTranslateX = useSharedValue(0);
 
   // Video player setup
-  const player = useVideoPlayer(require('../../assets/videos/kriya.mp4'), player => {
-    player.loop = true;
-    player.muted = true;
-    player.play();
-  });
+ 
 
   // Start icon animation when component mounts
   useEffect(() => {
@@ -247,13 +243,13 @@ export default function Onboarding() {
                 <Feather
                   name="chevrons-down"
                   size={28}
-                  color="rgba(104, 164, 177, 0.41)"
+                  color="rgba(104, 164, 177, 0.58)"
                 
                 />
               </Animated.View>
               
               <Pressable onPress={handleGetStarted} style={styles.actionButton}>
-                <Text style={styles.buttonText}>step into action</Text>
+                <Text style={styles.buttonText}> Step into Action</Text>
               </Pressable>
             </View>
           </Animated.View>
@@ -358,10 +354,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: "center",
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    backgroundColor: 'rgba(37, 188, 208, 0.08)',
     paddingHorizontal: 32,
     paddingVertical: 16,
-    borderRadius: 230,
+    borderRadius: 25,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
     marginTop: 16,
@@ -370,9 +366,10 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 18,
-    fontWeight: '400',
-    letterSpacing: 1,
+    fontWeight: '300',
+    letterSpacing: 3,
     marginRight: 12,
+    fontFamily:"SourceSerifPro"
   },
   buttonArrow: {
     color: 'white',
@@ -383,7 +380,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginTop: 20, // Reduced from 50
+    marginTop: -50, // Reduced from 50
   },
    arrowContainer: {
     marginBottom: 0,

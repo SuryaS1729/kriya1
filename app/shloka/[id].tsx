@@ -169,6 +169,13 @@ export default function ShlokaDetail() {
   // Create interpolated values
   const animatedScale = bookmarkScale;
 
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const handleSharePress = () => {
+    setShowTooltip(true);
+    setTimeout(() => setShowTooltip(false), 1500); // Hide tooltip after 1.5 seconds
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['right', 'bottom', 'left']}>
       <StatusBar style={isDarkMode ? "light" : "dark"} />
@@ -214,11 +221,19 @@ export default function ShlokaDetail() {
               </Animated.View>
             </Pressable>
             
-            <Link href={`/share?shlokaId=${currentIndex}`} asChild>
-              <Pressable hitSlop={16} style={styles.actionButton}>
-                <FontAwesome5 name="share" size={20} color={isDarkMode ? '#9ca3af' : '#696969ff'} />
-              </Pressable>
-            </Link>
+            {/* Share button with tooltip */}
+            <Pressable onPress={handleSharePress} hitSlop={16} style={styles.actionButton}>
+              <FontAwesome5 name="share" size={20} color={isDarkMode ? '#9ca3af' : '#696969ff'} />
+            </Pressable>
+
+            {/* Tooltip */}
+            {showTooltip && (
+              <View style={[styles.tooltip, { backgroundColor: isDarkMode ? '#1f2937' : '#f3f4f6' }]}>
+                <Text style={[styles.tooltipText, { color: isDarkMode ? '#f9fafb' : '#374151' }]}>
+                  Coming soon
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -388,5 +403,21 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     padding: 4,
+  },
+  tooltip: {
+    position: 'absolute',
+    top: -30, // Adjust to position above the share button
+    right: -10,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  tooltipText: {
+    fontSize: 12,
+    fontWeight: '500',
   },
 });

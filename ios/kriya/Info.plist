@@ -51,21 +51,14 @@
     <string>Allow $(PRODUCT_NAME) to access your photos</string>
     <key>UIAppFonts</key>
     <array>
-      <string>Alegreya-Black.otf</string>
-      <string>Alegreya-Italic.otf</string>
       <string>Alegreya-Regular.otf</string>
-      <string>SourceSerifPro-ExtraLight.otf</string>
       <string>SourceSerifPro-It.otf</string>
       <string>SourceSerifPro-Light.otf</string>
       <string>SourceSerifPro-Regular.otf</string>
       <string>SourceSerifPro-Semibold.otf</string>
       <string>SourceSerifPro-SemiboldIt.otf</string>
-      <string>spacemono_bold.ttf</string>
-      <string>spacemono_bolditalic.ttf</string>
       <string>spacemono_italic.ttf</string>
       <string>spacemono_regular.ttf</string>
-      <string>AMS-Samanya-Bold.ttf</string>
-      <string>Tillana-Regular.ttf</string>
       <string>Kalam-Regular.ttf</string>
       <string>Kalam-Light.ttf</string>
       <string>InstrumentSerif-Italic.ttf</string>

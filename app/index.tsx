@@ -6,12 +6,10 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  Layout,
   LinearTransition,
   interpolateColor,
   interpolate,
   FadeIn,
-  BounceIn,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useKriya } from '../lib/store';
@@ -20,8 +18,6 @@ import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Circle, G, Path } from 'react-native-svg';
-import { AnimatedFlashList, FlashList } from '@shopify/flash-list';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { router } from 'expo-router';
@@ -443,8 +439,8 @@ const onFocus = React.useCallback((task: Task) => {
   // Show loading while not ready
   if (!ready) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Loading...</Text>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#000' : '#fff' }}>
+        <Text style={{ fontSize: 30, fontFamily:"Instrument", fontStyle:"italic", color: isDarkMode ? '#fff' : '#000' }}>loading ...</Text>
       </View>
     );
   }

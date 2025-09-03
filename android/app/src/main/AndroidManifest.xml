@@ -25,7 +25,6 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="acme"/>
-        <data android:scheme="exp+kriya"/>
       </intent-filter>
     </activity>
   </application>

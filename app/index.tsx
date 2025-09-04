@@ -19,7 +19,7 @@ import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
-
+import { Spinner } from '@/components/ui/spinner';
 import { router } from 'expo-router';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
@@ -439,8 +439,10 @@ const onFocus = React.useCallback((task: Task) => {
   // Show loading while not ready
   if (!ready) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#000' : '#fff' }}>
-        <Text style={{ fontSize: 30, fontFamily:"Instrument", fontStyle:"italic", color: isDarkMode ? '#fff' : '#000' }}>loading...</Text>
+      <View style={{ flex: 1, justifyContent: 'space-evenly', alignItems: 'center', backgroundColor: isDarkMode ? '#000' : '#fff' }}>
+        <View></View>
+        <Spinner size="large" color="white" />
+        <Text style={{ fontSize: 20, fontFamily:"Instrument", fontStyle:"italic", color: isDarkMode ? '#fff' : '#000' }}>loading...</Text>
       </View>
     );
   }

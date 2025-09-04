@@ -9,6 +9,9 @@ import { setDb } from '../lib/db';
 import * as NavigationBar from 'expo-navigation-bar';
 import { Platform } from 'react-native';
 
+import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
+import '@/global.css';
+
 const DB_NAME = 'gita.db';
 const DB_ASSET = require('../assets/db/gita.db');
 
@@ -117,7 +120,9 @@ export default function Root() {
   }
 
   return (
-    <SafeAreaProvider>
+    
+    <GluestackUIProvider mode="light">
+      <SafeAreaProvider>
       <SQLiteProvider databaseName={DB_NAME} onInit={onInit}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" options={{animation:'fade'}}/>
@@ -133,5 +138,7 @@ export default function Root() {
         </Stack>
       </SQLiteProvider>
     </SafeAreaProvider>
+    </GluestackUIProvider>
+  
   );
 }

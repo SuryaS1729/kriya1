@@ -161,6 +161,7 @@ export default function Add() {
         style={StyleSheet.absoluteFill} 
       />
       
+      
       <KeyboardAvoidingView
         behavior={Platform.select({ ios: 'padding', android: 'height' })}
         keyboardVerticalOffset={Platform.OS === 'ios' ?  HEADER_HEIGHT + insets.top : 0}

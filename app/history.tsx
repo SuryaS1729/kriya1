@@ -12,6 +12,7 @@ import Animated, {
   withTiming,
   runOnJS 
 } from 'react-native-reanimated';
+import BlurBackground from '@/components/BlurBackground';
 
 const { width } = Dimensions.get('window');
 
@@ -251,14 +252,14 @@ function MainCalendar() {
                   ]}>
                     {day.date.getDate()}
                   </Text>
-                  {day.hasActivity && day.isCurrentMonth && (
+                  {/* {day.hasActivity && day.isCurrentMonth && (
                     <View style={styles.activityIndicator}>
                       <Text style={styles.activityCount}>
                         {day.completed > 0 && `${day.completed}t`}
                         {day.focusSessions > 0 && ` ${day.focusSessions}f`}
                       </Text>
                     </View>
-                  )}
+                  )} */}
                 </Pressable>
               ))}
             </View>
@@ -423,12 +424,17 @@ export default function History() {
 
   return (
     <SafeAreaView style={[styles.container, !isDarkMode && styles.lightContainer]}>
+
+      <Animated.View style={[StyleSheet.absoluteFill]}>
+        <BlurBackground />
+      </Animated.View>
+
       {/* Header */}
       <View style={styles.headerRow}>
         <Pressable onPress={() => router.back()} hitSlop={16}>
           <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#000"} />
         </Pressable>
-        <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>Activity History</Text>
+        {/* <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>Activity History</Text> */}
         <Pressable onPress={toggleDarkMode} hitSlop={16}>
           <Feather 
             name={isDarkMode ? "sun" : "moon"} 
@@ -465,8 +471,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 30,
-    marginTop: 10,
+    marginBottom: 24,
+    marginTop: 30,
   },
   headerTitle: {
     color: '#fff',
@@ -540,7 +546,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: 15,
     position: 'relative',
   },
   dayText: {

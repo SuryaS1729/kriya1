@@ -441,7 +441,7 @@ const onFocus = React.useCallback((task: Task) => {
     return (
       <View style={{ flex: 1, justifyContent: 'space-evenly', alignItems: 'center', backgroundColor: isDarkMode ? '#000' : '#fff' }}>
         <View></View>
-        <Spinner size="large" color="white" />
+        <Spinner size="large" color={isDarkMode ? '#fff' : '#000'} />
         <Text style={{ fontSize: 20, fontFamily:"Instrument", fontStyle:"italic", color: isDarkMode ? '#fff' : '#000' }}>loading...</Text>
       </View>
     );

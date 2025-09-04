@@ -24,6 +24,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Feather } from '@expo/vector-icons';
+import { Spinner } from '@/components/ui/spinner'; // Add this import
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -56,7 +57,8 @@ export default function Onboarding() {
   const insets = useSafeAreaInsets();
   
   const completeOnboarding = useKriya(s => s.completeOnboarding);
-  const [currentStep, setCurrentStep] = useState(-1); // -1 for initial screen, 0-2 for onboarding steps
+  const [currentStep, setCurrentStep] = useState(-1);
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
 
   // Animation values
   const titleTranslateY = useSharedValue(0);
@@ -70,6 +72,10 @@ export default function Onboarding() {
   
   // Icon animation
   const iconTranslateX = useSharedValue(0);
+  
+  // Loading animation values
+  const loadingOpacity = useSharedValue(0);
+  const loadingScale = useSharedValue(0.8);
 
   // Video player setup
  
@@ -133,21 +139,63 @@ export default function Onboarding() {
         }, 200);
       }, 300);
     } else {
-      // Complete onboarding
+      // Complete onboarding with loading transition
       console.log('🎯 Completing onboarding...');
-      if (completeOnboarding) {
-        completeOnboarding();
-      }
-      router.replace('/');
+      
+      // Start loading transition
+      setIsLoading(true);
+      
+      // Fade out current content and fade in loading
+      stepOpacity.value = withTiming(0, { duration: 500 });
+      navigationOpacity.value = withTiming(0, { duration: 500 });
+      
+      setTimeout(() => {
+        // Show loading screen with smooth animation
+        loadingOpacity.value = withTiming(1, { duration: 600 });
+        loadingScale.value = withTiming(1, { duration: 600 });
+        
+        // After 2 seconds, complete onboarding and navigate
+        setTimeout(() => {
+          if (completeOnboarding) {
+            completeOnboarding();
+          }
+          
+          // Fade out loading screen
+          loadingOpacity.value = withTiming(0, { duration: 800 });
+          
+          setTimeout(() => {
+            router.replace('/');
+          }, 800); // Wait for fade out to complete
+        }, 2000); // 2 second loading delay
+      }, 500); // Wait for content to fade out
     }
   };
 
   const handleSkip = () => {
     console.log('🎯 Skipping onboarding...');
-    if (completeOnboarding) {
-      completeOnboarding();
-    }
-    router.replace('/');
+    
+    // Same loading transition for skip
+    setIsLoading(true);
+    
+    stepOpacity.value = withTiming(0, { duration: 500 });
+    navigationOpacity.value = withTiming(0, { duration: 500 });
+    
+    setTimeout(() => {
+      loadingOpacity.value = withTiming(1, { duration: 600 });
+      loadingScale.value = withTiming(1, { duration: 600 });
+      
+      setTimeout(() => {
+        if (completeOnboarding) {
+          completeOnboarding();
+        }
+        
+        loadingOpacity.value = withTiming(0, { duration: 800 });
+        
+        setTimeout(() => {
+          router.replace('/');
+        }, 800);
+      }, 2000);
+    }, 500);
   };
 
   // Animated styles
@@ -178,6 +226,12 @@ export default function Onboarding() {
     transform: [{ translateY: iconTranslateX.value }], // Change to translateY for vertical
   }));
 
+  // Add loading screen animated styles
+  const animatedLoadingStyle = useAnimatedStyle(() => ({
+    opacity: loadingOpacity.value,
+    transform: [{ scale: loadingScale.value }],
+  }));
+
   return (
     <View style={styles.container}>
       <StatusBar hidden={true} />
@@ -198,14 +252,14 @@ export default function Onboarding() {
             <Text style={styles.tagline}>ancient wisdom, modern rhythm</Text>
           </Animated.View>
           
-          {currentStep === -1 && (
+          {currentStep === -1 && !isLoading && (
             <Animated.View style={[styles.subtitleContainer, animatedSubtitleStyle]}>
               <Text style={styles.subtitle}>free • offline • no signup • open source</Text>
             </Animated.View>
           )}
 
           {/* Onboarding Steps */}
-          {currentStep >= 0 && (
+          {currentStep >= 0 && !isLoading && (
             <Animated.View style={[styles.onboardingContainer, animatedStepStyle]}>
               <View style={styles.stepContent}>
                 <AntDesign 
@@ -232,10 +286,18 @@ export default function Onboarding() {
               </View>
             </Animated.View>
           )}
+
+          {/* Loading Screen */}
+          {isLoading && (
+            <Animated.View style={[styles.loadingContainer, animatedLoadingStyle]}>
+              <Spinner size="large" color="white" />
+              <Text style={styles.loadingText}>Preparing your journey...</Text>
+            </Animated.View>
+          )}
         </View>
 
         {/* Bottom modal card - only show on initial screen */}
-            {currentStep === -1 && (
+        {currentStep === -1 && !isLoading && (
           <Animated.View style={[styles.bottomCard, animatedCardStyle]}>
             <View style={styles.cardContent}>
               {/* Animated down arrow above the button */}
@@ -244,7 +306,6 @@ export default function Onboarding() {
                   name="chevrons-down"
                   size={28}
                   color="rgba(104, 164, 177, 0.58)"
-                
                 />
               </Animated.View>
               
@@ -256,7 +317,7 @@ export default function Onboarding() {
         )}
 
         {/* Onboarding Navigation - With separate fade animation */}
-        {currentStep >= 0 && (
+        {currentStep >= 0 && !isLoading && (
           <Animated.View style={[styles.navigationContainer, animatedNavigationStyle]}>
             <Pressable onPress={handleSkip} style={styles.skipButton}>
               <Text style={styles.skipText}>Skip</Text>
@@ -463,5 +524,21 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginRight: 8,
     fontFamily: 'SpaceMono',
+  },
+  // Add loading screen styles
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  loadingText: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 18,
+    fontWeight: '300',
+    marginTop: 24,
+    textAlign: 'center',
+    fontFamily: 'SourceSerifPro',
+    fontStyle: 'italic',
   },
 });

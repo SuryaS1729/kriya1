@@ -1,4 +1,3 @@
-// app/history.tsx
 import { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View, Pressable, FlatList, ScrollView, Alert, Dimensions } from 'react-native';
 import { useKriya } from '../lib/store';
@@ -14,6 +13,8 @@ import Animated, {
   runOnJS 
 } from 'react-native-reanimated';
 
+const { width } = Dimensions.get('window');
+
 function formatDay(ms: number) {
   const d = new Date(ms);
   return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
@@ -23,390 +24,782 @@ function getDateKey(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
-// Activity Heatmap Component
-function ActivityHeatmap() {
+// Day Detail Modal Component
+function DayDetailModal({ date, onClose }: { date: Date | null; onClose: () => void }) {
   const getForDay = useKriya(s => s.getTasksForDay);
+  const getFocusSessionsForDay = useKriya(s => s.getFocusSessionsForDay); // You'll need to add this to your store
   const isDarkMode = useKriya(s => s.isDarkMode);
   
-  const activityData = useMemo(() => {
-    const today = new Date();
-    const startDate = new Date(today);
-    startDate.setDate(today.getDate() - 90); // Last 90 days
+  if (!date) return null;
+  
+  const dayKey = getDateKey(date);
+  const tasks = getForDay(dayKey);
+  const completed = tasks.filter(t => t.completed);
+  const pending = tasks.filter(t => !t.completed);
+  const focusSessions = getFocusSessionsForDay ? getFocusSessionsForDay(dayKey) : 0;
+  const successRate = tasks.length > 0 ? Math.round((completed.length / tasks.length) * 100) : 0;
+  
+  return (
+    <View style={styles.modalOverlay}>
+      <View style={[styles.modalContent, !isDarkMode && styles.lightModalContent]}>
+        <View style={styles.modalHeader}>
+          <Text style={[styles.modalTitle, !isDarkMode && styles.lightText]}>
+            {date.toLocaleDateString(undefined, { 
+              weekday: 'long', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </Text>
+          <Pressable onPress={onClose}>
+            <Feather name="x" size={24} color={isDarkMode ? "#fff" : "#000"} />
+          </Pressable>
+        </View>
+        
+        <View style={[styles.modalStats, !isDarkMode && styles.lightModalStats]}>
+          <View style={styles.modalStat}>
+            <Text style={styles.modalStatValue}>{successRate}%</Text>
+            <Text style={[styles.modalStatLabel, !isDarkMode && styles.lightSubText]}>Success Rate</Text>
+          </View>
+          <View style={styles.modalStat}>
+            <Text style={styles.modalStatValue}>{completed.length}</Text>
+            <Text style={[styles.modalStatLabel, !isDarkMode && styles.lightSubText]}>Completed</Text>
+          </View>
+          <View style={styles.modalStat}>
+            <Text style={styles.modalStatValue}>{focusSessions}</Text>
+            <Text style={[styles.modalStatLabel, !isDarkMode && styles.lightSubText]}>Focus Sessions</Text>
+          </View>
+        </View>
+        
+        {tasks.length > 0 ? (
+          <ScrollView style={styles.tasksList}>
+            {completed.length > 0 && (
+              <>
+                <Text style={[styles.tasksSection, !isDarkMode && styles.lightText]}>Completed Tasks</Text>
+                {completed.map((task, index) => (
+                  <View key={`completed-${index}`} style={[styles.taskItem, styles.completedTask]}>
+                    <Feather name="check-circle" size={16} color="#00D4AA" />
+                    <Text style={[styles.taskText, !isDarkMode && styles.lightText]}>{task.title}</Text>
+                  </View>
+                ))}
+              </>
+            )}
+            
+            {pending.length > 0 && (
+              <>
+                <Text style={[styles.tasksSection, !isDarkMode && styles.lightText]}>Pending Tasks</Text>
+                {pending.map((task, index) => (
+                  <View key={`pending-${index}`} style={[styles.taskItem, styles.pendingTask]}>
+                    <Feather name="circle" size={16} color="#888" />
+                    <Text style={[styles.taskText, styles.pendingTaskText]}>{task.title}</Text>
+                  </View>
+                ))}
+              </>
+            )}
+          </ScrollView>
+        ) : (
+          <View style={styles.noTasksContainer}>
+            <Feather name="calendar" size={48} color="#444" />
+            <Text style={[styles.noTasksText, !isDarkMode && styles.lightSubText]}>No tasks for this day</Text>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+}
+
+// Main Calendar Component
+function MainCalendar() {
+  const getForDay = useKriya(s => s.getTasksForDay);
+  const getFocusSessionsForDay = useKriya(s => s.getFocusSessionsForDay);
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  
+  const calendarData = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
     
-    const data = [];
-    for (let d = new Date(startDate); d <= today; d.setDate(d.getDate() + 1)) {
-      const dayKey = getDateKey(d);
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const calendarStart = new Date(firstDay);
+    calendarStart.setDate(firstDay.getDate() - firstDay.getDay());
+    
+    const days = [];
+    const totalDays = 42;
+    
+    for (let i = 0; i < totalDays; i++) {
+      const date = new Date(calendarStart);
+      date.setDate(calendarStart.getDate() + i);
+      
+      const dayKey = getDateKey(date);
       const tasks = getForDay(dayKey);
-      const completedCount = tasks.filter(t => t.completed).length;
+      const completed = tasks.filter(t => t.completed).length;
+      const total = tasks.length;
+      const focusSessions = getFocusSessionsForDay ? getFocusSessionsForDay(dayKey) : 0;
       
-      // Calculate intensity (0-4 scale like GitHub)
-      let intensity = 0;
-      if (completedCount > 0) intensity = 1;
-      if (completedCount >= 3) intensity = 2;
-      if (completedCount >= 5) intensity = 3;
-      if (completedCount >= 8) intensity = 4;
-      
-      data.push({
-        date: new Date(d),
+      days.push({
+        date: new Date(date),
         dayKey,
-        completedCount,
-        totalCount: tasks.length,
-        intensity
+        completed,
+        total,
+        focusSessions,
+        isCurrentMonth: date.getMonth() === month,
+        isToday: new Date().toDateString() === date.toDateString(),
+        hasActivity: total > 0 || focusSessions > 0,
+        completionRate: total > 0 ? completed / total : 0
       });
     }
-    return data;
-  }, [getForDay]);
+    
+    return {
+      days,
+      monthName: firstDay.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+    };
+  }, [currentDate, getForDay, getFocusSessionsForDay]);
 
-  const weeks = useMemo(() => {
-    const weekGroups: any[][] = [];
-    let currentWeek: any[] = [];
-    
-    activityData.forEach((day, index) => {
-      if (index === 0) {
-        // Fill empty days at start of first week
-        const dayOfWeek = day.date.getDay();
-        for (let i = 0; i < dayOfWeek; i++) {
-          currentWeek.push(null);
-        }
-      }
-      
-      currentWeek.push(day);
-      
-      if (currentWeek.length === 7) {
-        weekGroups.push(currentWeek);
-        currentWeek = [];
-      }
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(prev.getMonth() + (direction === 'next' ? 1 : -1));
+      return newDate;
     });
-    
-    // Add remaining days
-    if (currentWeek.length > 0) {
-      while (currentWeek.length < 7) {
-        currentWeek.push(null);
-      }
-      weekGroups.push(currentWeek);
+  };
+
+  const getActivityStyle = (day: any) => {
+    if (!day.isCurrentMonth) {
+      return [styles.inactiveDay, !isDarkMode && styles.lightInactiveDay];
     }
     
-    return weekGroups;
-  }, [activityData]);
-
-  const getIntensityColor = (intensity: number) => {
-    if (isDarkMode) {
-      const colors = ['#4b5563', '#4c1d95', '#6d28d9', '#7c3aed', '#8b5cf6'];
-      return colors[intensity] || colors[0];
+    if (day.isToday) {
+      return [styles.todayDay, { backgroundColor: '#00D4AA' }];
+    }
+    
+    if (!day.hasActivity) {
+      return [styles.noActivityDay, !isDarkMode && styles.lightNoActivityDay];
+    }
+    
+    // Calculate activity intensity based on both tasks and focus sessions
+    const taskScore = day.total > 0 ? day.completionRate : 0;
+    const focusScore = Math.min(day.focusSessions / 3, 1); // Normalize to 0-1 (3+ sessions = max)
+    const combinedScore = (taskScore + focusScore) / 2;
+    
+    if (combinedScore >= 0.8) {
+      return styles.completedDay;
+    } else if (combinedScore >= 0.6) {
+      return styles.highActivityDay;
+    } else if (combinedScore >= 0.3) {
+      return styles.partialDay;
     } else {
-      const colors = ['#f1f5f9', '#c7d2fe', '#818cf8', '#4338ca', '#312e81'];
-      return colors[intensity] || colors[0];
+      return styles.lowActivityDay;
     }
   };
 
-  const showDayDetails = (day: any) => {
-    if (!day) return;
-    
-    const dateStr = day.date.toLocaleDateString(undefined, { 
-      weekday: 'long', 
-      month: 'long', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-    
-    const message = `${dateStr}\n\n${day.completedCount} of ${day.totalCount} tasks completed`;
-    
-    Alert.alert('Daily Progress', message, [{ text: 'OK' }]);
+  const handleDayPress = (day: any) => {
+    if (day.hasActivity && day.isCurrentMonth) {
+      setSelectedDate(day.date);
+    }
   };
 
-  const totalCompleted = activityData.reduce((sum, day) => sum + day.completedCount, 0);
-  const currentStreak = useMemo(() => {
-    let streak = 0;
-    for (let i = activityData.length - 1; i >= 0; i--) {
-      if (activityData[i].completedCount > 0) {
-        streak++;
-      } else {
-        break;
-      }
-    }
-    return streak;
-  }, [activityData]);
-
-  const themeStyles = isDarkMode ? darkHeatmapStyles : lightHeatmapStyles;
+  // Create weeks array for better layout control
+  const weeks = [];
+  for (let i = 0; i < calendarData.days.length; i += 7) {
+    weeks.push(calendarData.days.slice(i, i + 7));
+  }
 
   return (
-    <View style={[styles.heatmapContainer, themeStyles.heatmapContainer]}>
-      <View style={styles.heatmapHeader}>
-        <Text style={[styles.heatmapTitle, themeStyles.heatmapTitle]}>Your journey so far</Text>
-        <View style={styles.statsRow}>
-          <Text style={[styles.statText, themeStyles.statText]}>{totalCompleted} tasks completed</Text>
-          <Text style={[styles.statText, themeStyles.statText]}>{currentStreak} day streak</Text>
+    <>
+      <View style={styles.calendarSection}>
+        <View style={styles.calendarHeader}>
+          <Text style={[styles.calendarTitle, !isDarkMode && styles.lightText]}>{calendarData.monthName}</Text>
+          <View style={styles.monthNavigation}>
+            <Pressable onPress={() => navigateMonth('prev')} style={styles.navButton}>
+              <Feather name="chevron-left" size={20} color="#888" />
+            </Pressable>
+            <Pressable onPress={() => navigateMonth('next')} style={styles.navButton}>
+              <Feather name="chevron-right" size={20} color="#888" />
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Week Labels */}
+        <View style={styles.weekLabels}>
+          {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
+            <View key={day} style={styles.weekLabelContainer}>
+              <Text style={[styles.weekLabel, !isDarkMode && styles.lightSubText]}>{day}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Calendar Grid - Now using weeks */}
+        <View style={[styles.calendarContainer, !isDarkMode && styles.lightCalendarContainer]}>
+          {weeks.map((week, weekIndex) => (
+            <View key={weekIndex} style={styles.weekRow}>
+              {week.map((day, dayIndex) => (
+                <Pressable 
+                  key={dayIndex} 
+                  style={[
+                    styles.dayCell, 
+                    getActivityStyle(day)
+                  ]}
+                  onPress={() => handleDayPress(day)}
+                  disabled={!day.hasActivity || !day.isCurrentMonth}
+                >
+                  <Text style={[
+                    styles.dayText,
+                    !day.isCurrentMonth && styles.inactiveDayText,
+                    day.isToday && styles.todayText,
+                    !isDarkMode && day.isCurrentMonth && !day.isToday && styles.lightText
+                  ]}>
+                    {day.date.getDate()}
+                  </Text>
+                  {day.hasActivity && day.isCurrentMonth && (
+                    <View style={styles.activityIndicator}>
+                      <Text style={styles.activityCount}>
+                        {day.completed > 0 && `${day.completed}t`}
+                        {day.focusSessions > 0 && ` ${day.focusSessions}f`}
+                      </Text>
+                    </View>
+                  )}
+                </Pressable>
+              ))}
+            </View>
+          ))}
+        </View>
+        
+        {/* Legend */}
+        <View style={styles.legend}>
+          <Text style={[styles.legendTitle, !isDarkMode && styles.lightSubText]}>Activity Level</Text>
+          <View style={styles.legendItems}>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: '#444' }]} />
+              <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>None</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: '#004D3D' }]} />
+              <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>Low</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: '#007A5E' }]} />
+              <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>Medium</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: '#00A678' }]} />
+              <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>High</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: '#00D4AA' }]} />
+              <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>Perfect</Text>
+            </View>
+          </View>
+          <Text style={[styles.legendNote, !isDarkMode && styles.lightSubText]}>
+            Activity combines task completion and focus sessions. t = tasks, f = focus sessions
+          </Text>
         </View>
       </View>
       
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.heatmapScroll}>
-        <View style={styles.heatmap}>
-          <View style={styles.weekLabels}>
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-              <Text key={i} style={[styles.weekLabel, themeStyles.weekLabel]}>{day}</Text>
-            ))}
-          </View>
-          
-          <View style={styles.weeksContainer}>
-            {weeks.map((week, weekIndex) => (
-              <View key={weekIndex} style={styles.week}>
-                {week.map((day, dayIndex) => (
-                  <Pressable
-                    key={dayIndex}
-                    onPress={() => showDayDetails(day)}
-                    disabled={!day}
-                    style={[
-                      styles.daySquare,
-                      day && { backgroundColor: getIntensityColor(day.intensity) }
-                    ]}
-                  />
-                ))}
-              </View>
-            ))}
-          </View>
-        </View>
-      </ScrollView>
+      {selectedDate && (
+        <DayDetailModal 
+          date={selectedDate} 
+          onClose={() => setSelectedDate(null)} 
+        />
+      )}
+    </>
+  );
+}
+
+// Weekly Summary Component
+function WeeklySummary() {
+  const getForDay = useKriya(s => s.getTasksForDay);
+  const getFocusSessionsForDay = useKriya(s => s.getFocusSessionsForDay);
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  
+  const weeklyStats = useMemo(() => {
+    const today = new Date();
+    const currentWeekStart = new Date(today);
+    currentWeekStart.setDate(today.getDate() - today.getDay());
+    
+    let totalTasks = 0;
+    let completedTasks = 0;
+    let totalFocusSessions = 0;
+    let activeDays = 0;
+    
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(currentWeekStart);
+      day.setDate(currentWeekStart.getDate() + i);
+      const dayKey = getDateKey(day);
       
-      <View style={styles.legend}>
-        <Text style={[styles.legendText, themeStyles.legendText]}>Less</Text>
-        {[0, 1, 2, 3, 4].map(intensity => (
-          <View
-            key={intensity}
-            style={[styles.legendSquare, { backgroundColor: getIntensityColor(intensity) }]}
-          />
-        ))}
-        <Text style={[styles.legendText, themeStyles.legendText]}>More</Text>
+      const tasks = getForDay(dayKey);
+      const focusSessions = getFocusSessionsForDay ? getFocusSessionsForDay(dayKey) : 0;
+      
+      if (tasks.length > 0 || focusSessions > 0) {
+        activeDays++;
+      }
+      
+      totalTasks += tasks.length;
+      completedTasks += tasks.filter(t => t.completed).length;
+      totalFocusSessions += focusSessions;
+    }
+    
+    return {
+      activeDays,
+      completedTasks,
+      totalTasks,
+      totalFocusSessions,
+      completionRate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
+      focusTime: totalFocusSessions * 25 // 25 minutes per session
+    };
+  }, [getForDay, getFocusSessionsForDay]);
+
+  return (
+    <View style={styles.summarySection}>
+      <Text style={[styles.summaryTitle, !isDarkMode && styles.lightText]}>This Week</Text>
+      <View style={styles.summaryGrid}>
+        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
+          <Feather name="calendar" size={24} color="#00D4AA" />
+          <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.activeDays}</Text>
+          <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Active Days</Text>
+        </View>
+        
+        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
+          <Feather name="check-circle" size={24} color="#00D4AA" />
+          <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.completedTasks}</Text>
+          <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Tasks Done</Text>
+        </View>
+        
+        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
+          <Feather name="target" size={24} color="#00D4AA" />
+          <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.totalFocusSessions}</Text>
+          <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Focus Sessions</Text>
+        </View>
+        
+        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
+          <Feather name="clock" size={24} color="#00D4AA" />
+          <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.focusTime}m</Text>
+          <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Focus Time</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// Quick Actions Component
+function QuickActions() {
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  
+  return (
+    <View style={styles.actionsSection}>
+      <Text style={[styles.actionsTitle, !isDarkMode && styles.lightText]}>Quick Actions</Text>
+      <View style={styles.actionButtons}>
+        <Pressable 
+          style={[styles.actionButton, !isDarkMode && styles.lightCard]}
+          onPress={() => router.push('/')}
+        >
+          <Feather name="plus-circle" size={24} color="#00D4AA" />
+          <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Add Tasks</Text>
+        </Pressable>
+        
+        <Pressable 
+          style={[styles.actionButton, !isDarkMode && styles.lightCard]}
+          onPress={() => router.push('/focus')}
+        >
+          <Feather name="target" size={24} color="#00D4AA" />
+          <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Focus Session</Text>
+        </Pressable>
+        
+        <Pressable 
+          style={[styles.actionButton, !isDarkMode && styles.lightCard]}
+          onPress={() => router.push('/bookmarks')}
+        >
+          <MaterialIcons name="bookmark" size={24} color="#00D4AA" />
+          <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Bookmarks</Text>
+        </Pressable>
       </View>
     </View>
   );
 }
 
 export default function History() {
-  const listDays = useKriya(s => s.listHistoryDays);
-  const getForDay = useKriya(s => s.getTasksForDay);
   const isDarkMode = useKriya(s => s.isDarkMode);
   const toggleDarkMode = useKriya(s => s.toggleDarkMode);
 
-  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
-
-  const days = useMemo(() => listDays(60), [listDays]);
-
-  const renderDay = ({ item }: { item: { day_key: number; count: number } }) => {
-    const isOpen = !!expanded[item.day_key];
-    const tasks: Task[] = isOpen ? getForDay(item.day_key) : [];
-    const themeStyles = isDarkMode ? darkStyles : lightStyles;
-
-    return (
-      <View style={[styles.section, themeStyles.section]}>
-        <Pressable onPress={() => setExpanded(s => ({ ...s, [item.day_key]: !s[item.day_key] }))} style={styles.header}>
-          <Text style={[styles.headerText, themeStyles.headerText]}>{formatDay(item.day_key)}</Text>
-          <Text style={[styles.headerMeta, themeStyles.headerMeta]}>{item.count} task{item.count !== 1 ? 's' : ''} • {isOpen ? 'Hide' : 'Show'}</Text>
-        </Pressable>
-
-        {isOpen && tasks.map(t => (
-          <View key={t.id} style={styles.row}>
-            <View style={[styles.dot, t.completed ? styles.dotOn : styles.dotOff]} />
-            <Text style={[styles.title, t.completed && styles.done, themeStyles.title]} numberOfLines={2}>{t.title}</Text>
-          </View>
-        ))}
-      </View>
-    );
-  };
-
-  const themeStyles = isDarkMode ? darkStyles : lightStyles;
-
   return (
-    <SafeAreaView style={[styles.container, themeStyles.container]}>
+    <SafeAreaView style={[styles.container, !isDarkMode && styles.lightContainer]}>
+      {/* Header */}
       <View style={styles.headerRow}>
         <Pressable onPress={() => router.back()} hitSlop={16}>
-          <Text style={[styles.headerIcon, themeStyles.headerIcon]}>✕</Text>
+          <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#000"} />
         </Pressable>
-        <Pressable onPress={toggleDarkMode} hitSlop={16} style={[styles.darkModeToggle, themeStyles.darkModeToggle]}>
+        <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>Activity History</Text>
+        <Pressable onPress={toggleDarkMode} hitSlop={16}>
           <Feather 
             name={isDarkMode ? "sun" : "moon"} 
-            size={20} 
-            color={isDarkMode ? "#fbbf24" : "#6b7280"} 
+            size={24} 
+            color={isDarkMode ? "#fff" : "#000"} 
           />
         </Pressable>
       </View>
-      
-      <Text style={[styles.h1, themeStyles.h1]}>Hey There !</Text>
-      
-      <ActivityHeatmap />
 
-      <FlatList
-        data={days}
-        keyExtractor={(d) => String(d.day_key)}
-        renderItem={renderDay}
-        contentContainerStyle={{ paddingBottom: 40 }}
-      />
-
-      <Link href="/bookmarks" asChild>
-        <Pressable >
-          <View style={[styles.bookmarksButton, themeStyles.bookmarksButton]}>
-          <MaterialIcons name="bookmark" size={24} color={isDarkMode ? "#fbbf24" : "#f59e0b"} />
-          <Text style={[styles.bookmarksText, themeStyles.bookmarksText]}>View Bookmarks</Text>
-          </View>
-        </Pressable>
-      </Link>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Main Calendar */}
+        <MainCalendar />
+        
+        {/* Weekly Summary */}
+        <WeeklySummary />
+        
+        {/* Quick Actions */}
+        <QuickActions />
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 16 },
-  h1: { fontSize: 22, fontWeight: '700', marginVertical: 12 },
-  section: { borderBottomWidth: StyleSheet.hairlineWidth, paddingVertical: 8 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
-  headerText: { fontSize: 16, fontWeight: '600' },
-  headerMeta: { fontSize: 12 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  dotOn: { backgroundColor: '#22c55e' },
-  dotOff: { backgroundColor: '#cbd5e1' },
-  title: { flex: 1, fontSize: 16 },
-  done: { opacity: 0.6, textDecorationLine: 'line-through' },
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+    paddingHorizontal: 20,
+  },
+  lightContainer: {
+    backgroundColor: '#fff',
+  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 20,
-    marginTop: 20,
+    marginBottom: 30,
+    marginTop: 10,
   },
-  headerIcon: { fontSize: 22, fontWeight: '700' },
-  darkModeToggle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+  headerTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
   },
-  bookmarksButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#fef9c3',
-    marginTop: 16,
-    marginBottom: 16,
+  lightText: {
+    color: '#000',
   },
-  bookmarksText: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 8,
-    color: '#f59e0b',
+  lightSubText: {
+    color: '#666',
   },
   
-  // Heatmap styles
-  heatmapContainer: {
-    borderRadius: 12,
-    padding: 16,
+  // Calendar Section
+  calendarSection: {
+    marginBottom: 30,
+  },
+  calendarHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 20,
   },
-  heatmapHeader: {
-    marginBottom: 12,
-  },
-  heatmapTitle: {
-    fontSize: 16,
+  calendarTitle: {
+    color: '#fff',
+    fontSize: 20,
     fontWeight: '600',
-    marginBottom: 4,
   },
-  statsRow: {
+  monthNavigation: {
     flexDirection: 'row',
-    gap: 16,
+    gap: 12,
   },
-  statText: {
-    fontSize: 12,
-  },
-  heatmapScroll: {
-    marginBottom: 12,
-  },
-  heatmap: {
-    flexDirection: 'row',
-    gap: 8,
+  navButton: {
+    padding: 8,
   },
   weekLabels: {
-    justifyContent: 'space-between',
-    paddingVertical: 2,
+    flexDirection: 'row',
+    marginBottom: 12,
+    paddingHorizontal: 16,
+  },
+  weekLabelContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   weekLabel: {
-    fontSize: 9,
+    color: '#888',
+    fontSize: 12,
+    fontWeight: '500',
     textAlign: 'center',
-    height: 12,
-    lineHeight: 12,
   },
-  weeksContainer: {
+  calendarContainer: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#333',
+    marginBottom: 16,
+    gap: 4, // Gap between weeks
+  },
+  lightCalendarContainer: {
+    backgroundColor: '#f8f8f8',
+    borderColor: '#e0e0e0',
+  },
+  weekRow: {
     flexDirection: 'row',
-    gap: 2,
+    gap: 4, // Gap between days
   },
-  week: {
-    gap: 2,
+  dayCell: {
+    flex: 1,
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    position: 'relative',
   },
-  daySquare: {
-    width: 12,
-    height: 12,
-    borderRadius: 2,
-    backgroundColor: '#f1f5f9',
+  dayText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
   },
+  activityIndicator: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+  },
+  activityCount: {
+    color: '#fff',
+    fontSize: 7,
+    fontWeight: '600',
+  },
+  inactiveDay: {
+    backgroundColor: 'transparent',
+  },
+  lightInactiveDay: {
+    backgroundColor: 'transparent',
+  },
+  inactiveDayText: {
+    color: '#444',
+  },
+  todayDay: {
+    backgroundColor: '#00D4AA',
+  },
+  todayText: {
+    color: '#000',
+    fontWeight: '700',
+  },
+  noActivityDay: {
+    backgroundColor: 'transparent',
+  },
+  lightNoActivityDay: {
+    backgroundColor: 'transparent',
+  },
+  completedDay: {
+    backgroundColor: '#00D4AA',
+  },
+  highActivityDay: {
+    backgroundColor: '#00A678',
+  },
+  partialDay: {
+    backgroundColor: '#007A5E',
+  },
+  lowActivityDay: {
+    backgroundColor: '#004D3D',
+  },
+  
+  // Legend
   legend: {
+    marginTop: 8,
+  },
+  legendTitle: {
+    color: '#888',
+    fontSize: 12,
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  legendItems: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 8,
+  },
+  legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 2,
+    gap: 4,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
   legendText: {
-    fontSize: 9,
-    marginHorizontal: 2,
+    color: '#666',
+    fontSize: 10,
   },
-  legendSquare: {
-    width: 8,
-    height: 8,
-    borderRadius: 1,
+  legendNote: {
+    color: '#666',
+    fontSize: 10,
+    fontStyle: 'italic',
   },
-});
-
-// Light theme styles
-const lightStyles = StyleSheet.create({
-  container: { backgroundColor: 'white' },
-  h1: { color: '#111827' },
-  headerIcon: { color: '#545454' },
-  darkModeToggle: { backgroundColor: '#f1f5f9' },
-  section: { borderBottomColor: '#e5e7eb' },
-  headerText: { color: '#0f172a' },
-  headerMeta: { color: '#64748b' },
-  title: { color: '#111827' },
-  bookmarksButton: { backgroundColor: '#fef9c3' },
-  bookmarksText: { color: '#f59e0b' },
-});
-
-// Dark theme styles
-const darkStyles = StyleSheet.create({
-  container: { backgroundColor: '#1f2937ff' },
-  h1: { color: '#f9fafb' },
-  headerIcon: { color: '#d1d5db' },
-  darkModeToggle: { backgroundColor: '#374151' },
-  section: { borderBottomColor: '#374151' },
-  headerText: { color: '#f9fafb' },
-  headerMeta: { color: '#9ca3af' },
-  title: { color: '#f9fafb' },
-  bookmarksButton: { backgroundColor: '#058394fd' },
-  bookmarksText: { color: '#f8b200ff' },
-});
-
-// Heatmap theme styles
-const lightHeatmapStyles = StyleSheet.create({
-  heatmapContainer: { backgroundColor: '#f8fafc' },
-  heatmapTitle: { color: '#54647dff' },
-  statText: { color: '#64748b' },
-  weekLabel: { color: '#64748b' },
-  legendText: { color: '#64748b' },
-});
-
-const darkHeatmapStyles = StyleSheet.create({
-  heatmapContainer: { backgroundColor: '#374151' },
-  heatmapTitle: { color: '#f9fafb' },
-  statText: { color: '#d1d5db' },
-  weekLabel: { color: '#d1d5db' },
-  legendText: { color: '#d1d5db' },
+  
+  // Weekly Summary
+  summarySection: {
+    marginBottom: 30,
+  },
+  summaryTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  summaryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  summaryCard: {
+    flex: 1,
+    minWidth: '47%',
+    backgroundColor: '#1a1a1a',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  lightCard: {
+    backgroundColor: '#f5f5f5',
+    borderColor: '#e0e0e0',
+  },
+  summaryValue: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '600',
+    marginTop: 8,
+  },
+  summaryLabel: {
+    color: '#888',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  
+  // Quick Actions
+  actionsSection: {
+    marginBottom: 20,
+  },
+  actionsTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  actionButtons: {
+    gap: 12,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1a1a1a',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  actionButtonText: {
+    color: '#00D4AA',
+    fontSize: 16,
+    fontWeight: '500',
+    marginLeft: 12,
+  },
+  
+  // Modal Styles
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modalContent: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 16,
+    padding: 20,
+    width: width - 40,
+    maxHeight: '70%',
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  lightModalContent: {
+    backgroundColor: '#fff',
+    borderColor: '#e0e0e0',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  modalStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+    backgroundColor: '#0f0f0f',
+    borderRadius: 12,
+    padding: 16,
+  },
+  lightModalStats: {
+    backgroundColor: '#f0f0f0',
+  },
+  modalStat: {
+    alignItems: 'center',
+  },
+  modalStatValue: {
+    color: '#00D4AA',
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  modalStatLabel: {
+    color: '#888',
+    fontSize: 11,
+    marginTop: 4,
+  },
+  tasksList: {
+    maxHeight: 200,
+  },
+  tasksSection: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  taskItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  completedTask: {
+    backgroundColor: 'rgba(0, 212, 170, 0.1)',
+  },
+  pendingTask: {
+    backgroundColor: 'rgba(136, 136, 136, 0.1)',
+  },
+  taskText: {
+    color: '#fff',
+    fontSize: 14,
+    flex: 1,
+  },
+  pendingTaskText: {
+    color: '#888',
+  },
+  noTasksContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  noTasksText: {
+    color: '#666',
+    fontSize: 16,
+    marginTop: 12,
+  },
 });

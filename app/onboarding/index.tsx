@@ -58,8 +58,12 @@ export default function Onboarding() {
   
   const completeOnboarding = useKriya(s => s.completeOnboarding);
   const [currentStep, setCurrentStep] = useState(-1);
-  const [isLoading, setIsLoading] = useState(false); // Add loading state
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Separate animation values for step content only
+  const stepOpacity = useSharedValue(0);
+  const navigationOpacity = useSharedValue(0); // Only for initial show, not step transitions
+  
   // Animation values
   const titleTranslateY = useSharedValue(0);
   const titleOpacity = useSharedValue(1);
@@ -67,8 +71,6 @@ export default function Onboarding() {
   const subtitleTranslateY = useSharedValue(0);
   const cardOpacity = useSharedValue(1);
   const cardTranslateY = useSharedValue(0);
-  const stepOpacity = useSharedValue(0);
-  const navigationOpacity = useSharedValue(0);
   
   // Icon animation
   const iconTranslateX = useSharedValue(0);
@@ -125,58 +127,49 @@ export default function Onboarding() {
 
   const handleNext = () => {
     if (currentStep < onboardingSteps.length - 1) {
-      // Fade out current step and navigation
+      // Only fade out step content, NOT navigation
       stepOpacity.value = withTiming(0, { duration: 300 });
-      navigationOpacity.value = withTiming(0, { duration: 300 });
       
       setTimeout(() => {
         setCurrentStep(currentStep + 1);
-        // Fade in new step content
+        // Fade in new step content only
         stepOpacity.value = withTiming(1, { duration: 500 });
-        // Fade in navigation buttons
-        setTimeout(() => {
-          navigationOpacity.value = withTiming(1, { duration: 400 });
-        }, 200);
       }, 300);
     } else {
       // Complete onboarding with loading transition
       console.log('🎯 Completing onboarding...');
       
-      // Start loading transition
       setIsLoading(true);
       
-      // Fade out current content and fade in loading
+      // Fade out both step content AND navigation for final transition
       stepOpacity.value = withTiming(0, { duration: 500 });
       navigationOpacity.value = withTiming(0, { duration: 500 });
       
       setTimeout(() => {
-        // Show loading screen with smooth animation
         loadingOpacity.value = withTiming(1, { duration: 600 });
         loadingScale.value = withTiming(1, { duration: 600 });
         
-        // After 2 seconds, complete onboarding and navigate
         setTimeout(() => {
           if (completeOnboarding) {
             completeOnboarding();
           }
           
-          // Fade out loading screen
           loadingOpacity.value = withTiming(0, { duration: 800 });
           
           setTimeout(() => {
             router.replace('/');
-          }, 800); // Wait for fade out to complete
-        }, 2000); // 2 second loading delay
-      }, 500); // Wait for content to fade out
+          }, 800);
+        }, 2000);
+      }, 500);
     }
   };
 
   const handleSkip = () => {
     console.log('🎯 Skipping onboarding...');
     
-    // Same loading transition for skip
     setIsLoading(true);
     
+    // Fade out both for skip
     stepOpacity.value = withTiming(0, { duration: 500 });
     navigationOpacity.value = withTiming(0, { duration: 500 });
     
@@ -218,6 +211,7 @@ export default function Onboarding() {
     opacity: stepOpacity.value,
   }));
 
+  // Update navigation style to only animate initial appearance
   const animatedNavigationStyle = useAnimatedStyle(() => ({
     opacity: navigationOpacity.value,
   }));
@@ -258,7 +252,7 @@ export default function Onboarding() {
             </Animated.View>
           )}
 
-          {/* Onboarding Steps */}
+          {/* Onboarding Steps - Only this animates between steps */}
           {currentStep >= 0 && !isLoading && (
             <Animated.View style={[styles.onboardingContainer, animatedStepStyle]}>
               <View style={styles.stepContent}>
@@ -316,7 +310,7 @@ export default function Onboarding() {
           </Animated.View>
         )}
 
-        {/* Onboarding Navigation - With separate fade animation */}
+        {/* Navigation - Only animates on initial show and final hide */}
         {currentStep >= 0 && !isLoading && (
           <Animated.View style={[styles.navigationContainer, animatedNavigationStyle]}>
             <Pressable onPress={handleSkip} style={styles.skipButton}>

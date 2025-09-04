@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useSharedValue, withTiming, useAnimatedStyle, interpolateColor, Easing } from 'react-native-reanimated';
+import { useSharedValue, withTiming, useAnimatedStyle, interpolateColor, Easing, runOnJS } from 'react-native-reanimated';
 import Animated from 'react-native-reanimated';
 
 // Import components
@@ -19,42 +19,58 @@ export default function FocusMode() {
   const { id, title } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const isDarkMode = useKriya(s => s.isDarkMode);
+  const addFocusSession = useKriya(s => s.addFocusSession);
 
   const [timeLeft, setTimeLeft] = React.useState(25 * 60);
   const [isRunning, setIsRunning] = React.useState(true);
-  const fadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [sessionCompleted, setSessionCompleted] = React.useState(false);
+  const fadeTimeoutRef = useRef<number | null>(null);
 
   // Animated values for content fade (everything except buttons)
   const contentOpacity = useSharedValue(1);
   // Animated value for button color transition
   const buttonColorProgress = useSharedValue(0);
 
+  // Callback functions to handle shared value updates
+  const restoreOpacity = useCallback(() => {
+    contentOpacity.value = withTiming(1, {
+      duration: 300,
+      easing: Easing.out(Easing.cubic),
+    });
+    buttonColorProgress.value = withTiming(0, {
+      duration: 300,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [contentOpacity, buttonColorProgress]);
+
+  const handleSessionComplete = useCallback(() => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setIsRunning(false);
+    setSessionCompleted(true);
+    addFocusSession();
+    console.log('🎯 Focus session completed and recorded!');
+    
+    // Use runOnJS to safely update shared values
+    runOnJS(restoreOpacity)();
+  }, [addFocusSession, restoreOpacity]);
+
   // Timer effect
   useEffect(() => {
-    if (!isRunning) return;
+    if (!isRunning || sessionCompleted) return;
 
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
         const newTime = prev > 0 ? prev - 1 : 0;
         if (newTime === 0) {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          setIsRunning(false);
-          // Restore full opacity when session completes
-          contentOpacity.value = withTiming(1, {
-            duration: 300,
-            easing: Easing.out(Easing.cubic),
-          });
-          buttonColorProgress.value = withTiming(0, {
-            duration: 300,
-            easing: Easing.out(Easing.cubic),
-          });
+          // Use runOnJS to call the completion handler
+          runOnJS(handleSessionComplete)();
         }
         return newTime;
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, sessionCompleted, handleSessionComplete]);
 
   // Fade effect - separate useEffect
   useEffect(() => {
@@ -82,10 +98,10 @@ export default function FocusMode() {
         clearTimeout(fadeTimeoutRef.current);
       }
     };
-  }, [isRunning]);
+  }, [isRunning, contentOpacity, buttonColorProgress]);
 
   // Handle pause/resume
-  const toggleTimer = () => {
+  const toggleTimer = useCallback(() => {
     setIsRunning(!isRunning);
     
     if (isRunning) {
@@ -99,12 +115,36 @@ export default function FocusMode() {
         easing: Easing.out(Easing.cubic),
       });
     }
-  };
+  }, [isRunning, contentOpacity, buttonColorProgress]);
+
+  // Handle early exit
+  const handleExit = useCallback(() => {
+    if (timeLeft > 0 && !sessionCompleted) {
+      // Session was not completed - don't record it
+      console.log('🚫 Focus session exited early - not recorded');
+    }
+    router.back();
+  }, [timeLeft, sessionCompleted]);
+
+  // Handle reset timer
+  const resetTimer = useCallback(() => {
+    setTimeLeft(25 * 60);
+    setIsRunning(false);
+    setSessionCompleted(false);
+    contentOpacity.value = withTiming(1, {
+      duration: 200,
+      easing: Easing.out(Easing.cubic),
+    });
+    buttonColorProgress.value = withTiming(0, {
+      duration: 200,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [contentOpacity, buttonColorProgress]);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
-  // Get theme-specific colors
+  // ...existing code...
   const getThemeColors = () => {
     if (isDarkMode) {
       return {
@@ -113,6 +153,7 @@ export default function FocusMode() {
         mutedText: '#94a3b8',
         primaryButton: ['#2563eb', '#132138ff'],
         secondaryButton: '#122035ff',
+        successButton: '#10b981',
         buttonBorder: ['#2563eb', '#273241ff'],
         iconColor: ['#ffffff', '#a0b4bcff'],
         blurOverlay: ["#00000088", "#00000000"],
@@ -125,6 +166,7 @@ export default function FocusMode() {
         mutedText: '#64748b',
         primaryButton: ['#96a9f5ff', '#d1d1d1ff'],
         secondaryButton: '#d1d1d1ff',
+        successButton: '#34d399',
         buttonBorder: ['#3b82f6', '#cbd5e1'],
         iconColor: ['#ffffffff', '#7b7b7bff'],
         blurOverlay: ["#ffffff88", "#ffffff00"],
@@ -197,7 +239,6 @@ export default function FocusMode() {
       letterSpacing: 0.5,
       fontFamily: "Instrument",
       fontStyle: "italic",
-    
     },
     timerText: {
       fontSize: 64,
@@ -215,6 +256,16 @@ export default function FocusMode() {
     },
     secondaryButton: {
       backgroundColor: themeColors.secondaryButton,
+    },
+    successButton: {
+      backgroundColor: themeColors.successButton,
+    },
+    completedText: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: themeColors.successButton,
+      textAlign: 'center',
+      marginTop: 16,
     },
   });
 
@@ -258,22 +309,46 @@ export default function FocusMode() {
           <Text style={dynamicStyles.timerLabel}>
             {timeLeft === 0 ? 'Session Complete!' : isRunning ? 'Focus Time' : 'Paused'}
           </Text>
+          {sessionCompleted && (
+            <Text style={dynamicStyles.completedText}>
+              🎯 Focus session recorded!
+            </Text>
+          )}
         </Animated.View>
 
         {/* Actions - Positioned at the bottom */}
         <View style={styles.actions}>
-          <Pressable onPress={toggleTimer}>
-            <Animated.View style={[styles.actionButton, animatedButtonStyle, animatedButtonBorderStyle]}>
-              <AnimatedFeather
-                name={isRunning ? 'pause' : 'play'}
-                size={24}
-                style={animatedIconStyle}
-              />
-            </Animated.View>
-          </Pressable>
-          <Pressable onPress={() => router.back()} style={[styles.actionButton, dynamicStyles.secondaryButton]}>
-            <AnimatedFeather name="x" size={24} style={animatedIconStyle} />
-          </Pressable>
+          {!sessionCompleted ? (
+            <>
+              {/* Play/Pause Button */}
+              <Pressable onPress={toggleTimer}>
+                <Animated.View style={[styles.actionButton, animatedButtonStyle, animatedButtonBorderStyle]}>
+                  <AnimatedFeather
+                    name={isRunning ? 'pause' : 'play'}
+                    size={24}
+                    style={animatedIconStyle}
+                  />
+                </Animated.View>
+              </Pressable>
+              
+              {/* Exit Button */}
+              <Pressable onPress={handleExit} style={[styles.actionButton, dynamicStyles.secondaryButton]}>
+                <AnimatedFeather name="x" size={24} style={animatedIconStyle} />
+              </Pressable>
+            </>
+          ) : (
+            <>
+              {/* New Session Button */}
+              <Pressable onPress={resetTimer} style={[styles.actionButton, dynamicStyles.successButton]}>
+                <Feather name="refresh-cw" size={24} color="#ffffff" />
+              </Pressable>
+              
+              {/* Done Button */}
+              <Pressable onPress={handleExit} style={[styles.actionButton, dynamicStyles.secondaryButton]}>
+                <Feather name="check" size={24} color="#ffffff" />
+              </Pressable>
+            </>
+          )}
         </View>
       </View>
     </View>

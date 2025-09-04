@@ -14,6 +14,11 @@ import { ensureProgressForToday, countCompletedSince } from './progress';
 import { isDbReady } from './dbReady';
 import type { ShlokaRow } from './shloka';
 
+// Add this helper function
+function getDateKey(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
 // Add bookmark interface
 export interface Bookmark {
   id: number;
@@ -63,6 +68,11 @@ interface KriyaState {
   // Enhanced refresh
   clearCache: () => void;
   hardRefresh: () => void;
+
+  // focus sessions
+  focusSessions: Record<number, number>; // dayKey -> number of sessions
+  getFocusSessionsForDay: (dayKey: number) => number;
+  addFocusSession: (dayKey?: number) => void; // Make dayKey optional
 }
 
 export const useKriya = create<KriyaState>()(
@@ -73,6 +83,7 @@ export const useKriya = create<KriyaState>()(
       isDarkMode: true,
       bookmarks: [],
       hasCompletedOnboarding: false,
+      focusSessions: {},
 
       init: () => {
         if (!isDbReady()) {
@@ -218,6 +229,20 @@ export const useKriya = create<KriyaState>()(
         set({ hasCompletedOnboarding: true });
         console.log('🎯 Store: New state after completion:', get().hasCompletedOnboarding);
       },
+
+      getFocusSessionsForDay: (dayKey: number) => {
+        return get().focusSessions[dayKey] || 0;
+      },
+      
+      addFocusSession: (dayKey?: number) => {
+        const today = dayKey || getDateKey(new Date());
+        set((state) => ({
+          focusSessions: {
+            ...state.focusSessions,
+            [today]: (state.focusSessions[today] || 0) + 1
+          }
+        }));
+      },
     }),
     {
       name: 'kriya-storage',
@@ -226,6 +251,7 @@ export const useKriya = create<KriyaState>()(
         isDarkMode: state.isDarkMode,
         bookmarks: state.bookmarks,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
+        focusSessions: state.focusSessions, // Persist focus sessions
       }),
     }
   )

@@ -440,7 +440,7 @@ const onFocus = React.useCallback((task: Task) => {
   if (!ready) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#000' : '#fff' }}>
-        <Text style={{ fontSize: 30, fontFamily:"Instrument", fontStyle:"italic", color: isDarkMode ? '#fff' : '#000' }}>loading ...</Text>
+        <Text style={{ fontSize: 30, fontFamily:"Instrument", fontStyle:"italic", color: isDarkMode ? '#fff' : '#000' }}>loading...</Text>
       </View>
     );
   }

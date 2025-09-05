@@ -14,6 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import BlurBackground from '@/components/BlurBackground';
 import { Progress, ProgressFilledTrack } from '@/components/ui/progress';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 
@@ -533,41 +534,52 @@ export default function History() {
   const toggleDarkMode = useKriya(s => s.toggleDarkMode);
 
   return (
-    <SafeAreaView style={[styles.container, !isDarkMode && styles.lightContainer]}>
-
+    <View style={[styles.container, !isDarkMode && styles.lightContainer]}>
+      {/* BlurBackground */}
       <Animated.View style={[StyleSheet.absoluteFill]}>
         <BlurBackground />
       </Animated.View>
 
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <Pressable onPress={() => router.back()} hitSlop={16}>
-          <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#000"} />
-        </Pressable>
-            <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>My Journey</Text>
-        <Pressable onPress={toggleDarkMode} hitSlop={16}>
-          <Feather 
-            name={isDarkMode ? "sun" : "moon"} 
-            size={24} 
-            color={isDarkMode ? "#fff" : "#000"} 
-          />
-        </Pressable>
-      </View>
+      {/* Linear Gradient Overlay with reduced opacity */}
+      <LinearGradient
+        colors={isDarkMode 
+          ? ['rgba(52, 76, 103, 0.8)', 'rgba(0, 0, 0, 0.6)'] 
+          : ['rgba(255, 255, 255, 0.3)', 'rgba(139, 165, 225, 0.4)']
+        }
+        style={StyleSheet.absoluteFill}
+      />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Gita Progress */}
-        <GitaProgress />
-        
-        {/* Main Calendar */}
-        <MainCalendar />
-        
-        {/* Weekly Summary */}
-        <WeeklySummary />
-        
-        {/* Quick Actions */}
-        <QuickActions />
-      </ScrollView>
-    </SafeAreaView>
+      <SafeAreaView style={styles.safeAreaContent}>
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => router.back()} hitSlop={16}>
+            <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#000"} />
+          </Pressable>
+              <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>My Journey</Text>
+          <Pressable onPress={toggleDarkMode} hitSlop={16}>
+            <Feather 
+              name={isDarkMode ? "sun" : "moon"} 
+              size={24} 
+              color={isDarkMode ? "#fff" : "#000"} 
+            />
+          </Pressable>
+        </View>
+
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Gita Progress */}
+          <GitaProgress />
+          
+          {/* Main Calendar */}
+          <MainCalendar />
+          
+          {/* Weekly Summary */}
+          <WeeklySummary />
+          
+          {/* Quick Actions */}
+          <QuickActions />
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
@@ -575,10 +587,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    paddingHorizontal: 20,
   },
   lightContainer: {
     backgroundColor: '#fff',
+  },
+  safeAreaContent: {
+    flex: 1,
+    paddingHorizontal: 20,
   },
   headerRow: {
     flexDirection: 'row',
@@ -637,18 +652,18 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
-    calendarContainer: {
-    backgroundColor: 'rgba(26, 26, 26, 0.6)', // Made translucent
+  calendarContainer: {
+    backgroundColor: 'rgba(26, 26, 26, 0.6)',
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(51, 51, 51, 0.6)', // Made translucent
+    borderColor: 'rgba(51, 51, 51, 0.8)',
     marginBottom: 16,
     gap: 4,
   },
   lightCalendarContainer: {
-    backgroundColor: 'rgba(248, 248, 248, 0.6)', // Made translucent
-    borderColor: 'rgba(224, 224, 224, 0.6)', // Made translucent
+    backgroundColor: 'rgba(248, 248, 248, 0.4)',
+    borderColor: 'rgba(224, 224, 224, 0.6)',
   },
   weekRow: {
     flexDirection: 'row',
@@ -687,7 +702,7 @@ const styles = StyleSheet.create({
     color: '#444',
   },
   todayDay: {
-    backgroundColor: '#7c9fb0', // Muted blue-gray for today
+    backgroundColor: '#7c9fb0',
   },
   todayText: {
     color: '#fff',
@@ -700,16 +715,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   completedDay: {
-    backgroundColor: '#8ba5e1', // Soft lavender blue
+    backgroundColor: '#8ba5e1',
   },
   highActivityDay: {
-    backgroundColor: '#6b8db5', // Medium blue
+    backgroundColor: '#6b8db5',
   },
   partialDay: {
-    backgroundColor: '#5a7a9a', // Darker blue
+    backgroundColor: '#5a7a9a',
   },
   lowActivityDay: {
-    backgroundColor: '#4a6b8a', // Even darker blue
+    backgroundColor: '#4a6b8a',
   },
   
   // Legend
@@ -763,19 +778,19 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 12,
   },
-summaryCard: {
+  summaryCard: {
     flex: 1,
     minWidth: '47%',
-    backgroundColor: 'rgba(26, 26, 26, 0.7)', // Made translucent
+    backgroundColor: 'rgba(26, 26, 26, 0.7)',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(51, 51, 51, 0.6)', // Made translucent
+    borderColor: 'rgba(51, 51, 51, 0.6)',
   },
   lightCard: {
-    backgroundColor: 'rgba(245, 245, 245, 0.7)', // Made translucent
-    borderColor: 'rgba(224, 224, 224, 0.6)', // Made translucent
+    backgroundColor: 'rgba(245, 245, 245, 0.7)',
+    borderColor: 'rgba(224, 224, 224, 0.6)',
   },
   summaryValue: {
     color: '#fff',
@@ -805,14 +820,14 @@ summaryCard: {
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(26, 26, 26, 0.7)', // Made translucent
+    backgroundColor: 'rgba(26, 26, 26, 0.7)',
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(51, 51, 51, 0.6)', // Made translucent
+    borderColor: 'rgba(51, 51, 51, 0.6)',
   },
   actionButtonText: {
-    color: 'white', // Soft lavender blue for action text
+    color: 'white',
     fontSize: 16,
     fontWeight: '500',
     marginLeft: 12,
@@ -825,24 +840,23 @@ summaryCard: {
     left: 0,
     right: 0,
     bottom: 250,
-    backgroundColor: 'rgba(0,0,0,0.1)', // Slightly darker overlay
+    backgroundColor: 'rgba(0,0,0,0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
-  
   },
- modalContent: {
-    backgroundColor: 'rgba(26, 26, 26, 1)', // Made translucent
+  modalContent: {
+    backgroundColor: 'rgba(26, 26, 26, 1)',
     borderRadius: 16,
     padding: 20,
     width: width - 40,
     maxHeight: '70%',
     borderWidth: 1,
-    borderColor: 'rgba(51, 51, 51, 0.7)', // Made translucent
+    borderColor: 'rgba(51, 51, 51, 0.7)',
   },
   lightModalContent: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Made translucent
-    borderColor: 'rgba(224, 224, 224, 0.7)', // Made translucent
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderColor: 'rgba(224, 224, 224, 0.7)',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -870,7 +884,7 @@ summaryCard: {
     alignItems: 'center',
   },
   modalStatValue: {
-    color: '#8ba5e1', // Soft lavender blue for stats
+    color: '#8ba5e1',
     fontSize: 20,
     fontWeight: '600',
   },
@@ -899,7 +913,7 @@ summaryCard: {
     marginBottom: 4,
   },
   completedTask: {
-    backgroundColor: 'rgba(139, 165, 225, 0.15)', // Soft lavender blue with transparency
+    backgroundColor: 'rgba(139, 165, 225, 0.15)',
   },
   pendingTask: {
     backgroundColor: 'rgba(136, 136, 136, 0.1)',
@@ -923,18 +937,18 @@ summaryCard: {
     marginTop: 12,
   },
   
-  // Gita Progress Styles - Updated for light mode compatibility
-   gitaSection: {
+  // Gita Progress Styles
+  gitaSection: {
     marginBottom: 30,
-    backgroundColor: 'rgba(26, 26, 26, 0.7)', // Made translucent
+    backgroundColor: 'rgba(26, 26, 26, 0.6)',
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(51, 51, 51, 0.6)', // Made translucent
+    borderColor: 'rgba(51, 51, 51, 0.6)',
   },
   lightGitaSection: {
-    backgroundColor: 'rgba(248, 248, 248, 0.6)', // Made translucent
-    borderColor: 'rgba(224, 224, 224, 0.6)', // Made translucent
+    backgroundColor: 'rgba(248, 248, 248, 0.6)',
+    borderColor: 'rgba(224, 224, 224, 0.6)',
   },
   gitaHeader: {
     flexDirection: 'row',
@@ -964,7 +978,7 @@ summaryCard: {
     fontWeight: '700',
   },
   lightGitaStatsNumber: {
-    color: '#e67e00', // Darker orange for light mode
+    color: '#e67e00',
   },
   gitaStatsLabel: {
     color: '#888',
@@ -992,7 +1006,7 @@ summaryCard: {
     borderRadius: 4,
   },
   lightProgressFilled: {
-    backgroundColor: '#e67e00', // Darker orange for light mode
+    backgroundColor: '#e67e00',
   },
   progressText: {
     color: '#888',

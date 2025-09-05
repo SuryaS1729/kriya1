@@ -73,6 +73,9 @@ interface KriyaState {
   focusSessions: Record<number, number>; // dayKey -> number of sessions
   getFocusSessionsForDay: (dayKey: number) => number;
   addFocusSession: (dayKey?: number) => void; // Make dayKey optional
+
+  // Add this new function
+  getTotalCompletedTasks: () => number;
 }
 
 export const useKriya = create<KriyaState>()(
@@ -242,6 +245,34 @@ export const useKriya = create<KriyaState>()(
             [today]: (state.focusSessions[today] || 0) + 1
           }
         }));
+      },
+
+      getTotalCompletedTasks: () => {
+        if (!isDbReady()) {
+          return 0;
+        }
+        
+        try {
+          let totalCompleted = 0;
+          
+          // Get all history days (we'll use a large limit to get all days)
+          const historyDays = get().listHistoryDays(1000); // Get up to 1000 days of history
+          
+          // Add today's key if it's not in history yet
+          const todayKey = get().todayKey();
+          const allDayKeys = new Set([todayKey, ...historyDays.map(day => day.day_key)]);
+          
+          // Count completed tasks for each day
+          Array.from(allDayKeys).forEach(dayKey => {
+            const tasks = get().getTasksForDay(dayKey);
+            totalCompleted += tasks.filter(task => task.completed).length;
+          });
+          
+          return totalCompleted;
+        } catch (e) {
+          console.warn('getTotalCompletedTasks failed:', e);
+          return 0;
+        }
       },
     }),
     {

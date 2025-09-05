@@ -20,6 +20,14 @@ const BlurCircleColors = [
   "#1cd1c8a0"
 ];
 
+// const BlurCircleColors = [
+//   "#FFB80080",  // Orange
+//   "#00FFB980",  // Green
+//   "#15D6D680",  // Teal
+//   "#0898EC80",  // Blue
+//   "#0E43EE80",  // Dark blue
+// ];
+
 interface BlurCircleProps {
   cx: number;
   cy: number;

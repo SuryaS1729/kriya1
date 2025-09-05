@@ -13,6 +13,7 @@ import Animated, {
   runOnJS 
 } from 'react-native-reanimated';
 import BlurBackground from '@/components/BlurBackground';
+import { Progress, ProgressFilledTrack } from '@/components/ui/progress';
 
 const { width } = Dimensions.get('window');
 
@@ -78,7 +79,7 @@ function DayDetailModal({ date, onClose }: { date: Date | null; onClose: () => v
                 <Text style={[styles.tasksSection, !isDarkMode && styles.lightText]}>Completed Tasks</Text>
                 {completed.map((task, index) => (
                   <View key={`completed-${index}`} style={[styles.taskItem, styles.completedTask]}>
-                    <Feather name="check-circle" size={16} color="#00D4AA" />
+                    <Feather name="check-circle" size={16} color="#8ba5e1" />
                     <Text style={[styles.taskText, !isDarkMode && styles.lightText]}>{task.title}</Text>
                   </View>
                 ))}
@@ -171,26 +172,26 @@ function MainCalendar() {
     }
     
     if (day.isToday) {
-      return [styles.todayDay, { backgroundColor: '#00D4AA' }];
+      return [styles.todayDay, { backgroundColor: '#7c9fb0' }]; // Updated today color
     }
     
     if (!day.hasActivity) {
       return [styles.noActivityDay, !isDarkMode && styles.lightNoActivityDay];
     }
     
-    // Calculate activity intensity based on both tasks and focus sessions
+    // Calculate activity intensity
     const taskScore = day.total > 0 ? day.completionRate : 0;
-    const focusScore = Math.min(day.focusSessions / 3, 1); // Normalize to 0-1 (3+ sessions = max)
+    const focusScore = Math.min(day.focusSessions / 3, 1);
     const combinedScore = (taskScore + focusScore) / 2;
     
     if (combinedScore >= 0.8) {
-      return styles.completedDay;
+      return styles.completedDay; // #8ba5e1
     } else if (combinedScore >= 0.6) {
-      return styles.highActivityDay;
+      return styles.highActivityDay; // #6b8db5
     } else if (combinedScore >= 0.3) {
-      return styles.partialDay;
+      return styles.partialDay; // #5a7a9a
     } else {
-      return styles.lowActivityDay;
+      return styles.lowActivityDay; // #4a6b8a
     }
   };
 
@@ -275,19 +276,19 @@ function MainCalendar() {
               <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>None</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#004D3D' }]} />
+              <View style={[styles.legendDot, { backgroundColor: '#4a6b8a' }]} />
               <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>Low</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#007A5E' }]} />
+              <View style={[styles.legendDot, { backgroundColor: '#5a7a9a' }]} />
               <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>Medium</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#00A678' }]} />
+              <View style={[styles.legendDot, { backgroundColor: '#6b8db5' }]} />
               <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>High</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#00D4AA' }]} />
+              <View style={[styles.legendDot, { backgroundColor: '#8ba5e1' }]} />
               <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>Perfect</Text>
             </View>
           </View>
@@ -355,25 +356,25 @@ function WeeklySummary() {
       <Text style={[styles.summaryTitle, !isDarkMode && styles.lightText]}>This Week</Text>
       <View style={styles.summaryGrid}>
         <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
-          <Feather name="calendar" size={24} color="#00D4AA" />
+          <Feather name="calendar" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.activeDays}</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Active Days</Text>
         </View>
         
         <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
-          <Feather name="check-circle" size={24} color="#00D4AA" />
+          <Feather name="check-circle" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.completedTasks}</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Tasks Done</Text>
         </View>
         
         <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
-          <Feather name="target" size={24} color="#00D4AA" />
+          <Feather name="target" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.totalFocusSessions}</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Focus Sessions</Text>
         </View>
         
         <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
-          <Feather name="clock" size={24} color="#00D4AA" />
+          <Feather name="clock" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.focusTime}m</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Focus Time</Text>
         </View>
@@ -394,7 +395,7 @@ function QuickActions() {
           style={[styles.actionButton, !isDarkMode && styles.lightCard]}
           onPress={() => router.push('/')}
         >
-          <Feather name="plus-circle" size={24} color="#00D4AA" />
+          <Feather name="plus-circle" size={24} color="#35E21B" />
           <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Add Tasks</Text>
         </Pressable>
         
@@ -402,7 +403,7 @@ function QuickActions() {
           style={[styles.actionButton, !isDarkMode && styles.lightCard]}
           onPress={() => router.push('/focus')}
         >
-          <Feather name="target" size={24} color="#00D4AA" />
+          <Feather name="target" size={24} color="#00FFFF" />
           <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Focus Session</Text>
         </Pressable>
         
@@ -410,10 +411,119 @@ function QuickActions() {
           style={[styles.actionButton, !isDarkMode && styles.lightCard]}
           onPress={() => router.push('/bookmarks')}
         >
-          <MaterialIcons name="bookmark" size={24} color="#00D4AA" />
+          <MaterialIcons name="bookmark" size={24} color="#fbbf24" />
           <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Bookmarks</Text>
         </Pressable>
       </View>
+    </View>
+  );
+}
+
+// Gita Progress Component
+function GitaProgress() {
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  const getTotalCompletedTasks = useKriya(s => s.getTotalCompletedTasks);
+  
+  // Assuming 700 total shlokas in Bhagavad Gita
+  const totalShlokas = 700;
+  const completedTasks = getTotalCompletedTasks ? getTotalCompletedTasks() : 0;
+  const unlockedShlokas = Math.min(completedTasks, totalShlokas);
+  const progressPercentage = Math.round((unlockedShlokas / totalShlokas) * 100);
+  
+  // Calculate which chapter and verse they're currently on
+  const chaptersAndVerses = [
+    47, 72, 43, 42, 29, 47, 30, 28, 34, 42, 55, 20, 35, 27, 20, 24, 28, 78
+  ];
+  
+  let currentChapter = 1;
+  let currentVerse = 1;
+  let remainingShlokas = unlockedShlokas;
+  
+  for (let i = 0; i < chaptersAndVerses.length && remainingShlokas > 0; i++) {
+    if (remainingShlokas >= chaptersAndVerses[i]) {
+      remainingShlokas -= chaptersAndVerses[i];
+      currentChapter = i + 2; // Next chapter
+      currentVerse = 1;
+    } else {
+      currentChapter = i + 1;
+      currentVerse = remainingShlokas + 1;
+      break;
+    }
+  }
+  
+  if (unlockedShlokas >= totalShlokas) {
+    currentChapter = 18;
+    currentVerse = 78;
+  }
+  
+  return (
+    <View style={[styles.gitaSection, !isDarkMode && styles.lightGitaSection]}>
+      <View style={styles.gitaHeader}>
+        <View style={styles.gitaTitle}>
+          <Text style={[styles.gitaTitleText, !isDarkMode && styles.lightText]}>🕉️ Bhagavad Gita Journey</Text>
+          <Text style={[styles.gitaSubtitle, !isDarkMode && styles.lightSubText]}>
+            Chapter {currentChapter}, Verse {currentVerse}
+          </Text>
+        </View>
+        <View style={styles.gitaStats}>
+          <Text style={[styles.gitaStatsNumber, !isDarkMode && styles.lightGitaStatsNumber]}>{unlockedShlokas}</Text>
+          <Text style={[styles.gitaStatsLabel, !isDarkMode && styles.lightSubText]}>/ {totalShlokas}</Text>
+        </View>
+      </View>
+      
+      <View style={[styles.progressContainer, !isDarkMode && styles.lightProgressContainer]}>
+        <View style={[styles.progressBar, !isDarkMode && styles.lightProgressBar]}>
+          <View 
+            style={[
+              styles.progressFilled, 
+              { width: `${progressPercentage}%` },
+              !isDarkMode && styles.lightProgressFilled
+            ]} 
+          />
+        </View>
+        <Text style={[styles.progressText, !isDarkMode && styles.lightSubText]}>
+          {progressPercentage}% Complete
+        </Text>
+      </View>
+      
+      <View style={styles.gitaMilestones}>
+        <Text style={[styles.milestonesTitle, !isDarkMode && styles.lightSubText]}>Next Milestone</Text>
+        <View style={styles.milestoneItem}>
+          <View style={[styles.milestoneIcon, { backgroundColor: isDarkMode ? 'black' : 'white' }]}>
+            <Text style={styles.milestoneIconText}>📿</Text>
+          </View>
+          <View style={styles.milestoneText}>
+            <Text style={[styles.milestoneTitle, !isDarkMode && styles.lightText]}>
+              Chapter {currentChapter === 18 && currentVerse === 78 ? '1 (Restart)' : currentChapter + (currentVerse === chaptersAndVerses[currentChapter - 1] ? 1 : 0)} Complete
+            </Text>
+            <Text style={[styles.milestoneDesc, !isDarkMode && styles.lightSubText]}>
+              {currentChapter === 18 && currentVerse === 78 
+                ? 'You\'ve completed the entire Gita! Start a new journey.' 
+                : `${currentVerse === chaptersAndVerses[currentChapter - 1] ? chaptersAndVerses[currentChapter] - currentVerse : chaptersAndVerses[currentChapter - 1] - currentVerse + 1} more tasks to unlock`
+              }
+            </Text>
+          </View>
+        </View>
+      </View>
+      
+      {/* {unlockedShlokas > 0 && (
+        <Pressable 
+          style={[styles.gitaActionButton, !isDarkMode && styles.lightGitaActionButton]}
+          onPress={() => {
+            // Navigate to gita reader or show current shloka
+            Alert.alert(
+              `Chapter ${currentChapter}, Verse ${currentVerse - 1 > 0 ? currentVerse - 1 : currentVerse}`,
+              'This would open your current shloka in the Gita reader.',
+              [{ text: 'OK' }]
+            );
+          }}
+        >
+          <Text style={[styles.gitaActionText, !isDarkMode && styles.lightText]}>
+            📖 Read Current Shloka
+          </Text>
+          <Feather name="chevron-right" size={16} color={isDarkMode ? "#fff" : "#000"} />
+        </Pressable>
+      )} */}
     </View>
   );
 }
@@ -434,7 +544,7 @@ export default function History() {
         <Pressable onPress={() => router.back()} hitSlop={16}>
           <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#000"} />
         </Pressable>
-        {/* <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>Activity History</Text> */}
+            <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>My Journey</Text>
         <Pressable onPress={toggleDarkMode} hitSlop={16}>
           <Feather 
             name={isDarkMode ? "sun" : "moon"} 
@@ -445,6 +555,9 @@ export default function History() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Gita Progress */}
+        <GitaProgress />
+        
         {/* Main Calendar */}
         <MainCalendar />
         
@@ -524,22 +637,22 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
-  calendarContainer: {
-    backgroundColor: '#1a1a1a',
+    calendarContainer: {
+    backgroundColor: 'rgba(26, 26, 26, 0.6)', // Made translucent
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: 'rgba(51, 51, 51, 0.6)', // Made translucent
     marginBottom: 16,
-    gap: 4, // Gap between weeks
+    gap: 4,
   },
   lightCalendarContainer: {
-    backgroundColor: '#f8f8f8',
-    borderColor: '#e0e0e0',
+    backgroundColor: 'rgba(248, 248, 248, 0.6)', // Made translucent
+    borderColor: 'rgba(224, 224, 224, 0.6)', // Made translucent
   },
   weekRow: {
     flexDirection: 'row',
-    gap: 4, // Gap between days
+    gap: 4,
   },
   dayCell: {
     flex: 1,
@@ -574,10 +687,10 @@ const styles = StyleSheet.create({
     color: '#444',
   },
   todayDay: {
-    backgroundColor: '#00D4AA',
+    backgroundColor: '#7c9fb0', // Muted blue-gray for today
   },
   todayText: {
-    color: '#000',
+    color: '#fff',
     fontWeight: '700',
   },
   noActivityDay: {
@@ -587,16 +700,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   completedDay: {
-    backgroundColor: '#00D4AA',
+    backgroundColor: '#8ba5e1', // Soft lavender blue
   },
   highActivityDay: {
-    backgroundColor: '#00A678',
+    backgroundColor: '#6b8db5', // Medium blue
   },
   partialDay: {
-    backgroundColor: '#007A5E',
+    backgroundColor: '#5a7a9a', // Darker blue
   },
   lowActivityDay: {
-    backgroundColor: '#004D3D',
+    backgroundColor: '#4a6b8a', // Even darker blue
   },
   
   // Legend
@@ -650,19 +763,19 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 12,
   },
-  summaryCard: {
+summaryCard: {
     flex: 1,
     minWidth: '47%',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'rgba(26, 26, 26, 0.7)', // Made translucent
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: 'rgba(51, 51, 51, 0.6)', // Made translucent
   },
   lightCard: {
-    backgroundColor: '#f5f5f5',
-    borderColor: '#e0e0e0',
+    backgroundColor: 'rgba(245, 245, 245, 0.7)', // Made translucent
+    borderColor: 'rgba(224, 224, 224, 0.6)', // Made translucent
   },
   summaryValue: {
     color: '#fff',
@@ -692,14 +805,14 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: 'rgba(26, 26, 26, 0.7)', // Made translucent
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: 'rgba(51, 51, 51, 0.6)', // Made translucent
   },
   actionButtonText: {
-    color: '#00D4AA',
+    color: 'white', // Soft lavender blue for action text
     fontSize: 16,
     fontWeight: '500',
     marginLeft: 12,
@@ -711,24 +824,25 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    bottom: 250,
+    backgroundColor: 'rgba(0,0,0,0.1)', // Slightly darker overlay
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
+  
   },
-  modalContent: {
-    backgroundColor: '#1a1a1a',
+ modalContent: {
+    backgroundColor: 'rgba(26, 26, 26, 1)', // Made translucent
     borderRadius: 16,
     padding: 20,
     width: width - 40,
     maxHeight: '70%',
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: 'rgba(51, 51, 51, 0.7)', // Made translucent
   },
   lightModalContent: {
-    backgroundColor: '#fff',
-    borderColor: '#e0e0e0',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Made translucent
+    borderColor: 'rgba(224, 224, 224, 0.7)', // Made translucent
   },
   modalHeader: {
     flexDirection: 'row',
@@ -756,7 +870,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalStatValue: {
-    color: '#00D4AA',
+    color: '#8ba5e1', // Soft lavender blue for stats
     fontSize: 20,
     fontWeight: '600',
   },
@@ -785,7 +899,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   completedTask: {
-    backgroundColor: 'rgba(0, 212, 170, 0.1)',
+    backgroundColor: 'rgba(139, 165, 225, 0.15)', // Soft lavender blue with transparency
   },
   pendingTask: {
     backgroundColor: 'rgba(136, 136, 136, 0.1)',
@@ -807,5 +921,140 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 16,
     marginTop: 12,
+  },
+  
+  // Gita Progress Styles - Updated for light mode compatibility
+   gitaSection: {
+    marginBottom: 30,
+    backgroundColor: 'rgba(26, 26, 26, 0.7)', // Made translucent
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(51, 51, 51, 0.6)', // Made translucent
+  },
+  lightGitaSection: {
+    backgroundColor: 'rgba(248, 248, 248, 0.6)', // Made translucent
+    borderColor: 'rgba(224, 224, 224, 0.6)', // Made translucent
+  },
+  gitaHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  gitaTitle: {
+    flex: 1,
+  },
+  gitaTitleText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  gitaSubtitle: {
+    color: '#888',
+    fontSize: 14,
+  },
+  gitaStats: {
+    alignItems: 'flex-end',
+  },
+  gitaStatsNumber: {
+    color: '#ff9500',
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  lightGitaStatsNumber: {
+    color: '#e67e00', // Darker orange for light mode
+  },
+  gitaStatsLabel: {
+    color: '#888',
+    fontSize: 14,
+  },
+  progressContainer: {
+    marginBottom: 20,
+  },
+  lightProgressContainer: {
+    // Light mode specific styles if needed
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: '#333',
+    borderRadius: 4,
+    marginBottom: 8,
+    overflow: 'hidden',
+  },
+  lightProgressBar: {
+    backgroundColor: '#e0e0e0',
+  },
+  progressFilled: {
+    height: '100%',
+    backgroundColor: '#ff9500',
+    borderRadius: 4,
+  },
+  lightProgressFilled: {
+    backgroundColor: '#e67e00', // Darker orange for light mode
+  },
+  progressText: {
+    color: '#888',
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  gitaMilestones: {
+    marginBottom: 16,
+  },
+  milestonesTitle: {
+    color: '#888',
+    fontSize: 12,
+    fontWeight: '500',
+    marginBottom: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  milestoneItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  milestoneIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  milestoneIconText: {
+    fontSize: 16,
+  },
+  milestoneText: {
+    flex: 1,
+  },
+  milestoneTitle: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  milestoneDesc: {
+    color: '#888',
+    fontSize: 12,
+  },
+  gitaActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#0f0f0f',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#444',
+  },
+  lightGitaActionButton: {
+    backgroundColor: '#f0f0f0',
+    borderColor: '#d0d0d0',
+  },
+  gitaActionText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

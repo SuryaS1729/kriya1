@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   headerIcon: { fontSize: 22, fontWeight: '700' },
   headerTitle: { 
-    fontFamily:"SourceSerifPro",
+    fontFamily:"Source Serif Pro",
     fontSize: 23,
     fontStyle: 'italic',
     fontWeight: '600',
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   section: {
     fontSize: 18,
     marginTop: 8,
-    fontFamily:"SourceSerifPro",
+    fontFamily:"Source Serif Pro",
     fontWeight:"600",
     fontStyle:"normal",
     paddingVertical:10,

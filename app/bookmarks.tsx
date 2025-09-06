@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    fontFamily: 'SourceSerifPro',
+    fontFamily: 'Source Serif Pro',
   },
   list: {
     paddingBottom: 20,
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   bookmarkMeta: {
     fontSize: 14,
     fontWeight: '600',
-    fontFamily: 'SourceSerifPro',
+    fontFamily: 'Source Serif Pro',
   },
   removeButton: {
     padding: 4,
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 16,
     marginBottom: 8,
-    fontFamily: 'SourceSerifPro',
+    fontFamily: 'Source Serif Pro',
   },
   emptySubtitle: {
     fontSize: 16,

@@ -43,12 +43,12 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
-    // @generated begin xml-fonts-init - expo prebuild (DO NOT MODIFY) sync-5260f369e94ef9278ae9ddba1caa6e83f82d136a
+    // @generated begin xml-fonts-init - expo prebuild (DO NOT MODIFY) sync-559ecf33123b5468c89d059fb43bcbaeeaae2971
     ReactFontManager.getInstance().addCustomFont(this, "Alegreya", R.font.xml_alegreya)
-    ReactFontManager.getInstance().addCustomFont(this, "SourceSerifPro", R.font.xml_source_serif_pro)
-    ReactFontManager.getInstance().addCustomFont(this, "SpaceMono", R.font.xml_space_mono)
+    ReactFontManager.getInstance().addCustomFont(this, "Source Serif Pro", R.font.xml_source_serif_pro)
+    ReactFontManager.getInstance().addCustomFont(this, "Space Mono", R.font.xml_space_mono)
     ReactFontManager.getInstance().addCustomFont(this, "Kalam", R.font.xml_kalam)
-    ReactFontManager.getInstance().addCustomFont(this, "Instrument", R.font.xml_instrument)
+    ReactFontManager.getInstance().addCustomFont(this, "Instrument Serif", R.font.xml_instrument_serif)
     // @generated end xml-fonts-init
     SoLoader.init(this, OpenSourceMergedSoMapping)
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {

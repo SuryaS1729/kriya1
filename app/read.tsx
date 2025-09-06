@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     fontWeight: '600', 
     marginTop: 12, 
     marginBottom: 8,
-    fontFamily: "SpaceMono",
+    fontFamily: "Space Mono",
     fontStyle:'italic'
   },
   search: {
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   },
   resultMeta: { 
     fontSize: 12,
-    fontFamily: "SourceSerifPro",
+    fontFamily: "Source Serif Pro",
     fontWeight: '600',
   },
   resultText: { 

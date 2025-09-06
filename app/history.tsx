@@ -490,7 +490,7 @@ function GitaProgress() {
       <View style={styles.gitaMilestones}>
         <Text style={[styles.milestonesTitle, !isDarkMode && styles.lightSubText]}>Next Milestone</Text>
         <View style={styles.milestoneItem}>
-          <View style={[styles.milestoneIcon, { backgroundColor: isDarkMode ? 'black' : 'white' }]}>
+          <View style={[styles.milestoneIcon, { borderColor: "grey" }]}>
             <Text style={styles.milestoneIconText}>📿</Text>
           </View>
           <View style={styles.milestoneText}>
@@ -583,6 +583,8 @@ export default function History() {
   );
 }
 
+// ...existing code...
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -653,11 +655,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   calendarContainer: {
-    backgroundColor: 'rgba(26, 26, 26, 0.6)',
+    backgroundColor: 'rgba(52, 76, 103, 0.4)',
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(51, 51, 51, 0.8)',
+    borderColor: 'rgba(93, 123, 158, 0.3)',
     marginBottom: 16,
     gap: 4,
   },
@@ -781,12 +783,12 @@ const styles = StyleSheet.create({
   summaryCard: {
     flex: 1,
     minWidth: '47%',
-    backgroundColor: 'rgba(26, 26, 26, 0.7)',
+    backgroundColor: 'rgba(52, 76, 103, 0.5)',
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(51, 51, 51, 0.6)',
+    borderColor: 'rgba(93, 123, 158, 0.4)',
   },
   lightCard: {
     backgroundColor: 'rgba(245, 245, 245, 0.7)',
@@ -820,11 +822,11 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(26, 26, 26, 0.7)',
+    backgroundColor: 'rgba(52, 76, 103, 0.5)',
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(51, 51, 51, 0.6)',
+    borderColor: 'rgba(93, 123, 158, 0.4)',
   },
   actionButtonText: {
     color: 'white',
@@ -846,13 +848,13 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   modalContent: {
-    backgroundColor: 'rgba(26, 26, 26, 1)',
+    backgroundColor: 'rgba(52, 76, 103, 0.95)',
     borderRadius: 16,
     padding: 20,
     width: width - 40,
     maxHeight: '70%',
     borderWidth: 1,
-    borderColor: 'rgba(51, 51, 51, 0.7)',
+    borderColor: 'rgba(93, 123, 158, 0.6)',
   },
   lightModalContent: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -873,7 +875,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginBottom: 20,
-    backgroundColor: '#0f0f0f',
+    backgroundColor: 'rgba(36, 60, 85, 0.8)',
     borderRadius: 12,
     padding: 16,
   },
@@ -940,11 +942,11 @@ const styles = StyleSheet.create({
   // Gita Progress Styles
   gitaSection: {
     marginBottom: 30,
-    backgroundColor: 'rgba(26, 26, 26, 0.6)',
+    backgroundColor: 'rgba(52, 76, 103, 0.4)',
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(51, 51, 51, 0.6)',
+    borderColor: 'rgba(93, 123, 158, 0.3)',
   },
   lightGitaSection: {
     backgroundColor: 'rgba(248, 248, 248, 0.6)',
@@ -992,7 +994,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 8,
-    backgroundColor: '#333',
+    backgroundColor: 'rgba(36, 60, 85, 0.6)',
     borderRadius: 4,
     marginBottom: 8,
     overflow: 'hidden',
@@ -1032,9 +1034,11 @@ const styles = StyleSheet.create({
   milestoneIcon: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1, 
+
   },
   milestoneIconText: {
     fontSize: 16,
@@ -1056,11 +1060,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#0f0f0f',
+    backgroundColor: 'rgba(36, 60, 85, 0.8)',
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#444',
+    borderColor: 'rgba(93, 123, 158, 0.5)',
   },
   lightGitaActionButton: {
     backgroundColor: '#f0f0f0',

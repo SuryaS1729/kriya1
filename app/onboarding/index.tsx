@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     fontSize: 80,
     color: 'white',
     textAlign: 'center',
-    fontFamily: 'Instrument',
+    fontFamily: 'Instrument Serif',
     fontStyle: 'italic',
     letterSpacing: 2,
     fontWeight: '200',
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     fontWeight: '300',
     marginTop: 10,
-    fontFamily: 'SourceSerifPro',
+    fontFamily: 'Source Serif Pro',
   },
   subtitleContainer: {
     padding: 10,
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 1,
     fontWeight: '300',
-    fontFamily: 'SpaceMono',
+    fontFamily: 'Space Mono',
 
   },
   bottomCard: {
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     letterSpacing: 3,
     marginRight: 12,
-    fontFamily:"SourceSerifPro"
+    fontFamily:"Source Serif Pro"
   },
   buttonArrow: {
     color: 'white',
@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 20,
-    fontFamily: 'Instrument',
+    fontFamily: 'Instrument Serif',
   },
   stepDescription: {
     fontSize: 16,
@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 40,
-    fontFamily: 'SourceSerifPro',
+    fontFamily: 'Source Serif Pro',
   },
   progressContainer: {
     flexDirection: 'row',
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
   skipText: {
     color: 'rgba(255, 255, 255, 0.7)',
     fontSize: 16,
-    fontFamily: 'SpaceMono',
+    fontFamily: 'Space Mono',
   },
   nextButton: {
     flexDirection: 'row',
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     marginRight: 8,
-    fontFamily: 'SpaceMono',
+    fontFamily: 'Space Mono',
   },
   // Add loading screen styles
   loadingContainer: {
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     marginTop: 24,
     textAlign: 'center',
-    fontFamily: 'SourceSerifPro',
+    fontFamily: 'Source Serif Pro',
     fontStyle: 'italic',
   },
 });

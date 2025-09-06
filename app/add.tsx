@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     flex: 1, 
     fontSize: 18, 
     color: '#111827',
-    fontFamily:"SourceSerifPro",
+    fontFamily:"Source Serif Pro",
     fontWeight:"300",
     fontStyle:"normal" },
   done: { opacity: 0.6, textDecorationLine: 'line-through',    color: '#94a3b8', 
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     textAlign: 'center',
     lineHeight: 22,
-    fontFamily: "SourceSerifPro",
+    fontFamily: "Source Serif Pro",
     fontWeight:"300",
 
   },

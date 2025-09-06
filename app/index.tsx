@@ -232,6 +232,11 @@ export default function Home() {
         console.log('🧹 Home screen focused - refreshing state');
         refresh(); // This will reload tasks from SQLite
         
+        // // Clear the navigation stack
+        if (router.canGoBack()) {
+          router.dismissAll();
+        }
+        
         // Reset animation values to prevent accumulation
         fade.value = 0;
         fade.value = withSpring(1);
@@ -644,7 +649,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   meta: { 
-    fontFamily:"SourceSerifPro",
+    fontFamily:"Source Serif Pro",
     fontSize: 23,
     fontStyle: 'italic',
     color: '#545454',
@@ -751,7 +756,7 @@ const styles = StyleSheet.create({
     fontSize: 18, 
     color: '#000000ff',
     marginLeft: 12,
-    fontFamily:"SourceSerifPro",
+    fontFamily:"Source Serif Pro",
     fontWeight:"300",
     fontStyle:"normal"
   },
@@ -804,7 +809,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontSize: 15,
     color: '#64748b',
-    fontFamily:"SpaceMono",
+    fontFamily:"Space Mono",
     fontWeight:"400",
     fontStyle:"normal"
   },
@@ -837,7 +842,7 @@ const styles = StyleSheet.create({
     color: '#94a3b8',
     textAlign: 'center',
     lineHeight: 22,
-    fontFamily: "SourceSerifPro",
+    fontFamily: "Source Serif Pro",
     fontWeight:"300",
 
   },

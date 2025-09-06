@@ -38,7 +38,7 @@
                 ]
               },
               {
-                "fontFamily": "SourceSerifPro",
+                "fontFamily": "Source Serif Pro",
                 "fontDefinitions": [
                   {
                     "path": "./assets/fonts/SourceSerifPro-Light.otf",
@@ -68,7 +68,7 @@
                 ]
               },
               {
-                "fontFamily": "SpaceMono",
+                "fontFamily": "Space Mono",
                 "fontDefinitions": [
                   {
                     "path": "./assets/fonts/spacemono_regular.ttf",
@@ -98,7 +98,7 @@
                 ]
               },
               {
-                "fontFamily": "Instrument",
+                "fontFamily": "Instrument Serif",
                 "fontDefinitions": [
                   {
                     "path": "./assets/fonts/InstrumentSerif-Regular.ttf",

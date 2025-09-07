@@ -165,10 +165,11 @@ async function scheduleTaskReminder(hour: number, minute: number) {
       body: "Take a moment to write down your tasks before your day begins. Set your intentions mindfully.",
       data: { type: 'task_reminder' },
       sound: true,
-        ...(Platform.OS === 'android' && {
-        icon: './assets/icons/icon.png', // or use your app icon path
-        color: '#7eddd3ff', // Accent color for the icon
+       ...(Platform.OS === 'android' && {
+        icon: './assets/icons/icon.png',
+        color: '#ff9500', // Use your app's orange color
       }),
+  
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,

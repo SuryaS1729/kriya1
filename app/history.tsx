@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View, Pressable, FlatList, ScrollView, Alert, Dimensions, Modal } from 'react-native';
+import { StyleSheet, Text, View, Pressable, FlatList, ScrollView, Alert, Dimensions, Modal, Platform } from 'react-native';
 import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,6 +17,8 @@ import { Progress, ProgressFilledTrack } from '@/components/ui/progress';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 
+import * as Notifications from 'expo-notifications';
+import { SchedulableTriggerInputTypes } from 'expo-notifications';
 
 
 const { width } = Dimensions.get('window');
@@ -614,6 +616,58 @@ function NotificationSettings() {
 }
 
 
+
+// Add this test function before the QuickActions component
+function TestNotificationButton() {
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  
+  const triggerTestNotification = async () => {
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Test Notification",
+          body: "This is a test notification from Kriya. Your notification setup is working!",
+          data: { type: 'test_notification' },
+          sound: true,
+          ...(Platform.OS === 'android' && {
+            icon: './assets/icons/icon.png',
+            color: '#ff9500',
+          }),
+        },
+        trigger: {
+          type: SchedulableTriggerInputTypes.TIME_INTERVAL,
+          seconds: 1, // Trigger after 2 seconds
+        },
+      });
+      
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      console.log('✅ Test notification scheduled');
+    } catch (error) {
+      console.error('❌ Failed to schedule test notification:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  };
+
+  return (
+    <View style={styles.testSection}>
+      <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Test Notifications</Text>
+      <Pressable 
+        style={[styles.testButton, !isDarkMode && styles.lightTestButton]}
+        onPress={triggerTestNotification}
+      >
+        <View style={styles.testButtonContent}>
+          <Feather name="bell" size={20} color="#fff" />
+          <Text style={styles.testButtonText}>Test Notification</Text>
+        </View>
+        <Text style={[styles.testButtonDesc, !isDarkMode && styles.lightSubText]}>
+          Tap to send a test notification in 2 seconds
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
+
 // Quick Actions Component
 function QuickActions() {
   const isDarkMode = useKriya(s => s.isDarkMode);
@@ -896,6 +950,10 @@ export default function History() {
           <WeeklySummary />
              {/* ADD: Notification Settings - Add this here */}
           <NotificationSettings />
+
+            {/* Test Notification Button - Add this here */}
+          <TestNotificationButton />
+
           {/* Quick Actions */}
           <QuickActions />
                     <Footer />
@@ -1733,5 +1791,35 @@ const styles = StyleSheet.create({
   footerCopyrightText: {
     color: '#555',
     fontSize: 10,
+  },
+   testSection: {
+    marginBottom: 30,
+  },
+  testButton: {
+    backgroundColor: 'rgba(52, 76, 103, 0.5)',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(93, 123, 158, 0.4)',
+  },
+  lightTestButton: {
+    backgroundColor: 'rgba(245, 245, 245, 0.7)',
+    borderColor: 'rgba(224, 224, 224, 0.6)',
+  },
+  testButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
+  },
+  testButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  testButtonDesc: {
+    color: '#888',
+    fontSize: 12,
+    fontStyle: 'italic',
   },
 });

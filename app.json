@@ -18,6 +18,16 @@
           "imageWidth": 200
         }
       ],
+            [
+        "expo-notifications",
+        {
+          "icon": "./assets/icons/icon.png",
+          "color": "#ff9500",
+          "defaultChannel": "default",
+     
+          "enableBackgroundRemoteNotifications": false
+        }
+      ],
 
 
 

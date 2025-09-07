@@ -206,6 +206,17 @@ export default function Onboarding() {
   const loadingOpacity = useSharedValue(0);
   const loadingScale = useSharedValue(0.8);
 
+    // NEW: Add loading text state and animation
+  const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+  const loadingTextOpacity = useSharedValue(0);
+  
+  // NEW: Array of loading texts
+  const loadingTexts = [
+    "Preparing your journey...",
+    "Krishna is with you...",
+    "Your journey begins now...",
+  ];
+
   // Start icon animation when component mounts
   useEffect(() => {
     iconTranslateX.value = withRepeat(
@@ -217,6 +228,33 @@ export default function Onboarding() {
       false
     );
   }, []);
+
+   const startLoadingTextCycle = () => {
+    let currentIndex = 0;
+    
+    // Initial text fade in
+    loadingTextOpacity.value = withTiming(1, { duration: 600 });
+    
+    const cycleText = () => {
+      // Fade out current text
+      loadingTextOpacity.value = withTiming(0, { duration: 400 });
+      
+      setTimeout(() => {
+        // Update text and fade in
+        currentIndex = (currentIndex + 1) % loadingTexts.length;
+        setLoadingTextIndex(currentIndex);
+        loadingTextOpacity.value = withTiming(1, { duration: 400 });
+        
+        // Continue cycling unless we're on the last text and it's been shown
+        if (currentIndex !== loadingTexts.length - 1) {
+          setTimeout(cycleText, 3500); // Wait 2 seconds before next cycle
+        }
+      }, 400);
+    };
+    
+    // Start cycling after initial display
+    setTimeout(cycleText, 2000);
+  };
 
   const animateToOnboarding = () => {
     titleTranslateY.value = withTiming(-200, { duration: 800 });
@@ -258,6 +296,8 @@ export default function Onboarding() {
       console.log('🎯 Completing onboarding...');
       
       setIsLoading(true);
+            setLoadingTextIndex(0); // Reset to first text
+
       
       stepOpacity.value = withTiming(0, { duration: 500 });
       navigationOpacity.value = withTiming(0, { duration: 500 });
@@ -265,6 +305,9 @@ export default function Onboarding() {
       setTimeout(() => {
         loadingOpacity.value = withTiming(1, { duration: 600 });
         loadingScale.value = withTiming(1, { duration: 600 });
+
+                startLoadingTextCycle();
+
         
         setTimeout(() => {
           if (completeOnboarding) {
@@ -276,7 +319,7 @@ export default function Onboarding() {
           setTimeout(() => {
             router.replace('/');
           }, 800);
-        }, 100000);
+        }, 11000);
       }, 500);
     }
   };
@@ -285,6 +328,8 @@ export default function Onboarding() {
     console.log('🎯 Skipping onboarding...');
     
     setIsLoading(true);
+        setLoadingTextIndex(0); // Reset to first text
+
     
     stepOpacity.value = withTiming(0, { duration: 500 });
     navigationOpacity.value = withTiming(0, { duration: 500 });
@@ -292,6 +337,9 @@ export default function Onboarding() {
     setTimeout(() => {
       loadingOpacity.value = withTiming(1, { duration: 600 });
       loadingScale.value = withTiming(1, { duration: 600 });
+
+            startLoadingTextCycle();
+
       
       setTimeout(() => {
         if (completeOnboarding) {
@@ -303,7 +351,7 @@ export default function Onboarding() {
         setTimeout(() => {
           router.replace('/');
         }, 800);
-      }, 2000);
+      }, 11000);
     }, 500);
   };
 
@@ -338,6 +386,10 @@ export default function Onboarding() {
   const animatedLoadingStyle = useAnimatedStyle(() => ({
     opacity: loadingOpacity.value,
     transform: [{ scale: loadingScale.value }],
+  }));
+    // NEW: Animated style for loading text
+  const animatedLoadingTextStyle = useAnimatedStyle(() => ({
+    opacity: loadingTextOpacity.value,
   }));
 
   // UPDATED: Check if current step is notification slide
@@ -421,16 +473,19 @@ export default function Onboarding() {
           {isLoading && (
             <Animated.View style={[styles.loadingContainer, animatedLoadingStyle]}>
                <Image 
-      source={require('../../assets/images/krishnaMain.jpg')} // Update path to your image
-      style={styles.gitaImage}
-      resizeMode="contain"
-    />
-    <View style={{marginTop:40, marginBottom:20}}>
-      <Spinner size="large" color="white" />
-    </View>
+                      source={require('../../assets/images/krishnaMain.jpg')} // Update path to your image
+                      style={styles.gitaImage}
+                      resizeMode="contain"
+               />
 
-    <Text style={styles.loadingText}>Preparing your journey...</Text>
-  </Animated.View>
+
+              <View style={{marginTop:40, marginBottom:20}}><Spinner size="large" color='#0ccebe5e' /></View>
+
+<Animated.Text style={[styles.loadingText, animatedLoadingTextStyle]}>
+            {loadingTexts[loadingTextIndex]}
+          </Animated.Text>
+
+        </Animated.View>
 )}
 </View>
 
@@ -594,12 +649,13 @@ fontFamily: 'Source Serif Pro',
     marginBottom: 30,
   },
   stepTitle: {
-    fontSize: 20,
+    fontSize: 21,
     color: 'white',
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 20,
     fontFamily: 'Instrument Serif',
+    letterSpacing: 1,
   },
   stepDescription: {
     fontSize: 16,
@@ -742,7 +798,7 @@ fontFamily: 'Source Serif Pro',
     gitaImage: {
     width: SCREEN_WIDTH * 1, // 100% of screen width for horizontal image
     height: SCREEN_WIDTH * 1 * 0.6, // Maintain aspect ratio (assuming 5:3 ratio)
-    marginBottom: 40,
+    marginBottom: 20,
     borderRadius: 12,
     opacity: 0.9,
   },

@@ -529,6 +529,96 @@ function GitaProgress() {
   );
 }
 
+function Footer() {
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  
+  const openLink = (url: string) => {
+    // You'll need to import Linking from react-native and handle this
+    console.log('Opening:', url);
+  };
+  
+  return (
+    <View style={[styles.footerContainer, !isDarkMode && styles.lightFooterContainer]}>
+      {/* App Branding */}
+      <View style={styles.footerBranding}>
+        <Text style={[styles.footerAppName, !isDarkMode && styles.lightText]}>kriya</Text>
+        <View style={styles.footerTagline}>
+          <Text style={[styles.footerMadeIn, !isDarkMode && styles.lightSubText]}>Made with 🧡 in India</Text>
+          <Text style={[styles.footerInspiration, !isDarkMode && styles.lightSubText]}>
+            Inspired by the timeless wisdom of the Bhagavad Gita
+          </Text>
+        </View>
+      </View>
+      
+      {/* Social Links */}
+      <View style={styles.footerSocials}>
+        <Text style={[styles.footerSocialTitle, !isDarkMode && styles.lightSubText]}>Connect</Text>
+        <View style={styles.socialButtons}>
+          <Pressable 
+            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
+            onPress={() => openLink('https://twitter.com/kriyaapp')}
+          >
+            <Feather name="twitter" size={18} color={isDarkMode ? "#1da1f2" : "#1da1f2"} />
+          </Pressable>
+          
+          <Pressable 
+            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
+            onPress={() => openLink('https://github.com/kriyaapp')}
+          >
+            <Feather name="github" size={18} color={isDarkMode ? "#fff" : "#000"} />
+          </Pressable>
+          
+          <Pressable 
+            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
+            onPress={() => openLink('mailto:hello@kriyaapp.com')}
+          >
+            <Feather name="mail" size={18} color={isDarkMode ? "#ff6b6b" : "#ff6b6b"} />
+          </Pressable>
+          
+          <Pressable 
+            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
+            onPress={() => openLink('https://instagram.com/kriyaapp')}
+          >
+            <Feather name="instagram" size={18} color={isDarkMode ? "#e4405f" : "#e4405f"} />
+          </Pressable>
+        </View>
+      </View>
+      
+      {/* App Info */}
+      <View style={styles.footerInfo}>
+        <Text style={[styles.footerVersion, !isDarkMode && styles.lightSubText]}>Version 1.0.0</Text>
+        <View style={styles.footerLinks}>
+          <Pressable onPress={() => openLink('https://kriyaapp.com/privacy')}>
+            <Text style={[styles.footerLink, !isDarkMode && styles.lightFooterLink]}>Privacy Policy</Text>
+          </Pressable>
+          <Text style={[styles.footerDivider, !isDarkMode && styles.lightSubText]}>•</Text>
+          <Pressable onPress={() => openLink('https://kriyaapp.com/terms')}>
+            <Text style={[styles.footerLink, !isDarkMode && styles.lightFooterLink]}>Terms of Service</Text>
+          </Pressable>
+        </View>
+      </View>
+      
+      {/* Quote */}
+      <View style={styles.footerQuote}>
+        <Text style={[styles.footerQuoteText, !isDarkMode && styles.lightSubText]}>
+          "कर्मण्येवाधिकारस्ते मा फलेषु कदाचन"
+        </Text>
+        <Text style={[styles.footerQuoteTranslation, !isDarkMode && styles.lightSubText]}>
+          You have the right to perform actions, but never to the fruits of action
+        </Text>
+      </View>
+      
+      {/* Copyright */}
+      <View style={styles.footerCopyright}>
+        <Text style={[styles.footerCopyrightText, !isDarkMode && styles.lightSubText]}>
+          © 2024 Kriya. No rights reserved.
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+
 export default function History() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const toggleDarkMode = useKriya(s => s.toggleDarkMode);
@@ -577,6 +667,8 @@ export default function History() {
           
           {/* Quick Actions */}
           <QuickActions />
+                    <Footer />
+
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -1074,5 +1166,131 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '500',
+  },
+    footerContainer: {
+    marginTop: 40,
+    marginBottom: 20,
+    paddingTop: 30,
+    paddingHorizontal: 4,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(93, 123, 158, 0.3)',
+  },
+  lightFooterContainer: {
+    borderTopColor: 'rgba(224, 224, 224, 0.6)',
+  },
+  footerBranding: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  footerAppName: {
+    color: '#fff',
+    fontSize: 28,
+
+    marginBottom: 8,
+     fontFamily: 'Instrument Serif',
+    fontStyle: 'italic',
+    letterSpacing: 0,
+    fontWeight: '200',
+  },
+  footerTagline: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  footerMadeIn: {
+    color: '#888',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  footerInspiration: {
+    color: '#666',
+    fontSize: 12,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    fontFamily: 'Source Serif Pro',
+  },
+  footerSocials: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  footerSocialTitle: {
+    color: '#888',
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 12,
+  },
+  socialButtons: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  socialButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(52, 76, 103, 0.5)',
+    borderWidth: 1,
+    borderColor: 'rgba(93, 123, 158, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  lightSocialButton: {
+    backgroundColor: 'rgba(245, 245, 245, 0.7)',
+    borderColor: 'rgba(224, 224, 224, 0.6)',
+  },
+  footerInfo: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  footerVersion: {
+    color: '#666',
+    fontSize: 11,
+    marginBottom: 8,
+  },
+  footerLinks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  footerLink: {
+    color: '#8ba5e1',
+    fontSize: 12,
+    textDecorationLine: 'underline',
+  },
+  lightFooterLink: {
+    color: '#5a7a9a',
+  },
+  footerDivider: {
+    color: '#666',
+    fontSize: 12,
+  },
+  footerQuote: {
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  footerQuoteText: {
+    color: '#888',
+    fontSize: 14,
+    textAlign: 'center',
+    fontFamily: 'Kalam',
+    marginBottom: 4,
+  },
+  footerQuoteTranslation: {
+    color: '#666',
+    fontSize: 11,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    fontFamily: 'Source Serif Pro',
+  },
+  footerCopyright: {
+    alignItems: 'center',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(93, 123, 158, 0.2)',
+  },
+  footerCopyrightText: {
+    color: '#555',
+    fontSize: 10,
   },
 });

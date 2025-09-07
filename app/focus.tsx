@@ -237,7 +237,7 @@ export default function FocusMode() {
       color: themeColors.text,
       textAlign: 'center',
       letterSpacing: 0.5,
-      fontFamily: "Instrument",
+      fontFamily: "Instrument Serif",
       fontStyle: "italic",
     },
     timerText: {

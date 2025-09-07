@@ -23,6 +23,8 @@ import Animated, {
 
 } from 'react-native-reanimated';
 
+
+
 import { Feather } from '@expo/vector-icons';
 import { Spinner } from '@/components/ui/spinner'; // Add this import
 
@@ -60,6 +62,9 @@ export default function Onboarding() {
   const [currentStep, setCurrentStep] = useState(-1);
   const [isLoading, setIsLoading] = useState(false);
 
+
+
+
   // Separate animation values for step content only
   const stepOpacity = useSharedValue(0);
   const navigationOpacity = useSharedValue(0); // Only for initial show, not step transitions
@@ -93,6 +98,7 @@ export default function Onboarding() {
       -1,
       false
     );
+
   }, []);
 
   const animateToOnboarding = () => {
@@ -244,6 +250,8 @@ export default function Onboarding() {
           <Animated.View style={[styles.titleContainer, animatedTitleStyle]}>
             <Text style={styles.title}>kriya</Text>
             <Text style={styles.tagline}>ancient wisdom, modern rhythm</Text>
+
+
           </Animated.View>
           
           {currentStep === -1 && !isLoading && (
@@ -333,7 +341,7 @@ export default function Onboarding() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#023747e0',
+    backgroundColor: '#0a6b7add',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -387,6 +395,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Space Mono',
 
   },
+  
   bottomCard: {
     position: 'absolute',
     bottom: 0,

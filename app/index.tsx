@@ -225,6 +225,9 @@ export default function Home() {
   // Fade animation for shloka card
   const fade = useSharedValue(0);
 
+   // Add scale animation for toggle button
+  const toggleScale = useSharedValue(1);
+
   // Clear cache and refresh when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
@@ -260,8 +263,28 @@ export default function Home() {
   }));
 
   const handleTogglePress = () => {
+     // Subtle scale animation
+    toggleScale.value = withSpring(0.95, {
+      stiffness: 400,
+      damping: 20,
+      mass: 0.5,
+    });
+    
+    // Scale back up after a short delay
+    setTimeout(() => {
+      toggleScale.value = withSpring(1, {
+        stiffness: 300,
+        damping: 25,
+        mass: 0.8,
+      });
+    }, 100);
     setShowTranslation(!showTranslation);
   };
+
+  // Add animated style for toggle button
+  const toggleButtonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: toggleScale.value }],
+  }));
 
   // Optimized sorting - avoid double reverse
    const sortedTasks = useMemo(() => {
@@ -476,7 +499,7 @@ const onFocus = React.useCallback((task: Task) => {
 
   return (
     <LinearGradient
-      colors={isDarkMode ? ['#344c67ff', '#000000ff'] : ['#ffffffd2', '#8ba5e1ff']}
+      colors={isDarkMode ? ['#2e455fff', '#000000ff'] : ['#ffffffd2', '#8ba0d3ff']}
       style={[styles.container]}
     >
       <StatusBar style={isDarkMode ? "light" : "dark"} />
@@ -532,13 +555,14 @@ const onFocus = React.useCallback((task: Task) => {
           <Pressable onPress={handleTogglePress}>
             <Animated.View style={[
               styles.toggleButton,
-              { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' }
+              { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
+              toggleButtonStyle
             ]}>
               <Text style={[
                 styles.toggleText,
                 { color: isDarkMode ? '#f9fafb' : '#000000ff' }
               ]}>
-                {showTranslation ? 'View Sanskrit' : 'View Translation'}
+                {showTranslation ? 'View in Sanskrit' : 'View in English'}
               </Text>
             </Animated.View>
           </Pressable>

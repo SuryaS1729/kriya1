@@ -7,6 +7,7 @@ import {
   Pressable,
   StatusBar,
   ScrollView,
+  Image
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -86,12 +87,12 @@ const NotificationSlide = ({ onNext }: { onNext: () => void }) => {
   return (
     <View style={styles.notificationSlide}>
       <View style={styles.notificationContent}>
-        <AntDesign name="clockcircle" size={60} color="white" style={styles.stepIcon} />
+        <Feather name="bell" size={60} color="white" style={styles.stepIcon} />
         
-        <Text style={styles.stepTitle}>⏰ When do you start your day?</Text>
+        <Text style={styles.stepTitle}> When do you start your day?</Text>
         
         <Text style={styles.stepDescription}>
-          Kriya expects you to write down tasks before you begin your day. We'll send you a gentle reminder 10 minutes before your chosen time.
+          Kriya expects you to write down tasks just before you begin your day. We'll send you a gentle reminder 10 minutes before your chosen time.
         </Text>
 
         {/* Time Picker */}
@@ -275,7 +276,7 @@ export default function Onboarding() {
           setTimeout(() => {
             router.replace('/');
           }, 800);
-        }, 2000);
+        }, 100000);
       }, 500);
     }
   };
@@ -340,7 +341,7 @@ export default function Onboarding() {
   }));
 
   // UPDATED: Check if current step is notification slide
-  const isNotificationSlide = currentStep === onboardingSteps.length;
+  const isNotificationSlide = currentStep === 3;
 
   return (
     <View style={styles.container}>
@@ -365,25 +366,43 @@ export default function Onboarding() {
             </Animated.View>
           )}
 
-          {/* Onboarding Steps */}
+        {/* Onboarding Steps */}
           {currentStep >= 0 && !isLoading && (
             <Animated.View style={[styles.onboardingContainer, animatedStepStyle]}>
               {isNotificationSlide ? (
                 <NotificationSlide onNext={handleNext} />
               ) : (
                 <View style={styles.stepContent}>
-                  <AntDesign 
-                    name={onboardingSteps[currentStep].icon as any} 
-                    size={60} 
-                    color="white" 
-                    style={styles.stepIcon}
-                  />
-                  <Text style={styles.stepTitle}>{onboardingSteps[currentStep].title}</Text>
-                  <Text style={styles.stepDescription}>{onboardingSteps[currentStep].description}</Text>
+                  {/* UPDATED: Adjust the step index for content after notification slide */}
+                  {currentStep < 3 ? (
+                    // Steps 0, 1, 2 - show as normal
+                    <>
+                      <AntDesign 
+                        name={onboardingSteps[currentStep].icon as any} 
+                        size={60} 
+                        color="white" 
+                        style={styles.stepIcon}
+                      />
+                      <Text style={styles.stepTitle}>{onboardingSteps[currentStep].title}</Text>
+                      <Text style={styles.stepDescription}>{onboardingSteps[currentStep].description}</Text>
+                    </>
+                  ) : (
+                    // Step 4 - show the privacy slide (index 3 in array)
+                    <>
+                      <AntDesign 
+                        name={onboardingSteps[3].icon as any} 
+                        size={60} 
+                        color="white" 
+                        style={styles.stepIcon}
+                      />
+                      <Text style={styles.stepTitle}>{onboardingSteps[3].title}</Text>
+                      <Text style={styles.stepDescription}>{onboardingSteps[3].description}</Text>
+                    </>
+                  )}
                   
-                  {/* Progress dots */}
+                  {/* Progress dots - UPDATED: Show 5 dots total */}
                   <View style={styles.progressContainer}>
-                    {[...onboardingSteps, { title: 'Notifications' }].map((_, index) => (
+                    {[0, 1, 2, 3, 4].map((index) => (
                       <View 
                         key={index}
                         style={[
@@ -401,11 +420,19 @@ export default function Onboarding() {
           {/* Loading Screen */}
           {isLoading && (
             <Animated.View style={[styles.loadingContainer, animatedLoadingStyle]}>
-              <Spinner size="large" color="white" />
-              <Text style={styles.loadingText}>Preparing your journey...</Text>
-            </Animated.View>
-          )}
-        </View>
+               <Image 
+      source={require('../../assets/images/krishnaMain.jpg')} // Update path to your image
+      style={styles.gitaImage}
+      resizeMode="contain"
+    />
+    <View style={{marginTop:40, marginBottom:20}}>
+      <Spinner size="large" color="white" />
+    </View>
+
+    <Text style={styles.loadingText}>Preparing your journey...</Text>
+  </Animated.View>
+)}
+</View>
 
         {/* Bottom modal card */}
         {currentStep === -1 && !isLoading && (
@@ -420,7 +447,9 @@ export default function Onboarding() {
               </Animated.View>
               
               <Pressable onPress={handleGetStarted} style={styles.actionButton}>
-                <Text style={styles.buttonText}> Step into Action</Text>
+                <Text style={styles.buttonText}> Begin the Journey</Text>
+                <Text style={{fontSize:20}}>🪷</Text>
+
               </Pressable>
             </View>
           </Animated.View>
@@ -435,7 +464,7 @@ export default function Onboarding() {
             
             <Pressable onPress={handleNext} style={styles.nextButton}>
               <Text style={styles.nextText}>
-                {currentStep === onboardingSteps.length - 1 ? 'Next' : 'Next'}
+                {currentStep === 4 ? 'Next' : 'Next'}
               </Text>
               <AntDesign name="arrowright" size={20} color="white" />
             </Pressable>
@@ -538,9 +567,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: '300',
-    letterSpacing: 3,
+letterSpacing: 1,
     marginRight: 12,
-    fontFamily:"Source Serif Pro"
+fontFamily: 'Source Serif Pro',
+
+
+
   },
   
   // Onboarding styles
@@ -562,7 +594,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   stepTitle: {
-    fontSize: 28,
+    fontSize: 20,
     color: 'white',
     fontWeight: '600',
     textAlign: 'center',
@@ -706,6 +738,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 8,
     marginVertical: 2,
+  },
+    gitaImage: {
+    width: SCREEN_WIDTH * 1, // 100% of screen width for horizontal image
+    height: SCREEN_WIDTH * 1 * 0.6, // Maintain aspect ratio (assuming 5:3 ratio)
+    marginBottom: 40,
+    borderRadius: 12,
+    opacity: 0.9,
   },
   selectedTimeOption: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',

@@ -15,6 +15,9 @@ import Animated, {
 import BlurBackground from '@/components/BlurBackground';
 import { Progress, ProgressFilledTrack } from '@/components/ui/progress';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
+
+
 
 const { width } = Dimensions.get('window');
 
@@ -384,6 +387,180 @@ function WeeklySummary() {
   );
 }
 
+// ADD this new component before the existing QuickActions component
+function NotificationSettings() {
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  const notificationsEnabled = useKriya(s => s.notificationsEnabled);
+  const reminderTime = useKriya(s => s.reminderTime);
+  const toggleNotifications = useKriya(s => s.toggleNotifications);
+  const setReminderTime = useKriya(s => s.setReminderTime);
+  
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [tempHour, setTempHour] = useState(reminderTime.hour);
+  const [tempMinute, setTempMinute] = useState(reminderTime.minute);
+
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const minutes = [0, 15, 30, 45];
+
+  const handleSaveTime = async () => {
+    await setReminderTime(tempHour, tempMinute);
+    setShowTimePicker(false);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  return (
+    <View style={[styles.section, !isDarkMode && styles.lightSection]}>
+      <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Notification Settings</Text>
+      
+      <View style={styles.notificationSettings}>
+        {/* Toggle Notifications */}
+        <Pressable 
+          style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            toggleNotifications();
+          }}
+        >
+          <View style={styles.settingInfo}>
+            <Text style={[styles.settingTitle, !isDarkMode && styles.lightText]}>
+              Daily Task Reminder
+            </Text>
+            <Text style={[styles.settingDescription, !isDarkMode && styles.lightSubText]}>
+              Get reminded to plan your day
+            </Text>
+          </View>
+          <View style={[
+            styles.toggle,
+            notificationsEnabled && styles.toggleActive,
+            notificationsEnabled && !isDarkMode && styles.lightToggleActive
+          ]}>
+            <View style={[
+              styles.toggleKnob,
+              notificationsEnabled && styles.toggleKnobActive
+            ]} />
+          </View>
+        </Pressable>
+
+        {/* Time Setting */}
+        {notificationsEnabled && (
+          <Pressable 
+            style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setShowTimePicker(true);
+            }}
+          >
+            <View style={styles.settingInfo}>
+              <Text style={[styles.settingTitle, !isDarkMode && styles.lightText]}>
+                Reminder Time
+              </Text>
+              <Text style={[styles.settingDescription, !isDarkMode && styles.lightSubText]}>
+                When you usually start your day
+              </Text>
+            </View>
+            <View style={styles.timeDisplay}>
+              <Text style={[styles.timeDisplayText, !isDarkMode && styles.lightText]}>
+                {reminderTime.hour.toString().padStart(2, '0')}:{reminderTime.minute.toString().padStart(2, '0')}
+              </Text>
+              <Feather name="chevron-right" size={16} color={isDarkMode ? '#9ca3af' : '#64748b'} />
+            </View>
+          </Pressable>
+        )}
+      </View>
+
+      {/* Time Picker Modal */}
+      {showTimePicker && (
+        <View style={styles.timePickerOverlay}>
+          <View style={[styles.timePickerModal, !isDarkMode && styles.lightTimePickerModal]}>
+            <Text style={[styles.timePickerTitle, !isDarkMode && styles.lightText]}>
+              Set Reminder Time
+            </Text>
+            
+            <View style={styles.timePickerContent}>
+              <View style={styles.timePickerRow}>
+                <View style={styles.timePickerSection}>
+                  <Text style={[styles.timePickerLabel, !isDarkMode && styles.lightSubText]}>Hour</Text>
+                  <ScrollView 
+                    style={styles.timePickerScroll}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {hours.map((hour) => (
+                      <Pressable
+                        key={hour}
+                        onPress={() => setTempHour(hour)}
+                        style={[
+                          styles.timePickerOption,
+                          tempHour === hour && styles.selectedTimePickerOption,
+                          tempHour === hour && !isDarkMode && styles.lightSelectedTimePickerOption
+                        ]}
+                      >
+                        <Text style={[
+                          styles.timePickerOptionText,
+                          !isDarkMode && styles.lightText,
+                          tempHour === hour && styles.selectedTimePickerOptionText
+                        ]}>
+                          {hour.toString().padStart(2, '0')}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                </View>
+
+                <Text style={[styles.timePickerSeparator, !isDarkMode && styles.lightText]}>:</Text>
+
+                <View style={styles.timePickerSection}>
+                  <Text style={[styles.timePickerLabel, !isDarkMode && styles.lightSubText]}>Minute</Text>
+                  <ScrollView 
+                    style={styles.timePickerScroll}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {minutes.map((minute) => (
+                      <Pressable
+                        key={minute}
+                        onPress={() => setTempMinute(minute)}
+                        style={[
+                          styles.timePickerOption,
+                          tempMinute === minute && styles.selectedTimePickerOption,
+                          tempMinute === minute && !isDarkMode && styles.lightSelectedTimePickerOption
+                        ]}
+                      >
+                        <Text style={[
+                          styles.timePickerOptionText,
+                          !isDarkMode && styles.lightText,
+                          tempMinute === minute && styles.selectedTimePickerOptionText
+                        ]}>
+                          {minute.toString().padStart(2, '0')}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.timePickerActions}>
+              <Pressable 
+                onPress={() => setShowTimePicker(false)}
+                style={[styles.timePickerButton, styles.timePickerCancelButton]}
+              >
+                <Text style={styles.timePickerCancelText}>Cancel</Text>
+              </Pressable>
+              
+              <Pressable 
+                onPress={handleSaveTime}
+                style={[styles.timePickerButton, styles.timePickerSaveButton, !isDarkMode && styles.lightTimePickerSaveButton]}
+              >
+                <Text style={styles.timePickerSaveText}>Save</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      )}
+    </View>
+  );
+}
+
+
 // Quick Actions Component
 function QuickActions() {
   const isDarkMode = useKriya(s => s.isDarkMode);
@@ -664,7 +841,8 @@ export default function History() {
           
           {/* Weekly Summary */}
           <WeeklySummary />
-          
+             {/* ADD: Notification Settings - Add this here */}
+          <NotificationSettings />
           {/* Quick Actions */}
           <QuickActions />
                     <Footer />
@@ -726,6 +904,189 @@ const styles = StyleSheet.create({
   monthNavigation: {
     flexDirection: 'row',
     gap: 12,
+  },
+    toggle: {
+    width: 44,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#374151',
+    padding: 2,
+    justifyContent: 'center',
+  },
+  toggleActive: {
+    backgroundColor: '#10b981',
+  },
+  lightToggleActive: {
+    backgroundColor: '#059669',
+  },
+  toggleKnob: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    transform: [{ translateX: 0 }],
+  },
+  toggleKnobActive: {
+    transform: [{ translateX: 20 }],
+  },
+  section: {
+    marginBottom: 30,
+  },
+  lightSection: {
+    // Light mode specific styles if needed
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  notificationSettings: {
+    gap: 8,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: 'rgba(52, 76, 103, 0.3)',
+    borderWidth: 1,
+    borderColor: 'rgba(93, 123, 158, 0.3)',
+  },
+  lightSettingRow: {
+    backgroundColor: 'rgba(248, 250, 252, 0.8)',
+    borderColor: 'rgba(226, 232, 240, 0.6)',
+  },
+  settingInfo: {
+    flex: 1,
+  },
+  settingTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 2,
+  },
+  settingDescription: {
+    fontSize: 12,
+    color: '#9ca3af',
+  },
+  timeDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  timeDisplayText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    fontFamily: 'Space Mono',
+  },
+  timePickerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  timePickerModal: {
+    backgroundColor: '#1f2937',
+    borderRadius: 16,
+    padding: 24,
+    width: '90%',
+    maxWidth: 320,
+  },
+  lightTimePickerModal: {
+    backgroundColor: '#fff',
+  },
+  timePickerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  timePickerContent: {
+    marginBottom: 24,
+  },
+  timePickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  timePickerSection: {
+    alignItems: 'center',
+  },
+  timePickerLabel: {
+    fontSize: 12,
+    color: '#9ca3af',
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  timePickerScroll: {
+    height: 100,
+    width: 60,
+  },
+  timePickerOption: {
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 6,
+    marginVertical: 1,
+  },
+  selectedTimePickerOption: {
+    backgroundColor: '#3b82f6',
+  },
+  lightSelectedTimePickerOption: {
+    backgroundColor: '#2563eb',
+  },
+  timePickerOptionText: {
+    fontSize: 16,
+    color: '#d1d5db',
+    fontFamily: 'Space Mono',
+  },
+  selectedTimePickerOptionText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  timePickerSeparator: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginHorizontal: 12,
+  },
+  timePickerActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  timePickerButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  timePickerCancelButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#4b5563',
+  },
+  timePickerSaveButton: {
+    backgroundColor: '#3b82f6',
+  },
+  lightTimePickerSaveButton: {
+    backgroundColor: '#2563eb',
+  },
+  timePickerCancelText: {
+    color: '#9ca3af',
+    fontWeight: '500',
+  },
+  timePickerSaveText: {
+    color: '#fff',
+    fontWeight: '600',
   },
   navButton: {
     padding: 8,

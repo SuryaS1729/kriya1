@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 import {
   getTasksForDay,
   getDistinctPastDays,
@@ -13,6 +17,16 @@ import { getShlokaAt, getTotalShlokas } from './shloka';
 import { ensureProgressForToday, countCompletedSince } from './progress';
 import { isDbReady } from './dbReady';
 import type { ShlokaRow } from './shloka';
+
+// Configure notification handler - Updated to match official docs
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 // Add this helper function
 function getDateKey(date: Date) {
@@ -32,7 +46,6 @@ export interface Bookmark {
 
 interface KriyaState {
   ready: boolean;
-
   tasksToday: Task[];
 
   // actions
@@ -76,6 +89,88 @@ interface KriyaState {
 
   // Add this new function
   getTotalCompletedTasks: () => number;
+
+  // Notification properties
+  notificationsEnabled: boolean;
+  reminderTime: { hour: number; minute: number };
+  notificationToken: string | null;
+
+  // Notification methods
+  setReminderTime: (hour: number, minute: number) => Promise<void>;
+  toggleNotifications: () => Promise<void>;
+  initializeNotifications: () => Promise<void>;
+}
+
+// Updated helper function for notifications - Following official docs exactly
+async function registerForPushNotificationsAsync() {
+
+
+  // Set up Android notification channel - Updated channel name
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('kriyaNotificationChannel', {
+      name: 'Kriya Daily Reminders',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+    });
+  }
+
+  if (Device.isDevice) {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    
+    if (finalStatus !== 'granted') {
+      console.log('Failed to get push token for push notification!');
+      return null;
+    }
+    
+      console.log('✅ Local notification permissions granted');
+    return 'local-notifications-enabled'; // Return a simple success indicator
+  } else {
+    console.log('Must use physical device for notifications');
+    return null;
+  }
+}
+
+// Updated scheduling function - Using proper trigger format
+async function scheduleTaskReminder(hour: number, minute: number) {
+  // Cancel existing reminders
+  await Notifications.cancelAllScheduledNotificationsAsync();
+  
+  // Calculate reminder time (10 minutes before)
+  let reminderHour = hour;
+  let reminderMinute = minute - 10;
+  
+  if (reminderMinute < 0) {
+    reminderMinute += 60;
+    reminderHour -= 1;
+  }
+  
+  if (reminderHour < 0) {
+    reminderHour += 24;
+  }
+  
+  // Schedule daily reminder using proper trigger format
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "🕉️ Time to Plan Your Day",
+      body: "Take a moment to write down your tasks before your day begins. Set your intentions mindfully.",
+      data: { type: 'task_reminder' },
+      sound: true,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour: reminderHour,
+      minute: reminderMinute,
+    },
+  });
+  
+  console.log(`✅ Daily reminder scheduled for ${reminderHour.toString().padStart(2, '0')}:${reminderMinute.toString().padStart(2, '0')}`);
 }
 
 export const useKriya = create<KriyaState>()(
@@ -87,6 +182,11 @@ export const useKriya = create<KriyaState>()(
       bookmarks: [],
       hasCompletedOnboarding: false,
       focusSessions: {},
+
+      // Default notification settings
+      notificationsEnabled: true,
+      reminderTime: { hour: 8, minute: 0 }, // 8:00 AM default
+      notificationToken: null,
 
       init: () => {
         if (!isDbReady()) {
@@ -274,6 +374,46 @@ export const useKriya = create<KriyaState>()(
           return 0;
         }
       },
+
+      // Notification methods - Updated implementation
+      setReminderTime: async (hour: number, minute: number) => {
+        set({ reminderTime: { hour, minute } });
+        
+        // Reschedule notification with new time
+        const state = get();
+        if (state.notificationsEnabled) {
+          await scheduleTaskReminder(hour, minute);
+        }
+      },
+
+      toggleNotifications: async () => {
+        const { notificationsEnabled } = get();
+        const newState = !notificationsEnabled;
+        
+        set({ notificationsEnabled: newState });
+        
+        if (newState) {
+          await get().initializeNotifications();
+        } else {
+          await Notifications.cancelAllScheduledNotificationsAsync();
+          console.log('🔕 All notifications cancelled');
+        }
+      },
+
+      initializeNotifications: async () => {
+        try {
+          console.log('🔔 Initializing notifications...');
+          const result = await registerForPushNotificationsAsync();
+          set({ notificationToken: result });
+          
+          const { reminderTime } = get();
+          await scheduleTaskReminder(reminderTime.hour, reminderTime.minute);
+          
+          console.log('✅ Local notifications initialized successfully');
+        } catch (error) {
+          console.error('❌ Failed to initialize notifications:', error);
+        }
+      },
     }),
     {
       name: 'kriya-storage',
@@ -282,7 +422,10 @@ export const useKriya = create<KriyaState>()(
         isDarkMode: state.isDarkMode,
         bookmarks: state.bookmarks,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
-        focusSessions: state.focusSessions, // Persist focus sessions
+        focusSessions: state.focusSessions,
+        notificationsEnabled: state.notificationsEnabled,
+        reminderTime: state.reminderTime,
+        // Don't persist notification token
       }),
     }
   )

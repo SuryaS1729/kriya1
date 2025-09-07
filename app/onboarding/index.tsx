@@ -6,10 +6,11 @@ import {
   Dimensions,
   Pressable,
   StatusBar,
-
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 
 import { useKriya } from '../../lib/store';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -20,13 +21,10 @@ import Animated, {
   withTiming, 
   withRepeat,
   withSequence,
-
 } from 'react-native-reanimated';
 
-
-
 import { Feather } from '@expo/vector-icons';
-import { Spinner } from '@/components/ui/spinner'; // Add this import
+import { Spinner } from '@/components/ui/spinner';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -54,6 +52,132 @@ const onboardingSteps = [
   }
 ];
 
+// NEW: Add the NotificationSlide component
+const NotificationSlide = ({ onNext }: { onNext: () => void }) => {
+  const [selectedHour, setSelectedHour] = useState(8);
+  const [selectedMinute, setSelectedMinute] = useState(0);
+  const setReminderTime = useKriya(s => s.setReminderTime);
+
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const minutes = [0, 15, 30, 45];
+
+  const handleContinue = async () => {
+    await setReminderTime(selectedHour, selectedMinute);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onNext();
+  };
+
+  const getReminderTime = () => {
+    let reminderHour = selectedHour;
+    let reminderMinute = selectedMinute - 10;
+    
+    if (reminderMinute < 0) {
+      reminderMinute += 60;
+      reminderHour -= 1;
+    }
+    
+    if (reminderHour < 0) {
+      reminderHour += 24;
+    }
+    
+    return `${reminderHour.toString().padStart(2, '0')}:${reminderMinute.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <View style={styles.notificationSlide}>
+      <View style={styles.notificationContent}>
+        <AntDesign name="clockcircle" size={60} color="white" style={styles.stepIcon} />
+        
+        <Text style={styles.stepTitle}>⏰ When do you start your day?</Text>
+        
+        <Text style={styles.stepDescription}>
+          Kriya expects you to write down tasks before you begin your day. We'll send you a gentle reminder 10 minutes before your chosen time.
+        </Text>
+
+        {/* Time Picker */}
+        <View style={styles.timePickerContainer}>
+          <Text style={styles.timePickerLabel}>I usually start my day at:</Text>
+          
+          <View style={styles.timePicker}>
+            <View style={styles.timeSection}>
+              <Text style={styles.timeLabel}>Hour</Text>
+              <ScrollView 
+                style={styles.timeScroll}
+                showsVerticalScrollIndicator={false}
+                snapToInterval={40}
+                decelerationRate="fast"
+              >
+                {hours.map((hour) => (
+                  <Pressable
+                    key={hour}
+                    onPress={() => {
+                      setSelectedHour(hour);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }}
+                    style={[
+                      styles.timeOption,
+                      selectedHour === hour && styles.selectedTimeOption
+                    ]}
+                  >
+                    <Text style={[
+                      styles.timeText,
+                      selectedHour === hour && styles.selectedTimeText
+                    ]}>
+                      {hour.toString().padStart(2, '0')}
+                    </Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+
+            <Text style={styles.timeSeparator}>:</Text>
+
+            <View style={styles.timeSection}>
+              <Text style={styles.timeLabel}>Minute</Text>
+              <ScrollView 
+                style={styles.timeScroll}
+                showsVerticalScrollIndicator={false}
+                snapToInterval={40}
+                decelerationRate="fast"
+              >
+                {minutes.map((minute) => (
+                  <Pressable
+                    key={minute}
+                    onPress={() => {
+                      setSelectedMinute(minute);
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    }}
+                    style={[
+                      styles.timeOption,
+                      selectedMinute === minute && styles.selectedTimeOption
+                    ]}
+                  >
+                    <Text style={[
+                      styles.timeText,
+                      selectedMinute === minute && styles.selectedTimeText
+                    ]}>
+                      {minute.toString().padStart(2, '0')}
+                    </Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+
+          <Text style={styles.reminderNote}>
+            📱 You'll receive a reminder at {getReminderTime()} (10 minutes before)
+          </Text>
+        </View>
+
+        <Pressable onPress={handleContinue} style={styles.notificationButton}>
+          <Text style={styles.notificationButtonText}>Set Reminder</Text>
+          <AntDesign name="arrowright" size={20} color="white" />
+        </Pressable>
+      </View>
+    </View>
+  );
+};
+
 export default function Onboarding() {
   console.log('🎯 Onboarding component rendering');
   const insets = useSafeAreaInsets();
@@ -62,12 +186,9 @@ export default function Onboarding() {
   const [currentStep, setCurrentStep] = useState(-1);
   const [isLoading, setIsLoading] = useState(false);
 
-
-
-
   // Separate animation values for step content only
   const stepOpacity = useSharedValue(0);
-  const navigationOpacity = useSharedValue(0); // Only for initial show, not step transitions
+  const navigationOpacity = useSharedValue(0);
   
   // Animation values
   const titleTranslateY = useSharedValue(0);
@@ -84,46 +205,35 @@ export default function Onboarding() {
   const loadingOpacity = useSharedValue(0);
   const loadingScale = useSharedValue(0.8);
 
-  // Video player setup
- 
-
   // Start icon animation when component mounts
   useEffect(() => {
-    // Smoother vertical animation for downward movement
     iconTranslateX.value = withRepeat(
       withSequence(
-        withTiming(4, { duration: 1200 }), // Move down slightly and slower
+        withTiming(4, { duration: 1200 }),
         withTiming(0, { duration: 1200 })
       ),
       -1,
       false
     );
-
   }, []);
 
   const animateToOnboarding = () => {
-    // Animate title up and fade out
     titleTranslateY.value = withTiming(-200, { duration: 800 });
     titleOpacity.value = withTiming(0, { duration: 600 });
     
-    // Animate subtitle out to the left and fade
     subtitleTranslateY.value = withTiming(-100, { duration: 700 });
     subtitleOpacity.value = withTiming(0, { duration: 500 });
     
-    // Animate card down and fade out
     cardTranslateY.value = withTiming(300, { duration: 800 });
     cardOpacity.value = withTiming(0, { duration: 600 });
     
-    // Show first onboarding step after the exit animations complete
     setTimeout(() => {
       setCurrentStep(0);
-      // Fade in step content
       stepOpacity.value = withTiming(1, { duration: 800 });
-      // Fade in navigation buttons slightly after content
       setTimeout(() => {
         navigationOpacity.value = withTiming(1, { duration: 600 });
       }, 300);
-    }, 800); // Wait for exit animations to complete
+    }, 800);
   };
 
   const handleGetStarted = () => {
@@ -132,22 +242,22 @@ export default function Onboarding() {
   };
 
   const handleNext = () => {
-    if (currentStep < onboardingSteps.length - 1) {
-      // Only fade out step content, NOT navigation
+    // UPDATED: Total steps now includes the notification slide
+    const totalSteps = onboardingSteps.length + 1; // +1 for notification slide
+    
+    if (currentStep < totalSteps - 1) {
       stepOpacity.value = withTiming(0, { duration: 300 });
       
       setTimeout(() => {
         setCurrentStep(currentStep + 1);
-        // Fade in new step content only
         stepOpacity.value = withTiming(1, { duration: 500 });
       }, 300);
     } else {
-      // Complete onboarding with loading transition
+      // Complete onboarding
       console.log('🎯 Completing onboarding...');
       
       setIsLoading(true);
       
-      // Fade out both step content AND navigation for final transition
       stepOpacity.value = withTiming(0, { duration: 500 });
       navigationOpacity.value = withTiming(0, { duration: 500 });
       
@@ -175,7 +285,6 @@ export default function Onboarding() {
     
     setIsLoading(true);
     
-    // Fade out both for skip
     stepOpacity.value = withTiming(0, { duration: 500 });
     navigationOpacity.value = withTiming(0, { duration: 500 });
     
@@ -217,41 +326,37 @@ export default function Onboarding() {
     opacity: stepOpacity.value,
   }));
 
-  // Update navigation style to only animate initial appearance
   const animatedNavigationStyle = useAnimatedStyle(() => ({
     opacity: navigationOpacity.value,
   }));
 
   const animatedIconStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: iconTranslateX.value }], // Change to translateY for vertical
+    transform: [{ translateY: iconTranslateX.value }],
   }));
 
-  // Add loading screen animated styles
   const animatedLoadingStyle = useAnimatedStyle(() => ({
     opacity: loadingOpacity.value,
     transform: [{ scale: loadingScale.value }],
   }));
 
+  // UPDATED: Check if current step is notification slide
+  const isNotificationSlide = currentStep === onboardingSteps.length;
+
   return (
     <View style={styles.container}>
       <StatusBar hidden={true} />
 
-      {/* Video Background */}
       <Animated.View style={[StyleSheet.absoluteFill]}>
         <BlurBackground />
       </Animated.View>
       
-      {/* Dark overlay for better text readability */}
       <View style={styles.overlay} />
       
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
-          {/* Main title - positioned in upper portion */}
           <Animated.View style={[styles.titleContainer, animatedTitleStyle]}>
             <Text style={styles.title}>kriya</Text>
             <Text style={styles.tagline}>ancient wisdom, modern rhythm</Text>
-
-
           </Animated.View>
           
           {currentStep === -1 && !isLoading && (
@@ -260,32 +365,36 @@ export default function Onboarding() {
             </Animated.View>
           )}
 
-          {/* Onboarding Steps - Only this animates between steps */}
+          {/* Onboarding Steps */}
           {currentStep >= 0 && !isLoading && (
             <Animated.View style={[styles.onboardingContainer, animatedStepStyle]}>
-              <View style={styles.stepContent}>
-                <AntDesign 
-                  name={onboardingSteps[currentStep].icon as any} 
-                  size={60} 
-                  color="white" 
-                  style={styles.stepIcon}
-                />
-                <Text style={styles.stepTitle}>{onboardingSteps[currentStep].title}</Text>
-                <Text style={styles.stepDescription}>{onboardingSteps[currentStep].description}</Text>
-                
-                {/* Progress dots */}
-                <View style={styles.progressContainer}>
-                  {onboardingSteps.map((_, index) => (
-                    <View 
-                      key={index}
-                      style={[
-                        styles.progressDot,
-                        index === currentStep && styles.progressDotActive
-                      ]}
-                    />
-                  ))}
+              {isNotificationSlide ? (
+                <NotificationSlide onNext={handleNext} />
+              ) : (
+                <View style={styles.stepContent}>
+                  <AntDesign 
+                    name={onboardingSteps[currentStep].icon as any} 
+                    size={60} 
+                    color="white" 
+                    style={styles.stepIcon}
+                  />
+                  <Text style={styles.stepTitle}>{onboardingSteps[currentStep].title}</Text>
+                  <Text style={styles.stepDescription}>{onboardingSteps[currentStep].description}</Text>
+                  
+                  {/* Progress dots */}
+                  <View style={styles.progressContainer}>
+                    {[...onboardingSteps, { title: 'Notifications' }].map((_, index) => (
+                      <View 
+                        key={index}
+                        style={[
+                          styles.progressDot,
+                          index === currentStep && styles.progressDotActive
+                        ]}
+                      />
+                    ))}
+                  </View>
                 </View>
-              </View>
+              )}
             </Animated.View>
           )}
 
@@ -298,11 +407,10 @@ export default function Onboarding() {
           )}
         </View>
 
-        {/* Bottom modal card - only show on initial screen */}
+        {/* Bottom modal card */}
         {currentStep === -1 && !isLoading && (
           <Animated.View style={[styles.bottomCard, animatedCardStyle]}>
             <View style={styles.cardContent}>
-              {/* Animated down arrow above the button */}
               <Animated.View style={[styles.arrowContainer, animatedIconStyle]}>
                 <Feather
                   name="chevrons-down"
@@ -318,8 +426,8 @@ export default function Onboarding() {
           </Animated.View>
         )}
 
-        {/* Navigation - Only animates on initial show and final hide */}
-        {currentStep >= 0 && !isLoading && (
+        {/* Navigation - UPDATED: Don't show for notification slide since it has its own button */}
+        {currentStep >= 0 && !isLoading && !isNotificationSlide && (
           <Animated.View style={[styles.navigationContainer, animatedNavigationStyle]}>
             <Pressable onPress={handleSkip} style={styles.skipButton}>
               <Text style={styles.skipText}>Skip</Text>
@@ -327,7 +435,7 @@ export default function Onboarding() {
             
             <Pressable onPress={handleNext} style={styles.nextButton}>
               <Text style={styles.nextText}>
-                {currentStep === onboardingSteps.length - 1 ? 'Get Started' : 'Next'}
+                {currentStep === onboardingSteps.length - 1 ? 'Next' : 'Next'}
               </Text>
               <AntDesign name="arrowright" size={20} color="white" />
             </Pressable>
@@ -357,7 +465,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   titleContainer: {
-    marginTop: -100, // Reduced from -160
+    marginTop: -100,
   },
   title: {
     fontSize: 80,
@@ -393,7 +501,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     fontWeight: '300',
     fontFamily: 'Space Mono',
-
   },
   
   bottomCard: {
@@ -435,18 +542,16 @@ const styles = StyleSheet.create({
     marginRight: 12,
     fontFamily:"Source Serif Pro"
   },
-  buttonArrow: {
-    color: 'white',
-  },
+  
   // Onboarding styles
   onboardingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginTop: -50, // Reduced from 50
+    marginTop: -50,
   },
-   arrowContainer: {
+  arrowContainer: {
     marginBottom: 0,
     alignItems: 'center',
   },
@@ -499,7 +604,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 40,
-    paddingBottom: 50, // Increased for better visibility
+    paddingBottom: 50,
     paddingTop: 20,
   },
   skipButton: {
@@ -528,7 +633,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
     fontFamily: 'Space Mono',
   },
-  // Add loading screen styles
+  
+  // Loading screen styles
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -543,5 +649,107 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Source Serif Pro',
     fontStyle: 'italic',
+  },
+
+  // NEW: Notification slide styles
+  notificationSlide: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  notificationContent: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  timePickerContainer: {
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 16,
+    padding: 20,
+    marginVertical: 32,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    width: '100%',
+  },
+  timePickerLabel: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 24,
+    fontFamily: 'Source Serif Pro',
+  },
+  timePicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  timeSection: {
+    alignItems: 'center',
+  },
+  timeLabel: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginBottom: 8,
+    fontWeight: '500',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  timeScroll: {
+    height: 120,
+    width: 60,
+  },
+  timeOption: {
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    marginVertical: 2,
+  },
+  selectedTimeOption: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  timeText: {
+    fontSize: 18,
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontWeight: '500',
+    fontFamily: 'Space Mono',
+  },
+  selectedTimeText: {
+    color: '#fff',
+    fontWeight: '700',
+  },
+  timeSeparator: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginHorizontal: 16,
+    fontFamily: 'Space Mono',
+  },
+  reminderNote: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.6)',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    fontFamily: 'Source Serif Pro',
+  },
+  notificationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    marginTop: 20,
+  },
+  notificationButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '500',
+    marginRight: 8,
+    fontFamily: 'Space Mono',
   },
 });

@@ -21,6 +21,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
 import { Spinner } from '@/components/ui/spinner';
 import { router } from 'expo-router';
+import * as Notifications from 'expo-notifications';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
@@ -219,6 +220,12 @@ export default function Home() {
   const refresh   = useKriya(s => s.refresh);
   const insets    = useSafeAreaInsets();
   const navigationRef = useRef(false);
+    const initializeNotifications = useKriya(s => s.initializeNotifications);
+  const notificationsEnabled = useKriya(s => s.notificationsEnabled);
+  
+ // ADD refs to track listeners
+  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
+  const responseListener = useRef<Notifications.EventSubscription | null>(null);
 
   const [hasCheckedOnboarding, setHasCheckedOnboarding] = useState(false);
 
@@ -467,6 +474,43 @@ const onFocus = React.useCallback((task: Task) => {
       addTask(task.title); // This will create a new task for today
     });
   }, [addTask]);
+
+  // ADD: Initialize notifications when app loads
+  useEffect(() => {
+    if (ready && hasCompletedOnboarding && notificationsEnabled) {
+      initializeNotifications();
+    }
+  }, [ready, hasCompletedOnboarding, notificationsEnabled, initializeNotifications]);
+
+  // ADD: Handle notifications
+  useEffect(() => {
+    // Listener for notifications received while app is open
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      console.log('📱 Notification received:', notification);
+    });
+
+    // Listener for when user taps notification
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log('📱 Notification response:', response);
+      const data = response.notification.request.content.data;
+      
+      if (data?.type === 'task_reminder') {
+        // Navigate to add task screen
+        router.push('/add');
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    });
+
+    // Cleanup listeners
+    return () => {
+      if (notificationListener.current) {
+        notificationListener.current.remove();
+      }
+      if (responseListener.current) {
+        responseListener.current.remove();
+      }
+    };
+  }, []);
 
   // Show loading while not ready
   if (!ready) {

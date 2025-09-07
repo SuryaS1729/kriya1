@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "kriya",
+    "name": "Kriya",
     "slug": "kriya",
     "scheme": "acme",
-    "icon": "./assets/icons/adaptive-icon1.png",
+    "icon": "./assets/icons/adaptive-icon4.png",
     "plugins": [
 
        [

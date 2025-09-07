@@ -112,6 +112,9 @@ async function registerForPushNotificationsAsync() {
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
+       showBadge: true,
+      enableLights: true,
+      enableVibrate: true,
     });
   }
 
@@ -162,6 +165,10 @@ async function scheduleTaskReminder(hour: number, minute: number) {
       body: "Take a moment to write down your tasks before your day begins. Set your intentions mindfully.",
       data: { type: 'task_reminder' },
       sound: true,
+        ...(Platform.OS === 'android' && {
+        icon: './assets/icons/icon.png', // or use your app icon path
+        color: '#7eddd3ff', // Accent color for the icon
+      }),
     },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.DAILY,

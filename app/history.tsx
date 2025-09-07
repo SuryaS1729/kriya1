@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View, Pressable, FlatList, ScrollView, Alert, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Pressable, FlatList, ScrollView, Alert, Dimensions, Modal } from 'react-native';
 import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -30,10 +30,11 @@ function getDateKey(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
-// Day Detail Modal Component
+
+// Updated DayDetailModal to always show content
 function DayDetailModal({ date, onClose }: { date: Date | null; onClose: () => void }) {
   const getForDay = useKriya(s => s.getTasksForDay);
-  const getFocusSessionsForDay = useKriya(s => s.getFocusSessionsForDay); // You'll need to add this to your store
+  const getFocusSessionsForDay = useKriya(s => s.getFocusSessionsForDay);
   const isDarkMode = useKriya(s => s.isDarkMode);
   
   if (!date) return null;
@@ -45,74 +46,115 @@ function DayDetailModal({ date, onClose }: { date: Date | null; onClose: () => v
   const focusSessions = getFocusSessionsForDay ? getFocusSessionsForDay(dayKey) : 0;
   const successRate = tasks.length > 0 ? Math.round((completed.length / tasks.length) * 100) : 0;
   
+  // Check if it's today or future date
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const selectedDay = new Date(date);
+  selectedDay.setHours(0, 0, 0, 0);
+  const isToday = selectedDay.getTime() === today.getTime();
+  const isFuture = selectedDay.getTime() > today.getTime();
+  
   return (
-    <View style={styles.modalOverlay}>
-      <View style={[styles.modalContent, !isDarkMode && styles.lightModalContent]}>
-        <View style={styles.modalHeader}>
-          <Text style={[styles.modalTitle, !isDarkMode && styles.lightText]}>
-            {date.toLocaleDateString(undefined, { 
-              weekday: 'long', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
-          </Text>
-          <Pressable onPress={onClose}>
-            <Feather name="x" size={24} color={isDarkMode ? "#fff" : "#000"} />
-          </Pressable>
+    <Modal
+      visible={!!date}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <Pressable style={styles.modalBackdrop} onPress={onClose} />
+        <View style={[styles.modalContent, !isDarkMode && styles.lightModalContent]}>
+          <View style={styles.modalHeader}>
+            <Text style={[styles.modalTitle, !isDarkMode && styles.lightText]}>
+              {date.toLocaleDateString(undefined, { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+              {isToday && ' (Today)'}
+              {isFuture && ' (Future)'}
+            </Text>
+            <Pressable onPress={onClose}>
+              <Feather name="x" size={24} color={isDarkMode ? "#fff" : "#000"} />
+            </Pressable>
+          </View>
+          
+          <View style={[styles.modalStats, !isDarkMode && styles.lightModalStats]}>
+            <View style={styles.modalStat}>
+              <Text style={styles.modalStatValue}>{successRate}%</Text>
+              <Text style={[styles.modalStatLabel, !isDarkMode && styles.lightSubText]}>Success Rate</Text>
+            </View>
+            <View style={styles.modalStat}>
+              <Text style={styles.modalStatValue}>{completed.length}</Text>
+              <Text style={[styles.modalStatLabel, !isDarkMode && styles.lightSubText]}>Completed</Text>
+            </View>
+            <View style={styles.modalStat}>
+              <Text style={styles.modalStatValue}>{focusSessions}</Text>
+              <Text style={[styles.modalStatLabel, !isDarkMode && styles.lightSubText]}>Focus Sessions</Text>
+            </View>
+          </View>
+          
+          {tasks.length > 0 ? (
+            <ScrollView style={styles.tasksList}>
+              {completed.length > 0 && (
+                <>
+                  <Text style={[styles.tasksSection, !isDarkMode && styles.lightText]}>Completed Tasks</Text>
+                  {completed.map((task, index) => (
+                    <View key={`completed-${index}`} style={[styles.taskItem, styles.completedTask]}>
+                      <Feather name="check-circle" size={16} color="#8ba5e1" />
+                      <Text style={[styles.taskText, !isDarkMode && styles.lightText]}>{task.title}</Text>
+                    </View>
+                  ))}
+                </>
+              )}
+              
+              {pending.length > 0 && (
+                <>
+                  <Text style={[styles.tasksSection, !isDarkMode && styles.lightText]}>Pending Tasks</Text>
+                  {pending.map((task, index) => (
+                    <View key={`pending-${index}`} style={[styles.taskItem, styles.pendingTask]}>
+                      <Feather name="circle" size={16} color="#888" />
+                      <Text style={[styles.taskText, styles.pendingTaskText]}>{task.title}</Text>
+                    </View>
+                  ))}
+                </>
+              )}
+            </ScrollView>
+          ) : (
+            <View style={styles.noTasksContainer}>
+              <Feather 
+                name={isFuture ? "calendar" : "coffee"} 
+                size={48} 
+                color="#979797ff" 
+              />
+              <Text style={[styles.noTasksText, !isDarkMode && styles.lightSubText]}>
+                {isFuture 
+                  ? "No tasks planned for this day" 
+                  : isToday 
+                    ? "No tasks for today yet - time to add some!"
+                    : "No tasks were recorded for this day"
+                }
+              </Text>
+              {(isToday || isFuture) && (
+                <Pressable 
+                  style={[styles.addTaskButton]}
+                  onPress={() => {
+                    onClose();
+                    router.push('/add');
+                  }}
+                >
+                  <Text style={styles.addTaskButtonText}>Add Tasks</Text>
+                </Pressable>
+              )}
+            </View>
+          )}
         </View>
-        
-        <View style={[styles.modalStats, !isDarkMode && styles.lightModalStats]}>
-          <View style={styles.modalStat}>
-            <Text style={styles.modalStatValue}>{successRate}%</Text>
-            <Text style={[styles.modalStatLabel, !isDarkMode && styles.lightSubText]}>Success Rate</Text>
-          </View>
-          <View style={styles.modalStat}>
-            <Text style={styles.modalStatValue}>{completed.length}</Text>
-            <Text style={[styles.modalStatLabel, !isDarkMode && styles.lightSubText]}>Completed</Text>
-          </View>
-          <View style={styles.modalStat}>
-            <Text style={styles.modalStatValue}>{focusSessions}</Text>
-            <Text style={[styles.modalStatLabel, !isDarkMode && styles.lightSubText]}>Focus Sessions</Text>
-          </View>
-        </View>
-        
-        {tasks.length > 0 ? (
-          <ScrollView style={styles.tasksList}>
-            {completed.length > 0 && (
-              <>
-                <Text style={[styles.tasksSection, !isDarkMode && styles.lightText]}>Completed Tasks</Text>
-                {completed.map((task, index) => (
-                  <View key={`completed-${index}`} style={[styles.taskItem, styles.completedTask]}>
-                    <Feather name="check-circle" size={16} color="#8ba5e1" />
-                    <Text style={[styles.taskText, !isDarkMode && styles.lightText]}>{task.title}</Text>
-                  </View>
-                ))}
-              </>
-            )}
-            
-            {pending.length > 0 && (
-              <>
-                <Text style={[styles.tasksSection, !isDarkMode && styles.lightText]}>Pending Tasks</Text>
-                {pending.map((task, index) => (
-                  <View key={`pending-${index}`} style={[styles.taskItem, styles.pendingTask]}>
-                    <Feather name="circle" size={16} color="#888" />
-                    <Text style={[styles.taskText, styles.pendingTaskText]}>{task.title}</Text>
-                  </View>
-                ))}
-              </>
-            )}
-          </ScrollView>
-        ) : (
-          <View style={styles.noTasksContainer}>
-            <Feather name="calendar" size={48} color="#444" />
-            <Text style={[styles.noTasksText, !isDarkMode && styles.lightSubText]}>No tasks for this day</Text>
-          </View>
-        )}
       </View>
-    </View>
+    </Modal>
   );
 }
 
+// ...existing code...
 // Main Calendar Component
 function MainCalendar() {
   const getForDay = useKriya(s => s.getTasksForDay);
@@ -199,11 +241,12 @@ function MainCalendar() {
     }
   };
 
-  const handleDayPress = (day: any) => {
-    if (day.hasActivity && day.isCurrentMonth) {
-      setSelectedDate(day.date);
-    }
-  };
+const handleDayPress = (day: any) => {
+  if (day.isCurrentMonth) { // Remove the hasActivity condition
+    setSelectedDate(day.date);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); // Add haptic feedback
+  }
+};
 
   // Create weeks array for better layout control
   const weeks = [];
@@ -247,7 +290,9 @@ function MainCalendar() {
                     getActivityStyle(day)
                   ]}
                   onPress={() => handleDayPress(day)}
-                  disabled={!day.hasActivity || !day.isCurrentMonth}
+                  // disabled={!day.hasActivity || !day.isCurrentMonth}
+                    disabled={!day.isCurrentMonth} // Only disable for non-current month days
+
                 >
                   <Text style={[
                     styles.dayText,
@@ -387,7 +432,9 @@ function WeeklySummary() {
   );
 }
 
-// ADD this new component before the existing QuickActions component
+
+
+// Updated NotificationSettings component with proper Modal
 function NotificationSettings() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const notificationsEnabled = useKriya(s => s.notificationsEnabled);
@@ -468,9 +515,15 @@ function NotificationSettings() {
         )}
       </View>
 
-      {/* Time Picker Modal */}
-      {showTimePicker && (
+      {/* Time Picker Modal - Updated with proper Modal */}
+      <Modal
+        visible={showTimePicker}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowTimePicker(false)}
+      >
         <View style={styles.timePickerOverlay}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setShowTimePicker(false)} />
           <View style={[styles.timePickerModal, !isDarkMode && styles.lightTimePickerModal]}>
             <Text style={[styles.timePickerTitle, !isDarkMode && styles.lightText]}>
               Set Reminder Time
@@ -555,7 +608,7 @@ function NotificationSettings() {
             </View>
           </View>
         </View>
-      )}
+      </Modal>
     </View>
   );
 }
@@ -944,6 +997,20 @@ const styles = StyleSheet.create({
   notificationSettings: {
     gap: 8,
   },
+    addTaskButton: {
+    marginTop: 26,
+    backgroundColor: '#111724ff',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    
+  },
+  addTaskButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -982,23 +1049,26 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'Space Mono',
   },
-  timePickerOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+   timePickerOverlay: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1000,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   timePickerModal: {
     backgroundColor: '#1f2937',
     borderRadius: 16,
     padding: 24,
-    width: '90%',
+    width: '85%',
     maxWidth: 320,
+    elevation: 10, // Android shadow
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   lightTimePickerModal: {
     backgroundColor: '#fff',
@@ -1289,28 +1359,38 @@ const styles = StyleSheet.create({
   },
   
   // Modal Styles
-  modalOverlay: {
+   modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent background
+  },
+  modalBackdrop: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    bottom: 250,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
+    bottom: 0,
   },
   modalContent: {
-    backgroundColor: 'rgba(52, 76, 103, 0.95)',
+    backgroundColor: 'rgba(31, 54, 81, 1)',
     borderRadius: 16,
     padding: 20,
     width: width - 40,
-    maxHeight: '70%',
+    maxHeight: '80%',
     borderWidth: 1,
     borderColor: 'rgba(93, 123, 158, 0.6)',
+    elevation: 10, // Android shadow
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   lightModalContent: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderColor: 'rgba(224, 224, 224, 0.7)',
   },
   modalHeader: {
@@ -1387,8 +1467,8 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
   },
   noTasksText: {
-    color: '#666',
-    fontSize: 16,
+    color: '#dfdfdfff',
+    fontSize: 12,
     marginTop: 12,
   },
   

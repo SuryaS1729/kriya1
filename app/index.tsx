@@ -263,6 +263,10 @@ export default function Home() {
   }));
 
   const handleTogglePress = () => {
+
+     // Add haptics feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
      // Subtle scale animation
     toggleScale.value = withSpring(0.95, {
       stiffness: 400,
@@ -470,7 +474,7 @@ const onFocus = React.useCallback((task: Task) => {
       <View style={{ flex: 1, justifyContent: 'space-evenly', alignItems: 'center', backgroundColor: isDarkMode ? '#000' : '#fff' }}>
         <View></View>
         <Spinner size="large" color={isDarkMode ? '#fff' : '#000'} />
-        <Text style={{ fontSize: 20, fontFamily:"Instrument", fontStyle:"italic", color: isDarkMode ? '#fff' : '#000' }}>loading...</Text>
+        <Text style={{ fontSize: 20, fontFamily:"Instrument Serif", fontStyle:"italic", color: isDarkMode ? '#fff' : '#000' }}>loading...</Text>
       </View>
     );
   }
@@ -519,7 +523,7 @@ const onFocus = React.useCallback((task: Task) => {
             href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
             asChild
           >
-            <Pressable style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Pressable onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <Animated.View style={[fadeStyle, styles.contentSection]}>
                 {showTranslation ? (
                   <View style={styles.englishSection}>
@@ -622,7 +626,7 @@ const onFocus = React.useCallback((task: Task) => {
         />
         
         <Link href="/add" asChild>
-          <Pressable>
+          <Pressable onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}>
             <View style={[styles.addTaskButton, {backgroundColor: isDarkMode ? '#1b293d91' : '#f9fafb'}]}>
             <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#081623ff' : '#E6E6E6' }]}>
               <Feather name="plus" size={20} color={isDarkMode ? "#ffffffff" : "#606060"} />

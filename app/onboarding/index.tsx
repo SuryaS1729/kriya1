@@ -319,7 +319,7 @@ export default function Onboarding() {
           setTimeout(() => {
             router.replace('/');
           }, 800);
-        }, 11000);
+        }, 12000);
       }, 500);
     }
   };
@@ -351,7 +351,7 @@ export default function Onboarding() {
         setTimeout(() => {
           router.replace('/');
         }, 800);
-      }, 11000);
+      }, 12000);
     }, 500);
   };
 
@@ -479,7 +479,7 @@ export default function Onboarding() {
                />
 
 
-              <View style={{marginTop:40, marginBottom:20}}><Spinner size="large" color='#0ccebe5e' /></View>
+              {/* <View style={{marginTop:40, marginBottom:20}}><Spinner size="large" color='#0ccebe5e' /></View> */}
 
 <Animated.Text style={[styles.loadingText, animatedLoadingTextStyle]}>
             {loadingTexts[loadingTextIndex]}

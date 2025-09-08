@@ -827,7 +827,7 @@ function Footer() {
       <View style={styles.footerBranding}>
         <Text style={[styles.footerAppName, !isDarkMode && styles.lightText]}>kriya</Text>
         <View style={styles.footerTagline}>
-          <Text style={[styles.footerMadeIn, !isDarkMode && styles.lightSubText]}>Made with 🧡 in India</Text>
+          <Text style={[styles.footerMadeIn, !isDarkMode && styles.lightSubText]}>Made with 🤍 in Bharāt</Text>
           <Text style={[styles.footerInspiration, !isDarkMode && styles.lightSubText]}>
             Inspired by the timeless wisdom of the Bhagavad Gita
           </Text>

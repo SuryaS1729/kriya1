@@ -212,8 +212,8 @@ export default function Onboarding() {
   
   // NEW: Array of loading texts
   const loadingTexts = [
-    "Preparing your journey...",
-    "Krishna is with you...",
+    "Act on your dharma...",
+    "One task at a time...",
     "Your journey begins now...",
   ];
 
@@ -247,7 +247,7 @@ export default function Onboarding() {
         
         // Continue cycling unless we're on the last text and it's been shown
         if (currentIndex !== loadingTexts.length - 1) {
-          setTimeout(cycleText, 3500); // Wait 2 seconds before next cycle
+          setTimeout(cycleText, 4000); // Wait 2 seconds before next cycle
         }
       }, 400);
     };
@@ -351,7 +351,7 @@ export default function Onboarding() {
         setTimeout(() => {
           router.replace('/');
         }, 800);
-      }, 12000);
+      }, 120000);
     }, 500);
   };
 
@@ -479,11 +479,11 @@ export default function Onboarding() {
                />
 
 
-              {/* <View style={{marginTop:40, marginBottom:20}}><Spinner size="large" color='#0ccebe5e' /></View> */}
 
 <Animated.Text style={[styles.loadingText, animatedLoadingTextStyle]}>
             {loadingTexts[loadingTextIndex]}
           </Animated.Text>
+              <View style={{marginTop:40, marginBottom:20}}><Spinner size="small" color='#0ccebe5e' /></View>
 
         </Animated.View>
 )}

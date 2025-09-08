@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View, Pressable, FlatList, ScrollView, Alert, Dimensions, Modal, Platform } from 'react-native';
+import { StyleSheet, Text, View, Pressable, FlatList, ScrollView, Alert, Dimensions, Modal, Platform, Linking } from 'react-native';
 import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -817,7 +817,7 @@ function Footer() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   
   const openLink = (url: string) => {
-    // You'll need to import Linking from react-native and handle this
+    Linking.openURL(url); // Opens the provided URL
     console.log('Opening:', url);
   };
   
@@ -833,7 +833,18 @@ function Footer() {
           </Text>
         </View>
       </View>
-      
+       {/* Feedback Form Button */}
+      <View style={styles.feedbackSection}>
+        <Pressable 
+          style={[styles.feedbackButton, !isDarkMode && styles.lightFeedbackButton]}
+          onPress={() => openLink('https://forms.gle/iLQH7vjNZuY27Du17')} // Replace with your Google Form link
+        >
+          <Feather name="message-square" size={20} color="#fff" />
+          <Text style={[styles.feedbackButtonText, !isDarkMode && styles.lightText]}>
+            Share Feedback
+          </Text>
+        </Pressable>
+      </View>
       {/* Social Links */}
       <View style={styles.footerSocials}>
         <Text style={[styles.footerSocialTitle, !isDarkMode && styles.lightSubText]}>Connect</Text>
@@ -854,7 +865,7 @@ function Footer() {
           
           <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
-            onPress={() => openLink('mailto:hello@kriyaapp.com')}
+            onPress={() => openLink('mailto:bitwisedharma@gmail.com')}
           >
             <Feather name="mail" size={18} color={isDarkMode ? "#ff6b6b" : "#ff6b6b"} />
           </Pressable>
@@ -1821,5 +1832,28 @@ const styles = StyleSheet.create({
     color: '#888',
     fontSize: 12,
     fontStyle: 'italic',
+  },
+   feedbackSection: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  feedbackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(52, 76, 103, 0.5)',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(93, 123, 158, 0.4)',
+    gap: 12,
+  },
+  lightFeedbackButton: {
+    backgroundColor: 'rgba(245, 245, 245, 0.7)',
+    borderColor: 'rgba(224, 224, 224, 0.6)',
+  },
+  feedbackButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

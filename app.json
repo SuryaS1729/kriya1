@@ -3,10 +3,9 @@
     "name": "Kriya",
     "slug": "kriya",
     "scheme": "acme",
-    "icon": "./assets/icons/adaptive-icon4.png",
+    "icon": "./assets/icons/adaptive-icon5.png",
     "plugins": [
-
-       [
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#ffffff",
@@ -18,25 +17,20 @@
           "imageWidth": 200
         }
       ],
-            [
+      [
         "expo-notifications",
         {
           "icon": "./assets/icons/icon.png",
           "color": "#ff9500",
           "defaultChannel": "default",
-     
           "enableBackgroundRemoteNotifications": false
         }
       ],
-
-
-
       [
         "expo-font",
         {
           "android": {
             "fonts": [
-              
               {
                 "fontFamily": "Alegreya",
                 "fontDefinitions": [
@@ -141,7 +135,8 @@
             ]
           }
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "assetBundlePatterns": [
       "**/*"
@@ -150,7 +145,6 @@
       "package": "com.surya7314.kriya",
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "resize"
-      
     },
     "ios": {
       "bundleIdentifier": "com.surya7314.kriya"

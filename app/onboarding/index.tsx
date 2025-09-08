@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
+import { useAudioPlayer } from 'expo-audio';
 
 import { useKriya } from '../../lib/store';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -53,7 +54,7 @@ const onboardingSteps = [
   }
 ];
 
-// NEW: Add the NotificationSlide component
+// NotificationSlide component remains the same
 const NotificationSlide = ({ onNext }: { onNext: () => void }) => {
   const [selectedHour, setSelectedHour] = useState(8);
   const [selectedMinute, setSelectedMinute] = useState(0);
@@ -95,7 +96,6 @@ const NotificationSlide = ({ onNext }: { onNext: () => void }) => {
           Kriya expects you to write down tasks just before you begin your day. We'll send you a gentle reminder 10 minutes before your chosen time.
         </Text>
 
-        {/* Time Picker */}
         <View style={styles.timePickerContainer}>
           <Text style={styles.timePickerLabel}>I usually start my day at:</Text>
           
@@ -187,37 +187,127 @@ export default function Onboarding() {
   const [currentStep, setCurrentStep] = useState(-1);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Separate animation values for step content only
+  // Audio setup with expo-audio
+  const AUDIO_URL = "https://res.cloudinary.com/dztfsdmcv/video/upload/v1757360585/Drifting_Echoes_j5fudj.mp3"
+  const IMAGE_URL = "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757361124/Partha-Sarathi-scaled_wmawo4.jpg"; // Replace with your actual Cloudinary URL
+
+  const audioPlayer = useAudioPlayer(AUDIO_URL);
+
+   // Add state to track if audio is loading
+
+  const [audioLoading, setAudioLoading] = useState(true);
+  const [audioError, setAudioError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+
+  // Animation values
   const stepOpacity = useSharedValue(0);
   const navigationOpacity = useSharedValue(0);
-  
-  // Animation values
   const titleTranslateY = useSharedValue(0);
   const titleOpacity = useSharedValue(1);
   const subtitleOpacity = useSharedValue(1);
   const subtitleTranslateY = useSharedValue(0);
   const cardOpacity = useSharedValue(1);
   const cardTranslateY = useSharedValue(0);
-  
-  // Icon animation
   const iconTranslateX = useSharedValue(0);
-  
-  // Loading animation values
   const loadingOpacity = useSharedValue(0);
   const loadingScale = useSharedValue(0.8);
 
-    // NEW: Add loading text state and animation
-  const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+  // Loading text state
+  const [currentLoadingText, setCurrentLoadingText] = useState("Act on your dharma...");
   const loadingTextOpacity = useSharedValue(0);
   
-  // NEW: Array of loading texts
   const loadingTexts = [
     "Act on your dharma...",
     "One task at a time...",
     "Your journey begins now...",
   ];
 
-  // Start icon animation when component mounts
+  // Audio setup - Start playing immediately when component mounts
+  useEffect(() => {
+    let isMounted = true;
+    let fadeInterval: ReturnType<typeof setInterval>;
+
+    const startAmbientAudio = async () => {
+      try {
+        if (audioPlayer && isMounted) {
+          console.log('🎵 Loading ambient music from network...');
+
+             // Wait a moment for the audio to load
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          if (!isMounted) return;
+          
+          // Configure audio properties
+          audioPlayer.loop = true;
+          audioPlayer.volume = 0.05;
+          
+          // Start playing
+          audioPlayer.play();
+
+            
+          setAudioLoading(false);
+          console.log('🎵 Ambient music started successfully');
+          
+          
+          // Fade in over 2 seconds
+          let currentVolume = 0.05;
+          const targetVolume = 0.25; // Soft ambient level
+          const fadeStep = (targetVolume - 0.05) / 45; // 45 steps for 1.5-second fade
+          
+          fadeInterval = setInterval(() => {
+            if (currentVolume < targetVolume && audioPlayer) {
+              currentVolume += fadeStep;
+              audioPlayer.volume = Math.min(currentVolume, targetVolume);
+            } else {
+              clearInterval(fadeInterval);
+            }
+          }, 33); // ~30fps for smooth fade
+        }
+      } catch (error) {
+ console.warn('Audio setup failed:', error);
+        setAudioError(true);
+        setAudioLoading(false);      }
+    };
+
+    startAmbientAudio();
+
+    return () => {
+      isMounted = false;
+      if (fadeInterval) {
+        clearInterval(fadeInterval);
+      }
+    };
+  }, [audioPlayer]);
+
+  // Function to fade out audio
+  const fadeOutAudio = () => {
+    if (!audioPlayer) return;
+    
+    try {
+      const currentVolume = audioPlayer.volume || 0;
+      const steps = 20;
+      const volumeDecrement = currentVolume / steps;
+      
+      const fadeOutInterval = setInterval(() => {
+        const newVolume = audioPlayer.volume - volumeDecrement;
+        if (newVolume > 0) {
+          audioPlayer.volume = Math.max(newVolume, 0);
+        } else {
+          audioPlayer.volume = 0;
+          audioPlayer.pause();
+          clearInterval(fadeOutInterval);
+        }
+      }, 30); // 1.2 second fade out
+    } catch (error) {
+      console.warn('Audio fade out failed:', error);
+    }
+  };
+
+  
+
+  // Icon animation
   useEffect(() => {
     iconTranslateX.value = withRepeat(
       withSequence(
@@ -227,33 +317,30 @@ export default function Onboarding() {
       -1,
       false
     );
-  }, []);
+  }, [iconTranslateX]);
 
-   const startLoadingTextCycle = () => {
-    let currentIndex = 0;
-    
-    // Initial text fade in
+  // Loading text cycle
+  const startLoadingTextCycle = () => {
+    setCurrentLoadingText(loadingTexts[0]);
     loadingTextOpacity.value = withTiming(1, { duration: 600 });
     
-    const cycleText = () => {
-      // Fade out current text
+    setTimeout(() => {
       loadingTextOpacity.value = withTiming(0, { duration: 400 });
       
       setTimeout(() => {
-        // Update text and fade in
-        currentIndex = (currentIndex + 1) % loadingTexts.length;
-        setLoadingTextIndex(currentIndex);
+        setCurrentLoadingText(loadingTexts[1]);
         loadingTextOpacity.value = withTiming(1, { duration: 400 });
         
-        // Continue cycling unless we're on the last text and it's been shown
-        if (currentIndex !== loadingTexts.length - 1) {
-          setTimeout(cycleText, 4000); // Wait 2 seconds before next cycle
-        }
+        setTimeout(() => {
+          loadingTextOpacity.value = withTiming(0, { duration: 400 });
+          
+          setTimeout(() => {
+            setCurrentLoadingText(loadingTexts[2]);
+            loadingTextOpacity.value = withTiming(1, { duration: 400 });
+          }, 400);
+        }, 4000);
       }, 400);
-    };
-    
-    // Start cycling after initial display
-    setTimeout(cycleText, 2000);
+    }, 2000);
   };
 
   const animateToOnboarding = () => {
@@ -281,8 +368,7 @@ export default function Onboarding() {
   };
 
   const handleNext = () => {
-    // UPDATED: Total steps now includes the notification slide
-    const totalSteps = onboardingSteps.length + 1; // +1 for notification slide
+    const totalSteps = onboardingSteps.length + 1;
     
     if (currentStep < totalSteps - 1) {
       stepOpacity.value = withTiming(0, { duration: 300 });
@@ -292,22 +378,21 @@ export default function Onboarding() {
         stepOpacity.value = withTiming(1, { duration: 500 });
       }, 300);
     } else {
-      // Complete onboarding
       console.log('🎯 Completing onboarding...');
       
       setIsLoading(true);
-            setLoadingTextIndex(0); // Reset to first text
-
       
       stepOpacity.value = withTiming(0, { duration: 500 });
       navigationOpacity.value = withTiming(0, { duration: 500 });
+      
+      // Start fading out audio
+      fadeOutAudio();
       
       setTimeout(() => {
         loadingOpacity.value = withTiming(1, { duration: 600 });
         loadingScale.value = withTiming(1, { duration: 600 });
 
-                startLoadingTextCycle();
-
+        startLoadingTextCycle();
         
         setTimeout(() => {
           if (completeOnboarding) {
@@ -328,18 +413,18 @@ export default function Onboarding() {
     console.log('🎯 Skipping onboarding...');
     
     setIsLoading(true);
-        setLoadingTextIndex(0); // Reset to first text
-
     
     stepOpacity.value = withTiming(0, { duration: 500 });
     navigationOpacity.value = withTiming(0, { duration: 500 });
+    
+    // Start fading out audio
+    fadeOutAudio();
     
     setTimeout(() => {
       loadingOpacity.value = withTiming(1, { duration: 600 });
       loadingScale.value = withTiming(1, { duration: 600 });
 
-            startLoadingTextCycle();
-
+      startLoadingTextCycle();
       
       setTimeout(() => {
         if (completeOnboarding) {
@@ -351,7 +436,7 @@ export default function Onboarding() {
         setTimeout(() => {
           router.replace('/');
         }, 800);
-      }, 120000);
+      }, 12000);
     }, 500);
   };
 
@@ -387,13 +472,24 @@ export default function Onboarding() {
     opacity: loadingOpacity.value,
     transform: [{ scale: loadingScale.value }],
   }));
-    // NEW: Animated style for loading text
+
   const animatedLoadingTextStyle = useAnimatedStyle(() => ({
     opacity: loadingTextOpacity.value,
   }));
 
-  // UPDATED: Check if current step is notification slide
   const isNotificationSlide = currentStep === 3;
+
+  // UPDATED: Add image status function
+  // const renderImageStatus = () => {
+  //   if (imageLoading && isLoading) {
+  //     return (
+  //       <View style={styles.imageStatusContainer}>
+  //         <Text style={styles.imageStatusText}>🖼️ Loading image...</Text>
+  //       </View>
+  //     );
+  //   }
+  //   return null;
+  // };
 
   return (
     <View style={styles.container}>
@@ -404,6 +500,12 @@ export default function Onboarding() {
       </Animated.View>
       
       <View style={styles.overlay} />
+
+            {/* Show image loading status */}
+
+
+            {/* {renderImageStatus()} */}
+
       
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
@@ -418,16 +520,14 @@ export default function Onboarding() {
             </Animated.View>
           )}
 
-        {/* Onboarding Steps */}
+          {/* Onboarding Steps */}
           {currentStep >= 0 && !isLoading && (
             <Animated.View style={[styles.onboardingContainer, animatedStepStyle]}>
               {isNotificationSlide ? (
                 <NotificationSlide onNext={handleNext} />
               ) : (
                 <View style={styles.stepContent}>
-                  {/* UPDATED: Adjust the step index for content after notification slide */}
                   {currentStep < 3 ? (
-                    // Steps 0, 1, 2 - show as normal
                     <>
                       <AntDesign 
                         name={onboardingSteps[currentStep].icon as any} 
@@ -439,7 +539,6 @@ export default function Onboarding() {
                       <Text style={styles.stepDescription}>{onboardingSteps[currentStep].description}</Text>
                     </>
                   ) : (
-                    // Step 4 - show the privacy slide (index 3 in array)
                     <>
                       <AntDesign 
                         name={onboardingSteps[3].icon as any} 
@@ -452,7 +551,6 @@ export default function Onboarding() {
                     </>
                   )}
                   
-                  {/* Progress dots - UPDATED: Show 5 dots total */}
                   <View style={styles.progressContainer}>
                     {[0, 1, 2, 3, 4].map((index) => (
                       <View 
@@ -469,25 +567,37 @@ export default function Onboarding() {
             </Animated.View>
           )}
 
-          {/* Loading Screen */}
+          {/* Loading Screen - FIXED to prevent crashes */}
           {isLoading && (
             <Animated.View style={[styles.loadingContainer, animatedLoadingStyle]}>
                <Image 
-                      source={require('../../assets/images/krishnaMain.jpg')} // Update path to your image
-                      style={styles.gitaImage}
-                      resizeMode="contain"
-               />
+                source={{ uri: IMAGE_URL }}
+                style={styles.gitaImage}
+                resizeMode="contain"
+                onLoadStart={() => setImageLoading(true)}
+                onLoadEnd={() => setImageLoading(false)}
+                onError={() => {
+                  setImageError(true);
+                  setImageLoading(false);
+                }}
+              />
+               {imageError && (
+                <View style={styles.imageFallback}>
+                  <Text style={styles.fallbackText}>🕉️</Text>
+                  <Text style={styles.fallbackSubText}>Image unavailable</Text>
+                </View>
+              )}
 
-
-
-<Animated.Text style={[styles.loadingText, animatedLoadingTextStyle]}>
-            {loadingTexts[loadingTextIndex]}
-          </Animated.Text>
-              <View style={{marginTop:40, marginBottom:20}}><Spinner size="small" color='#0ccebe5e' /></View>
-
-        </Animated.View>
-)}
-</View>
+              <Animated.Text style={[styles.loadingText, animatedLoadingTextStyle]}>
+                {currentLoadingText}
+              </Animated.Text>
+              
+              <View style={{marginTop:40, marginBottom:20}}>
+                <Spinner size="small" color='#0ccebe5e' />
+              </View>
+            </Animated.View>
+          )}
+        </View>
 
         {/* Bottom modal card */}
         {currentStep === -1 && !isLoading && (
@@ -504,13 +614,12 @@ export default function Onboarding() {
               <Pressable onPress={handleGetStarted} style={styles.actionButton}>
                 <Text style={styles.buttonText}> Begin the Journey</Text>
                 <Text style={{fontSize:20}}>🪷</Text>
-
               </Pressable>
             </View>
           </Animated.View>
         )}
 
-        {/* Navigation - UPDATED: Don't show for notification slide since it has its own button */}
+        {/* Navigation */}
         {currentStep >= 0 && !isLoading && !isNotificationSlide && (
           <Animated.View style={[styles.navigationContainer, animatedNavigationStyle]}>
             <Pressable onPress={handleSkip} style={styles.skipButton}>
@@ -529,6 +638,8 @@ export default function Onboarding() {
     </View>
   );
 }
+
+// ...styles remain exactly the same...
 
 const styles = StyleSheet.create({
   container: {
@@ -737,6 +848,46 @@ fontFamily: 'Source Serif Pro',
     textAlign: 'center',
     fontFamily: 'Source Serif Pro',
     fontStyle: 'italic',
+  },
+
+  // NEW: Image status and fallback styles
+  imageStatusContainer: {
+    position: 'absolute',
+    top: 100,
+    left: 20,
+    right: 20,
+    zIndex: 100,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    padding: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  imageStatusText: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 10,
+    textAlign: 'center',
+    fontFamily: 'Space Mono',
+  },
+  imageFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: SCREEN_WIDTH * 1,
+    height: SCREEN_WIDTH * 1 * 0.6,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    marginBottom: 20,
+  },
+  fallbackText: {
+    fontSize: 60,
+    marginBottom: 8,
+  },
+  fallbackSubText: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 12,
+    fontFamily: 'Space Mono',
   },
 
   // NEW: Notification slide styles

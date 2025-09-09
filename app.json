@@ -3,7 +3,7 @@
     "name": "Kriya",
     "slug": "kriya",
     "scheme": "acme",
-    "icon": "./assets/icons/adaptive-icon5.png",
+    "icon": "./assets/icons/adaptive-icon4.png",
     "plugins": [
       [
         "expo-splash-screen",

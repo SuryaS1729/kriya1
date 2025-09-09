@@ -189,8 +189,7 @@ export default function Onboarding() {
 
   // Audio setup with expo-audio
   const AUDIO_URL = "https://res.cloudinary.com/dztfsdmcv/video/upload/v1757360585/Drifting_Echoes_j5fudj.mp3"
-  const IMAGE_URL = "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757361124/Partha-Sarathi-scaled_wmawo4.jpg"; // Replace with your actual Cloudinary URL
-
+const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/hflxxtpxtyrhrcteczzn_w1ll3e.webp"
   const audioPlayer = useAudioPlayer(AUDIO_URL);
 
    // Add state to track if audio is loading

@@ -393,9 +393,13 @@ const onFocus = React.useCallback((task: Task) => {
           </Pressable>
         </View>
         
+         {/* UPDATED: Simple conditional rendering */}
+      {!item.completed && (
+        
         <Pressable onPress={handleRemove} hitSlop={8} style={styles.deleteButton}>
           <Text style={[styles.deleteIcon, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>✕</Text>
         </Pressable>
+      )}
       </View>
     )
     }, (prevProps, nextProps) => {

@@ -3,7 +3,7 @@
     "name": "Kriya",
     "slug": "kriya",
     "scheme": "acme",
-    "icon": "./assets/icons/adaptive-icon4.png",
+    "icon": "./assets/icons/adaptive-icon9.png",
     "plugins": [
       [
         "expo-splash-screen",
@@ -14,7 +14,7 @@
             "image": "./assets/icons/splash-icon-light.png",
             "backgroundColor": "#000000"
           },
-          "imageWidth": 200
+          "imageWidth": 180
         }
       ],
       [

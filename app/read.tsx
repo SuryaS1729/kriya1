@@ -71,7 +71,7 @@ export default function Read() {
               return (
                 <Link
                   href={{ pathname: '/shloka/[id]', params: { id: String(idx) } }}
-                  asChild
+                  replace asChild
                 >
                   <Pressable style={[
                     styles.resultRow,
@@ -168,6 +168,7 @@ export default function Read() {
                   return (
                     <Link
                       href={{ pathname: '/shloka/[id]', params: { id: String(idx) } }}
+                      replace
                       asChild
                     >
                       <Pressable style={styles.vRow}>

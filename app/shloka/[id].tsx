@@ -314,7 +314,7 @@ export default function ShlokaDetail() {
             />
           </Pressable>
 
-          <Link href="/read" asChild>
+          <Link href="/read" replace asChild>
             <Pressable hitSlop={12} style={styles.pillBtn}>
               <FontAwesome5 name="book" size={20} color={isDarkMode ? '#f9fafb' : '#18464aff'} />
             </Pressable>

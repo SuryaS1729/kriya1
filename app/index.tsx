@@ -239,9 +239,10 @@ export default function Home() {
   useFocusEffect(
     React.useCallback(() => {
       if (ready) {
-        console.log('🧹 Home screen focused - refreshing state');
+
         refresh(); // This will reload tasks from SQLite
-        
+                console.log('🧹 Home screen focused - refreshing state');
+
         // // Clear the navigation stack
         if (router.canGoBack()) {
           router.dismissAll();
@@ -569,6 +570,7 @@ const onFocus = React.useCallback((task: Task) => {
 
           <Link
             href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
+
             asChild
           >
             <Pressable onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

@@ -129,7 +129,7 @@ export default function Root() {
           <Stack.Screen name="onboarding/index" options={{ headerShown: false, animation:'fade' }} />
           <Stack.Screen name="add" options={{  animation:'fade' }} />
           <Stack.Screen name="history" options={{animation:'fade'}}/>
-          <Stack.Screen name="read" options={{animation:'fade'}} />
+          <Stack.Screen name="read" options={{animation:'slide_from_bottom'}} />
           <Stack.Screen name="shloka/[id]" options={{animation:'fade'}}/>
           <Stack.Screen name="share" options={{animation:'slide_from_bottom'}}/>
           <Stack.Screen name="bookmarks" options={{animation:'fade'}}/>

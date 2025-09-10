@@ -39,29 +39,29 @@ export default function ShlokaDetail() {
   const isDarkMode = useKriya(s => s.isDarkMode);
 
   // Intercept any "go back" gesture/button → go Home (and avoid loops)
-  useEffect(() => {
-    const unsub = navigation.addListener('beforeRemove', (e: any) => {
-      if (allowExitRef.current) return;
-      const t = e?.data?.action?.type;
-      if (t === 'GO_BACK' || t === 'POP' || t === 'POP_TO_TOP') {
-        e.preventDefault?.();
-        allowExitRef.current = true;
-        router.replace('/');
-      }
-    });
-    return unsub;
-  }, [navigation]);
+  // useEffect(() => {
+  //   const unsub = navigation.addListener('beforeRemove', (e: any) => {
+  //     if (allowExitRef.current) return;
+  //     const t = e?.data?.action?.type;
+  //     if (t === 'GO_BACK' || t === 'POP' || t === 'POP_TO_TOP') {
+  //       e.preventDefault?.();
+  //       allowExitRef.current = true;
+  //       router.replace('/');
+  //     }
+  //   });
+  //   return unsub;
+  // }, [navigation]);
 
-  useFocusEffect(
-    useCallback(() => {
-      const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-        allowExitRef.current = true;
-        router.replace('/');
-        return true;
-      });
-      return () => sub.remove();
-    }, [])
-  );
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+  //       allowExitRef.current = true;
+  //       router.replace('/');
+  //       return true;
+  //     });
+  //     return () => sub.remove();
+  //   }, [])
+  // );
 
   // Treat URL param as *index* (0-based)
   const initialIndex = useMemo(() => {

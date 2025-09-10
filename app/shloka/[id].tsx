@@ -1,10 +1,10 @@
 // app/shloka/[id].tsx
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {  useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalSearchParams, router, Link } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
-  BackHandler,
+
   Animated,
   StyleSheet,
   Text,
@@ -17,25 +17,25 @@ import {
   getPrevNextIndices,
   type ShlokaRow,
 } from '../../lib/shloka';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+
 import { StatusBar } from 'expo-status-bar';
 import { useKriya } from '../../lib/store';
 import * as Haptics from 'expo-haptics';
 
-import Ionicons from '@expo/vector-icons/Ionicons';
+
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import BlurBackground from '@/components/BlurBackground';
+
 
 const PILL_W = 180;
 
 export default function ShlokaDetail() {
   // --- Always-on hooks ---
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+
   const params = useLocalSearchParams<{ id?: string | string[] }>();
-  const allowExitRef = useRef(false);
+
   const isDarkMode = useKriya(s => s.isDarkMode);
 
   // Intercept any "go back" gesture/button → go Home (and avoid loops)

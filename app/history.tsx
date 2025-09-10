@@ -4,7 +4,7 @@ import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, Link } from 'expo-router';
-import { Feather, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -19,6 +19,7 @@ import * as Haptics from 'expo-haptics';
 
 import * as Notifications from 'expo-notifications';
 import { SchedulableTriggerInputTypes } from 'expo-notifications';
+import { StatusBar } from 'expo-status-bar';
 
 
 const { width } = Dimensions.get('window');
@@ -156,7 +157,6 @@ function DayDetailModal({ date, onClose }: { date: Date | null; onClose: () => v
   );
 }
 
-// ...existing code...
 // Main Calendar Component
 function MainCalendar() {
   const getForDay = useKriya(s => s.getTasksForDay);
@@ -826,8 +826,9 @@ function Footer() {
       {/* App Branding */}
       <View style={styles.footerBranding}>
         <Text style={[styles.footerAppName, !isDarkMode && styles.lightText]}>kriya</Text>
+
         <View style={styles.footerTagline}>
-          <Text style={[styles.footerMadeIn, !isDarkMode && styles.lightSubText]}>Made with 🤍 in Bharāt</Text>
+          <Text style={[styles.footerMadeIn, !isDarkMode && styles.lightSubText]}>Crafted with  {<AntDesign name="heart" size={15} color="#ff0044ff" />}  in Bharāt</Text>
           <Text style={[styles.footerInspiration, !isDarkMode && styles.lightSubText]}>
             Inspired by the timeless wisdom of the Bhagavad Gita
           </Text>
@@ -839,7 +840,7 @@ function Footer() {
           style={[styles.feedbackButton, !isDarkMode && styles.lightFeedbackButton]}
           onPress={() => openLink('https://forms.gle/iLQH7vjNZuY27Du17')} // Replace with your Google Form link
         >
-          <Feather name="message-square" size={20} color="#fff" />
+          <Feather name="message-square" size={20} color={isDarkMode ? "#fff" : "#000"} />
           <Text style={[styles.feedbackButtonText, !isDarkMode && styles.lightText]}>
             Share Feedback
           </Text>
@@ -920,6 +921,7 @@ export default function History() {
 
   return (
     <View style={[styles.container, !isDarkMode && styles.lightContainer]}>
+      <StatusBar hidden= {true} />
       {/* BlurBackground */}
       <Animated.View style={[StyleSheet.absoluteFill]}>
         <BlurBackground />
@@ -1694,13 +1696,18 @@ const styles = StyleSheet.create({
   },
   footerAppName: {
     color: '#fff',
-    fontSize: 28,
-
-    marginBottom: 8,
-     fontFamily: 'Instrument Serif',
+    fontSize: 48,
+    marginBottom: 8, // Reduced margin to make room for company name
+    fontFamily: 'Instrument Serif',
     fontStyle: 'italic',
     letterSpacing: 0,
     fontWeight: '200',
+  },
+  footerCompany: {
+    color: '#888',
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: 10,
   },
   footerTagline: {
     alignItems: 'center',

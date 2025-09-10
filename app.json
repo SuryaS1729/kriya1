@@ -4,6 +4,8 @@
     "slug": "kriya",
     "scheme": "acme",
     "icon": "./assets/icons/adaptive-icon9.png",
+    "userInterfaceStyle": "automatic",
+
     "plugins": [
       [
         "expo-splash-screen",

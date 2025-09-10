@@ -7,7 +7,8 @@ import {
   Pressable,
   StatusBar,
   ScrollView,
-  Image
+  Image,
+  useColorScheme
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -29,6 +30,48 @@ import { Feather } from '@expo/vector-icons';
 import { Spinner } from '@/components/ui/spinner';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Theme configuration
+const themes = {
+  dark: {
+    background: '#0a6b7add',
+    overlay: 'rgba(0, 0, 0, 0.3)',
+    text: 'white',
+    textSecondary: 'rgba(255, 255, 255, 0.8)',
+    textTertiary: 'rgba(255, 255, 255, 0.7)',
+    textQuaternary: 'rgba(255, 255, 255, 0.6)',
+    cardBackground: 'rgba(0, 12, 26, 0.34)',
+    buttonBackground: 'rgba(37, 188, 208, 0.08)',
+    buttonBackgroundSecondary: 'rgba(255, 255, 255, 0.15)',
+    border: 'rgba(255, 255, 255, 0.3)',
+    borderSecondary: 'rgba(255, 255, 255, 0.2)',
+    progressDot: 'rgba(255, 255, 255, 0.3)',
+    timePickerBackground: 'rgba(0, 0, 0, 0.3)',
+    selectedTimeBackground: 'rgba(255, 255, 255, 0.2)',
+    arrowColor: "rgba(104, 164, 177, 0.58)",
+    spinnerColor: '#0ccebe5e',
+    imageFallbackBackground: 'rgba(255, 255, 255, 0.1)',
+  },
+  light: {
+    background: '#e8f4f8',
+    overlay: 'rgba(255, 255, 255, 0.2)',
+    text: '#1a365d',
+    textSecondary: 'rgba(26, 54, 93, 0.8)',
+    textTertiary: 'rgba(26, 54, 93, 0.7)',
+    textQuaternary: 'rgba(26, 54, 93, 0.6)',
+    cardBackground: 'rgba(255, 255, 255, 0.9)',
+    buttonBackground: 'rgba(37, 188, 208, 0.15)',
+    buttonBackgroundSecondary: 'rgba(26, 54, 93, 0.1)',
+    border: 'rgba(26, 54, 93, 0.3)',
+    borderSecondary: 'rgba(26, 54, 93, 0.2)',
+    progressDot: 'rgba(26, 54, 93, 0.3)',
+    timePickerBackground: 'rgba(255, 255, 255, 0.8)',
+    selectedTimeBackground: 'rgba(26, 54, 93, 0.15)',
+    arrowColor: "rgba(37, 188, 208, 0.7)",
+    spinnerColor: '#0ccebe',
+    imageFallbackBackground: 'rgba(26, 54, 93, 0.1)',
+  }
+};
 
 // Onboarding content
 const onboardingSteps = [
@@ -54,8 +97,8 @@ const onboardingSteps = [
   }
 ];
 
-// NotificationSlide component remains the same
-const NotificationSlide = ({ onNext }: { onNext: () => void }) => {
+// NotificationSlide component
+const NotificationSlide = ({ onNext, theme }: { onNext: () => void, theme: any }) => {
   const [selectedHour, setSelectedHour] = useState(8);
   const [selectedMinute, setSelectedMinute] = useState(0);
   const setReminderTime = useKriya(s => s.setReminderTime);
@@ -88,20 +131,20 @@ const NotificationSlide = ({ onNext }: { onNext: () => void }) => {
   return (
     <View style={styles.notificationSlide}>
       <View style={styles.notificationContent}>
-        <Feather name="bell" size={60} color="white" style={styles.stepIcon} />
+        <Feather name="bell" size={60} color={theme.text} style={styles.stepIcon} />
         
-        <Text style={styles.stepTitle}> When do you start your day?</Text>
+        <Text style={[styles.stepTitle, { color: theme.text }]}> When do you start your day?</Text>
         
-        <Text style={styles.stepDescription}>
+        <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
           Kriya expects you to write down tasks just before you begin your day. We'll send you a gentle reminder 10 minutes before your chosen time.
         </Text>
 
-        <View style={styles.timePickerContainer}>
-          <Text style={styles.timePickerLabel}>I usually start my day at:</Text>
+        <View style={[styles.timePickerContainer, { backgroundColor: theme.timePickerBackground, borderColor: theme.borderSecondary }]}>
+          <Text style={[styles.timePickerLabel, { color: theme.text }]}>I usually start my day at:</Text>
           
           <View style={styles.timePicker}>
             <View style={styles.timeSection}>
-              <Text style={styles.timeLabel}>Hour</Text>
+              <Text style={[styles.timeLabel, { color: theme.textTertiary }]}>Hour</Text>
               <ScrollView 
                 style={styles.timeScroll}
                 showsVerticalScrollIndicator={false}
@@ -117,12 +160,13 @@ const NotificationSlide = ({ onNext }: { onNext: () => void }) => {
                     }}
                     style={[
                       styles.timeOption,
-                      selectedHour === hour && styles.selectedTimeOption
+                      selectedHour === hour && { backgroundColor: theme.selectedTimeBackground }
                     ]}
                   >
                     <Text style={[
                       styles.timeText,
-                      selectedHour === hour && styles.selectedTimeText
+                      { color: theme.textTertiary },
+                      selectedHour === hour && { color: theme.text, fontWeight: '700' }
                     ]}>
                       {hour.toString().padStart(2, '0')}
                     </Text>
@@ -131,10 +175,10 @@ const NotificationSlide = ({ onNext }: { onNext: () => void }) => {
               </ScrollView>
             </View>
 
-            <Text style={styles.timeSeparator}>:</Text>
+            <Text style={[styles.timeSeparator, { color: theme.text }]}>:</Text>
 
             <View style={styles.timeSection}>
-              <Text style={styles.timeLabel}>Minute</Text>
+              <Text style={[styles.timeLabel, { color: theme.textTertiary }]}>Minute</Text>
               <ScrollView 
                 style={styles.timeScroll}
                 showsVerticalScrollIndicator={false}
@@ -150,12 +194,13 @@ const NotificationSlide = ({ onNext }: { onNext: () => void }) => {
                     }}
                     style={[
                       styles.timeOption,
-                      selectedMinute === minute && styles.selectedTimeOption
+                      selectedMinute === minute && { backgroundColor: theme.selectedTimeBackground }
                     ]}
                   >
                     <Text style={[
                       styles.timeText,
-                      selectedMinute === minute && styles.selectedTimeText
+                      { color: theme.textTertiary },
+                      selectedMinute === minute && { color: theme.text, fontWeight: '700' }
                     ]}>
                       {minute.toString().padStart(2, '0')}
                     </Text>
@@ -165,14 +210,14 @@ const NotificationSlide = ({ onNext }: { onNext: () => void }) => {
             </View>
           </View>
 
-          <Text style={styles.reminderNote}>
+          <Text style={[styles.reminderNote, { color: theme.textQuaternary }]}>
             📱 You'll receive a reminder at {getReminderTime()} (10 minutes before)
           </Text>
         </View>
 
-        <Pressable onPress={handleContinue} style={styles.notificationButton}>
-          <Text style={styles.notificationButtonText}>Set Reminder</Text>
-          <AntDesign name="arrowright" size={20} color="white" />
+        <Pressable onPress={handleContinue} style={[styles.notificationButton, { backgroundColor: theme.buttonBackgroundSecondary, borderColor: theme.border }]}>
+          <Text style={[styles.notificationButtonText, { color: theme.text }]}>Set Reminder</Text>
+          <AntDesign name="arrowright" size={20} color={theme.text} />
         </Pressable>
       </View>
     </View>
@@ -183,22 +228,24 @@ export default function Onboarding() {
   console.log('🎯 Onboarding component rendering');
   const insets = useSafeAreaInsets();
   
+  // Clean color scheme detection
+  const colorScheme = useColorScheme();
+  const theme = themes[colorScheme === 'dark' ? 'dark' : 'light'];
+  
   const completeOnboarding = useKriya(s => s.completeOnboarding);
   const [currentStep, setCurrentStep] = useState(-1);
   const [isLoading, setIsLoading] = useState(false);
 
   // Audio setup with expo-audio
   const AUDIO_URL = "https://res.cloudinary.com/dztfsdmcv/video/upload/v1757360585/Drifting_Echoes_j5fudj.mp3"
-const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/hflxxtpxtyrhrcteczzn_w1ll3e.webp"
+  const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/hflxxtpxtyrhrcteczzn_w1ll3e.webp"
   const audioPlayer = useAudioPlayer(AUDIO_URL);
 
    // Add state to track if audio is loading
-
   const [audioLoading, setAudioLoading] = useState(true);
   const [audioError, setAudioError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
-
 
   // Animation values
   const stepOpacity = useSharedValue(0);
@@ -303,8 +350,6 @@ const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/
       console.warn('Audio fade out failed:', error);
     }
   };
-
-  
 
   // Icon animation
   useEffect(() => {
@@ -478,44 +523,26 @@ const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/
 
   const isNotificationSlide = currentStep === 3;
 
-  // UPDATED: Add image status function
-  // const renderImageStatus = () => {
-  //   if (imageLoading && isLoading) {
-  //     return (
-  //       <View style={styles.imageStatusContainer}>
-  //         <Text style={styles.imageStatusText}>🖼️ Loading image...</Text>
-  //       </View>
-  //     );
-  //   }
-  //   return null;
-  // };
-
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar hidden={true} />
 
       <Animated.View style={[StyleSheet.absoluteFill]}>
         <BlurBackground />
       </Animated.View>
       
-      <View style={styles.overlay} />
-
-            {/* Show image loading status */}
-
-
-            {/* {renderImageStatus()} */}
-
+      <View style={[styles.overlay, { backgroundColor: theme.overlay }]} />
       
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
           <Animated.View style={[styles.titleContainer, animatedTitleStyle]}>
-            <Text style={styles.title}>kriya</Text>
-            <Text style={styles.tagline}>ancient wisdom, modern rhythm</Text>
+            <Text style={[styles.title, { color: theme.text }]}>kriya</Text>
+            <Text style={[styles.tagline, { color: theme.textSecondary }]}>ancient wisdom, modern rhythm</Text>
           </Animated.View>
           
           {currentStep === -1 && !isLoading && (
-            <Animated.View style={[styles.subtitleContainer, animatedSubtitleStyle]}>
-              <Text style={styles.subtitle}>free • offline • no signup • open source</Text>
+            <Animated.View style={[styles.subtitleContainer, animatedSubtitleStyle, { borderColor: theme.text }]}>
+              <Text style={[styles.subtitle, { color: theme.textSecondary }]}>free • offline • no signup • open source</Text>
             </Animated.View>
           )}
 
@@ -523,7 +550,7 @@ const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/
           {currentStep >= 0 && !isLoading && (
             <Animated.View style={[styles.onboardingContainer, animatedStepStyle]}>
               {isNotificationSlide ? (
-                <NotificationSlide onNext={handleNext} />
+                <NotificationSlide onNext={handleNext} theme={theme} />
               ) : (
                 <View style={styles.stepContent}>
                   {currentStep < 3 ? (
@@ -531,22 +558,22 @@ const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/
                       <AntDesign 
                         name={onboardingSteps[currentStep].icon as any} 
                         size={60} 
-                        color="white" 
+                        color={theme.text} 
                         style={styles.stepIcon}
                       />
-                      <Text style={styles.stepTitle}>{onboardingSteps[currentStep].title}</Text>
-                      <Text style={styles.stepDescription}>{onboardingSteps[currentStep].description}</Text>
+                      <Text style={[styles.stepTitle, { color: theme.text }]}>{onboardingSteps[currentStep].title}</Text>
+                      <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>{onboardingSteps[currentStep].description}</Text>
                     </>
                   ) : (
                     <>
                       <AntDesign 
                         name={onboardingSteps[3].icon as any} 
                         size={60} 
-                        color="white" 
+                        color={theme.text} 
                         style={styles.stepIcon}
                       />
-                      <Text style={styles.stepTitle}>{onboardingSteps[3].title}</Text>
-                      <Text style={styles.stepDescription}>{onboardingSteps[3].description}</Text>
+                      <Text style={[styles.stepTitle, { color: theme.text }]}>{onboardingSteps[3].title}</Text>
+                      <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>{onboardingSteps[3].description}</Text>
                     </>
                   )}
                   
@@ -556,7 +583,8 @@ const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/
                         key={index}
                         style={[
                           styles.progressDot,
-                          index === currentStep && styles.progressDotActive
+                          { backgroundColor: theme.progressDot },
+                          index === currentStep && { backgroundColor: theme.text, width: 12, height: 12, borderRadius: 6 }
                         ]}
                       />
                     ))}
@@ -566,7 +594,7 @@ const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/
             </Animated.View>
           )}
 
-          {/* Loading Screen - FIXED to prevent crashes */}
+          {/* Loading Screen */}
           {isLoading && (
             <Animated.View style={[styles.loadingContainer, animatedLoadingStyle]}>
                <Image 
@@ -581,18 +609,18 @@ const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/
                 }}
               />
                {imageError && (
-                <View style={styles.imageFallback}>
+                <View style={[styles.imageFallback, { backgroundColor: theme.imageFallbackBackground, borderColor: theme.border }]}>
                   <Text style={styles.fallbackText}>🕉️</Text>
-                  <Text style={styles.fallbackSubText}>Image unavailable</Text>
+                  <Text style={[styles.fallbackSubText, { color: theme.textQuaternary }]}>Image unavailable</Text>
                 </View>
               )}
 
-              <Animated.Text style={[styles.loadingText, animatedLoadingTextStyle]}>
+              <Animated.Text style={[styles.loadingText, animatedLoadingTextStyle, { color: theme.textSecondary }]}>
                 {currentLoadingText}
               </Animated.Text>
               
               <View style={{marginTop:40, marginBottom:20}}>
-                <Spinner size="small" color='#0ccebe5e' />
+                <Spinner size="small" color={theme.spinnerColor} />
               </View>
             </Animated.View>
           )}
@@ -600,18 +628,18 @@ const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/
 
         {/* Bottom modal card */}
         {currentStep === -1 && !isLoading && (
-          <Animated.View style={[styles.bottomCard, animatedCardStyle]}>
+          <Animated.View style={[styles.bottomCard, animatedCardStyle, { backgroundColor: theme.cardBackground }]}>
             <View style={styles.cardContent}>
               <Animated.View style={[styles.arrowContainer, animatedIconStyle]}>
                 <Feather
                   name="chevrons-down"
                   size={28}
-                  color="rgba(104, 164, 177, 0.58)"
+                  color={theme.arrowColor}
                 />
               </Animated.View>
               
-              <Pressable onPress={handleGetStarted} style={styles.actionButton}>
-                <Text style={styles.buttonText}> Begin the Journey</Text>
+              <Pressable onPress={handleGetStarted} style={[styles.actionButton, { backgroundColor: theme.buttonBackground, borderColor: theme.border }]}>
+                <Text style={[styles.buttonText, { color: theme.text }]}> Begin the Journey</Text>
                 <Text style={{fontSize:20}}>🪷</Text>
               </Pressable>
             </View>
@@ -622,14 +650,14 @@ const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/
         {currentStep >= 0 && !isLoading && !isNotificationSlide && (
           <Animated.View style={[styles.navigationContainer, animatedNavigationStyle]}>
             <Pressable onPress={handleSkip} style={styles.skipButton}>
-              <Text style={styles.skipText}>Skip</Text>
+              <Text style={[styles.skipText, { color: theme.textTertiary }]}>Skip</Text>
             </Pressable>
             
-            <Pressable onPress={handleNext} style={styles.nextButton}>
-              <Text style={styles.nextText}>
+            <Pressable onPress={handleNext} style={[styles.nextButton, { backgroundColor: theme.buttonBackgroundSecondary, borderColor: theme.border }]}>
+              <Text style={[styles.nextText, { color: theme.text }]}>
                 {currentStep === 4 ? 'Next' : 'Next'}
               </Text>
-              <AntDesign name="arrowright" size={20} color="white" />
+              <AntDesign name="arrowright" size={20} color={theme.text} />
             </Pressable>
           </Animated.View>
         )}
@@ -638,16 +666,12 @@ const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/
   );
 }
 
-// ...styles remain exactly the same...
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a6b7add',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   safeArea: {
     flex: 1,
@@ -663,7 +687,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 80,
-    color: 'white',
     textAlign: 'center',
     fontFamily: 'Instrument Serif',
     fontStyle: 'italic',
@@ -672,7 +695,6 @@ const styles = StyleSheet.create({
   },
   tagline: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
     letterSpacing: 1.5,
     fontWeight: '300',
@@ -683,14 +705,12 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: 'center',
     borderWidth: 0.5,
-    borderColor: "white",
     borderRadius: 30,
     paddingHorizontal: 13,
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 8,
-    color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
     letterSpacing: 1,
     fontWeight: '300',
@@ -703,7 +723,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: SCREEN_HEIGHT * 0.30,
-    backgroundColor: 'rgba(0, 12, 26, 0.34)',
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
     overflow: 'hidden',
@@ -719,25 +738,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: "center",
     alignItems: 'center',
-    backgroundColor: 'rgba(37, 188, 208, 0.08)',
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
     marginTop: 16,
     marginBottom: 20,
   },
   buttonText: {
-    color: 'white',
     fontSize: 18,
     fontWeight: '300',
-letterSpacing: 1,
+    letterSpacing: 1,
     marginRight: 12,
-fontFamily: 'Source Serif Pro',
-
-
-
+    fontFamily: 'Source Serif Pro',
   },
   
   // Onboarding styles
@@ -760,7 +773,6 @@ fontFamily: 'Source Serif Pro',
   },
   stepTitle: {
     fontSize: 21,
-    color: 'white',
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 20,
@@ -769,7 +781,6 @@ fontFamily: 'Source Serif Pro',
   },
   stepDescription: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 40,
@@ -784,14 +795,7 @@ fontFamily: 'Source Serif Pro',
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     marginHorizontal: 4,
-  },
-  progressDotActive: {
-    backgroundColor: 'white',
-    width: 12,
-    height: 12,
-    borderRadius: 6,
   },
   navigationContainer: {
     position: 'absolute',
@@ -810,22 +814,18 @@ fontFamily: 'Source Serif Pro',
     paddingHorizontal: 20,
   },
   skipText: {
-    color: 'rgba(255, 255, 255, 0.7)',
     fontSize: 16,
     fontFamily: 'Space Mono',
   },
   nextButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   nextText: {
-    color: 'white',
     fontSize: 16,
     fontWeight: '500',
     marginRight: 8,
@@ -840,7 +840,6 @@ fontFamily: 'Source Serif Pro',
     paddingHorizontal: 40,
   },
   loadingText: {
-    color: 'rgba(255, 255, 255, 0.9)',
     fontSize: 18,
     fontWeight: '300',
     marginTop: 24,
@@ -848,35 +847,13 @@ fontFamily: 'Source Serif Pro',
     fontFamily: 'Source Serif Pro',
     fontStyle: 'italic',
   },
-
-  // NEW: Image status and fallback styles
-  imageStatusContainer: {
-    position: 'absolute',
-    top: 100,
-    left: 20,
-    right: 20,
-    zIndex: 100,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    padding: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  imageStatusText: {
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 10,
-    textAlign: 'center',
-    fontFamily: 'Space Mono',
-  },
   imageFallback: {
     alignItems: 'center',
     justifyContent: 'center',
     width: SCREEN_WIDTH * 1,
     height: SCREEN_WIDTH * 1 * 0.6,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
     marginBottom: 20,
   },
   fallbackText: {
@@ -884,12 +861,11 @@ fontFamily: 'Source Serif Pro',
     marginBottom: 8,
   },
   fallbackSubText: {
-    color: 'rgba(255, 255, 255, 0.6)',
     fontSize: 12,
     fontFamily: 'Space Mono',
   },
 
-  // NEW: Notification slide styles
+  // Notification slide styles
   notificationSlide: {
     flex: 1,
     justifyContent: 'center',
@@ -901,18 +877,15 @@ fontFamily: 'Source Serif Pro',
     width: '100%',
   },
   timePickerContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: 16,
     padding: 20,
     marginVertical: 32,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
     width: '100%',
   },
   timePickerLabel: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
     textAlign: 'center',
     marginBottom: 24,
     fontFamily: 'Source Serif Pro',
@@ -928,7 +901,6 @@ fontFamily: 'Source Serif Pro',
   },
   timeLabel: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.7)',
     marginBottom: 8,
     fontWeight: '500',
     textTransform: 'uppercase',
@@ -945,36 +917,26 @@ fontFamily: 'Source Serif Pro',
     borderRadius: 8,
     marginVertical: 2,
   },
-    gitaImage: {
-    width: SCREEN_WIDTH * 1, // 100% of screen width for horizontal image
-    height: SCREEN_WIDTH * 1 * 0.6, // Maintain aspect ratio (assuming 5:3 ratio)
+  gitaImage: {
+    width: SCREEN_WIDTH * 1,
+    height: SCREEN_WIDTH * 1 * 0.6,
     marginBottom: 20,
     borderRadius: 12,
     opacity: 0.9,
   },
-  selectedTimeOption: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  },
   timeText: {
     fontSize: 18,
-    color: 'rgba(255, 255, 255, 0.7)',
     fontWeight: '500',
     fontFamily: 'Space Mono',
-  },
-  selectedTimeText: {
-    color: '#fff',
-    fontWeight: '700',
   },
   timeSeparator: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
     marginHorizontal: 16,
     fontFamily: 'Space Mono',
   },
   reminderNote: {
     fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.6)',
     textAlign: 'center',
     fontStyle: 'italic',
     fontFamily: 'Source Serif Pro',
@@ -982,16 +944,13 @@ fontFamily: 'Source Serif Pro',
   notificationButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 25,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
     marginTop: 20,
   },
   notificationButtonText: {
-    color: 'white',
     fontSize: 16,
     fontWeight: '500',
     marginRight: 8,

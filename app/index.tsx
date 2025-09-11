@@ -621,42 +621,40 @@ const onFocus = React.useCallback((task: Task) => {
   </View>
   
   {/* Fixed Toggle Button - moved outside the card */}
-  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-  <View style={styles.toggleButtonContainer}>
-    <Pressable onPress={handleTogglePress}>
-      <Animated.View style={[
-        styles.toggleButton,
-        { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
-        toggleButtonStyle
+<View style={styles.toggleButtonRow}>
+  {/* Invisible spacer to push toggle button to center */}
+  <View style={styles.leftSpacer} />
+  
+  <Pressable onPress={handleTogglePress}>
+    <Animated.View style={[
+      styles.toggleButton,
+      { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
+      toggleButtonStyle
+    ]}>
+      <Text style={[
+        styles.toggleText,
+        { color: isDarkMode ? '#f9fafb' : '#000000ff' }
       ]}>
-        <Text style={[
-          styles.toggleText,
-          { color: isDarkMode ? '#f9fafb' : '#000000ff' }
-        ]}>
-          {showTranslation ? 'View in Sanskrit' : 'View in English'}
-        </Text>
-      </Animated.View>
-    </Pressable>
-  </View>
+        {showTranslation ? 'View in Sanskrit' : 'View in English'}
+      </Text>
+    </Animated.View>
+  </Pressable>
 
-   <View style={styles.toggleButtonContainer}>
-    <Pressable  onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        router.push({
-          pathname: '/shloka/[id]',
-          params: { id: String(shlokaIndex) }
-        });
-      }}>
-      <Animated.View style={[
-        styles.descButton,
-        { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
-
-      ]}>
-        <Feather name="book-open" size={16} color={isDarkMode ? "#f9fafb" : "#000000ff"} />
-      </Animated.View>
-    </Pressable>
-  </View>
-  </View>
+  <Pressable onPress={() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push({
+      pathname: '/shloka/[id]',
+      params: { id: String(shlokaIndex) }
+    });
+  }}>
+    <Animated.View style={[
+      styles.descButton,
+      { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
+    ]}>
+      <Feather name="book-open" size={16} color={isDarkMode ? "#f9fafb" : "#000000ff"} />
+    </Animated.View>
+  </Pressable>
+</View>
 </View>
 
       {/* Tasks Section */}
@@ -776,23 +774,36 @@ const styles = StyleSheet.create({
     color: '#545454',
 
   },
-  toggleButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    backgroundColor: '#fffffffe',
-    overflow: 'hidden',
-    // Remove marginTop: 0 as it's no longer needed
-  },
-  descButton:{
-     paddingVertical: 8,
-    paddingHorizontal: 8,
-    borderRadius: 16,
-    backgroundColor: '#fffffffe',
-    overflow: 'hidden',
-    marginLeft:6
+ toggleButtonRow: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingBottom: 16,
+  paddingHorizontal: 20,
+  position: 'relative', // Enable absolute positioning for children if needed
+},
 
-  },
+leftSpacer: {
+  width: 32, // Same width as descButton (8px padding + 16px icon + 8px padding)
+  // This invisible spacer balances the book button on the right
+},
+
+toggleButton: {
+  paddingVertical: 8,
+  paddingHorizontal: 16,
+  borderRadius: 16,
+  backgroundColor: '#fffffffe',
+  overflow: 'hidden',
+},
+
+descButton: {
+  paddingVertical: 8,
+  paddingHorizontal: 8,
+  borderRadius: 16,
+  backgroundColor: '#fffffffe',
+  overflow: 'hidden',
+  marginLeft: 8, // Space between the two buttons
+},
   
   shlokaContentContainer: {
     flex: 1, // Take all remaining space in the card

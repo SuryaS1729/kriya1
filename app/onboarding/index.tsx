@@ -54,12 +54,12 @@ const themes = {
   },
   light: {
     background: '#e8f4f8',
-    overlay: 'rgba(255, 255, 255, 0.2)',
+    overlay: 'rgba(76, 121, 180, 0.22)',
     text: '#1a365d',
     textSecondary: 'rgba(26, 54, 93, 0.8)',
     textTertiary: 'rgba(26, 54, 93, 0.7)',
     textQuaternary: 'rgba(26, 54, 93, 0.6)',
-    cardBackground: 'rgba(255, 255, 255, 0.9)',
+    cardBackground: 'rgba(203, 240, 241, 0.53)',
     buttonBackground: 'rgba(37, 188, 208, 0.15)',
     buttonBackgroundSecondary: 'rgba(26, 54, 93, 0.1)',
     border: 'rgba(26, 54, 93, 0.3)',
@@ -412,6 +412,8 @@ export default function Onboarding() {
   };
 
   const handleNext = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
     const totalSteps = onboardingSteps.length + 1;
     
     if (currentStep < totalSteps - 1) {
@@ -454,6 +456,8 @@ export default function Onboarding() {
   };
 
   const handleSkip = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
     console.log('🎯 Skipping onboarding...');
     
     setIsLoading(true);

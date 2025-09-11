@@ -1,7 +1,7 @@
 // app/index.tsx
 import { Link } from 'expo-router';
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { FlatList, StyleSheet, Text, View, Pressable } from 'react-native';
+import { FlatList, StyleSheet, Text, View, Pressable, ScrollView } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -559,69 +559,85 @@ const onFocus = React.useCallback((task: Task) => {
             {/* <StatusBar hidden={true} /> */}
       
       
-      <View style={[styles.topHalf, { paddingTop: insets.top }]}>
-        {/* Shloka Card */}
-        <View style={styles.card}>
-          <View style={styles.headerSection}>
-            <Text style={[styles.meta, { color: isDarkMode ? '#eef1f4ff' : '#545454' }]}>
-              Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
-            </Text>
-          </View>
+   <View style={[styles.topHalf, { paddingTop: insets.top }]}>
+  {/* Shloka Card */}
+  <View style={styles.card}>
+    <View style={styles.headerSection}>
+       <Pressable 
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        router.push({
+          pathname: '/shloka/[id]',
+          params: { id: String(shlokaIndex) }
+        });
+      }}
+    >
+      <Text style={[styles.meta, { color: isDarkMode ? '#eef1f4ff' : '#545454' }]}>
+        Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
+      </Text>
+    </Pressable>
+    </View>
 
-          <Link
-            href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
-
-            asChild
-          >
-            <Pressable onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-              <Animated.View style={[fadeStyle, styles.contentSection]}>
-                {showTranslation ? (
-                  <View style={styles.englishSection}>
-                    <Text 
-                      style={[
-                        styles.en, 
-                        {lineHeight:(shloka.translation_2 || "").length < 350 ? 24 : 18},
-                        { color: isDarkMode ? '#d1d5db' : '#434343ff' }
-                      ]} 
-                      adjustsFontSizeToFit
-                    >
-                      {shloka.translation_2 || shloka.description || 'No translation available'}
-                    </Text>
-                  </View>
-                ) : (
-                  <View>
-                    <Text 
-                      style={[
-                        styles.sa, 
-                        {lineHeight:(shloka.translation_2 || "").length < 90 ? 24 : 20},
-                        { color: isDarkMode ? '#eaecf1ff' : '#565657ff' }
-                      ]}
-                      adjustsFontSizeToFit
-                    >
-                      {shloka.text}
-                    </Text>
-                  </View>
-                )}
-              </Animated.View>
-            </Pressable>
-          </Link>
-          
-          <Pressable onPress={handleTogglePress}>
-            <Animated.View style={[
-              styles.toggleButton,
-              { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
-              toggleButtonStyle
-            ]}>
-              <Text style={[
-                styles.toggleText,
-                { color: isDarkMode ? '#f9fafb' : '#000000ff' }
-              ]}>
-                {showTranslation ? 'View in Sanskrit' : 'View in English'}
+    {/* <Link
+      href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
+      asChild
+    > */}
+      <View style={styles.shlokaContentContainer}
+      >
+        <Animated.View style={[fadeStyle, styles.contentSection]}>
+          {showTranslation ? (
+            <ScrollView
+              style={styles.scrollContainer}
+              contentContainerStyle={styles.scrollContentEnglish}
+              showsVerticalScrollIndicator={true}
+              bounces={true}
+            >
+              <Text 
+                style={[
+                  styles.en, 
+                  { color: isDarkMode ? '#d1d5db' : '#434343ff' }
+                ]}
+              >
+                {shloka.translation_2 || shloka.description || 'No translation available'}
               </Text>
-            </Animated.View>
-          </Pressable>
-        </View>
+            </ScrollView>
+          ) : (
+            <ScrollView
+              style={styles.scrollContainer}
+              contentContainerStyle={styles.scrollContentSanskrit}
+              showsVerticalScrollIndicator={true}
+              bounces={true}
+            >
+              <Text 
+                style={[styles.sa, { color: isDarkMode ? '#eaecf1ff' : '#565657ff' }]}
+              >
+                {shloka.text}
+              </Text>
+            </ScrollView>
+          )}
+        </Animated.View>
       </View>
+    {/* </Link> */}
+  </View>
+  
+  {/* Fixed Toggle Button - moved outside the card */}
+  <View style={styles.toggleButtonContainer}>
+    <Pressable onPress={handleTogglePress}>
+      <Animated.View style={[
+        styles.toggleButton,
+        { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
+        toggleButtonStyle
+      ]}>
+        <Text style={[
+          styles.toggleText,
+          { color: isDarkMode ? '#f9fafb' : '#000000ff' }
+        ]}>
+          {showTranslation ? 'View in Sanskrit' : 'View in English'}
+        </Text>
+      </Animated.View>
+    </Pressable>
+  </View>
+</View>
 
       {/* Tasks Section */}
       <View style={[
@@ -702,14 +718,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical:0
   },
+
   card: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    height: 300,
+    justifyContent: 'flex-start', // Changed from 'space-between'
+    flex: 1, // Take remaining space
     borderRadius: 16,
     paddingTop: 20,
     paddingHorizontal: 5,
-    paddingBottom: 10,
+    marginBottom: 8, // Small gap before toggle button
+  },
+  
+  // New container for the toggle button
+  toggleButtonContainer: {
+    alignItems: 'center',
+    paddingBottom: 16, // Fixed distance from tasks container
   },
   headerSection: {
     width: '100%',
@@ -722,14 +745,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    paddingTop: 20,
-    marginTop: 20,
-    paddingBottom: 20,
+
+
+
   },
   meta: { 
     fontFamily:"Source Serif Pro",
     fontSize: 23,
-    fontStyle: 'italic',
+    fontStyle: 'normal',
     color: '#545454',
   },
   toggleButton: {
@@ -738,22 +761,38 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: '#fffffffe',
     overflow: 'hidden',
-    marginTop: 0, 
-
+    // Remove marginTop: 0 as it's no longer needed
   },
+  
+  shlokaContentContainer: {
+    flex: 1, // Take all remaining space in the card
+    width: '100%',
+    paddingHorizontal: 8,
+  },
+
+  scrollContainer: {
+    flex: 1,
+  },
+  
+ scrollContentEnglish: {
+  paddingVertical: 20,
+  paddingHorizontal: 16,
+  minHeight: '100%', // This ensures the content takes full height
+  justifyContent: 'center', // Centers the text vertically
+  alignItems: 'center', // Centers the text horizontally
+},
+
+scrollContentSanskrit: {
+  paddingVertical: 20,
+  paddingHorizontal: 16,
+  minHeight: '100%', // This ensures the content takes full height
+  justifyContent: 'center', // Centers the text vertically
+  alignItems: 'center', // Centers the text horizontally
+},
   toggleText: {
     color: '#000000ff',
     fontSize: 12,
     fontWeight: '600',
-  },
-  englishSection: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    paddingHorizontal: 8,
-    paddingBottom: 0,
-    paddingTop: 5,
   },
    profileButton: {
     width: 36,
@@ -765,37 +804,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  sa: { 
-    // flex: 1,
-    // fontSize: 18,
-    // lineHeight: 24,
-    // color: '#565657ff',
-    // textAlign: 'center',
-    // fontFamily:"Samanya",
-    // fontWeight:"100",
-    // fontStyle:"normal",
-    // paddingTop: 20,
-
-     flex: 1,
-    fontSize: 20,
-    lineHeight: 24,
+ sa: { 
+    fontSize: 23,
     color: '#565657ff',
     textAlign: 'center',
-    fontFamily:"Kalam",
-    fontWeight:"300",
-    fontStyle:"normal",
-    paddingTop: 20,
+    fontFamily: "Kalam",
+    fontWeight: "300",
+    fontStyle: "normal",
+    paddingTop: 10,
+    lineHeight: 26, // Fixed line height for better readability
   },
+  
   en: { 
-    flex: 1,
-    fontSize: 18,
-    lineHeight: 24,
+    fontSize: 20,
     color: '#434343ff',
     textAlign: 'center',
-    fontFamily:"Alegreya",
-    fontWeight:"400",
-    fontStyle:"normal"
+    fontFamily: "Alegreya",
+    fontWeight: "400",
+    fontStyle: "italic",
+    lineHeight: 28, // Fixed line height for better readability
   },
+  
   tasksContainer: {
     flex: 1.37,
     backgroundColor: 'white',

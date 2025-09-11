@@ -102,16 +102,24 @@ export default function ShlokaDetail() {
   // prev/next indices from current index and total
   const { prevIndex, nextIndex } = getPrevNextIndices(currentIndex ?? 0, total);
 
-  const goPrev = () => {
-    if (prevIndex == null) return;
-    setCurrentIndex(prevIndex);
-    router.setParams({ id: String(prevIndex) });
-  };
-  const goNext = () => {
-    if (nextIndex == null) return;
-    setCurrentIndex(nextIndex);
-    router.setParams({ id: String(nextIndex) });
-  };
+const goPrev = () => {
+  if (prevIndex == null) return;
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  setCurrentIndex(prevIndex);
+  router.setParams({ id: String(prevIndex) });
+};
+
+const goNext = () => {
+  if (nextIndex == null) return;
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  setCurrentIndex(nextIndex);
+  router.setParams({ id: String(nextIndex) });
+};
+
+const handleBookPress = () => {
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  router.replace('/read');
+};
 
   const invalidIndex = currentIndex == null;
   const loading = !row && !invalidIndex;
@@ -314,11 +322,9 @@ export default function ShlokaDetail() {
             />
           </Pressable>
 
-          <Link href="/read" replace asChild>
-            <Pressable hitSlop={12} style={styles.pillBtn}>
-              <FontAwesome5 name="book" size={20} color={isDarkMode ? '#f9fafb' : '#18464aff'} />
-            </Pressable>
-          </Link>
+           <Pressable onPress={handleBookPress} hitSlop={12} style={styles.pillBtn}>
+      <FontAwesome5 name="book" size={20} color={isDarkMode ? '#f9fafb' : '#18464aff'} />
+    </Pressable>
 
           <Pressable
             onPress={goNext}

@@ -902,7 +902,7 @@ marginLeft:10
   },
   title: { 
     flex: 1, 
-    fontSize: 18, 
+    fontSize: 19, 
     color: '#000000ff',
     marginLeft: 12,
     fontFamily:"Source Serif Pro",

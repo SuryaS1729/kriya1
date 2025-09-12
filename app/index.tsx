@@ -867,7 +867,7 @@ scrollContentSanskrit: {
   },
   
   tasksContainer: {
-    flex: 1.4,
+    flex: 1.47,
     backgroundColor: 'white',
     borderTopLeftRadius: 41,
     borderTopRightRadius: 43,

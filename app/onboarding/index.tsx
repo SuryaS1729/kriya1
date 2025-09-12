@@ -6,7 +6,7 @@ import {
   Dimensions,
   Pressable,
   StatusBar,
-  ScrollView,
+  Platform,
   Image,
   useColorScheme
 } from 'react-native';
@@ -25,6 +25,7 @@ import Animated, {
   withRepeat,
   withSequence,
 } from 'react-native-reanimated';
+import DateTimePicker from '@react-native-community/datetimepicker'; // Add this import
 
 import { Feather } from '@expo/vector-icons';
 import { Spinner } from '@/components/ui/spinner';
@@ -46,7 +47,7 @@ const themes = {
     border: 'rgba(255, 255, 255, 0.3)',
     borderSecondary: 'rgba(255, 255, 255, 0.2)',
     progressDot: 'rgba(255, 255, 255, 0.3)',
-    timePickerBackground: 'rgba(0, 0, 0, 0.3)',
+    timePickerBackground: 'rgba(0, 0, 0, 0.07)',
     selectedTimeBackground: 'rgba(255, 255, 255, 0.2)',
     arrowColor: "rgba(104, 164, 177, 0.58)",
     spinnerColor: '#0ccebe5e',
@@ -55,7 +56,7 @@ const themes = {
   light: {
     background: '#e8f4f8',
     overlay: 'rgba(76, 121, 180, 0.22)',
-    text: '#1a365d',
+    text: '#2b4971ff',
     textSecondary: 'rgba(26, 54, 93, 0.8)',
     textTertiary: 'rgba(26, 54, 93, 0.7)',
     textQuaternary: 'rgba(26, 54, 93, 0.6)',
@@ -65,7 +66,7 @@ const themes = {
     border: 'rgba(26, 54, 93, 0.3)',
     borderSecondary: 'rgba(26, 54, 93, 0.2)',
     progressDot: 'rgba(26, 54, 93, 0.3)',
-    timePickerBackground: 'rgba(255, 255, 255, 0.8)',
+    timePickerBackground: 'rgba(255, 255, 255, 0.09)',
     selectedTimeBackground: 'rgba(26, 54, 93, 0.15)',
     arrowColor: "rgba(37, 188, 208, 0.7)",
     spinnerColor: '#0ccebe',
@@ -97,132 +98,144 @@ const onboardingSteps = [
   }
 ];
 
-// NotificationSlide component
+
+// Update the NotificationSlide component
+// ...existing code...
+
+// Update the NotificationSlide component
 const NotificationSlide = ({ onNext, theme }: { onNext: () => void, theme: any }) => {
-  const [selectedHour, setSelectedHour] = useState(8);
-  const [selectedMinute, setSelectedMinute] = useState(0);
+  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
   const setReminderTime = useKriya(s => s.setReminderTime);
 
-  const hours = Array.from({ length: 24 }, (_, i) => i);
-  const minutes = [0, 15, 30, 45];
+  // Initialize with 8:00 AM
+  useEffect(() => {
+    const initialTime = new Date();
+    initialTime.setHours(8, 0, 0, 0);
+    setSelectedTime(initialTime);
+  }, []);
+
+  const handleTimeChange = (event: any, time?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowPicker(false);
+    }
+    
+    if (time) {
+      setSelectedTime(time);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  };
 
   const handleContinue = async () => {
-    await setReminderTime(selectedHour, selectedMinute);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const hours = selectedTime.getHours();
+    const minutes = selectedTime.getMinutes();
+    await setReminderTime(hours, minutes);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onNext();
   };
 
   const getReminderTime = () => {
-    let reminderHour = selectedHour;
-    let reminderMinute = selectedMinute - 10;
+    const reminderTime = new Date(selectedTime);
+    reminderTime.setMinutes(reminderTime.getMinutes() - 10);
     
-    if (reminderMinute < 0) {
-      reminderMinute += 60;
-      reminderHour -= 1;
-    }
-    
-    if (reminderHour < 0) {
-      reminderHour += 24;
-    }
-    
-    return `${reminderHour.toString().padStart(2, '0')}:${reminderMinute.toString().padStart(2, '0')}`;
+    return reminderTime.toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
+  const getDisplayTime = () => {
+    return selectedTime.toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
   };
 
   return (
-    <View style={styles.notificationSlide}>
-      <View style={styles.notificationContent}>
-        <Feather name="bell" size={60} color={theme.text} style={styles.stepIcon} />
-        
-        <Text style={[styles.stepTitle, { color: theme.text }]}> When do you start your day?</Text>
-        
-        <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
-          Kriya expects you to write down tasks just before you begin your day. We'll send you a gentle reminder 10 minutes before your chosen time.
+    <View style={styles.notificationContent}>
+      <Feather name="bell" size={60} color={theme.text} style={styles.stepIcon} />
+      
+      <Text style={[styles.stepTitle, { color: theme.text }]}>
+        When do you start your day?
+      </Text>
+      
+      <Text style={[styles.stepDescription, { color: theme.textSecondary }]}>
+        Kriya expects you to write down tasks just before you begin your day. We'll send you a gentle reminder 10 minutes before your chosen time.
+      </Text>
+
+      <View style={[styles.timePickerContainer, { 
+        backgroundColor: theme.timePickerBackground, 
+        borderColor: theme.borderSecondary 
+      }]}>
+        <Text style={[styles.timePickerLabel, { color: theme.text }]}>
+          I usually start my day at:
         </Text>
-
-        <View style={[styles.timePickerContainer, { backgroundColor: theme.timePickerBackground, borderColor: theme.borderSecondary }]}>
-          <Text style={[styles.timePickerLabel, { color: theme.text }]}>I usually start my day at:</Text>
-          
-          <View style={styles.timePicker}>
-            <View style={styles.timeSection}>
-              <Text style={[styles.timeLabel, { color: theme.textTertiary }]}>Hour</Text>
-              <ScrollView 
-                style={styles.timeScroll}
-                showsVerticalScrollIndicator={false}
-                snapToInterval={40}
-                decelerationRate="fast"
-              >
-                {hours.map((hour) => (
-                  <Pressable
-                    key={hour}
-                    onPress={() => {
-                      setSelectedHour(hour);
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }}
-                    style={[
-                      styles.timeOption,
-                      selectedHour === hour && { backgroundColor: theme.selectedTimeBackground }
-                    ]}
-                  >
-                    <Text style={[
-                      styles.timeText,
-                      { color: theme.textTertiary },
-                      selectedHour === hour && { color: theme.text, fontWeight: '700' }
-                    ]}>
-                      {hour.toString().padStart(2, '0')}
-                    </Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </View>
-
-            <Text style={[styles.timeSeparator, { color: theme.text }]}>:</Text>
-
-            <View style={styles.timeSection}>
-              <Text style={[styles.timeLabel, { color: theme.textTertiary }]}>Minute</Text>
-              <ScrollView 
-                style={styles.timeScroll}
-                showsVerticalScrollIndicator={false}
-                snapToInterval={40}
-                decelerationRate="fast"
-              >
-                {minutes.map((minute) => (
-                  <Pressable
-                    key={minute}
-                    onPress={() => {
-                      setSelectedMinute(minute);
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    }}
-                    style={[
-                      styles.timeOption,
-                      selectedMinute === minute && { backgroundColor: theme.selectedTimeBackground }
-                    ]}
-                  >
-                    <Text style={[
-                      styles.timeText,
-                      { color: theme.textTertiary },
-                      selectedMinute === minute && { color: theme.text, fontWeight: '700' }
-                    ]}>
-                      {minute.toString().padStart(2, '0')}
-                    </Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-            </View>
+        
+        {/* Native Time Picker */}
+        {Platform.OS === 'ios' ? (
+          <View style={styles.iosTimePickerContainer}>
+            <DateTimePicker
+              value={selectedTime}
+              mode="time"
+              display="compact" // Changed from "wheels" to "compact"
+              onChange={handleTimeChange}
+              style={styles.iosTimePicker}
+              textColor={theme.text}
+              themeVariant={theme === themes.dark ? 'dark' : 'light'}
+            />
           </View>
+        ) : (
+          // Android: Show button to open picker
+          <View style={styles.androidTimePickerContainer}>
+            <Pressable
+              onPress={() => setShowPicker(true)}
+              style={[styles.androidTimeButton, { 
+                backgroundColor: theme.selectedTimeBackground,
+                borderColor: theme.border
+              }]}
+            >
+              <Text style={[styles.androidTimeText, { color: theme.text }]}>
+                {getDisplayTime()}
+              </Text>
+              <Feather name="clock" size={20} color={theme.text} />
+            </Pressable>
+            
+            {showPicker && (
+              <DateTimePicker
+                value={selectedTime}
+                mode="time"
+                display="default" // This is correct for Android
+                onChange={handleTimeChange}
+              />
+            )}
+          </View>
+        )}
 
-          <Text style={[styles.reminderNote, { color: theme.textQuaternary }]}>
-            📱 You'll receive a reminder at {getReminderTime()} (10 minutes before)
-          </Text>
-        </View>
-
-        <Pressable onPress={handleContinue} style={[styles.notificationButton, { backgroundColor: theme.buttonBackgroundSecondary, borderColor: theme.border }]}>
-          <Text style={[styles.notificationButtonText, { color: theme.text }]}>Set Reminder</Text>
-          <AntDesign name="arrowright" size={20} color={theme.text} />
-        </Pressable>
+        <Text style={[styles.reminderNote, { color: theme.textQuaternary }]}>
+          📱 You'll receive a reminder at {getReminderTime()} (10 minutes before)
+        </Text>
       </View>
+
+      {/* <View style={styles.progressContainer}>
+        {[0, 1, 2, 3, 4].map((index) => (
+          <View 
+            key={index}
+            style={[
+              styles.progressDot,
+              { backgroundColor: theme.progressDot },
+              index === 4 && { backgroundColor: theme.text, width: 12, height: 12, borderRadius: 6 }
+            ]}
+          />
+        ))}
+      </View> */}
     </View>
   );
 };
+
+// ...rest of your component remains the same...
+
 
 export default function Onboarding() {
   console.log('🎯 Onboarding component rendering');
@@ -651,15 +664,24 @@ export default function Onboarding() {
         )}
 
         {/* Navigation */}
-        {currentStep >= 0 && !isLoading && !isNotificationSlide && (
-          <Animated.View style={[styles.navigationContainer, animatedNavigationStyle]}>
-            <Pressable onPress={handleSkip} style={styles.skipButton}>
-              <Text style={[styles.skipText, { color: theme.textTertiary }]}>Skip</Text>
-            </Pressable>
+        {currentStep >= 0 && !isLoading && (
+          <Animated.View style={[
+            styles.navigationContainer, 
+            animatedNavigationStyle,
+            isNotificationSlide && styles.navigationContainerCentered
+          ]}>
+            {!isNotificationSlide && (
+              <Pressable onPress={handleSkip} style={styles.skipButton}>
+                <Text style={[styles.skipText, { color: theme.textTertiary }]}>Skip</Text>
+              </Pressable>
+            )}
             
-            <Pressable onPress={handleNext} style={[styles.nextButton, { backgroundColor: theme.buttonBackgroundSecondary, borderColor: theme.border }]}>
+            <Pressable 
+              onPress={handleNext} 
+              style={[styles.nextButton, { backgroundColor: theme.buttonBackgroundSecondary, borderColor: theme.border }]}
+            >
               <Text style={[styles.nextText, { color: theme.text }]}>
-                {currentStep === 4 ? 'Next' : 'Next'}
+                {isNotificationSlide ? 'Set Reminder' : 'Next'}
               </Text>
               <AntDesign name="arrowright" size={20} color={theme.text} />
             </Pressable>
@@ -813,6 +835,9 @@ const styles = StyleSheet.create({
     paddingBottom: 50,
     paddingTop: 20,
   },
+  navigationContainerCentered: {
+    justifyContent: 'center',
+  },
   skipButton: {
     paddingVertical: 12,
     paddingHorizontal: 20,
@@ -870,56 +895,65 @@ const styles = StyleSheet.create({
   },
 
   // Notification slide styles
-  notificationSlide: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-  },
   notificationContent: {
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 20,
     width: '100%',
+    minHeight: '80%', // Ensure it takes enough space but allows for accessibility scaling
   },
-  timePickerContainer: {
+   timePickerContainer: {
     borderRadius: 16,
-    padding: 20,
+    padding: 24,
     marginVertical: 32,
     borderWidth: 1,
     width: '100%',
+    maxWidth: 380,
+    alignItems: 'center',
   },
   timePickerLabel: {
-    fontSize: 18,
+    fontSize: 20, // Larger for better readability
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 24, // Increased spacing
     fontFamily: 'Source Serif Pro',
+    lineHeight: 28, // Better line height for accessibility
   },
-  timePicker: {
+  // iOS Time Picker Styles
+  iosTimePickerContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  
+  iosTimePicker: {
+    width: 320,
+    height: 120,
+  },
+
+  // Android Time Picker Styles
+  androidTimePickerContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  
+  androidTimeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    minWidth: 160,
+    minHeight: 48, // Accessibility guideline
   },
-  timeSection: {
-    alignItems: 'center',
-  },
-  timeLabel: {
-    fontSize: 12,
-    marginBottom: 8,
-    fontWeight: '500',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  timeScroll: {
-    height: 120,
-    width: 60,
-  },
-  timeOption: {
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 8,
-    marginVertical: 2,
+  
+  androidTimeText: {
+    fontSize: 18,
+    fontWeight: '600',
+    fontFamily: 'Space Mono',
+    marginRight: 12,
   },
   gitaImage: {
     width: SCREEN_WIDTH * 1,
@@ -928,22 +962,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     opacity: 0.9,
   },
-  timeText: {
-    fontSize: 18,
-    fontWeight: '500',
-    fontFamily: 'Space Mono',
-  },
-  timeSeparator: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginHorizontal: 16,
-    fontFamily: 'Space Mono',
-  },
   reminderNote: {
-    fontSize: 12,
+    fontSize: 13,
     textAlign: 'center',
     fontStyle: 'italic',
     fontFamily: 'Source Serif Pro',
+    lineHeight: 18,
+    paddingHorizontal: 10,
+    marginTop: 16,
   },
   notificationButton: {
     flexDirection: 'row',
@@ -953,6 +979,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     borderWidth: 1,
     marginTop: 20,
+    minHeight: 44, // Accessibility guideline for touch targets
   },
   notificationButtonText: {
     fontSize: 16,

@@ -184,181 +184,218 @@ const handleBookPress = () => {
     setShowTooltip(true);
     setTimeout(() => setShowTooltip(false), 1500); // Hide tooltip after 1.5 seconds
   };
+const headerHeight = insets.top + 12 + 36 + 12; // safeArea + paddingTop + buttonHeight + paddingBottom
 
-  return (
-    <SafeAreaView style={{ flex: 1 }} edges={['right', 'bottom', 'left']}>
-      <StatusBar style={isDarkMode ? "light" : "dark"} />
-      <LinearGradient 
-        colors={isDarkMode ? ['#344c67ff', '#000000ff'] : ['#ffffffff', '#9FABC8']} 
-        style={StyleSheet.absoluteFill} 
-      />
+// ...existing code...
+return (
+  <SafeAreaView style={{ flex: 1 }} edges={['right', 'bottom', 'left']}>
+    <StatusBar style={isDarkMode ? "light" : "dark"} />
+    <LinearGradient 
+      colors={isDarkMode ? ['#344c67ff', '#000000ff'] : ['#ffffffff', '#9FABC8']} 
+      style={StyleSheet.absoluteFill} 
+    />
 
-      <Animated.ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingTop: insets.top + 28,
-          paddingHorizontal: 22,
-          paddingBottom: 120,
-        }}
+    {/* Sticky Header */}
+    <View style={[
+      styles.stickyHeader, 
+      { 
+        paddingTop: insets.top + 12,
+        
+      }
+    ]}>
+      {/* Close Button */}
+      <Pressable 
+        onPress={() => router.back()} 
+        hitSlop={16}
+        style={[
+          styles.circularButton,
+          { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(0, 0, 0, 0.08)' }
+        ]}
       >
-        {/* Header row */}
-        <View style={styles.headerRow}>
-          <Pressable onPress={() => router.back()} hitSlop={16}>
-            <Text style={[styles.headerIcon, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>✕</Text>
-          </Pressable>
-          
-          <View style={styles.headerActions}>
-            <Pressable 
-              onPress={toggleBookmark} 
-              onLongPress={handleLongPressBookmark}
-              hitSlop={16} 
-              style={styles.actionButton}
-            >
-              <Animated.View
-                style={{
-                  transform: [{ scale: bookmarkScale }],
-                }}
-              >
-                <MaterialIcons 
-                  name={bookmarked ? "bookmark" : "bookmark-border"} 
-                  size={24} 
-                  color={bookmarked 
-                    ? (isDarkMode ? '#fbbf24' : '#f59e0b') 
-                    : (isDarkMode ? '#9ca3af' : '#696969ff')
-                  } 
-                />
-              </Animated.View>
-            </Pressable>
-            
-            {/* Share button with tooltip */}
-            <Pressable onPress={handleSharePress} hitSlop={16} style={styles.actionButton}>
-              <FontAwesome5 name="share" size={20} color={isDarkMode ? '#9ca3af' : '#696969ff'} />
-            </Pressable>
-
-            {/* Tooltip */}
-            {showTooltip && (
-              <View style={[styles.tooltip, { backgroundColor: isDarkMode ? '#1f2937' : '#f3f4f6' }]}>
-                <Text style={[styles.tooltipText, { color: isDarkMode ? '#f9fafb' : '#374151' }]}>
-                  Coming soon
-                </Text>
-              </View>
-            )}
-          </View>
-        </View>
-
-        {/* Body states */}
-        {invalidIndex ? (
-          <View style={styles.center}>
-            <Text style={{ color: isDarkMode ? '#d1d5db' : '#545454' }}>Invalid shloka index.</Text>
-          </View>
-        ) : loading ? (
-          <View style={styles.center}>
-            <Text style={{ color: isDarkMode ? '#d1d5db' : '#545454' }}>Loading…</Text>
-          </View>
-        ) : (
-          <Animated.View style={{ opacity: fade }}>
-            <Text style={[styles.headerTitle, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>
-              Adhyaya {row!.chapter_number}, Shloka {row!.verse_number}
-            </Text>
-
-            <Text style={[styles.sa, { color: isDarkMode ? '#e5e7eb' : '#545454' }]} selectable>
-              {row!.text}
-            </Text>
-
-            {row!.transliteration ? (
-              <>
-                <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
-                  Transliteration :
-                </Text>
-                <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable>
-                  {row!.transliteration}
-                </Text>
-              </>
-            ) : null}
-
-            <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
-              Translation :
-            </Text>
-            <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable={true}>
-              {row!.translation_2 ?? row!.description ?? '—'}
-            </Text>
-
-            {row!.commentary ? (
-              <>
-                <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
-                  Commentary :
-                </Text>
-                <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable>
-                  {row!.commentary}
-                </Text>
-              </>
-            ) : null}
-          </Animated.View>
-        )}
-      </Animated.ScrollView>
-
-      {/* Floating pill: ◀  📖  ▶  (now fixed in position) */}
-      {!invalidIndex && (
-        <Animated.View
+        <Text style={[styles.closeIcon, { color: isDarkMode ? '#d1d5db' : '#18464aff' }]}>✕</Text>
+      </Pressable>
+      
+      {/* Action Buttons */}
+      <View style={styles.headerActions}>
+        {/* Bookmark Button */}
+        <Pressable 
+          onPress={toggleBookmark} 
+          onLongPress={handleLongPressBookmark}
+          hitSlop={16} 
           style={[
-            styles.pillWrap,
-            {
-              bottom: insets.bottom + 20,
-              backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(148, 168, 193, 0.81)',
-              borderColor: isDarkMode ? 'rgba(71, 85, 105, 0.6)' : 'rgba(255, 255, 255, 0.43)',
-            },
+            styles.circularButton,
+            { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(0, 0, 0, 0.08)' }
           ]}
         >
-          <Pressable
-            onPress={goPrev}
-            disabled={prevIndex == null}
-            hitSlop={12}
-            style={[styles.pillBtn, prevIndex == null && styles.disabled]}
+          <Animated.View
+            style={{
+              transform: [{ scale: bookmarkScale }],
+            }}
           >
-            <AntDesign 
-              style={[styles.pillIcon, { color: prevIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 
-              name="arrowleft" 
-              size={32} 
+            <MaterialIcons 
+              name={bookmarked ? "bookmark" : "bookmark-border"} 
+              size={20} 
+              color={bookmarked 
+                ? (isDarkMode ? '#fbbf24' : '#ff7700ff') 
+                : (isDarkMode ? '#d1d5db' : '#18464aff')
+              } 
             />
-          </Pressable>
+          </Animated.View>
+        </Pressable>
+        
+        {/* Share Button */}
+        <Pressable 
+          onPress={handleSharePress} 
+          hitSlop={16} 
+          style={[
+            styles.circularButton,
+            { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(0, 0, 0, 0.08)' }
+          ]}
+        >
+          <FontAwesome5 name="share" size={16} color={isDarkMode ? '#ffffffff' : '#18464aff'} />
+        </Pressable>
 
-           <Pressable onPress={handleBookPress} hitSlop={12} style={styles.pillBtn}>
-      <FontAwesome5 name="book" size={20} color={isDarkMode ? '#f9fafb' : '#18464aff'} />
-    </Pressable>
+        {/* Tooltip - positioned relative to header */}
+        {showTooltip && (
+          <View style={[
+            styles.tooltip, 
+            { 
+              backgroundColor: isDarkMode ? '#1f2937' : '#f3f4f6',
+              top: 45, // Position below the sticky header
+            }
+          ]}>
+            <Text style={[styles.tooltipText, { color: isDarkMode ? '#f9fafb' : '#374151' }]}>
+              Coming soon
+            </Text>
+          </View>
+        )}
+      </View>
+    </View>
 
-          <Pressable
-            onPress={goNext}
-            disabled={nextIndex == null}
-            hitSlop={12}
-            style={[styles.pillBtn, nextIndex == null && styles.disabled]}
-          >
-            <AntDesign 
-              style={[styles.pillIcon, { color: nextIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 
-              name="arrowright" 
-              size={32} 
-            />
-          </Pressable>
+    <Animated.ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{
+        paddingTop: headerHeight + 20, // Dynamic top padding
+        paddingHorizontal: 22,
+        paddingBottom: 120,
+      }}
+    >
+      {/* Body states - removed old header row */}
+      {invalidIndex ? (
+        <View style={styles.center}>
+          <Text style={{ color: isDarkMode ? '#d1d5db' : '#545454' }}>Invalid shloka index.</Text>
+        </View>
+      ) : loading ? (
+        <View style={styles.center}>
+          <Text style={{ color: isDarkMode ? '#d1d5db' : '#545454' }}>Loading…</Text>
+        </View>
+      ) : (
+        <Animated.View style={{ opacity: fade }}>
+          <Text style={[styles.headerTitle, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>
+            Adhyaya {row!.chapter_number}, Shloka {row!.verse_number}
+          </Text>
+
+          <Text style={[styles.sa, { color: isDarkMode ? '#e5e7eb' : '#545454' }]} selectable>
+            {row!.text}
+          </Text>
+
+          {row!.transliteration ? (
+            <>
+              <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
+                Transliteration :
+              </Text>
+              <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable>
+                {row!.transliteration}
+              </Text>
+            </>
+          ) : null}
+
+          <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
+            Translation :
+          </Text>
+          <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable={true}>
+            {row!.translation_2 ?? row!.description ?? '—'}
+          </Text>
+
+          {row!.commentary ? (
+            <>
+              <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
+                Commentary :
+              </Text>
+              <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable>
+                {row!.commentary}
+              </Text>
+            </>
+          ) : null}
         </Animated.View>
       )}
-    </SafeAreaView>
-  );
+    </Animated.ScrollView>
+
+    {/* Floating pill navigation - unchanged */}
+    {!invalidIndex && (
+      <Animated.View
+        style={[
+          styles.pillWrap,
+          {
+            bottom: insets.bottom + 20,
+            backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(148, 168, 193, 0.81)',
+            borderColor: isDarkMode ? 'rgba(71, 85, 105, 0.6)' : 'rgba(255, 255, 255, 0.43)',
+          },
+        ]}
+      >
+        <Pressable
+          onPress={goPrev}
+          disabled={prevIndex == null}
+          hitSlop={12}
+          style={[styles.pillBtn, prevIndex == null && styles.disabled]}
+        >
+          <AntDesign 
+            style={[styles.pillIcon, { color: prevIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 
+            name="arrowleft" 
+            size={32} 
+          />
+        </Pressable>
+
+        <Pressable onPress={handleBookPress} hitSlop={12} style={styles.pillBtn}>
+          <FontAwesome5 name="book" size={20} color={isDarkMode ? '#f9fafb' : '#18464aff'} />
+        </Pressable>
+
+        <Pressable
+          onPress={goNext}
+          disabled={nextIndex == null}
+          hitSlop={12}
+          style={[styles.pillBtn, nextIndex == null && styles.disabled]}
+        >
+          <AntDesign 
+            style={[styles.pillIcon, { color: nextIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 
+            name="arrowright" 
+            size={32} 
+          />
+        </Pressable>
+      </Animated.View>
+    )}
+  </SafeAreaView>
+);
+// ...existing code...
 }
 
 const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
+  // headerRow: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   justifyContent: 'space-between',
+  //   marginBottom: 20,
+  // },
   headerIcon: { fontSize: 22, fontWeight: '700' },
   headerTitle: { 
     fontFamily:"Source Serif Pro",
     fontSize: 23,
-    fontStyle: 'italic',
-    fontWeight: '600',
+    fontStyle: 'normal',
+    fontWeight: '500',
     marginBottom: 42,
-    textAlign:'center'
+    textAlign:'center',
+
+    // marginTop:100
   },
   section: {
     fontSize: 18,
@@ -413,7 +450,7 @@ const styles = StyleSheet.create({
   },
   tooltip: {
     position: 'absolute',
-    top: -30, // Adjust to position above the share button
+    // top: -30, // Adjust to position above the share button
     right: -10,
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -422,9 +459,41 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    zIndex:101
   },
   tooltipText: {
     fontSize: 12,
     fontWeight: '500',
+  },
+   stickyHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 22,
+    paddingBottom: 12,
+    backgroundColor: "transparent",
+
+    // Backdrop blur effect (iOS only, but adds nice touch)
+
+  },
+  
+  circularButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Add subtle shadow for depth
+   
+  },
+  
+  closeIcon: { 
+    fontSize: 16, 
+    fontWeight: '700' 
   },
 });

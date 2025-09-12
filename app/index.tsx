@@ -660,7 +660,7 @@ const onFocus = React.useCallback((task: Task) => {
       {/* Tasks Section */}
       <View style={[
         styles.tasksContainer,
-        { backgroundColor: isDarkMode ? '#03233181' : '#ffffffdd', paddingBottom: insets.bottom }
+        { backgroundColor: isDarkMode ? '#03233181' : '#ffffffff', paddingBottom: insets.bottom }
       ]}>
         <View style={styles.tasksHeader}>
           <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#5a6173ff' }]}>Today's Tasks</Text>
@@ -768,7 +768,7 @@ const styles = StyleSheet.create({
 
   },
   meta: { 
-    fontFamily:"Source Serif Pro",
+    fontFamily:"Alegreya",
     fontSize: 23,
     fontStyle: 'normal',
     color: '#545454',
@@ -860,14 +860,14 @@ scrollContentSanskrit: {
     fontSize: 20,
     color: '#434343ff',
     textAlign: 'center',
-    fontFamily: "Alegreya",
+    fontFamily: "Source Serif Pro",
     fontWeight: "400",
     fontStyle: "italic",
     lineHeight: 28, // Fixed line height for better readability
   },
   
   tasksContainer: {
-    flex: 1.37,
+    flex: 1.57,
     backgroundColor: 'white',
     borderTopLeftRadius: 41,
     borderTopRightRadius: 43,

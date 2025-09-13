@@ -29,6 +29,7 @@ import DateTimePicker from '@react-native-community/datetimepicker'; // Add this
 
 import { Feather } from '@expo/vector-icons';
 import { Spinner } from '@/components/ui/spinner';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -272,6 +273,8 @@ export default function Onboarding() {
   const iconTranslateX = useSharedValue(0);
   const loadingOpacity = useSharedValue(0);
   const loadingScale = useSharedValue(0.8);
+  // Add this new animated component after your other useSharedValue declarations
+const shimmerTranslateX = useSharedValue(-200);
 
   // Loading text state
   const [currentLoadingText, setCurrentLoadingText] = useState("Act on your dharma...");
@@ -375,6 +378,27 @@ export default function Onboarding() {
       false
     );
   }, [iconTranslateX]);
+  // Add shimmer animation in useEffect (add this after your icon animation)
+useEffect(() => {
+  // Start shimmer animation with a delay, then repeat
+  const startShimmer = () => {
+    shimmerTranslateX.value = -200;
+    shimmerTranslateX.value = withRepeat(
+      withSequence(
+        withTiming(-200, { duration: 0 }), // Reset position
+        withTiming(400, { duration: 1700 }), // Animate across
+        withTiming(400, { duration: 2000 }) // Pause before repeat
+      ),
+      -1,
+      false
+    );
+  };
+  
+  // Start after a short delay
+  const timer = setTimeout(startShimmer, 1000);
+  
+  return () => clearTimeout(timer);
+}, [shimmerTranslateX]);
 
   // Loading text cycle
   const startLoadingTextCycle = () => {
@@ -420,6 +444,8 @@ export default function Onboarding() {
   };
 
   const handleGetStarted = () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
     console.log('🎯 Starting onboarding flow...');
     animateToOnboarding();
   };
@@ -537,6 +563,9 @@ export default function Onboarding() {
   const animatedLoadingTextStyle = useAnimatedStyle(() => ({
     opacity: loadingTextOpacity.value,
   }));
+  const animatedShimmerStyle = useAnimatedStyle(() => ({
+  transform: [{ translateX: shimmerTranslateX.value }],
+}));
 
   const isNotificationSlide = currentStep === 3;
 
@@ -644,24 +673,42 @@ export default function Onboarding() {
         </View>
 
         {/* Bottom modal card */}
-        {currentStep === -1 && !isLoading && (
-          <Animated.View style={[styles.bottomCard, animatedCardStyle, { backgroundColor: theme.cardBackground }]}>
-            <View style={styles.cardContent}>
-              <Animated.View style={[styles.arrowContainer, animatedIconStyle]}>
-                <Feather
-                  name="chevrons-down"
-                  size={28}
-                  color={theme.arrowColor}
-                />
-              </Animated.View>
-              
-              <Pressable onPress={handleGetStarted} style={[styles.actionButton, { backgroundColor: theme.buttonBackground, borderColor: theme.border }]}>
-                <Text style={[styles.buttonText, { color: theme.text }]}> Begin the Journey</Text>
-                <Text style={{fontSize:20}}>🪷</Text>
-              </Pressable>
-            </View>
+    {/* // Update your bottom card section with the shimmer effect */}
+{currentStep === -1 && !isLoading && (
+  <Animated.View style={[styles.bottomCard, animatedCardStyle, { backgroundColor: theme.cardBackground }]}>
+    <View style={styles.cardContent}>
+      <Animated.View style={[styles.arrowContainer, animatedIconStyle]}>
+        <Feather
+          name="chevrons-down"
+          size={28}
+          color={theme.arrowColor}
+        />
+      </Animated.View>
+      <Pressable 
+        onPress={handleGetStarted} 
+        style={[styles.actionButton, { backgroundColor: theme.buttonBackground, borderColor: theme.border }]}
+      ><View style={styles.shimmerContainer}>
+          <Animated.View style={[styles.shimmerOverlay, animatedShimmerStyle]}>
+            <LinearGradient
+              colors={[
+    'rgba(255, 255, 255, 0)',      // Transparent
+                'rgba(255, 255, 255, 0.051)',
+                'rgba(255, 255, 255, 0.051)',
+                'rgba(255, 255, 255, 0.04)',
+                'rgba(255, 255, 255, 0)'
+              ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.shimmerGradient}
+            />
           </Animated.View>
-        )}
+        </View>
+        <Text style={[styles.buttonText, { color: theme.text }]}>Begin the Journey</Text>
+        <Text style={{fontSize:20}}>🪷</Text>
+      </Pressable>
+    </View>
+  </Animated.View>
+)}
 
         {/* Navigation */}
         {currentStep >= 0 && !isLoading && (
@@ -770,6 +817,31 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 16,
     marginBottom: 20,
+       overflow: 'hidden', // Important: ensures shimmer doesn't overflow button bounds
+    position: 'relative', // For absolute positioning of shimmer
+  },
+    // New shimmer styles
+  shimmerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    overflow: 'hidden',
+    borderRadius: 25, // Match button border radius
+  },
+  
+  shimmerOverlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 100, // Width of the shimmer effect
+    transform: [{ skewX: '-15deg' }], // Slight angle for more realistic effect
+  },
+  
+  shimmerGradient: {
+    flex: 1,
+    width: '100%',
   },
   buttonText: {
     fontSize: 18,

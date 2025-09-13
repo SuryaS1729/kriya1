@@ -682,18 +682,21 @@ const onFocus = React.useCallback((task: Task) => {
             <View>
               <Pressable onPress={() => router.push('/add')}>
                 <View style={styles.emptyState}>
-                  <Feather name="sun" size={48} color={isDarkMode ? "#6b7280" : "#cbd5e1"} />
+                  <Feather name="sun" size={48} color={isDarkMode ? "#8a93a4ff" : "#cbd5e1"} />
                   <Text style={[
                     styles.emptyStateTitle,
                     { color: isDarkMode ? '#9ca3af' : '#64748b' }
                   ]}>It's a Fresh Start</Text>
-                  <View style={{ height: 16 }}></View>
-                  <Text style={[
-                    styles.emptyStateSubtitle,
-                    { color: isDarkMode ? '#6b7280' : '#94a3b8' }
-                  ]}>
-                   add your tasks for today!
-                  </Text>
+                  <View style={{ height: 10 }}></View>
+                <Text style={[styles.emptyStateSubtitle, { color: isDarkMode ? '#959eb1ff' : '#94a3b8' }]}>
+  1. Add your tasks for today
+</Text>
+<Text style={[styles.emptyStateSubSubtitle, { color: isDarkMode ? '#959eb1ff' : '#94a3b8' }]}>
+  2. Complete tasks to unlock new shlokas ✅
+</Text>
+<Text style={[styles.emptyStateSubSubtitle, { color: isDarkMode ? '#959eb1ff' : '#94a3b8' }]}>
+  3. The Gita becomes part of your routine ☸️
+</Text>
                 </View>
               </Pressable>
               
@@ -975,7 +978,7 @@ marginLeft:10
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 60,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
 
   },
   emptyStateTitle: {
@@ -987,12 +990,22 @@ marginLeft:10
     fontFamily: "Kalam",
   },
   emptyStateSubtitle: {
-    fontSize: 16,
+    fontSize: 13,
     color: '#94a3b8',
     textAlign: 'center',
     lineHeight: 22,
     fontFamily: "Source Serif Pro",
     fontWeight:"300",
+
+  },
+  emptyStateSubSubtitle: {
+    fontSize: 13,
+    color: '#94a3b8',
+    textAlign: 'center',
+    lineHeight: 22,
+    fontFamily: "Source Serif Pro",
+    fontWeight:"300",
+    marginTop:16
 
   },
 

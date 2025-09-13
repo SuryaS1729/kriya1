@@ -16,10 +16,11 @@ import BlurBackground from '@/components/BlurBackground';
 import { Progress, ProgressFilledTrack } from '@/components/ui/progress';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
-
+import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Notifications from 'expo-notifications';
 import { SchedulableTriggerInputTypes } from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
+import { Toast, ToastTitle, ToastDescription, useToast } from '@/components/ui/toast'; // Add this import
 
 
 const { width } = Dimensions.get('window');
@@ -437,6 +438,8 @@ function WeeklySummary() {
 
 
 // Updated NotificationSettings component with proper Modal
+// Updated NotificationSettings component with native DateTimePicker
+// Updated NotificationSettings component with proper Android handling
 function NotificationSettings() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const notificationsEnabled = useKriya(s => s.notificationsEnabled);
@@ -445,16 +448,138 @@ function NotificationSettings() {
   const setReminderTime = useKriya(s => s.setReminderTime);
   
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [tempHour, setTempHour] = useState(reminderTime.hour);
-  const [tempMinute, setTempMinute] = useState(reminderTime.minute);
+  const [selectedTime, setSelectedTime] = useState(new Date());
+  const toast = useToast(); // Add toast hook
 
-  const hours = Array.from({ length: 24 }, (_, i) => i);
-  const minutes = [0, 15, 30, 45];
+  // Initialize selectedTime with current reminder time
+  useEffect(() => {
+    const newTime = new Date();
+    newTime.setHours(reminderTime.hour, reminderTime.minute, 0, 0);
+    setSelectedTime(newTime);
+  }, [reminderTime]);
 
-  const handleSaveTime = async () => {
-    await setReminderTime(tempHour, tempMinute);
-    setShowTimePicker(false);
+  const showSuccessToast = (timeString: string) => {
+    const newId = Math.random().toString();
+    toast.show({
+      id: newId,
+      placement: 'bottom',
+      duration: 3000,
+      render: ({ id }) => {
+        const uniqueToastId = 'toast-' + id;
+        return (
+          <Toast nativeID={uniqueToastId} action="success" variant="solid">
+            <ToastTitle>Reminder Time Set!</ToastTitle>
+            <ToastDescription>
+              Your daily reminder is now set for {timeString}
+            </ToastDescription>
+          </Toast>
+        );
+      },
+    });
+  };
+
+  const handleTimeChange = async (event: any, time?: Date) => {
+    // Hide picker on Android when user interacts
+    if (Platform.OS === 'android') {
+      setShowTimePicker(false);
+    }
+    
+    if (time) {
+      setSelectedTime(time);
+      
+      // Save the time immediately for both platforms
+      const hours = time.getHours();
+      const minutes = time.getMinutes();
+      
+      try {
+        await setReminderTime(hours, minutes);
+        
+        // Format time for display in toast
+        const timeString = time.toLocaleTimeString([], { 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: true 
+        });
+        
+        console.log(`✅ Time updated to ${hours}:${minutes.toString().padStart(2, '0')}`);
+        
+        // Show success toast
+        showSuccessToast(timeString);
+        
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } catch (error) {
+        console.error('❌ Failed to update reminder time:', error);
+        
+        // Show error toast
+        const errorId = Math.random().toString();
+        toast.show({
+          id: errorId,
+          placement: 'bottom',
+          duration: 3000,
+          render: ({ id }) => {
+            const uniqueToastId = 'toast-' + id;
+            return (
+              <Toast nativeID={uniqueToastId} action="error" variant="solid">
+                <ToastTitle>Failed to Set Time</ToastTitle>
+                <ToastDescription>
+                  Could not update your reminder time. Please try again.
+                </ToastDescription>
+              </Toast>
+            );
+          },
+        });
+        
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    } else if (Platform.OS === 'android') {
+      // User cancelled on Android
+      console.log('User cancelled time picker on Android');
+    }
+  };
+
+  const getDisplayTime = () => {
+    return `${reminderTime.hour.toString().padStart(2, '0')}:${reminderTime.minute.toString().padStart(2, '0')}`;
+  };
+
+  const handleOpenTimePicker = () => {
+    // Sync selectedTime with current reminderTime before opening picker
+    const currentTime = new Date();
+    currentTime.setHours(reminderTime.hour, reminderTime.minute, 0, 0);
+    setSelectedTime(currentTime);
+    
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setShowTimePicker(true);
+  };
+
+  const handleToggleNotifications = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await toggleNotifications();
+    
+    // Show toast based on new state
+    const newState = !notificationsEnabled; // Since toggle happens after this
+    const toastId = Math.random().toString();
+    
+    toast.show({
+      id: toastId,
+      placement: 'bottom',
+      duration: 2500,
+      render: ({ id }) => {
+        const uniqueToastId = 'toast-' + id;
+        return (
+          <Toast nativeID={uniqueToastId} action={newState ? "success" : "info"} variant="solid">
+            <ToastTitle>
+              {newState ? "Notifications Enabled" : "Notifications Disabled"}
+            </ToastTitle>
+            <ToastDescription>
+              {newState 
+                ? "You'll receive daily reminders to plan your day" 
+                : "Daily reminders have been turned off"
+              }
+            </ToastDescription>
+          </Toast>
+        );
+      },
+    });
   };
 
   return (
@@ -465,10 +590,7 @@ function NotificationSettings() {
         {/* Toggle Notifications */}
         <Pressable 
           style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            toggleNotifications();
-          }}
+          onPress={handleToggleNotifications}
         >
           <View style={styles.settingInfo}>
             <Text style={[styles.settingTitle, !isDarkMode && styles.lightText]}>
@@ -494,10 +616,7 @@ function NotificationSettings() {
         {notificationsEnabled && (
           <Pressable 
             style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setShowTimePicker(true);
-            }}
+            onPress={handleOpenTimePicker}
           >
             <View style={styles.settingInfo}>
               <Text style={[styles.settingTitle, !isDarkMode && styles.lightText]}>
@@ -509,7 +628,7 @@ function NotificationSettings() {
             </View>
             <View style={styles.timeDisplay}>
               <Text style={[styles.timeDisplayText, !isDarkMode && styles.lightText]}>
-                {reminderTime.hour.toString().padStart(2, '0')}:{reminderTime.minute.toString().padStart(2, '0')}
+                {getDisplayTime()}
               </Text>
               <Feather name="chevron-right" size={16} color={isDarkMode ? '#9ca3af' : '#64748b'} />
             </View>
@@ -517,104 +636,58 @@ function NotificationSettings() {
         )}
       </View>
 
-      {/* Time Picker Modal - Updated with proper Modal */}
-      <Modal
-        visible={showTimePicker}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowTimePicker(false)}
-      >
-        <View style={styles.timePickerOverlay}>
-          <Pressable style={styles.modalBackdrop} onPress={() => setShowTimePicker(false)} />
-          <View style={[styles.timePickerModal, !isDarkMode && styles.lightTimePickerModal]}>
-            <Text style={[styles.timePickerTitle, !isDarkMode && styles.lightText]}>
-              Set Reminder Time
-            </Text>
-            
-            <View style={styles.timePickerContent}>
-              <View style={styles.timePickerRow}>
-                <View style={styles.timePickerSection}>
-                  <Text style={[styles.timePickerLabel, !isDarkMode && styles.lightSubText]}>Hour</Text>
-                  <ScrollView 
-                    style={styles.timePickerScroll}
-                    showsVerticalScrollIndicator={false}
-                  >
-                    {hours.map((hour) => (
-                      <Pressable
-                        key={hour}
-                        onPress={() => setTempHour(hour)}
-                        style={[
-                          styles.timePickerOption,
-                          tempHour === hour && styles.selectedTimePickerOption,
-                          tempHour === hour && !isDarkMode && styles.lightSelectedTimePickerOption
-                        ]}
-                      >
-                        <Text style={[
-                          styles.timePickerOptionText,
-                          !isDarkMode && styles.lightText,
-                          tempHour === hour && styles.selectedTimePickerOptionText
-                        ]}>
-                          {hour.toString().padStart(2, '0')}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </ScrollView>
-                </View>
+      {/* Native Time Picker - unchanged */}
+      {Platform.OS === 'ios' ? (
+        <Modal
+          visible={showTimePicker}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowTimePicker(false)}
+        >
+          <View style={styles.timePickerOverlay}>
+            <Pressable style={styles.modalBackdrop} onPress={() => setShowTimePicker(false)} />
+            <View style={[styles.nativeTimePickerModal, !isDarkMode && styles.lightNativeTimePickerModal]}>
+              <Text style={[styles.timePickerTitle, !isDarkMode && styles.lightText]}>
+                Set Reminder Time
+              </Text>
+              
+              <View style={styles.nativeTimePickerContainer}>
+                <DateTimePicker
+                  value={selectedTime}
+                  mode="time"
+                  display="spinner"
+                  onChange={handleTimeChange}
+                  style={styles.nativeTimePicker}
+                  textColor={isDarkMode ? '#fff' : '#000'}
+                  themeVariant={isDarkMode ? 'dark' : 'light'}
+                />
+              </View>
 
-                <Text style={[styles.timePickerSeparator, !isDarkMode && styles.lightText]}>:</Text>
-
-                <View style={styles.timePickerSection}>
-                  <Text style={[styles.timePickerLabel, !isDarkMode && styles.lightSubText]}>Minute</Text>
-                  <ScrollView 
-                    style={styles.timePickerScroll}
-                    showsVerticalScrollIndicator={false}
-                  >
-                    {minutes.map((minute) => (
-                      <Pressable
-                        key={minute}
-                        onPress={() => setTempMinute(minute)}
-                        style={[
-                          styles.timePickerOption,
-                          tempMinute === minute && styles.selectedTimePickerOption,
-                          tempMinute === minute && !isDarkMode && styles.lightSelectedTimePickerOption
-                        ]}
-                      >
-                        <Text style={[
-                          styles.timePickerOptionText,
-                          !isDarkMode && styles.lightText,
-                          tempMinute === minute && styles.selectedTimePickerOptionText
-                        ]}>
-                          {minute.toString().padStart(2, '0')}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </ScrollView>
-                </View>
+              <View style={styles.nativeTimePickerActions}>
+                <Pressable 
+                  onPress={() => setShowTimePicker(false)}
+                  style={[styles.timePickerButton, styles.timePickerCancelButton]}
+                >
+                  <Text style={[styles.timePickerCancelText, !isDarkMode && { color: '#4b5563' }]}>Done</Text>
+                </Pressable>
               </View>
             </View>
-
-            <View style={styles.timePickerActions}>
-              <Pressable 
-                onPress={() => setShowTimePicker(false)}
-                style={[styles.timePickerButton, styles.timePickerCancelButton]}
-              >
-                <Text style={styles.timePickerCancelText}>Cancel</Text>
-              </Pressable>
-              
-              <Pressable 
-                onPress={handleSaveTime}
-                style={[styles.timePickerButton, styles.timePickerSaveButton, !isDarkMode && styles.lightTimePickerSaveButton]}
-              >
-                <Text style={styles.timePickerSaveText}>Save</Text>
-              </Pressable>
-            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      ) : (
+        showTimePicker && (
+          <DateTimePicker
+            value={selectedTime}
+            mode="time"
+            display="default"
+            onChange={handleTimeChange}
+            is24Hour={false}
+          />
+        )
+      )}
     </View>
   );
 }
-
 
 
 // Add this test function before the QuickActions component
@@ -631,7 +704,7 @@ function TestNotificationButton() {
           sound: true,
           ...(Platform.OS === 'android' && {
             icon: './assets/icons/icon.png',
-            color: '#ff9500',
+            color: '#0026ffff',
           }),
         },
         trigger: {
@@ -852,31 +925,31 @@ function Footer() {
         <View style={styles.socialButtons}>
           <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
-            onPress={() => openLink('https://twitter.com/kriyaapp')}
+            onPress={() => openLink('https://twitter.com/SuryaS_1729')}
           >
             <Feather name="twitter" size={18} color={isDarkMode ? "#1da1f2" : "#1da1f2"} />
           </Pressable>
-          
-          <Pressable 
-            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
-            onPress={() => openLink('https://github.com/kriyaapp')}
-          >
-            <Feather name="github" size={18} color={isDarkMode ? "#fff" : "#000"} />
-          </Pressable>
-          
           <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
             onPress={() => openLink('mailto:bitwisedharma@gmail.com')}
           >
             <Feather name="mail" size={18} color={isDarkMode ? "#ff6b6b" : "#ff6b6b"} />
           </Pressable>
-          
           <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
-            onPress={() => openLink('https://instagram.com/kriyaapp')}
+            onPress={() => openLink('https://github.com/SuryaS1729/kriya1')}
+          >
+            <Feather name="github" size={18} color={isDarkMode ? "#fff" : "#000"} />
+          </Pressable>
+          
+          
+          
+          {/* <Pressable 
+            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
+            onPress={() => openLink('https://instagram.com/thebitwisedharma')}
           >
             <Feather name="instagram" size={18} color={isDarkMode ? "#e4405f" : "#e4405f"} />
-          </Pressable>
+          </Pressable> */}
         </View>
       </View>
       
@@ -1126,21 +1199,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  timePickerModal: {
-    backgroundColor: '#1f2937',
-    borderRadius: 16,
-    padding: 24,
-    width: '85%',
-    maxWidth: 320,
-    elevation: 10, // Android shadow
-    shadowColor: '#000', // iOS shadow
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-  },
+ 
   lightTimePickerModal: {
     backgroundColor: '#fff',
   },
@@ -1151,59 +1210,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
-  timePickerContent: {
-    marginBottom: 24,
-  },
-  timePickerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  timePickerSection: {
-    alignItems: 'center',
-  },
-  timePickerLabel: {
-    fontSize: 12,
-    color: '#9ca3af',
-    marginBottom: 8,
-    fontWeight: '500',
-  },
-  timePickerScroll: {
-    height: 100,
-    width: 60,
-  },
-  timePickerOption: {
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 6,
-    marginVertical: 1,
-  },
-  selectedTimePickerOption: {
-    backgroundColor: '#3b82f6',
-  },
-  lightSelectedTimePickerOption: {
-    backgroundColor: '#2563eb',
-  },
-  timePickerOptionText: {
-    fontSize: 16,
-    color: '#d1d5db',
-    fontFamily: 'Space Mono',
-  },
-  selectedTimePickerOptionText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  timePickerSeparator: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginHorizontal: 12,
-  },
-  timePickerActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
+
+
   timePickerButton: {
     flex: 1,
     paddingVertical: 12,
@@ -1215,20 +1223,41 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#4b5563',
   },
-  timePickerSaveButton: {
-    backgroundColor: '#3b82f6',
-  },
-  lightTimePickerSaveButton: {
-    backgroundColor: '#2563eb',
-  },
+
   timePickerCancelText: {
     color: '#9ca3af',
     fontWeight: '500',
   },
-  timePickerSaveText: {
-    color: '#fff',
-    fontWeight: '600',
+   nativeTimePickerModal: {
+    backgroundColor: '#1f2937',
+    borderRadius: 16,
+    padding: 24,
+    width: '85%',
+    maxWidth: 320,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
+  lightNativeTimePickerModal: {
+    backgroundColor: '#fff',
+  },
+  nativeTimePickerContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  nativeTimePicker: {
+    width: 280,
+    height: 120,
+  },
+  nativeTimePickerActions: {
+    alignItems: 'center',
+  },
+
   navButton: {
     padding: 8,
   },

@@ -1,7 +1,7 @@
 // app/index.tsx
 import { Link } from 'expo-router';
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { FlatList, StyleSheet, Text, View, Pressable, ScrollView } from 'react-native';
+import { FlatList, StyleSheet, Text, View, Pressable, ScrollView, TouchableOpacity } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -624,8 +624,8 @@ const onFocus = React.useCallback((task: Task) => {
 <View style={styles.toggleButtonRow}>
   {/* Invisible spacer to push toggle button to center */}
   <View style={styles.leftSpacer} />
-  
-  <Pressable onPress={handleTogglePress}>
+
+  <TouchableOpacity onPress={handleTogglePress} activeOpacity={0.7}>
     <Animated.View style={[
       styles.toggleButton,
       { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
@@ -638,22 +638,23 @@ const onFocus = React.useCallback((task: Task) => {
         {showTranslation ? 'View in Sanskrit' : 'View in English'}
       </Text>
     </Animated.View>
-  </Pressable>
+  </TouchableOpacity>
 
-  <Pressable onPress={() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  <TouchableOpacity onPress={() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push({
       pathname: '/shloka/[id]',
       params: { id: String(shlokaIndex) }
     });
-  }}>
+  }}
+  activeOpacity={0.7}>
     <Animated.View style={[
       styles.descButton,
       { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
     ]}>
       <Feather name="book-open" size={16} color={isDarkMode ? "#f9fafb" : "#000000ff"} />
     </Animated.View>
-  </Pressable>
+  </TouchableOpacity>
 </View>
 </View>
 
@@ -665,11 +666,11 @@ const onFocus = React.useCallback((task: Task) => {
         <View style={styles.tasksHeader}>
           <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#5a6173ff' }]}>Today's Tasks</Text>
           <Link href="/history" asChild>
-            <Pressable >
+            <TouchableOpacity activeOpacity={0.8} onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}>
               <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
               <Feather name='user' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
               </View>
-            </Pressable>
+            </TouchableOpacity>
           </Link>
         </View>
         
@@ -713,7 +714,7 @@ const onFocus = React.useCallback((task: Task) => {
         />
         
         <Link href="/add" asChild>
-          <Pressable onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}>
+          <TouchableOpacity onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)} activeOpacity={0.7}>
             <View style={[styles.addTaskButton, {backgroundColor: isDarkMode ? '#1b293d91' : '#f9fafb'}]}>
             <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#081623ff' : '#E6E6E6' }]}>
               <Feather name="plus" size={20} color={isDarkMode ? "#ffffffff" : "#606060"} />
@@ -722,7 +723,7 @@ const onFocus = React.useCallback((task: Task) => {
               Add a task . . .
             </Text>
             </View>
-          </Pressable>
+          </TouchableOpacity>
         </Link>
       </View>
     </LinearGradient>

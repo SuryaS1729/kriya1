@@ -58,6 +58,7 @@ export default function Read() {
           returnKeyType="search"
           autoCorrect={false}
           placeholderTextColor={isDarkMode ? "#9ca3af" : "#6b7280"}
+          
         />
 
         {query.trim() ? (
@@ -76,7 +77,8 @@ export default function Read() {
                   <Pressable style={[
                     styles.resultRow,
                     { backgroundColor: isDarkMode ? '#1f2937' : 'white' }
-                  ]}>
+                  ]}
+                  android_ripple={{ color: '#cccccc18'}}>
                     <Text style={[
                       styles.resultMeta,
                       { color: isDarkMode ? '#9ca3af' : '#64748b' }
@@ -122,6 +124,7 @@ export default function Read() {
                             : 'transparent'
                         }
                       ]}
+                      android_ripple={{ color: '#cccccc18'}}
                     >
                       <Text style={[
                         styles.chText,
@@ -171,11 +174,12 @@ export default function Read() {
                       replace
                       asChild
                     >
-                      <Pressable style={styles.vRow}>
+                      <Pressable style={styles.vRow} android_ripple={{ color: '#cccccc18'}}>
                         <Text style={[
                           styles.vNum,
                           { color: isDarkMode ? '#f9fafb' : '#0f172a' }
-                        ]}>
+                        ]}
+                        >
                           {item.verse_number}
                         </Text>
                         <Text style={[

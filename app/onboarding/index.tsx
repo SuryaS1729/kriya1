@@ -8,7 +8,9 @@ import {
   StatusBar,
   Platform,
   Image,
-  useColorScheme
+  useColorScheme,
+  Touchable,
+  TouchableOpacity
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -189,25 +191,26 @@ const NotificationSlide = ({ onNext, theme }: { onNext: () => void, theme: any }
           </View>
         ) : (
           // Android: Show button to open picker
-          <View style={styles.androidTimePickerContainer}>
-            <Pressable
+        <View style={styles.androidTimePickerContainer}>
+            <TouchableOpacity // Changed from Pressable to TouchableOpacity
               onPress={() => setShowPicker(true)}
               style={[styles.androidTimeButton, { 
                 backgroundColor: theme.selectedTimeBackground,
                 borderColor: theme.border
               }]}
+              activeOpacity={0.7} // Add touch feedback
             >
               <Text style={[styles.androidTimeText, { color: theme.text }]}>
                 {getDisplayTime()}
               </Text>
               <Feather name="clock" size={20} color={theme.text} />
-            </Pressable>
+            </TouchableOpacity>
             
             {showPicker && (
               <DateTimePicker
                 value={selectedTime}
                 mode="time"
-                display="default" // This is correct for Android
+                display="default"
                 onChange={handleTimeChange}
               />
             )}
@@ -684,8 +687,10 @@ useEffect(() => {
           color={theme.arrowColor}
         />
       </Animated.View>
-      <Pressable 
+      <TouchableOpacity 
         onPress={handleGetStarted} 
+               activeOpacity={0.8} 
+
         style={[styles.actionButton, { backgroundColor: theme.buttonBackground, borderColor: theme.border }]}
       ><View style={styles.shimmerContainer}>
           <Animated.View style={[styles.shimmerOverlay, animatedShimmerStyle]}>
@@ -705,35 +710,40 @@ useEffect(() => {
         </View>
         <Text style={[styles.buttonText, { color: theme.text }]}>Begin the Journey</Text>
         <Text style={{fontSize:20}}>🪷</Text>
-      </Pressable>
+      </TouchableOpacity>
     </View>
   </Animated.View>
 )}
 
         {/* Navigation */}
-        {currentStep >= 0 && !isLoading && (
-          <Animated.View style={[
-            styles.navigationContainer, 
-            animatedNavigationStyle,
-            isNotificationSlide && styles.navigationContainerCentered
-          ]}>
-            {!isNotificationSlide && (
-              <Pressable onPress={handleSkip} style={styles.skipButton}>
-                <Text style={[styles.skipText, { color: theme.textTertiary }]}>Skip</Text>
-              </Pressable>
-            )}
-            
-            <Pressable 
-              onPress={handleNext} 
-              style={[styles.nextButton, { backgroundColor: theme.buttonBackgroundSecondary, borderColor: theme.border }]}
-            >
-              <Text style={[styles.nextText, { color: theme.text }]}>
-                {isNotificationSlide ? 'Set Reminder' : 'Next'}
-              </Text>
-              <AntDesign name="arrowright" size={20} color={theme.text} />
-            </Pressable>
-          </Animated.View>
-        )}
+      {currentStep >= 0 && !isLoading && (
+  <Animated.View style={[
+    styles.navigationContainer, 
+    animatedNavigationStyle,
+    isNotificationSlide && styles.navigationContainerCentered
+  ]}>
+    {!isNotificationSlide && (
+      <TouchableOpacity 
+        onPress={handleSkip} 
+        style={styles.skipButton}
+        activeOpacity={0.6} // Add touch feedback
+      >
+        <Text style={[styles.skipText, { color: theme.textTertiary }]}>Skip</Text>
+      </TouchableOpacity>
+    )}
+    
+    <TouchableOpacity 
+      onPress={handleNext} 
+      style={[styles.nextButton, { backgroundColor: theme.buttonBackgroundSecondary, borderColor: theme.border }]}
+      activeOpacity={0.7} // Add touch feedback
+    >
+      <Text style={[styles.nextText, { color: theme.text }]}>
+        {isNotificationSlide ? 'Set Reminder' : 'Next'}
+      </Text>
+      <AntDesign name="arrowright" size={20} color={theme.text} />
+    </TouchableOpacity>
+  </Animated.View>
+)}
       </SafeAreaView>
     </View>
   );

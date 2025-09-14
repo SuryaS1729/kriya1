@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View, Pressable, FlatList, ScrollView, Alert, Dimensions, Modal, Platform, Linking } from 'react-native';
+import { StyleSheet, Text, View, Pressable, FlatList, ScrollView, Alert, Dimensions, Modal, Platform, Linking, TouchableOpacity } from 'react-native';
 import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -208,6 +208,7 @@ function MainCalendar() {
   }, [currentDate, getForDay, getFocusSessionsForDay]);
 
   const navigateMonth = (direction: 'prev' | 'next') => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setCurrentDate(prev => {
       const newDate = new Date(prev);
       newDate.setMonth(prev.getMonth() + (direction === 'next' ? 1 : -1));
@@ -247,7 +248,7 @@ function MainCalendar() {
 const handleDayPress = (day: any) => {
   if (day.isCurrentMonth) { // Remove the hasActivity condition
     setSelectedDate(day.date);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); // Add haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); // Add haptic feedback
   }
 };
 
@@ -263,10 +264,13 @@ const handleDayPress = (day: any) => {
         <View style={styles.calendarHeader}>
           <Text style={[styles.calendarTitle, !isDarkMode && styles.lightText]}>{calendarData.monthName}</Text>
           <View style={styles.monthNavigation}>
-            <Pressable onPress={() => navigateMonth('prev')} style={styles.navButton}>
+            <Pressable 
+            onPress={() => navigateMonth('prev')} 
+            style={styles.navButton} 
+            android_ripple={{ color: '#cccccc18', radius: 22 }} >
               <Feather name="chevron-left" size={20} color="#888" />
             </Pressable>
-            <Pressable onPress={() => navigateMonth('next')} style={styles.navButton}>
+            <Pressable onPress={() => navigateMonth('next')} style={styles.navButton} android_ripple={{ color: '#cccccc18', radius: 22 }}>
               <Feather name="chevron-right" size={20} color="#888" />
             </Pressable>
           </View>
@@ -295,7 +299,7 @@ const handleDayPress = (day: any) => {
                   onPress={() => handleDayPress(day)}
                   // disabled={!day.hasActivity || !day.isCurrentMonth}
                     disabled={!day.isCurrentMonth} // Only disable for non-current month days
-
+android_ripple={{ color: '#cccccc18', radius: 25 }}
                 >
                   <Text style={[
                     styles.dayText,
@@ -591,6 +595,8 @@ function NotificationSettings() {
         <Pressable 
           style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
           onPress={handleToggleNotifications}
+          android_ripple={{ color: '#cccccc18' }}
+
         >
           <View style={styles.settingInfo}>
             <Text style={[styles.settingTitle, !isDarkMode && styles.lightText]}>
@@ -617,6 +623,7 @@ function NotificationSettings() {
           <Pressable 
             style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
             onPress={handleOpenTimePicker}
+            android_ripple={{ color: '#cccccc18' }}
           >
             <View style={styles.settingInfo}>
               <Text style={[styles.settingTitle, !isDarkMode && styles.lightText]}>
@@ -727,6 +734,8 @@ function TestNotificationButton() {
       <Pressable 
         style={[styles.testButton, !isDarkMode && styles.lightTestButton]}
         onPress={triggerTestNotification}
+        android_ripple={{ color: '#cccccc18' }}
+
       >
         <View style={styles.testButtonContent}>
           <Feather name="bell" size={20} color="#fff" />
@@ -751,7 +760,8 @@ function QuickActions() {
       <View style={styles.actionButtons}>
         <Pressable 
           style={[styles.actionButton, !isDarkMode && styles.lightCard]}
-          onPress={() => router.push('/')}
+          onPress={() => router.push('/add')}
+          android_ripple={{ color: '#cccccc18' }}
         >
           <Feather name="plus-circle" size={24} color="#35E21B" />
           <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Add Tasks</Text>
@@ -760,6 +770,8 @@ function QuickActions() {
         <Pressable 
           style={[styles.actionButton, !isDarkMode && styles.lightCard]}
           onPress={() => router.push('/focus')}
+          android_ripple={{ color: '#cccccc18' }}
+
         >
           <Feather name="target" size={24} color="#00FFFF" />
           <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Focus Session</Text>
@@ -768,6 +780,7 @@ function QuickActions() {
         <Pressable 
           style={[styles.actionButton, !isDarkMode && styles.lightCard]}
           onPress={() => router.push('/bookmarks')}
+          android_ripple={{ color: '#cccccc18' }}
         >
           <MaterialIcons name="bookmark" size={24} color="#fbbf24" />
           <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Bookmarks</Text>
@@ -912,6 +925,7 @@ function Footer() {
         <Pressable 
           style={[styles.feedbackButton, !isDarkMode && styles.lightFeedbackButton]}
           onPress={() => openLink('https://forms.gle/iLQH7vjNZuY27Du17')} // Replace with your Google Form link
+          android_ripple={{ color: '#cccccc18'}}
         >
           <Feather name="message-square" size={20} color={isDarkMode ? "#fff" : "#000"} />
           <Text style={[styles.feedbackButtonText, !isDarkMode && styles.lightText]}>
@@ -926,18 +940,21 @@ function Footer() {
           <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
             onPress={() => openLink('https://twitter.com/SuryaS_1729')}
+            android_ripple={{ color: '#cccccc18', radius: 22 }}
           >
             <Feather name="twitter" size={18} color={isDarkMode ? "#1da1f2" : "#1da1f2"} />
           </Pressable>
           <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
             onPress={() => openLink('mailto:bitwisedharma@gmail.com')}
+            android_ripple={{ color: '#cccccc18', radius: 22 }}
           >
             <Feather name="mail" size={18} color={isDarkMode ? "#ff6b6b" : "#ff6b6b"} />
           </Pressable>
           <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
             onPress={() => openLink('https://github.com/SuryaS1729/kriya1')}
+            android_ripple={{ color: '#cccccc18', radius: 22 }}
           >
             <Feather name="github" size={18} color={isDarkMode ? "#fff" : "#000"} />
           </Pressable>
@@ -1012,17 +1029,26 @@ export default function History() {
       <SafeAreaView style={styles.safeAreaContent}>
         {/* Header */}
         <View style={styles.headerRow}>
-          <Pressable onPress={() => router.back()} hitSlop={16}>
+          <Pressable onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                            router.back();
+                          }}   hitSlop={16}>
             <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#000"} />
           </Pressable>
               <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>My Journey</Text>
-          <Pressable onPress={toggleDarkMode} hitSlop={16}>
+          <TouchableOpacity 
+          onPress={() => {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                            toggleDarkMode();
+                          }}  
+          hitSlop={16} 
+          activeOpacity={0.7}>
             <Feather 
               name={isDarkMode ? "sun" : "moon"} 
               size={24} 
               color={isDarkMode ? "#fff" : "#000"} 
             />
-          </Pressable>
+          </TouchableOpacity>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>

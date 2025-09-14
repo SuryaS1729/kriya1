@@ -10,7 +10,8 @@ import {
   TextInput,
   View,
   FlatList,
-  BackHandler
+  BackHandler,
+  TouchableOpacity
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '../components/TopBar';
@@ -25,6 +26,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { InteractionManager } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
+
 
 // Create animated Feather component
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
@@ -77,7 +80,9 @@ export default function Add() {
     };
   });
 
-  function addAndStay() {
+  const addAndStay=()=> {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     const t = text.trim();
     if (!t) return;
     addTask(t);
@@ -221,7 +226,7 @@ export default function Add() {
               paddingBottom: 8
             }
           ]}>
-            <Pressable onPress={addAndStay}>
+            <TouchableOpacity activeOpacity={0.8} onPress={addAndStay}>
               <View style={[
                 styles.addTaskIcon,
                 { backgroundColor: isDarkMode ? '#0a3a4bff' : '#ebebebff' }
@@ -233,7 +238,7 @@ export default function Add() {
                   style={animatedIconStyle}
                 />
               </View>
-            </Pressable>
+            </TouchableOpacity>
             <TextInput
               ref={inputRef}
               value={text}

@@ -209,8 +209,10 @@ return (
         hitSlop={16}
         style={[
           styles.circularButton,
-          { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(0, 0, 0, 0.08)' }
+          { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)' }
         ]}
+
+
       >
         <Text style={[styles.closeIcon, { color: isDarkMode ? '#d1d5db' : '#18464aff' }]}>✕</Text>
       </Pressable>
@@ -224,7 +226,7 @@ return (
           hitSlop={16} 
           style={[
             styles.circularButton,
-            { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(0, 0, 0, 0.08)' }
+            { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)'  }
           ]}
         >
           <Animated.View
@@ -249,8 +251,9 @@ return (
           hitSlop={16} 
           style={[
             styles.circularButton,
-            { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(0, 0, 0, 0.08)' }
+            { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)'  }
           ]}
+
         >
           <FontAwesome5 name="share" size={16} color={isDarkMode ? '#ffffffff' : '#18464aff'} />
         </Pressable>
@@ -348,6 +351,8 @@ return (
           disabled={prevIndex == null}
           hitSlop={12}
           style={[styles.pillBtn, prevIndex == null && styles.disabled]}
+          android_ripple={{ color: '#cccccc18', radius: 18 }}
+
         >
           <AntDesign 
             style={[styles.pillIcon, { color: prevIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 
@@ -356,7 +361,11 @@ return (
           />
         </Pressable>
 
-        <Pressable onPress={handleBookPress} hitSlop={12} style={styles.pillBtn}>
+        <Pressable 
+        onPress={handleBookPress} 
+        hitSlop={12} 
+        style={styles.pillBtn}
+        android_ripple={{ color: '#cccccc18', radius: 24 }}>
           <FontAwesome5 name="book" size={20} color={isDarkMode ? '#f9fafb' : '#18464aff'} />
         </Pressable>
 
@@ -365,6 +374,7 @@ return (
           disabled={nextIndex == null}
           hitSlop={12}
           style={[styles.pillBtn, nextIndex == null && styles.disabled]}
+          android_ripple={{ color: '#cccccc18', radius: 18 }}
         >
           <AntDesign 
             style={[styles.pillIcon, { color: nextIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 

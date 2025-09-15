@@ -2165,6 +2165,7 @@ lockOverlay: {
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
+    
   },
 
   scriptureSubtitle: {

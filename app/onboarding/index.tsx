@@ -45,7 +45,7 @@ const themes = {
     textTertiary: 'rgba(255, 255, 255, 0.7)',
     textQuaternary: 'rgba(255, 255, 255, 0.6)',
     cardBackground: 'rgba(0, 12, 26, 0.34)',
-    buttonBackground: 'rgba(37, 188, 208, 0.08)',
+    buttonBackground: 'rgba(0, 67, 76, 1)',
     buttonBackgroundSecondary: 'rgba(255, 255, 255, 0.15)',
     border: 'rgba(255, 255, 255, 0.3)',
     borderSecondary: 'rgba(255, 255, 255, 0.2)',
@@ -817,7 +817,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingVertical: 40,
   },
-  actionButton: {
+actionButton: {
     flexDirection: 'row',
     justifyContent: "center",
     alignItems: 'center',
@@ -827,8 +827,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 16,
     marginBottom: 20,
-       overflow: 'hidden', // Important: ensures shimmer doesn't overflow button bounds
+    overflow: 'hidden', // Important: ensures shimmer doesn't overflow button bounds
     position: 'relative', // For absolute positioning of shimmer
+    // 3D Effect Properties
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8, // Android shadow
+    // Additional 3D styling
+    transform: [{ translateY: -2 }], // Lift the button slightly
   },
     // New shimmer styles
   shimmerContainer: {

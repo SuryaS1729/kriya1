@@ -149,7 +149,8 @@
       "softwareKeyboardLayoutMode": "resize"
     },
     "ios": {
-      "bundleIdentifier": "com.surya7314.kriya"
+      "bundleIdentifier": "com.surya7314.kriya",
+      "icon": "./assets/icons/icon1234.png",
     },
     "extra": {
       "eas": {

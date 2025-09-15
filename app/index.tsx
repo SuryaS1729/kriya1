@@ -697,7 +697,7 @@ const onFocus = React.useCallback((task: Task) => {
                   ]}>It's a Fresh Start</Text>
                   <View style={{ height: 10 }}></View>
                 <Text style={[styles.emptyStateSubtitle, { color: isDarkMode ? '#959eb1ff' : '#94a3b8' }]}>
-  1. Add your tasks for today
+  1. Add your tasks for today 📝
 </Text>
 <Text style={[styles.emptyStateSubSubtitle, { color: isDarkMode ? '#959eb1ff' : '#94a3b8' }]}>
   2. Complete tasks to unlock new shlokas ✅

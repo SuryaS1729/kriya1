@@ -64,7 +64,7 @@ const themes = {
     textTertiary: 'rgba(26, 54, 93, 0.7)',
     textQuaternary: 'rgba(26, 54, 93, 0.6)',
     cardBackground: 'rgba(203, 240, 241, 0.53)',
-    buttonBackground: 'rgba(37, 188, 208, 0.15)',
+    buttonBackground: 'rgba(209, 234, 238, 0.94)',
     buttonBackgroundSecondary: 'rgba(26, 54, 93, 0.1)',
     border: 'rgba(26, 54, 93, 0.3)',
     borderSecondary: 'rgba(26, 54, 93, 0.2)',
@@ -246,7 +246,7 @@ export default function Onboarding() {
   const insets = useSafeAreaInsets();
   
   // Clean color scheme detection
-  const colorScheme = useColorScheme();
+  const colorScheme = "dark"; 
   const theme = themes[colorScheme === 'dark' ? 'dark' : 'light'];
   
   const completeOnboarding = useKriya(s => s.completeOnboarding);
@@ -278,6 +278,7 @@ export default function Onboarding() {
   const loadingScale = useSharedValue(0.8);
   // Add this new animated component after your other useSharedValue declarations
 const shimmerTranslateX = useSharedValue(-200);
+  const nextButtonScale = useSharedValue(1);
 
   // Loading text state
   const [currentLoadingText, setCurrentLoadingText] = useState("Act on your dharma...");
@@ -456,6 +457,13 @@ useEffect(() => {
   const handleNext = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
+      // Add scale animation
+    nextButtonScale.value = withSequence(
+      withTiming(0.92, { duration: 60 }), // Faster and more scale down
+      withTiming(1.02, { duration: 80 }), // Slight overshoot for bounce
+      withTiming(1, { duration: 100 })  
+    );
+
     const totalSteps = onboardingSteps.length + 1;
     
     if (currentStep < totalSteps - 1) {
@@ -569,6 +577,9 @@ useEffect(() => {
   const animatedShimmerStyle = useAnimatedStyle(() => ({
   transform: [{ translateX: shimmerTranslateX.value }],
 }));
+const animatedNextButtonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: nextButtonScale.value }],
+  }));
 
   const isNotificationSlide = currentStep === 3;
 
@@ -664,6 +675,11 @@ useEffect(() => {
                 </View>
               )}
 
+               {/* Image Credit */}
+              <Text style={[styles.imageCredit, { color: theme.textQuaternary }]}>
+                Art by Giampaolo Tomassetti
+              </Text>
+
               <Animated.Text style={[styles.loadingText, animatedLoadingTextStyle, { color: theme.textSecondary }]}>
                 {currentLoadingText}
               </Animated.Text>
@@ -683,7 +699,7 @@ useEffect(() => {
       <Animated.View style={[styles.arrowContainer, animatedIconStyle]}>
         <Feather
           name="chevrons-down"
-          size={28}
+          size={30}
           color={theme.arrowColor}
         />
       </Animated.View>
@@ -732,16 +748,18 @@ useEffect(() => {
       </TouchableOpacity>
     )}
     
-    <TouchableOpacity 
-      onPress={handleNext} 
-      style={[styles.nextButton, { backgroundColor: theme.buttonBackgroundSecondary, borderColor: theme.border }]}
-      activeOpacity={0.7} // Add touch feedback
-    >
-      <Text style={[styles.nextText, { color: theme.text }]}>
-        {isNotificationSlide ? 'Set Reminder' : 'Next'}
-      </Text>
-      <AntDesign name="arrowright" size={20} color={theme.text} />
-    </TouchableOpacity>
+   <Animated.View style={animatedNextButtonStyle}>
+            <TouchableOpacity 
+              onPress={handleNext} 
+              style={[styles.nextButton, { backgroundColor: theme.buttonBackgroundSecondary, borderColor: theme.border }]}
+              activeOpacity={1} // Remove default opacity change since we're using custom scale
+            >
+              <Text style={[styles.nextText, { color: theme.text }]}>
+                {isNotificationSlide ? 'Set Reminder' : 'Next'}
+              </Text>
+              <AntDesign name="arrowright" size={20} color={theme.text} />
+            </TouchableOpacity>
+          </Animated.View>
   </Animated.View>
 )}
       </SafeAreaView>
@@ -830,14 +848,14 @@ actionButton: {
     overflow: 'hidden', // Important: ensures shimmer doesn't overflow button bounds
     position: 'relative', // For absolute positioning of shimmer
     // 3D Effect Properties
-    shadowColor: '#000',
+    shadowColor: '#00fff783',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 2,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8, // Android shadow
+    shadowOpacity: 0.2,
+    shadowRadius: 7,
+    elevation: 5, // Android shadow
     // Additional 3D styling
     transform: [{ translateY: -2 }], // Lift the button slightly
   },
@@ -889,6 +907,16 @@ actionButton: {
   },
   stepIcon: {
     marginBottom: 30,
+  },
+   imageCredit: {
+    fontSize: 10,
+    fontFamily: 'Space Mono',
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 16,
+    fontStyle: 'italic',
+    letterSpacing: 0.5,
+    opacity: 0.7,
   },
   stepTitle: {
     fontSize: 21,

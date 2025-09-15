@@ -150,7 +150,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.surya7314.kriya",
-      "icon": "./assets/icons/icon1234.png",
+      "icon": "./assets/icons/icon1234.png"
     },
     "extra": {
       "eas": {

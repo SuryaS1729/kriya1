@@ -47,6 +47,10 @@ export interface Bookmark {
 interface KriyaState {
   ready: boolean;
   tasksToday: Task[];
+   hasCompletedTour: boolean;
+  setTourCompleted: (completed: boolean) => void;
+
+
 
   // actions
   init: () => void;
@@ -190,6 +194,8 @@ export const useKriya = create<KriyaState>()(
       bookmarks: [],
       hasCompletedOnboarding: false,
       focusSessions: {},
+            hasCompletedTour: false,
+
 
       // Default notification settings
       notificationsEnabled: true,
@@ -211,6 +217,12 @@ export const useKriya = create<KriyaState>()(
           set({ ready: true, tasksToday: [] });
         }
       },
+
+       
+      setTourCompleted: (completed: boolean) => {
+        set({ hasCompletedTour: completed });
+      },
+      
 
       refresh: () => {
         try {

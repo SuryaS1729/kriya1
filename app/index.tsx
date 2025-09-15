@@ -270,28 +270,26 @@ export default function Home() {
     opacity: fade.value,
   }));
 
-  const handleTogglePress = () => {
-
-     // Add haptics feedback
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
-     // Subtle scale animation
-    toggleScale.value = withSpring(0.95, {
-      stiffness: 400,
-      damping: 20,
-      mass: 0.5,
+const handleTogglePress = () => {
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  
+  // Super snappy version
+  toggleScale.value = withSpring(0.90, {
+    stiffness: 800,
+    damping: 12,
+    mass: 0.2,
+  });
+  
+  setTimeout(() => {
+    toggleScale.value = withSpring(1, {
+      stiffness: 700,
+      damping: 18,
+      mass: 0.3,
     });
-    
-    // Scale back up after a short delay
-    setTimeout(() => {
-      toggleScale.value = withSpring(1, {
-        stiffness: 300,
-        damping: 25,
-        mass: 0.8,
-      });
-    }, 100);
-    setShowTranslation(!showTranslation);
-  };
+  }, 50);
+  
+  setShowTranslation(!showTranslation);
+};
 
   // Add animated style for toggle button
   const toggleButtonStyle = useAnimatedStyle(() => ({
@@ -681,6 +679,15 @@ const onFocus = React.useCallback((task: Task) => {
           contentContainerStyle={styles.tasksList}
           ListEmptyComponent={() => (
             <View>
+
+              {/* Show yesterday's tasks banner if available */}
+              {yesterdayUnfinishedTasks.length > 0 && (
+                <YesterdayTasksBanner
+                  tasks={yesterdayUnfinishedTasks}
+                  isDarkMode={isDarkMode}
+                  onImportTasks={handleImportTasks}
+                />
+              )}
               <Pressable onPress={() => router.push('/add')}>
                 <View style={styles.emptyState}>
                   <Feather name="sun" size={48} color={isDarkMode ? "#8a93a4ff" : "#cbd5e1"} />
@@ -701,14 +708,6 @@ const onFocus = React.useCallback((task: Task) => {
                 </View>
               </Pressable>
               
-              {/* Show yesterday's tasks banner if available */}
-              {yesterdayUnfinishedTasks.length > 0 && (
-                <YesterdayTasksBanner
-                  tasks={yesterdayUnfinishedTasks}
-                  isDarkMode={isDarkMode}
-                  onImportTasks={handleImportTasks}
-                />
-              )}
             </View>
           )}
         />

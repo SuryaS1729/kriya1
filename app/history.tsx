@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View, Pressable, FlatList, ScrollView, Alert, Dimensions, Modal, Platform, Linking, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Pressable, FlatList, ScrollView, Alert, Dimensions, Modal, Platform, Linking, TouchableOpacity, Image } from 'react-native';
 import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -696,60 +696,6 @@ function NotificationSettings() {
   );
 }
 
-
-// Add this test function before the QuickActions component
-function TestNotificationButton() {
-  const isDarkMode = useKriya(s => s.isDarkMode);
-  
-  const triggerTestNotification = async () => {
-    try {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Test Notification",
-          body: "This is a test notification from Kriya. Your notification setup is working!",
-          data: { type: 'test_notification' },
-          sound: true,
-          ...(Platform.OS === 'android' && {
-            icon: './assets/icons/icon.png',
-            color: '#0026ffff',
-          }),
-        },
-        trigger: {
-          type: SchedulableTriggerInputTypes.TIME_INTERVAL,
-          seconds: 1, // Trigger after 2 seconds
-        },
-      });
-      
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      console.log('✅ Test notification scheduled');
-    } catch (error) {
-      console.error('❌ Failed to schedule test notification:', error);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    }
-  };
-
-  return (
-    <View style={styles.testSection}>
-      <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Test Notifications</Text>
-      <Pressable 
-        style={[styles.testButton, !isDarkMode && styles.lightTestButton]}
-        onPress={triggerTestNotification}
-        android_ripple={{ color: '#cccccc18' }}
-
-      >
-        <View style={styles.testButtonContent}>
-          <Feather name="bell" size={20} color="#fff" />
-          <Text style={styles.testButtonText}>Test Notification</Text>
-        </View>
-        <Text style={[styles.testButtonDesc, !isDarkMode && styles.lightSubText]}>
-          Tap to send a test notification in 2 seconds
-        </Text>
-      </Pressable>
-    </View>
-  );
-}
-
-
 // Quick Actions Component
 function QuickActions() {
   const isDarkMode = useKriya(s => s.isDarkMode);
@@ -790,13 +736,15 @@ function QuickActions() {
   );
 }
 
+
+
 // Gita Progress Component
 function GitaProgress() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const getTotalCompletedTasks = useKriya(s => s.getTotalCompletedTasks);
   
   // Assuming 700 total shlokas in Bhagavad Gita
-  const totalShlokas = 700;
+  const totalShlokas = 701;
   const completedTasks = getTotalCompletedTasks ? getTotalCompletedTasks() : 0;
   const unlockedShlokas = Math.min(completedTasks, totalShlokas);
   const progressPercentage = Math.round((unlockedShlokas / totalShlokas) * 100);
@@ -828,7 +776,7 @@ function GitaProgress() {
   }
   
   return (
-    <View style={[styles.gitaSection, !isDarkMode && styles.lightGitaSection]}>
+    <View style={[styles.gitaProgressCard, !isDarkMode && styles.lightGitaSection]}>
       <View style={styles.gitaHeader}>
         <View style={styles.gitaTitle}>
           <Text style={[styles.gitaTitleText, !isDarkMode && styles.lightText]}>🕉️ Bhagavad Gita Journey</Text>
@@ -895,6 +843,202 @@ function GitaProgress() {
           <Feather name="chevron-right" size={16} color={isDarkMode ? "#fff" : "#000"} />
         </Pressable>
       )} */}
+    </View>
+  );
+}
+
+
+// Add this new component after GitaProgress function
+function ScripturesProgress() {
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  const getTotalCompletedTasks = useKriya(s => s.getTotalCompletedTasks);
+  
+  const completedTasks = getTotalCompletedTasks ? getTotalCompletedTasks() : 0;
+  
+   const scriptures = [
+    {
+      id: 'bhagavad-gita',
+      title: 'Bhagavad Gita',
+      subtitle: 'Krishna & Arjuna',
+      totalVerses: 701,
+      isUnlocked: true,
+      // Different images for dark and light mode
+      darkImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921476/krishnarjuna_npvsot.webp"},
+      lightImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921475/krishnarjunalight_fdqa8x.webp"},
+      description: 'The eternal dialogue between Krishna and Arjuna',
+      progress: Math.min(completedTasks, 701),
+    },
+    {
+      id: 'ashtavakra-gita',
+      title: 'Ashtavakra Gita',
+      subtitle: 'Janaka & Ashtavakra',
+      totalVerses: 298,
+      isUnlocked: false,
+      // Different images for dark and light mode
+      darkImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921475/ashtavakra_gfmoqa.webp"},
+      lightImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921475/ashtavakralight_qnuqgv.webp"},
+      description: 'The profound dialogue on Advaita Vedanta',
+      progress: 0,
+      unlockRequirement: 'Complete Bhagavad Gita',
+    },
+    {
+      id: 'Advaita-vedanta',
+      title: 'Advaita Vedanta',
+      subtitle: 'Shankaracharya',
+      totalVerses: 32000,
+      isUnlocked: false,
+      // Different images for dark and light mode
+      darkImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921476/shankara_j1k104.webp"},
+      lightImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921476/shankaralight_lid6ez.webp"},
+      description: 'The non-dualistic philosophy of oneness',
+      progress: 0,
+      unlockRequirement: 'Complete Ashtavakra Gita',
+    },
+  ];
+
+  const handleScripturePress = (scripture: any) => {
+    if (scripture.isUnlocked) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      // Navigate to scripture reader
+      // router.push(`/scripture/${scripture.id}`);
+      console.log(`Opening ${scripture.title}`);
+    } else {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      // Show unlock requirement
+      Alert.alert(
+        `🔒 ${scripture.title}`,
+        `This scripture will be unlocked when you ${scripture.unlockRequirement.toLowerCase()}.`,
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  return (
+    <View style={[styles.scripturesSection, !isDarkMode && styles.lightGitaSection]}>
+      <View style={styles.scripturesHeader}>
+        <Text style={[styles.scripturesSectionTitle, !isDarkMode && styles.lightText]}>
+          📚 Sacred Scriptures
+        </Text>
+        <Text style={[styles.scripturesSubtitle, !isDarkMode && styles.lightSubText]}>
+          Your journey through ancient wisdom
+        </Text>
+      </View>
+
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scripturesScrollContainer}
+        style={styles.scripturesScroll}
+      >
+        {scriptures.map((scripture, index) => (
+          <Pressable
+            key={scripture.id}
+            style={[
+              styles.scriptureCard,
+              !scripture.isUnlocked && styles.lockedScriptureCard,
+              !isDarkMode && styles.lightScriptureCard
+            ]}
+            onPress={() => handleScripturePress(scripture)}
+            android_ripple={{ 
+              color: scripture.isUnlocked ? '#cccccc18' : '#ff000018' 
+            }}
+          >
+            {/* Scripture Image */}
+          <View style={styles.scriptureImageContainer}>
+  <View style={[
+    styles.scriptureImage,
+    !scripture.isUnlocked && styles.lockedScriptureImage
+  ]}>
+    {/* Replace the placeholder with actual Image */}
+   <Image
+                  source={isDarkMode ? scripture.darkImage : scripture.lightImage}
+                  style={styles.scriptureImageStyle}
+                  resizeMode="cover"
+                />
+    
+    {/* Lock Overlay */}
+    {/* {!scripture.isUnlocked && (
+      <View style={styles.lockOverlay}>
+        <Feather name="lock" size={24} color="#fff" />
+      </View>
+    )} */}
+  </View>
+</View>
+
+            {/* Scripture Info */}
+            <View style={styles.scriptureInfo}>
+              <Text style={[
+                styles.scriptureTitle,
+                !isDarkMode && styles.lightText,
+                !scripture.isUnlocked && styles.lockedText
+              ]}>
+                {scripture.title}
+              </Text>
+              
+              <Text style={[
+                styles.scriptureSubtitle,
+                !isDarkMode && styles.lightSubText,
+                !scripture.isUnlocked && styles.lockedSubText
+              ]}>
+                {scripture.subtitle}
+              </Text>
+
+              <Text style={[
+                styles.scriptureDescription,
+                !isDarkMode && styles.lightSubText,
+                !scripture.isUnlocked && styles.lockedSubText
+              ]}>
+                {scripture.description}
+              </Text>
+
+              {/* Progress Section */}
+              {scripture.isUnlocked ? (
+                <View style={styles.scriptureProgress}>
+                  <View style={styles.scriptureProgressInfo}>
+                    <Text style={[styles.scriptureProgressText, !isDarkMode && styles.lightText]}>
+                      {scripture.progress} / {scripture.totalVerses}
+                    </Text>
+                    <Text style={[styles.scriptureProgressPercentage, !isDarkMode && styles.lightSubText]}>
+                      {Math.round((scripture.progress / scripture.totalVerses) * 100)}%
+                    </Text>
+                  </View>
+                  
+                  <View style={[styles.scriptureProgressBar, !isDarkMode && styles.lightProgressBar]}>
+                    <View 
+                      style={[
+                        styles.scriptureProgressFilled,
+                        { width: `${(scripture.progress / scripture.totalVerses) * 100}%` }
+                      ]} 
+                    />
+                  </View>
+                </View>
+              ) : (
+                <View style={styles.unlockRequirement}>
+                  <Feather name="info" size={12} color="#888" />
+                  <Text style={[styles.unlockText, !isDarkMode && styles.lightSubText]}>
+                    {scripture.unlockRequirement}
+                  </Text>
+                </View>
+              )}
+
+              {/* Action Button */}
+              {scripture.isUnlocked && (
+                <View style={styles.scriptureAction}>
+                  <Feather name="book-open" size={16} color="#4a90e2" />
+                  <Text style={styles.scriptureActionText}>Continue Reading</Text>
+                </View>
+              )}
+            </View>
+          </Pressable>
+        ))}
+      </ScrollView>
+
+      {/* Coming Soon Badge */}
+      <View style={styles.comingSoonBadge}>
+        <Text style={[styles.comingSoonText, !isDarkMode && styles.lightSubText]}>
+          ✨ More scriptures coming soon
+        </Text>
+      </View>
     </View>
   );
 }
@@ -1052,22 +1196,26 @@ export default function History() {
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Gita Progress */}
-          <GitaProgress />
-          
+   
           {/* Main Calendar */}
           <MainCalendar />
           
           {/* Weekly Summary */}
           <WeeklySummary />
-             {/* ADD: Notification Settings - Add this here */}
+           
+
+          {/* Gita Progress */}
+          <GitaProgress />
+
+               {/* NEW: Scriptures Progress List */}
+        <ScripturesProgress />
+       
+          {/* Quick Actions */}
+          <QuickActions /> 
+          
+           {/* ADD: Notification Settings - Add this here */}
           <NotificationSettings />
 
-            {/* Test Notification Button - Add this here */}
-          <TestNotificationButton />
-
-          {/* Quick Actions */}
-          <QuickActions />
                     <Footer />
 
         </ScrollView>
@@ -1599,8 +1747,8 @@ const styles = StyleSheet.create({
   },
   
   // Gita Progress Styles
-  gitaSection: {
-    marginBottom: 30,
+  gitaProgressCard: {
+    marginBottom: 20, // Reduced margin since scriptures section follows
     backgroundColor: 'rgba(52, 76, 103, 0.4)',
     borderRadius: 16,
     padding: 20,
@@ -1917,5 +2065,199 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+
+   // New Scripture Styles
+  scripturesSection: {
+    marginBottom: 30,
+    backgroundColor: 'rgba(52, 76, 103, 0.4)',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(93, 123, 158, 0.3)',
+  },
+  
+  scripturesHeader: {
+    marginBottom: 20,
+  },
+  
+  scripturesSectionTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  
+  scripturesSubtitle: {
+    color: '#888',
+    fontSize: 14,
+  },
+
+  scripturesScroll: {
+    marginHorizontal: -4,
+  },
+
+  scripturesScrollContainer: {
+    paddingHorizontal: 4,
+    gap: 16,
+  },
+
+  scriptureCard: {
+    width: 280,
+    backgroundColor: 'rgba(36, 60, 85, 0.6)',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(93, 123, 158, 0.4)',
+    marginRight: 16,
+  },
+
+  lightScriptureCard: {
+    backgroundColor: 'rgba(245, 245, 245, 0.8)',
+    borderColor: 'rgba(224, 224, 224, 0.6)',
+  },
+
+  lockedScriptureCard: {
+    opacity: 0.7,
+    backgroundColor: 'rgba(36, 60, 85, 0.3)',
+  },
+
+  scriptureImageContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+
+// Add these new styles:
+scriptureImageStyle: {
+  width: 80,
+  height: 80,
+  borderRadius: 40,
+},
+
+scriptureImage: {
+  position: 'relative',
+  borderRadius: 40,
+  overflow: 'hidden', // Important for circular clipping
+},
+
+lockedScriptureImage: {
+  opacity: 0.5,
+},
+
+lockOverlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  borderRadius: 40,
+  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+  scriptureInfo: {
+    flex: 1,
+  },
+
+  scriptureTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+
+  scriptureSubtitle: {
+    color: '#888',
+    fontSize: 12,
+    marginBottom: 8,
+  },
+
+  scriptureDescription: {
+    color: '#888',
+    fontSize: 11,
+    lineHeight: 16,
+    marginBottom: 12,
+  },
+
+  lockedText: {
+    color: '#666',
+  },
+
+  lockedSubText: {
+    color: '#555',
+  },
+
+  scriptureProgress: {
+    marginBottom: 12,
+  },
+
+  scriptureProgressInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+
+  scriptureProgressText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+
+  scriptureProgressPercentage: {
+    color: '#888',
+    fontSize: 12,
+  },
+
+  scriptureProgressBar: {
+    height: 4,
+    backgroundColor: 'rgba(36, 60, 85, 0.6)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+
+  scriptureProgressFilled: {
+    height: '100%',
+    backgroundColor: '#4a90e2',
+    borderRadius: 2,
+  },
+
+  unlockRequirement: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+  },
+
+  unlockText: {
+    color: '#888',
+    fontSize: 10,
+    fontStyle: 'italic',
+  },
+
+  scriptureAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  scriptureActionText: {
+    color: '#4a90e2',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+
+  comingSoonBadge: {
+    alignItems: 'center',
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(93, 123, 158, 0.2)',
+  },
+
+  comingSoonText: {
+    color: '#888',
+    fontSize: 12,
+    fontStyle: 'italic',
   },
 });

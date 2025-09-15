@@ -44,7 +44,7 @@ const themes = {
     textSecondary: 'rgba(255, 255, 255, 0.8)',
     textTertiary: 'rgba(255, 255, 255, 0.7)',
     textQuaternary: 'rgba(255, 255, 255, 0.6)',
-    cardBackground: 'rgba(0, 12, 26, 0.34)',
+    cardBackground: 'rgba(0, 12, 26, 0.26)',
     buttonBackground: 'rgba(0, 67, 76, 1)',
     buttonBackgroundSecondary: 'rgba(255, 255, 255, 0.15)',
     border: 'rgba(255, 255, 255, 0.3)',
@@ -657,6 +657,7 @@ const animatedNextButtonStyle = useAnimatedStyle(() => ({
           {/* Loading Screen */}
           {isLoading && (
             <Animated.View style={[styles.loadingContainer, animatedLoadingStyle]}>
+             
                <Image 
                 source={{ uri: IMAGE_URL }}
                 style={styles.gitaImage}
@@ -677,7 +678,7 @@ const animatedNextButtonStyle = useAnimatedStyle(() => ({
 
                {/* Image Credit */}
               <Text style={[styles.imageCredit, { color: theme.textQuaternary }]}>
-                Art by Giampaolo Tomassetti
+               "Partha-Sarathi" by Giampaolo Tomassetti
               </Text>
 
               <Animated.Text style={[styles.loadingText, animatedLoadingTextStyle, { color: theme.textSecondary }]}>
@@ -695,6 +696,7 @@ const animatedNextButtonStyle = useAnimatedStyle(() => ({
     {/* // Update your bottom card section with the shimmer effect */}
 {currentStep === -1 && !isLoading && (
   <Animated.View style={[styles.bottomCard, animatedCardStyle, { backgroundColor: theme.cardBackground }]}>
+
     <View style={styles.cardContent}>
       <Animated.View style={[styles.arrowContainer, animatedIconStyle]}>
         <Feather
@@ -824,8 +826,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: SCREEN_HEIGHT * 0.30,
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
     overflow: 'hidden',
   },
   cardContent: {
@@ -842,7 +844,7 @@ actionButton: {
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 25,
-    borderWidth: 1,
+    borderWidth: 2.4,
     marginTop: 16,
     marginBottom: 20,
     overflow: 'hidden', // Important: ensures shimmer doesn't overflow button bounds
@@ -909,11 +911,11 @@ actionButton: {
     marginBottom: 30,
   },
    imageCredit: {
-    fontSize: 10,
+    fontSize: 8,
     fontFamily: 'Space Mono',
     textAlign: 'center',
     marginTop: 8,
-    marginBottom: 16,
+    marginBottom: 30,
     fontStyle: 'italic',
     letterSpacing: 0.5,
     opacity: 0.7,
@@ -988,11 +990,12 @@ actionButton: {
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
+    marginTop: -70,
   },
   loadingText: {
     fontSize: 18,
     fontWeight: '300',
-    marginTop: 24,
+    marginTop: 44,
     textAlign: 'center',
     fontFamily: 'Source Serif Pro',
     fontStyle: 'italic',

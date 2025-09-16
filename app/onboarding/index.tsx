@@ -242,7 +242,7 @@ const NotificationSlide = ({ onNext, theme }: { onNext: () => void, theme: any }
 
 
 export default function Onboarding() {
-  console.log('🎯 Onboarding component rendering');
+  // console.log('🎯 Onboarding component rendering');
   const insets = useSafeAreaInsets();
   
   // Clean color scheme detection
@@ -298,7 +298,7 @@ const shimmerTranslateX = useSharedValue(-200);
     const startAmbientAudio = async () => {
       try {
         if (audioPlayer && isMounted) {
-          console.log('🎵 Loading ambient music from network...');
+          // console.log('🎵 Loading ambient music from network...');
 
              // Wait a moment for the audio to load
           await new Promise(resolve => setTimeout(resolve, 1000));
@@ -314,7 +314,7 @@ const shimmerTranslateX = useSharedValue(-200);
 
             
           setAudioLoading(false);
-          console.log('🎵 Ambient music started successfully');
+          // console.log('🎵 Ambient music started successfully');
           
           
           // Fade in over 2 seconds
@@ -332,7 +332,7 @@ const shimmerTranslateX = useSharedValue(-200);
           }, 33); // ~30fps for smooth fade
         }
       } catch (error) {
- console.warn('Audio setup failed:', error);
+//  console.warn('Audio setup failed:', error);
         setAudioError(true);
         setAudioLoading(false);      }
     };
@@ -367,7 +367,7 @@ const shimmerTranslateX = useSharedValue(-200);
         }
       }, 30); // 1.2 second fade out
     } catch (error) {
-      console.warn('Audio fade out failed:', error);
+      // console.warn('Audio fade out failed:', error);
     }
   };
 
@@ -450,7 +450,7 @@ useEffect(() => {
   const handleGetStarted = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
-    console.log('🎯 Starting onboarding flow...');
+    // console.log('🎯 Starting onboarding flow...');
     animateToOnboarding();
   };
 
@@ -474,7 +474,7 @@ useEffect(() => {
         stepOpacity.value = withTiming(1, { duration: 500 });
       }, 300);
     } else {
-      console.log('🎯 Completing onboarding...');
+      // console.log('🎯 Completing onboarding...');
       
       setIsLoading(true);
       

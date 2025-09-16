@@ -1,34 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View, Pressable, FlatList, ScrollView, Alert, Dimensions, Modal, Platform, Linking, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, Pressable, ScrollView, Alert, Dimensions, Modal, Platform, Linking, TouchableOpacity, Image } from 'react-native';
 import { useKriya } from '../lib/store';
-import type { Task } from '../lib/tasks';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router, Link } from 'expo-router';
+import { router } from 'expo-router';
 import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withSpring, 
-  withTiming,
-  runOnJS 
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import BlurBackground from '@/components/BlurBackground';
-import { Progress, ProgressFilledTrack } from '@/components/ui/progress';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import * as Notifications from 'expo-notifications';
-import { SchedulableTriggerInputTypes } from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import { Toast, ToastTitle, ToastDescription, useToast } from '@/components/ui/toast'; // Add this import
 
 
 const { width } = Dimensions.get('window');
 
-function formatDay(ms: number) {
-  const d = new Date(ms);
-  return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-}
+
 
 function getDateKey(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
@@ -505,14 +492,14 @@ function NotificationSettings() {
           hour12: true 
         });
         
-        console.log(`✅ Time updated to ${hours}:${minutes.toString().padStart(2, '0')}`);
+        // console.log(`✅ Time updated to ${hours}:${minutes.toString().padStart(2, '0')}`);
         
         // Show success toast
         showSuccessToast(timeString);
         
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       } catch (error) {
-        console.error('❌ Failed to update reminder time:', error);
+        // console.error('❌ Failed to update reminder time:', error);
         
         // Show error toast
         const errorId = Math.random().toString();
@@ -537,7 +524,7 @@ function NotificationSettings() {
       }
     } else if (Platform.OS === 'android') {
       // User cancelled on Android
-      console.log('User cancelled time picker on Android');
+      // console.log('User cancelled time picker on Android');
     }
   };
 
@@ -901,7 +888,7 @@ function ScripturesProgress() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       // Navigate to scripture reader
       // router.push(`/scripture/${scripture.id}`);
-      console.log(`Opening ${scripture.title}`);
+      // console.log(`Opening ${scripture.title}`);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       // Show unlock requirement
@@ -1048,7 +1035,7 @@ function Footer() {
   
   const openLink = (url: string) => {
     Linking.openURL(url); // Opens the provided URL
-    console.log('Opening:', url);
+    // console.log('Opening:', url);
   };
   
   return (

@@ -189,7 +189,9 @@ const headerHeight = insets.top + 12 + 36 + 12; // safeArea + paddingTop + butto
 // ...existing code...
 return (
   <SafeAreaView style={{ flex: 1 }} edges={['right', 'bottom', 'left']}>
-    <StatusBar style={isDarkMode ? "light" : "dark"} />
+    {/* <StatusBar style={isDarkMode ? "light" : "dark"} /> */}
+                <StatusBar hidden={true} />
+
     <LinearGradient 
       colors={isDarkMode ? ['#344c67ff', '#000000ff'] : ['#ffffffff', '#9FABC8']} 
       style={StyleSheet.absoluteFill} 

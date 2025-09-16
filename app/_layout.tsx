@@ -28,7 +28,7 @@ export default function Root() {
       try {
         await ensureDatabasePresent(DB_NAME, DB_ASSET, { forceReplace: false });
       } catch (e) {
-        console.warn('ensureDatabasePresent failed:', e);
+        // console.warn('ensureDatabasePresent failed:', e);
       } finally {
         setBooted(true);
       }
@@ -40,12 +40,12 @@ export default function Root() {
   async function onInit(db: any) {
     // Use global flag to prevent multiple initializations
     if (globalDbInitialized) {
-      console.log('DB already initialized globally, skipping...');
+      // console.log('DB already initialized globally, skipping...');
       return;
     }
     
     globalDbInitialized = true;
-    console.log('Initializing DB for the first time...');
+    // console.log('Initializing DB for the first time...');
     
     try {
       await runMigrationsSafe(db);
@@ -54,10 +54,10 @@ export default function Root() {
       const tables = db.getAllSync(
         `SELECT name FROM sqlite_master WHERE type='table' ORDER BY name`
       ) as { name: string }[];
-      console.log('SQLite tables:', tables.map(t => t.name).join(', '));
+      // console.log('SQLite tables:', tables.map(t => t.name).join(', '));
 
-      const row = db.getFirstSync<{ c: number }>(`SELECT COUNT(*) AS c FROM shlokas`);
-      console.log('Shlokas count:', row?.c ?? 0);
+      // const row = db.getFirstSync<{ c: number }>(`SELECT COUNT(*) AS c FROM shlokas`);
+      // console.log('Shlokas count:', row?.c ?? 0);
 
       setDbReady(true);
       
@@ -66,7 +66,7 @@ export default function Root() {
         useKriya.getState().init();
       }, 100);
     } catch (e) {
-      console.warn('DB migrate/init failed:', e);
+      // console.warn('DB migrate/init failed:', e);
       setDbReady(false);
       globalDbInitialized = false; // Reset on error
     }

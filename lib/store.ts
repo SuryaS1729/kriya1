@@ -132,14 +132,14 @@ async function registerForPushNotificationsAsync() {
     }
     
     if (finalStatus !== 'granted') {
-      console.log('Failed to get push token for push notification!');
+      // console.log('Failed to get push token for push notification!');
       return null;
     }
     
-      console.log('✅ Local notification permissions granted');
+      // console.log('✅ Local notification permissions granted');
     return 'local-notifications-enabled'; // Return a simple success indicator
   } else {
-    console.log('Must use physical device for notifications');
+    // console.log('Must use physical device for notifications');
     return null;
   }
 }
@@ -182,7 +182,7 @@ async function scheduleTaskReminder(hour: number, minute: number) {
     },
   });
   
-  console.log(`✅ Daily reminder scheduled for ${reminderHour.toString().padStart(2, '0')}:${reminderMinute.toString().padStart(2, '0')}`);
+  // console.log(`✅ Daily reminder scheduled for ${reminderHour.toString().padStart(2, '0')}:${reminderMinute.toString().padStart(2, '0')}`);
 }
 
 export const useKriya = create<KriyaState>()(
@@ -213,7 +213,7 @@ export const useKriya = create<KriyaState>()(
           set({ tasksToday: getTasksForDay(get().todayKey()) });
           set({ ready: true });
         } catch (e) {
-          console.warn('Init failed:', e);
+          // console.warn('Init failed:', e);
           set({ ready: true, tasksToday: [] });
         }
       },
@@ -228,18 +228,18 @@ export const useKriya = create<KriyaState>()(
         try {
           set({ tasksToday: getTasksForDay(get().todayKey()) });
         } catch (e) {
-          console.warn('Refresh failed:', e);
+          // console.warn('Refresh failed:', e);
         }
       },
 
       clearCache: () => {
-        console.log('🧹 Clearing in-memory cache');
+        // console.log('🧹 Clearing in-memory cache');
         // Clear tasks array to force fresh load
         set({ tasksToday: [] });
       },
 
       hardRefresh: () => {
-        console.log('🧹 Hard refresh - clearing cache and reloading');
+        // console.log('🧹 Hard refresh - clearing cache and reloading');
         try {
           // Clear cache first
           set({ tasksToday: [] });
@@ -250,7 +250,7 @@ export const useKriya = create<KriyaState>()(
           
           set({ tasksToday: freshTasks });
         } catch (e) {
-          console.warn('Hard refresh failed:', e);
+          // console.warn('Hard refresh failed:', e);
           set({ tasksToday: [] });
         }
       },
@@ -297,7 +297,7 @@ export const useKriya = create<KriyaState>()(
           const idx = (prog.base_index + offset) % total;
           return { index: idx, data: getShlokaAt(idx) };
         } catch (e) {
-          console.warn('currentShloka failed:', e);
+          // console.warn('currentShloka failed:', e);
           return { index: 0, data: null };
         }
       },
@@ -348,9 +348,9 @@ export const useKriya = create<KriyaState>()(
       },
 
       completeOnboarding: () => {
-        console.log('🎯 Store: Completing onboarding...');
+        // console.log('🎯 Store: Completing onboarding...');
         set({ hasCompletedOnboarding: true });
-        console.log('🎯 Store: New state after completion:', get().hasCompletedOnboarding);
+        // console.log('🎯 Store: New state after completion:', get().hasCompletedOnboarding);
       },
 
       getFocusSessionsForDay: (dayKey: number) => {
@@ -390,7 +390,7 @@ export const useKriya = create<KriyaState>()(
           
           return totalCompleted;
         } catch (e) {
-          console.warn('getTotalCompletedTasks failed:', e);
+          // console.warn('getTotalCompletedTasks failed:', e);
           return 0;
         }
       },
@@ -416,22 +416,22 @@ export const useKriya = create<KriyaState>()(
           await get().initializeNotifications();
         } else {
           await Notifications.cancelAllScheduledNotificationsAsync();
-          console.log('🔕 All notifications cancelled');
+          // console.log('🔕 All notifications cancelled');
         }
       },
 
       initializeNotifications: async () => {
         try {
-          console.log('🔔 Initializing notifications...');
+          // console.log('🔔 Initializing notifications...');
           const result = await registerForPushNotificationsAsync();
           set({ notificationToken: result });
           
           const { reminderTime } = get();
           await scheduleTaskReminder(reminderTime.hour, reminderTime.minute);
           
-          console.log('✅ Local notifications initialized successfully');
+          // console.log('✅ Local notifications initialized successfully');
         } catch (error) {
-          console.error('❌ Failed to initialize notifications:', error);
+          // console.error('❌ Failed to initialize notifications:', error);
         }
       },
     }),

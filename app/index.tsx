@@ -241,7 +241,7 @@ export default function Home() {
       if (ready) {
 
         refresh(); // This will reload tasks from SQLite
-                console.log('🧹 Home screen focused - refreshing state');
+                // console.log('🧹 Home screen focused - refreshing state');
 
         // // Clear the navigation stack
         if (router.canGoBack()) {
@@ -446,13 +446,13 @@ const onFocus = React.useCallback((task: Task) => {
   useEffect(() => {
     if (ready && !navigationRef.current) {
       navigationRef.current = true;
-      console.log('🔍 Checking onboarding status:', hasCompletedOnboarding);
+      // console.log('🔍 Checking onboarding status:', hasCompletedOnboarding);
       
       if (!hasCompletedOnboarding) {
-        console.log('🔍 Redirecting to onboarding...');
+        // console.log('🔍 Redirecting to onboarding...');
         router.replace('/onboarding');
       } else {
-        console.log('🔍 Onboarding already completed, staying on main app');
+        // console.log('🔍 Onboarding already completed, staying on main app');
       }
     }
   }, [ready, hasCompletedOnboarding]);
@@ -489,12 +489,12 @@ const onFocus = React.useCallback((task: Task) => {
   useEffect(() => {
     // Listener for notifications received while app is open
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      console.log('📱 Notification received:', notification);
+      // console.log('📱 Notification received:', notification);
     });
 
     // Listener for when user taps notification
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('📱 Notification response:', response);
+      // console.log('📱 Notification response:', response);
       const data = response.notification.request.content.data;
       
       if (data?.type === 'task_reminder') {

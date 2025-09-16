@@ -48,7 +48,7 @@ export default function FocusMode() {
     setIsRunning(false);
     setSessionCompleted(true);
     addFocusSession();
-    console.log('🎯 Focus session completed and recorded!');
+    // console.log('🎯 Focus session completed and recorded!');
     
     // Use runOnJS to safely update shared values
     runOnJS(restoreOpacity)();
@@ -121,7 +121,7 @@ export default function FocusMode() {
   const handleExit = useCallback(() => {
     if (timeLeft > 0 && !sessionCompleted) {
       // Session was not completed - don't record it
-      console.log('🚫 Focus session exited early - not recorded');
+      // console.log('🚫 Focus session exited early - not recorded');
     }
     router.back();
   }, [timeLeft, sessionCompleted]);

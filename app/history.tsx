@@ -1183,6 +1183,10 @@ export default function History() {
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
+
+
+          {/* Gita Progress */}
+          <GitaProgress />
    
           {/* Main Calendar */}
           <MainCalendar />
@@ -1191,8 +1195,6 @@ export default function History() {
           <WeeklySummary />
            
 
-          {/* Gita Progress */}
-          <GitaProgress />
 
                {/* NEW: Scriptures Progress List */}
         <ScripturesProgress />

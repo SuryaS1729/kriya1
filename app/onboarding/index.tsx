@@ -52,7 +52,7 @@ const themes = {
     progressDot: 'rgba(255, 255, 255, 0.3)',
     timePickerBackground: 'rgba(0, 0, 0, 0.07)',
     selectedTimeBackground: 'rgba(255, 255, 255, 0.2)',
-    arrowColor: "rgba(104, 164, 177, 0.58)",
+    arrowColor: "rgba(19, 202, 244, 0.58)",
     spinnerColor: '#0ccebe5e',
     imageFallbackBackground: 'rgba(255, 255, 255, 0.1)',
   },
@@ -844,7 +844,7 @@ actionButton: {
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 25,
-    borderWidth: 2.4,
+    borderWidth: 1.5,
     marginTop: 16,
     marginBottom: 20,
     overflow: 'hidden', // Important: ensures shimmer doesn't overflow button bounds

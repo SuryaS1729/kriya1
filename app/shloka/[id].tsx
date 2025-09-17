@@ -21,6 +21,13 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useKriya } from '../../lib/store';
 import * as Haptics from 'expo-haptics';
+// Add toast imports
+import {
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  useToast,
+} from '@/components/ui/toast';
 
 
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -33,10 +40,15 @@ const PILL_W = 180;
 export default function ShlokaDetail() {
   // --- Always-on hooks ---
   const insets = useSafeAreaInsets();
-
   const params = useLocalSearchParams<{ id?: string | string[] }>();
-
   const isDarkMode = useKriya(s => s.isDarkMode);
+
+   // Fix: Use separate toast IDs for saved and removed toasts
+  const toast = useToast();
+  const [savedToastId, setSavedToastId] = useState<string>('0');
+  const [removedToastId, setRemovedToastId] = useState<string>('0');
+
+
 
   // Intercept any "go back" gesture/button → go Home (and avoid loops)
   // useEffect(() => {
@@ -158,11 +170,102 @@ const handleBookPress = () => {
     // Run animation
     bounceAnimation.start();
     
-    // Update state
+
+       // Update state and show appropriate toast
     if (bookmarked) {
       removeBookmark(currentIndex);
+      showRemovedToast();
     } else {
       addBookmark(currentIndex, row);
+      showSavedToast();
+    }
+  };
+
+   // Toast function
+  const showSavedToast = () => {
+    if (!toast.isActive(savedToastId)) {
+      const newId = Math.random().toString();
+      setSavedToastId(newId);
+      toast.show({
+        id: newId,
+        placement: 'bottom',
+        duration: 2000,
+        render: ({ id }) => {
+          const uniqueToastId = 'toast-' + id;
+          return (
+            <Toast 
+              nativeID={uniqueToastId} 
+              action="success" 
+              variant="solid"
+              style={[
+                styles.toastContainer,
+                { backgroundColor: isDarkMode ? '#064e3b' : '#ecfdf5' }
+              ]}
+            >
+              <View style={styles.toastContent}>
+                <MaterialIcons 
+                  name="bookmark" 
+                  size={16} 
+                  color={isDarkMode ? '#10b981' : '#059669'} 
+                />
+                <ToastTitle style={[
+                  styles.toastTitle,
+                  { color: isDarkMode ? '#d1fae5' : '#064e3b' }
+                ]}>
+                  Saved to Bookmarks
+                </ToastTitle>
+              </View>
+              <ToastDescription style={[
+                styles.toastDescription,
+                { color: isDarkMode ? '#a7f3d0' : '#047857' }
+              ]}>
+                Find it in Profile → Bookmarks or long press the bookmark icon
+              </ToastDescription>
+            </Toast>
+          );
+        },
+      });
+    }
+  };
+
+
+    const showRemovedToast = () => {
+    if (!toast.isActive(removedToastId)) {
+      const newId = Math.random().toString();
+      setRemovedToastId(newId);
+      toast.show({
+        id: newId,
+        placement: 'bottom',
+        duration: 1000,
+        render: ({ id }) => {
+          const uniqueToastId = 'toast-' + id;
+          return (
+            <Toast 
+              nativeID={uniqueToastId} 
+              action="muted" 
+              variant="solid"
+              style={[
+                styles.toastContainerRemoved,
+                { backgroundColor: isDarkMode ? '#374151' : '#f3f4f6' }
+              ]}
+            >
+              <View style={styles.toastContent}>
+                <MaterialIcons 
+                  name="bookmark-border" 
+                  size={16} 
+                  color={isDarkMode ? '#9ca3af' : '#6b7280'} 
+                />
+                <ToastTitle style={[
+                  styles.toastTitle,
+                  { color: isDarkMode ? '#e5e7eb' : '#374151' }
+                ]}>
+                  Bookmark Removed
+                </ToastTitle>
+              </View>
+            </Toast>
+          );
+        },
+      });
     }
   };
 
@@ -507,5 +610,66 @@ const styles = StyleSheet.create({
   closeIcon: { 
     fontSize: 16, 
     fontWeight: '700' 
+  },
+
+  // Toast styles
+  toastContainer: {
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom:80,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.2)',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+
+  // New style for removed toast
+  toastContainerRemoved: {
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 80,
+    borderWidth: 1,
+    borderColor: 'rgba(107, 114, 128, 0.2)',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+
+  },
+  
+  toastContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  
+  toastTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: 'Source Serif Pro',
+    marginLeft: 8,
+  },
+  
+  toastDescription: {
+    fontSize: 12,
+    fontWeight: '400',
+    fontFamily: 'Source Serif Pro',
+    lineHeight: 16,
   },
 });

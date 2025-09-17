@@ -238,7 +238,7 @@ const NotificationSlide = ({ onNext, theme }: { onNext: () => void, theme: any }
   );
 };
 
-// ...rest of your component remains the same...
+
 
 
 export default function Onboarding() {

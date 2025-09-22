@@ -15,6 +15,8 @@ import {
 import { useKriya } from '../lib/store';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
+// Add haptics import
+import { buttonPressHaptic, selectionHaptic } from '../lib/haptics';
 
 export default function Read() {
   const chapters = useMemo(() => getChapterCounts(), []);
@@ -30,6 +32,12 @@ export default function Read() {
     () => (query.trim() ? searchShlokasLike(query.trim()) : []),
     [query]
   );
+
+  // Add haptic feedback for chapter selection
+  const handleChapterSelect = (chapterNumber: number) => {
+    selectionHaptic(); // Haptic feedback for chapter selection
+    setChapter(chapterNumber);
+  };
 
   return (
     <LinearGradient
@@ -58,7 +66,6 @@ export default function Read() {
           returnKeyType="search"
           autoCorrect={false}
           placeholderTextColor={isDarkMode ? "#9ca3af" : "#6b7280"}
-          
         />
 
         {query.trim() ? (
@@ -74,11 +81,14 @@ export default function Read() {
                   href={{ pathname: '/shloka/[id]', params: { id: String(idx) } }}
                   replace asChild
                 >
-                  <Pressable style={[
-                    styles.resultRow,
-                    { backgroundColor: isDarkMode ? '#1f2937' : 'white' }
-                  ]}
-                  android_ripple={{ color: '#cccccc18'}}>
+                  <Pressable 
+                    style={[
+                      styles.resultRow,
+                      { backgroundColor: isDarkMode ? '#1f2937' : 'white' }
+                    ]}
+                    android_ripple={{ color: '#cccccc18'}}
+                    onPress={() => buttonPressHaptic()} // Add haptic for search result tap
+                  >
                     <Text style={[
                       styles.resultMeta,
                       { color: isDarkMode ? '#9ca3af' : '#64748b' }
@@ -115,7 +125,7 @@ export default function Read() {
                   const sel = item.chapter === chapter;
                   return (
                     <Pressable
-                      onPress={() => setChapter(item.chapter)}
+                      onPress={() => handleChapterSelect(item.chapter)} // Use haptic function
                       style={[
                         styles.chRow,
                         {
@@ -165,7 +175,6 @@ export default function Read() {
               <FlashList
                 data={verses}
                 keyExtractor={(v) => `${chapter}.${v.verse_number}`}
-
                 renderItem={({ item }) => {
                   const idx = getIndexOf(chapter, item.verse_number);
                   return (
@@ -174,7 +183,11 @@ export default function Read() {
                       replace
                       asChild
                     >
-                      <Pressable style={styles.vRow} android_ripple={{ color: '#cccccc18'}}>
+                      <Pressable 
+                        style={styles.vRow} 
+                        android_ripple={{ color: '#cccccc18'}}
+                        onPress={() => buttonPressHaptic()} // Add haptic for verse tap
+                      >
                         <Text style={[
                           styles.vNum,
                           { color: isDarkMode ? '#f9fafb' : '#0f172a' }
@@ -207,6 +220,7 @@ export default function Read() {
   );
 }
 
+// ...existing styles remain the same...
 const styles = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1, paddingHorizontal: 16 },
@@ -268,7 +282,6 @@ const styles = StyleSheet.create({
   },
   vText: { 
     flex: 1,
-
   },
   resultRow: { 
     paddingVertical: 10,

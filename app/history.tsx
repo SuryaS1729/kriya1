@@ -7,10 +7,11 @@ import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
 import Animated from 'react-native-reanimated';
 import BlurBackground from '@/components/BlurBackground';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
+// import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { StatusBar } from 'expo-status-bar';
 import { Toast, ToastTitle, ToastDescription, useToast } from '@/components/ui/toast'; // Add this import
+import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic } from '../lib/haptics';
 
 
 const { width } = Dimensions.get('window');
@@ -53,7 +54,10 @@ function DayDetailModal({ date, onClose }: { date: Date | null; onClose: () => v
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <Pressable style={styles.modalBackdrop} onPress={onClose} />
+        <Pressable style={styles.modalBackdrop} onPress={() => {
+          selectionHaptic(); // Add haptic for modal close
+          onClose();
+        }} />
         <View style={[styles.modalContent, !isDarkMode && styles.lightModalContent]}>
           <View style={styles.modalHeader}>
             <Text style={[styles.modalTitle, !isDarkMode && styles.lightText]}>
@@ -65,7 +69,10 @@ function DayDetailModal({ date, onClose }: { date: Date | null; onClose: () => v
               {isToday && ' (Today)'}
               {isFuture && ' (Future)'}
             </Text>
-            <Pressable onPress={onClose}>
+           <Pressable onPress={() => {
+              selectionHaptic(); // Add haptic for close button
+              onClose();
+            }}>
               <Feather name="x" size={24} color={isDarkMode ? "#fff" : "#000"} />
             </Pressable>
           </View>
@@ -130,6 +137,7 @@ function DayDetailModal({ date, onClose }: { date: Date | null; onClose: () => v
                 <Pressable 
                   style={[styles.addTaskButton]}
                   onPress={() => {
+                    buttonPressHaptic(); // Add haptic for add task button
                     onClose();
                     router.push('/add');
                   }}
@@ -195,7 +203,8 @@ function MainCalendar() {
   }, [currentDate, getForDay, getFocusSessionsForDay]);
 
   const navigateMonth = (direction: 'prev' | 'next') => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      buttonPressHaptic();
     setCurrentDate(prev => {
       const newDate = new Date(prev);
       newDate.setMonth(prev.getMonth() + (direction === 'next' ? 1 : -1));
@@ -235,7 +244,7 @@ function MainCalendar() {
 const handleDayPress = (day: any) => {
   if (day.isCurrentMonth) { // Remove the hasActivity condition
     setSelectedDate(day.date);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); // Add haptic feedback
+      selectionHaptic(); // Changed from direct Haptics call
   }
 };
 
@@ -497,7 +506,7 @@ function NotificationSettings() {
         // Show success toast
         showSuccessToast(timeString);
         
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        taskCompleteHaptic(); // Changed from direct Haptics call
       } catch (error) {
         // console.error('❌ Failed to update reminder time:', error);
         
@@ -520,7 +529,7 @@ function NotificationSettings() {
           },
         });
         
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        errorHaptic(); // Changed from direct Haptics call
       }
     } else if (Platform.OS === 'android') {
       // User cancelled on Android
@@ -538,12 +547,12 @@ function NotificationSettings() {
     currentTime.setHours(reminderTime.hour, reminderTime.minute, 0, 0);
     setSelectedTime(currentTime);
     
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    buttonPressHaptic(); // Changed from direct Haptics call
     setShowTimePicker(true);
   };
 
   const handleToggleNotifications = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    selectionHaptic(); // Changed from direct Haptics call
     await toggleNotifications();
     
     // Show toast based on new state
@@ -693,7 +702,10 @@ function QuickActions() {
       <View style={styles.actionButtons}>
         <Pressable 
           style={[styles.actionButton, !isDarkMode && styles.lightCard]}
-          onPress={() => router.push('/add')}
+            onPress={() => {
+            buttonPressHaptic(); // Add haptic for add tasks
+            router.push('/add');
+          }}
           android_ripple={{ color: '#cccccc18' }}
         >
           <Feather name="plus-circle" size={24} color="#35E21B" />
@@ -702,7 +714,10 @@ function QuickActions() {
         
         <Pressable 
           style={[styles.actionButton, !isDarkMode && styles.lightCard]}
-          onPress={() => router.push('/focus')}
+          onPress={() => {
+            buttonPressHaptic(); // Add haptic for focus session
+            router.push('/focus');
+          }}
           android_ripple={{ color: '#cccccc18' }}
 
         >
@@ -712,7 +727,10 @@ function QuickActions() {
         
         <Pressable 
           style={[styles.actionButton, !isDarkMode && styles.lightCard]}
-          onPress={() => router.push('/bookmarks')}
+ onPress={() => {
+            buttonPressHaptic(); // Add haptic for bookmarks
+            router.push('/bookmarks');
+          }}
           android_ripple={{ color: '#cccccc18' }}
         >
           <MaterialIcons name="bookmark" size={24} color="#fbbf24" />
@@ -885,12 +903,12 @@ function ScripturesProgress() {
 
   const handleScripturePress = (scripture: any) => {
     if (scripture.isUnlocked) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      selectionHaptic(); // Changed from direct Haptics call
       // Navigate to scripture reader
       // router.push(`/scripture/${scripture.id}`);
       // console.log(`Opening ${scripture.title}`);
     } else {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      errorHaptic(); // Changed from direct Haptics call
       // Show unlock requirement
       Alert.alert(
         `🔒 ${scripture.title}`,
@@ -1034,6 +1052,8 @@ function Footer() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   
   const openLink = (url: string) => {
+        buttonPressHaptic(); // Add haptic for link opening
+
     Linking.openURL(url); // Opens the provided URL
     // console.log('Opening:', url);
   };
@@ -1161,7 +1181,7 @@ export default function History() {
         {/* Header */}
         <View style={styles.headerRow}>
           <Pressable onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            buttonPressHaptic(); // Changed from direct Haptics call
                             router.back();
                           }}   hitSlop={16}>
             <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#000"} />
@@ -1169,7 +1189,7 @@ export default function History() {
               <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>My Journey</Text>
           <TouchableOpacity 
           onPress={() => {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              selectionHaptic(); // Changed from direct Haptics call
                             toggleDarkMode();
                           }}  
           hitSlop={16} 

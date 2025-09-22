@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import * as Haptics from 'expo-haptics';
+import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../../lib/haptics';
 import { useAudioPlayer } from 'expo-audio';
 
 import { useKriya } from '../../lib/store';
@@ -125,15 +125,20 @@ const NotificationSlide = ({ onNext, theme }: { onNext: () => void, theme: any }
     
     if (time) {
       setSelectedTime(time);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      selectionHaptic(); // Changed from direct Haptics call
     }
+  };
+
+   const handleTimePickerOpen = () => {
+    buttonPressHaptic(); // Add haptic for opening time picker
+    setShowPicker(true);
   };
 
   const handleContinue = async () => {
     const hours = selectedTime.getHours();
     const minutes = selectedTime.getMinutes();
     await setReminderTime(hours, minutes);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    taskCompleteHaptic(); // Changed from direct Haptics call - success haptic for setting reminder
     onNext();
   };
 
@@ -193,7 +198,7 @@ const NotificationSlide = ({ onNext, theme }: { onNext: () => void, theme: any }
           // Android: Show button to open picker
         <View style={styles.androidTimePickerContainer}>
             <TouchableOpacity // Changed from Pressable to TouchableOpacity
-              onPress={() => setShowPicker(true)}
+              onPress={handleTimePickerOpen}
               style={[styles.androidTimeButton, { 
                 backgroundColor: theme.selectedTimeBackground,
                 borderColor: theme.border
@@ -448,14 +453,14 @@ useEffect(() => {
   };
 
   const handleGetStarted = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    taskCompleteHaptic(); // Changed from direct Haptics call - success haptic for starting journey
 
     // console.log('🎯 Starting onboarding flow...');
     animateToOnboarding();
   };
 
   const handleNext = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    buttonPressHaptic(); // Changed from direct Haptics call - medium haptic for progression
 
       // Add scale animation
     nextButtonScale.value = withSequence(
@@ -506,7 +511,7 @@ useEffect(() => {
   };
 
   const handleSkip = () => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    selectionHaptic(); // Changed from direct Haptics call - light haptic for skipping
 
     console.log('🎯 Skipping onboarding...');
     

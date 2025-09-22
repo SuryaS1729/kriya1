@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
+// Remove this line: import * as Haptics from 'expo-haptics';
+// Add this instead:
+import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic, errorHaptic } from '../lib/haptics';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSharedValue, withTiming, useAnimatedStyle, interpolateColor, Easing, runOnJS } from 'react-native-reanimated';
 import Animated from 'react-native-reanimated';
@@ -44,7 +46,8 @@ export default function FocusMode() {
   }, [contentOpacity, buttonColorProgress]);
 
   const handleSessionComplete = useCallback(() => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Changed from direct Haptics call
+    taskCompleteHaptic(); // Strong success haptic for session completion
     setIsRunning(false);
     setSessionCompleted(true);
     addFocusSession();
@@ -102,6 +105,13 @@ export default function FocusMode() {
 
   // Handle pause/resume
   const toggleTimer = useCallback(() => {
+    // Add different haptics for play vs pause
+    if (isRunning) {
+      selectionHaptic(); // Light haptic for pausing
+    } else {
+      buttonPressHaptic(); // Medium haptic for resuming
+    }
+    
     setIsRunning(!isRunning);
     
     if (isRunning) {
@@ -120,14 +130,19 @@ export default function FocusMode() {
   // Handle early exit
   const handleExit = useCallback(() => {
     if (timeLeft > 0 && !sessionCompleted) {
-      // Session was not completed - don't record it
+      // Session was not completed - give warning haptic
+      errorHaptic(); // Warning haptic for early exit
       // console.log('🚫 Focus session exited early - not recorded');
+    } else {
+      // Normal exit after completion
+      buttonPressHaptic(); // Light haptic for normal exit
     }
     router.back();
   }, [timeLeft, sessionCompleted]);
 
   // Handle reset timer
   const resetTimer = useCallback(() => {
+    selectionHaptic(); // Light haptic for reset action
     setTimeLeft(25 * 60);
     setIsRunning(false);
     setSessionCompleted(false);
@@ -144,7 +159,7 @@ export default function FocusMode() {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
-  // ...existing code...
+  // ...existing getThemeColors function and other code remains the same...
   const getThemeColors = () => {
     if (isDarkMode) {
       return {
@@ -177,7 +192,7 @@ export default function FocusMode() {
 
   const themeColors = getThemeColors();
 
-  // Animated styles for background and content (not buttons)
+  // ...existing animated styles remain the same...
   const animatedBackgroundStyle = useAnimatedStyle(() => ({
     opacity: contentOpacity.value,
   }));
@@ -186,7 +201,6 @@ export default function FocusMode() {
     opacity: contentOpacity.value,
   }));
 
-  // Animated style for the primary button color
   const animatedButtonStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
       buttonColorProgress.value,
@@ -226,6 +240,7 @@ export default function FocusMode() {
     };
   });
 
+  // ...existing dynamic styles remain the same...
   const dynamicStyles = StyleSheet.create({
     container: {
       flex: 1,
@@ -355,6 +370,7 @@ export default function FocusMode() {
   );
 }
 
+// ...existing styles remain the same...
 const styles = StyleSheet.create({
   content: {
     flex: 1,

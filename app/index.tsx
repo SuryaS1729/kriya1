@@ -16,7 +16,7 @@ import { useKriya } from '../lib/store';
 import type { Task } from '../lib/tasks';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
+import { taskCompleteHaptic, selectionHaptic, buttonPressHaptic, errorHaptic } from '../lib/haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
 import { Spinner } from '@/components/ui/spinner';
@@ -100,6 +100,7 @@ const YesterdayTasksBanner = React.memo(({
   const displayTasks = showAll ? tasks : tasks.slice(0, 3);
 
   const toggleTask = (taskId: number) => {
+    selectionHaptic(); 
     setSelectedTasks(prev => {
       const newSet = new Set(prev);
       if (newSet.has(taskId)) {
@@ -114,8 +115,8 @@ const YesterdayTasksBanner = React.memo(({
   const handleImport = () => {
     const tasksToImport = tasks.filter(task => selectedTasks.has(task.id));
     if (tasksToImport.length > 0) {
+      taskCompleteHaptic(); 
       onImportTasks(tasksToImport);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
   };
 
@@ -271,9 +272,7 @@ export default function Home() {
   }));
 
 const handleTogglePress = () => {
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  
-  // Super snappy version
+    selectionHaptic();
   toggleScale.value = withSpring(0.90, {
     stiffness: 800,
     damping: 12,
@@ -320,26 +319,34 @@ const handleTogglePress = () => {
 
 
   // Memoized callbacks to prevent unnecessary re-renders
+   // Update the onToggle callback
   const onToggle = React.useCallback((id: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const task = tasks.find(t => t.id === id);
+    if (task && !task.completed) {
+      taskCompleteHaptic(); // Success haptic for completing tasks
+    } else {
+      selectionHaptic(); // Light haptic for uncompleting
+    }
     toggle(id);
-  }, [toggle]);
+  }, [toggle, tasks]);
 
+  // Update the onRemove callback
   const onRemove = React.useCallback((id: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    errorHaptic(); // Error haptic for deletion
     remove(id);
   }, [remove]);
 
-
-const onFocus = React.useCallback((task: Task) => {
-  router.push({
-    pathname: '/focus',
-    params: { 
-       id: String(task.id), 
-      title: task.title,   
-     },
-  });
-}, []);
+  // Update the onFocus callback
+  const onFocus = React.useCallback((task: Task) => {
+    buttonPressHaptic(); // Light haptic for navigation
+    router.push({
+      pathname: '/focus',
+      params: { 
+        id: String(task.id), 
+        title: task.title,   
+      },
+    });
+  }, []);
 
 
   // Enhanced TaskRow with cleanup
@@ -500,7 +507,6 @@ const onFocus = React.useCallback((task: Task) => {
       if (data?.type === 'task_reminder') {
         // Navigate to add task screen
         router.push('/add');
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
     });
 
@@ -563,7 +569,7 @@ const onFocus = React.useCallback((task: Task) => {
     <View style={styles.headerSection}>
        <Pressable 
       onPress={() => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        buttonPressHaptic(); 
         router.push({
           pathname: '/shloka/[id]',
           params: { id: String(shlokaIndex) }
@@ -639,7 +645,7 @@ const onFocus = React.useCallback((task: Task) => {
   </TouchableOpacity>
 
   <TouchableOpacity onPress={() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+     buttonPressHaptic();
     router.push({
       pathname: '/shloka/[id]',
       params: { id: String(shlokaIndex) }
@@ -664,7 +670,7 @@ const onFocus = React.useCallback((task: Task) => {
         <View style={styles.tasksHeader}>
           <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#5a6173ff' }]}>Today's Tasks</Text>
           <Link href="/history" asChild>
-            <TouchableOpacity activeOpacity={0.8} onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)}>
+            <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
               <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
               <Feather name='user' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
               </View>
@@ -688,7 +694,10 @@ const onFocus = React.useCallback((task: Task) => {
                   onImportTasks={handleImportTasks}
                 />
               )}
-              <Pressable onPress={() => router.push('/add')}>
+              <Pressable onPress={() => {
+                buttonPressHaptic(); // Add haptic for empty state press
+                router.push('/add');
+              }}>
                 <View style={styles.emptyState}>
                   <Feather name="sun" size={48} color={isDarkMode ? "#8a93a4ff" : "#cbd5e1"} />
                   <Text style={[
@@ -713,7 +722,7 @@ const onFocus = React.useCallback((task: Task) => {
         />
         
         <Link href="/add" asChild>
-          <TouchableOpacity onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => buttonPressHaptic()} activeOpacity={0.7}>{/* Changed from direct Haptics call */}
             <View style={[styles.addTaskButton, {backgroundColor: isDarkMode ? '#1b293d91' : '#f9fafb'}]}>
             <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#081623ff' : '#E6E6E6' }]}>
               <Feather name="plus" size={20} color={isDarkMode ? "#ffffffff" : "#606060"} />

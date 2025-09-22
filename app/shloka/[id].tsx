@@ -4,7 +4,6 @@ import { useLocalSearchParams, router, Link } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
-
   Animated,
   StyleSheet,
   Text,
@@ -20,7 +19,10 @@ import {
 
 import { StatusBar } from 'expo-status-bar';
 import { useKriya } from '../../lib/store';
-import * as Haptics from 'expo-haptics';
+// Remove this line: import * as Haptics from 'expo-haptics';
+// Add this instead:
+import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic, errorHaptic } from '../../lib/haptics';
+
 // Add toast imports
 import {
   Toast,
@@ -29,11 +31,9 @@ import {
   useToast,
 } from '@/components/ui/toast';
 
-
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-
 
 const PILL_W = 180;
 
@@ -47,33 +47,6 @@ export default function ShlokaDetail() {
   const toast = useToast();
   const [savedToastId, setSavedToastId] = useState<string>('0');
   const [removedToastId, setRemovedToastId] = useState<string>('0');
-
-
-
-  // Intercept any "go back" gesture/button → go Home (and avoid loops)
-  // useEffect(() => {
-  //   const unsub = navigation.addListener('beforeRemove', (e: any) => {
-  //     if (allowExitRef.current) return;
-  //     const t = e?.data?.action?.type;
-  //     if (t === 'GO_BACK' || t === 'POP' || t === 'POP_TO_TOP') {
-  //       e.preventDefault?.();
-  //       allowExitRef.current = true;
-  //       router.replace('/');
-  //     }
-  //   });
-  //   return unsub;
-  // }, [navigation]);
-
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-  //       allowExitRef.current = true;
-  //       router.replace('/');
-  //       return true;
-  //     });
-  //     return () => sub.remove();
-  //   }, [])
-  // );
 
   // Treat URL param as *index* (0-based)
   const initialIndex = useMemo(() => {
@@ -116,20 +89,20 @@ export default function ShlokaDetail() {
 
 const goPrev = () => {
   if (prevIndex == null) return;
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  selectionHaptic(); // Changed from direct Haptics call - light haptic for navigation
   setCurrentIndex(prevIndex);
   router.setParams({ id: String(prevIndex) });
 };
 
 const goNext = () => {
   if (nextIndex == null) return;
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  selectionHaptic(); // Changed from direct Haptics call - light haptic for navigation
   setCurrentIndex(nextIndex);
   router.setParams({ id: String(nextIndex) });
 };
 
 const handleBookPress = () => {
-  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  buttonPressHaptic(); // Changed from direct Haptics call - medium haptic for navigation
   router.replace('/read');
 };
 
@@ -149,8 +122,12 @@ const handleBookPress = () => {
   const toggleBookmark = () => {
     if (currentIndex === null || !row) return;
     
-    // Haptic feedback
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Enhanced haptic feedback based on action
+    if (bookmarked) {
+      selectionHaptic(); // Light haptic for removing bookmark
+    } else {
+      taskCompleteHaptic(); // Success haptic for adding bookmark
+    }
     
     // Snappier animation sequence - no rotation
      // Simple bounce animation
@@ -170,8 +147,7 @@ const handleBookPress = () => {
     // Run animation
     bounceAnimation.start();
     
-
-       // Update state and show appropriate toast
+    // Update state and show appropriate toast
     if (bookmarked) {
       removeBookmark(currentIndex);
       showRemovedToast();
@@ -228,8 +204,7 @@ const handleBookPress = () => {
     }
   };
 
-
-    const showRemovedToast = () => {
+  const showRemovedToast = () => {
     if (!toast.isActive(removedToastId)) {
       const newId = Math.random().toString();
       setRemovedToastId(newId);
@@ -272,7 +247,7 @@ const handleBookPress = () => {
   // Add long press handler
   const handleLongPressBookmark = () => {
     // Stronger haptic feedback for long press
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    buttonPressHaptic(); // Medium haptic for navigation to bookmarks
     
     // Navigate to bookmarks page
     router.push('/bookmarks');
@@ -284,16 +259,17 @@ const handleBookPress = () => {
   const [showTooltip, setShowTooltip] = useState(false);
 
   const handleSharePress = () => {
+    selectionHaptic(); // Light haptic for interaction
     setShowTooltip(true);
     setTimeout(() => setShowTooltip(false), 1500); // Hide tooltip after 1.5 seconds
   };
+
 const headerHeight = insets.top + 12 + 36 + 12; // safeArea + paddingTop + buttonHeight + paddingBottom
 
 // ...existing code...
 return (
   <SafeAreaView style={{ flex: 1 }} edges={['right', 'bottom', 'left']}>
-    {/* <StatusBar style={isDarkMode ? "light" : "dark"} /> */}
-                <StatusBar hidden={true} />
+    <StatusBar hidden={true} />
 
     <LinearGradient 
       colors={isDarkMode ? ['#344c67ff', '#000000ff'] : ['#ffffffff', '#9FABC8']} 
@@ -305,19 +281,19 @@ return (
       styles.stickyHeader, 
       { 
         paddingTop: insets.top + 12,
-        
       }
     ]}>
       {/* Close Button */}
       <Pressable 
-        onPress={() => router.back()} 
+        onPress={() => {
+          buttonPressHaptic(); // Add haptic for close button
+          router.back();
+        }} 
         hitSlop={16}
         style={[
           styles.circularButton,
           { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)' }
         ]}
-
-
       >
         <Text style={[styles.closeIcon, { color: isDarkMode ? '#d1d5db' : '#18464aff' }]}>✕</Text>
       </Pressable>
@@ -358,7 +334,6 @@ return (
             styles.circularButton,
             { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)'  }
           ]}
-
         >
           <FontAwesome5 name="share" size={16} color={isDarkMode ? '#ffffffff' : '#18464aff'} />
         </Pressable>
@@ -457,7 +432,6 @@ return (
           hitSlop={12}
           style={[styles.pillBtn, prevIndex == null && styles.disabled]}
           android_ripple={{ color: '#cccccc18', radius: 18 }}
-
         >
           <AntDesign 
             style={[styles.pillIcon, { color: prevIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 
@@ -491,16 +465,10 @@ return (
     )}
   </SafeAreaView>
 );
-// ...existing code...
 }
 
+// ...existing styles remain the same...
 const styles = StyleSheet.create({
-  // headerRow: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   justifyContent: 'space-between',
-  //   marginBottom: 20,
-  // },
   headerIcon: { fontSize: 22, fontWeight: '700' },
   headerTitle: { 
     fontFamily:"Source Serif Pro",
@@ -509,8 +477,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginBottom: 42,
     textAlign:'center',
-
-    // marginTop:100
   },
   section: {
     fontSize: 18,
@@ -565,7 +531,6 @@ const styles = StyleSheet.create({
   },
   tooltip: {
     position: 'absolute',
-    // top: -30, // Adjust to position above the share button
     right: -10,
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -592,9 +557,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingBottom: 12,
     backgroundColor: "transparent",
-
-    // Backdrop blur effect (iOS only, but adds nice touch)
-
   },
   
   circularButton: {
@@ -603,8 +565,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    // Add subtle shadow for depth
-   
   },
   
   closeIcon: { 
@@ -650,7 +610,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
-
   },
   
   toastContent: {

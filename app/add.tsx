@@ -26,7 +26,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { InteractionManager } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
+import { taskAddHaptic, selectionHaptic, errorHaptic } from '../lib/haptics';
 
 
 // Create animated Feather component
@@ -81,7 +81,7 @@ export default function Add() {
   });
 
   const addAndStay=()=> {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    taskAddHaptic(); // More reliable haptic
 
     const t = text.trim();
     if (!t) return;
@@ -119,8 +119,14 @@ export default function Add() {
 
   const renderItem = ({ item }: { item: Task }) => (
     <Pressable
-      onPress={() => toggle(item.id)}
-      onLongPress={() => remove(item.id)}
+      onPress={() => {
+        selectionHaptic(); // Add haptic feedback
+        toggle(item.id);
+      }}
+      onLongPress={() => {
+        errorHaptic(); // Different haptic for delete
+        remove(item.id);
+      }}
       style={[styles.row, { borderBottomColor: isDarkMode ? '#374151' : '#f1f5f9' }]}
       android_ripple={{ color: '#eeeeee1c' }}
     >
@@ -168,10 +174,10 @@ export default function Add() {
       
       
       <KeyboardAvoidingView
-        behavior={Platform.select({ ios: 'padding', android: 'height' })}
-        keyboardVerticalOffset={Platform.OS === 'ios' ?  HEADER_HEIGHT + insets.top : 0}
-        style={{ flex: 1 }}
-      >
+        behavior="padding"
+  keyboardVerticalOffset={0} // Remove all offset
+  style={{ flex: 1 }}
+>
         <TopBar
           title="Quick Add"
           variant="close"

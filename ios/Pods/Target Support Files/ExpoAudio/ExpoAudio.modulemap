@@ -1,6 +1,0 @@
-module ExpoAudio {
-  umbrella header "ExpoAudio-umbrella.h"
-
-  export *
-  module * { export * }
-}

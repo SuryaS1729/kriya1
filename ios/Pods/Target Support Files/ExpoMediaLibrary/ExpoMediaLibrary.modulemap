@@ -1,6 +1,0 @@
-module ExpoMediaLibrary {
-  umbrella header "ExpoMediaLibrary-umbrella.h"
-
-  export *
-  module * { export * }
-}

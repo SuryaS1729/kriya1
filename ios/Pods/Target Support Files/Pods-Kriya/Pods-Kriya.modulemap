@@ -1,6 +1,0 @@
-module Pods_Kriya {
-  umbrella header "Pods-Kriya-umbrella.h"
-
-  export *
-  module * { export * }
-}

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist, createJSONStorage, devtools } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
@@ -49,6 +49,10 @@ interface KriyaState {
   tasksToday: Task[];
    hasCompletedTour: boolean;
   setTourCompleted: (completed: boolean) => void;
+    hasSeenGuidedTour: boolean;
+      setHasSeenGuidedTour: (seen: boolean) => void;
+
+
 
 
 
@@ -186,6 +190,7 @@ async function scheduleTaskReminder(hour: number, minute: number) {
 }
 
 export const useKriya = create<KriyaState>()(
+  devtools(
   persist(
     (set, get) => ({
       ready: false,
@@ -194,7 +199,11 @@ export const useKriya = create<KriyaState>()(
       bookmarks: [],
       hasCompletedOnboarding: false,
       focusSessions: {},
-            hasCompletedTour: false,
+      hasCompletedTour: false,
+        hasSeenGuidedTour: false,
+        setHasSeenGuidedTour: (seen: boolean) => {
+          set({ hasSeenGuidedTour: seen });
+        },
 
 
       // Default notification settings
@@ -449,4 +458,5 @@ export const useKriya = create<KriyaState>()(
       }),
     }
   )
+)
 );

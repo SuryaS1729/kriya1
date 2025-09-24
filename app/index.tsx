@@ -22,6 +22,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Spinner } from '@/components/ui/spinner';
 import { router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
+import { GuidedTour } from '../components/GuidedTour/GuidedTour';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
@@ -223,7 +224,9 @@ export default function Home() {
   const navigationRef = useRef(false);
     const initializeNotifications = useKriya(s => s.initializeNotifications);
   const notificationsEnabled = useKriya(s => s.notificationsEnabled);
-  
+  const hasSeenGuidedTour = useKriya(s => s.hasSeenGuidedTour);
+  const setHasSeenGuidedTour = useKriya(s => s.setHasSeenGuidedTour);
+
  // ADD refs to track listeners
   const notificationListener = useRef<Notifications.EventSubscription | null>(null);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
@@ -347,7 +350,19 @@ const handleTogglePress = () => {
       },
     });
   }, []);
+  const handleTourComplete = React.useCallback(() => {
+    setHasSeenGuidedTour(true);
+  }, [setHasSeenGuidedTour]);
 
+    const shouldShowGuidedTour = ready && hasCompletedOnboarding && !hasSeenGuidedTour;
+
+console.log('🔍 Guided Tour Debug:', {
+    ready,
+    hasCompletedOnboarding,
+    hasSeenGuidedTour,
+    tasksLength: tasks.length,
+    shouldShowGuidedTour
+  });
 
   // Enhanced TaskRow with cleanup
   const TaskRow = React.memo(({ 
@@ -554,7 +569,7 @@ const handleTogglePress = () => {
     );
   }
 
-  return (
+  const mainContent = (
     <LinearGradient
       colors={isDarkMode ? ['#2e455fff', '#000000ff'] : ['#ffffffd2', '#8ba0d3ff']}
       style={[styles.container]}
@@ -736,6 +751,17 @@ const handleTogglePress = () => {
       </View>
     </LinearGradient>
   );
+
+ if (shouldShowGuidedTour) {
+    return (
+      <GuidedTour onComplete={handleTourComplete}>
+        {mainContent}
+      </GuidedTour>
+    );
+  }
+
+
+  return mainContent
 }
 
 const styles = StyleSheet.create({

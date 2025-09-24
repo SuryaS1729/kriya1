@@ -454,6 +454,8 @@ export const useKriya = create<KriyaState>()(
         focusSessions: state.focusSessions,
         notificationsEnabled: state.notificationsEnabled,
         reminderTime: state.reminderTime,
+                hasSeenGuidedTour: state.hasSeenGuidedTour, // Add this line
+
         // Don't persist notification token
       }),
     }

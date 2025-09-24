@@ -754,7 +754,10 @@ console.log('🔍 Guided Tour Debug:', {
 
  if (shouldShowGuidedTour) {
     return (
-      <GuidedTour onComplete={handleTourComplete}>
+      <GuidedTour 
+      onComplete={handleTourComplete}       
+      hasUserTasks={tasks.length > 0}
+>
         {mainContent}
       </GuidedTour>
     );

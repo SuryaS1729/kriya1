@@ -1,43 +1,64 @@
 import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
 
-export const triggerHaptic = async (type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' | 'selection') => {
-  // Only run on iOS devices (not simulator)
-  if (Platform.OS !== 'ios') return;
-  
-  try {
-    switch (type) {
-      case 'light':
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        break;
-      case 'medium':
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        break;
-      case 'heavy':
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-        break;
-      case 'success':
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        break;
-      case 'warning':
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-        break;
-      case 'error':
-        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        break;
-      case 'selection':
-        await Haptics.selectionAsync();
-        break;
-    }
-  } catch (error) {
-    // Silently fail - don't crash the app if haptics fail
-    console.warn('Haptic feedback failed:', error);
-  }
+/**
+ * Success haptic for completing tasks, successful operations
+ */
+export const taskCompleteHaptic = () => {
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 };
 
-// Convenience functions for common actions
-export const taskCompleteHaptic = () => triggerHaptic('success');
-export const taskAddHaptic = () => triggerHaptic('medium');
-export const buttonPressHaptic = () => triggerHaptic('light');
-export const selectionHaptic = () => triggerHaptic('selection');
-export const errorHaptic = () => triggerHaptic('error');
+/**
+ * Light haptic for selections, toggles, minor interactions
+ */
+export const selectionHaptic = () => {
+  Haptics.selectionAsync();
+};
+
+/**
+ * Light impact haptic for button presses, navigation
+ */
+export const buttonPressHaptic = () => {
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+};
+
+/**
+ * Error haptic for deletions, failed operations
+ */
+export const errorHaptic = () => {
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+};
+
+/**
+ * Warning haptic for warnings, confirmations needed
+ */
+export const warningHaptic = () => {
+  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+};
+
+/**
+ * Medium impact haptic for significant interactions
+ */
+export const mediumImpactHaptic = () => {
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+};
+
+/**
+ * Heavy impact haptic for major interactions
+ */
+export const heavyImpactHaptic = () => {
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+};
+
+/**
+ * Soft impact haptic for gentle interactions
+ */
+export const softImpactHaptic = () => {
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
+};
+
+/**
+ * Rigid impact haptic for firm interactions
+ */
+export const rigidImpactHaptic = () => {
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Rigid);
+};

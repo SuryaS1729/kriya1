@@ -21,7 +21,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useKriya } from '../../lib/store';
 // Remove this line: import * as Haptics from 'expo-haptics';
 // Add this instead:
-import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic, errorHaptic } from '../../lib/haptics';
+import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../../lib/haptics';
 
 // Add toast imports
 import {

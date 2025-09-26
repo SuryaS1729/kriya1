@@ -26,7 +26,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { InteractionManager } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { taskAddHaptic, selectionHaptic, errorHaptic } from '../lib/haptics';
+import { mediumImpactHaptic, selectionHaptic, errorHaptic } from '../lib/haptics';
 
 
 // Create animated Feather component
@@ -81,7 +81,7 @@ export default function Add() {
   });
 
   const addAndStay=()=> {
-    taskAddHaptic(); // More reliable haptic
+    mediumImpactHaptic(); // More reliable haptic
 
     const t = text.trim();
     if (!t) return;

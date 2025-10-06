@@ -874,6 +874,19 @@ function ScripturesProgress() {
       progress: Math.min(completedTasks, 701),
     },
     {
+      id: 'Nachiketa-upanishad',
+      title: 'Nachiketa Upanishad',
+      subtitle: 'Yama & Nachiketa',
+      totalVerses: 108,
+      isUnlocked: false,
+      // Different images for dark and light mode
+      darkImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1759794295/Mask_group_3_jbpyxo.webp"},
+      lightImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1759794491/Mask_group_4_xmcp7q.webp"},
+      description: 'Dialogue on death, immortality, and self-realization.',
+      progress: 0,
+      unlockRequirement: 'Complete Bhagavad Gita',
+    },
+    {
       id: 'ashtavakra-gita',
       title: 'Ashtavakra Gita',
       subtitle: 'Janaka & Ashtavakra',
@@ -882,9 +895,9 @@ function ScripturesProgress() {
       // Different images for dark and light mode
       darkImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921475/ashtavakra_gfmoqa.webp"},
       lightImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921475/ashtavakralight_qnuqgv.webp"},
-      description: 'The profound dialogue on Advaita Vedanta',
+      description: 'Pure non-duality and liberation through self-realization.',
       progress: 0,
-      unlockRequirement: 'Complete Bhagavad Gita',
+      unlockRequirement: 'Complete Nachiketa Upanishad',
     },
     {
       id: 'Advaita-vedanta',
@@ -899,6 +912,7 @@ function ScripturesProgress() {
       progress: 0,
       unlockRequirement: 'Complete Ashtavakra Gita',
     },
+     
   ];
 
   const handleScripturePress = (scripture: any) => {
@@ -1123,7 +1137,7 @@ function Footer() {
       
       {/* App Info */}
       <View style={styles.footerInfo}>
-        <Text style={[styles.footerVersion, !isDarkMode && styles.lightSubText]}>Version 1.0.0</Text>
+        <Text style={[styles.footerVersion, !isDarkMode && styles.lightSubText]}>Version 1.0.1</Text>
         <View style={styles.footerLinks}>
           <Pressable onPress={() => openLink('https://kriyaapp.com/privacy')}>
             <Text style={[styles.footerLink, !isDarkMode && styles.lightFooterLink]}>Privacy Policy</Text>

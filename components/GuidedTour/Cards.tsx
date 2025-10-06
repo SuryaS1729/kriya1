@@ -144,7 +144,7 @@ export function BookCard({ onNext, onSkip }: CardProps) {
 const styles = StyleSheet.create({
   card: {
     position: 'absolute',
-    backgroundColor: 'white',
+    backgroundColor: '#dafefdff',
     borderRadius: 16,
     padding: 20,
     marginHorizontal: 20,
@@ -184,7 +184,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1f2937',
     marginBottom: 8,
-    fontFamily: 'Kalam',
+    fontFamily: 'Instrument Serif',
+
+    letterSpacing: 0.5,
   },
   cardText: {
     fontSize: 15,

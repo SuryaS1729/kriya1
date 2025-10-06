@@ -2,8 +2,9 @@
   "expo": {
     "name": "Kriya",
     "slug": "kriya",
+    "version": "1.0.1",
     "scheme": "acme",
-    "icon": "./assets/icons/adaptive-icon9.png",
+    "icon": "./assets/icons/androidicon1.png",
     "userInterfaceStyle": "automatic",
 
     "plugins": [
@@ -150,7 +151,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.surya7314.kriya",
-      "icon": "./assets/icons/icon1234.png"
+      "icon": "./assets/icons/iosicon.png"
     },
     "extra": {
       "eas": {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View, Pressable, ScrollView, Alert, Dimensions, Modal, Platform, Linking, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, Pressable, ScrollView, Alert, Dimensions, Modal, Platform, Linking, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useKriya } from '../lib/store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -28,6 +28,9 @@ function DayDetailModal({ date, onClose }: { date: Date | null; onClose: () => v
   const getForDay = useKriya(s => s.getTasksForDay);
   const getFocusSessionsForDay = useKriya(s => s.getFocusSessionsForDay);
   const isDarkMode = useKriya(s => s.isDarkMode);
+  const addTask = useKriya(s => s.addTask);
+  
+  const [importedTaskIds, setImportedTaskIds] = useState<Set<number>>(new Set());
   
   if (!date) return null;
   
@@ -45,6 +48,31 @@ function DayDetailModal({ date, onClose }: { date: Date | null; onClose: () => v
   selectedDay.setHours(0, 0, 0, 0);
   const isToday = selectedDay.getTime() === today.getTime();
   const isFuture = selectedDay.getTime() > today.getTime();
+  const isPast = selectedDay.getTime() < today.getTime();
+  
+  // Import a single task to today
+  const handleImportTask = (task: { id: number; title: string }) => {
+    if (importedTaskIds.has(task.id)) return;
+    
+    taskCompleteHaptic();
+    addTask(task.title);
+    setImportedTaskIds(prev => new Set(prev).add(task.id));
+  };
+  
+  // Import all pending tasks to today
+  const handleImportAllPending = () => {
+    if (pending.length === 0) return;
+    
+    taskCompleteHaptic();
+    pending.forEach(task => {
+      if (!importedTaskIds.has(task.id)) {
+        addTask(task.title);
+      }
+    });
+    setImportedTaskIds(new Set(pending.map(t => t.id)));
+  };
+  
+  const allPendingImported = pending.length > 0 && pending.every(t => importedTaskIds.has(t.id));
   
   return (
     <Modal
@@ -108,11 +136,45 @@ function DayDetailModal({ date, onClose }: { date: Date | null; onClose: () => v
               
               {pending.length > 0 && (
                 <>
-                  <Text style={[styles.tasksSection, !isDarkMode && styles.lightText]}>Pending Tasks</Text>
+                  <View style={styles.pendingSectionHeader}>
+                    <Text style={[styles.tasksSection, !isDarkMode && styles.lightText]}>Pending Tasks</Text>
+                    {/* Import All button - only show for past dates */}
+                    {isPast && !allPendingImported && (
+                      <Pressable 
+                        style={[styles.importAllButton, !isDarkMode && styles.lightImportAllButton]}
+                        onPress={handleImportAllPending}
+                      >
+                        <Feather name="download" size={14} color={isDarkMode ? "#10b981" : "#059669"} />
+                        <Text style={[styles.importAllText, !isDarkMode && styles.lightImportAllText]}>
+                          Import All
+                        </Text>
+                      </Pressable>
+                    )}
+                    {allPendingImported && (
+                      <Text style={styles.allImportedText}>✓ All Imported</Text>
+                    )}
+                  </View>
                   {pending.map((task, index) => (
                     <View key={`pending-${index}`} style={[styles.taskItem, styles.pendingTask]}>
                       <Feather name="circle" size={16} color="#888" />
-                      <Text style={[styles.taskText, styles.pendingTaskText]}>{task.title}</Text>
+                      <Text style={[styles.taskText, styles.pendingTaskText, { flex: 1 }]}>{task.title}</Text>
+                      {/* Import button for individual tasks - only show for past dates */}
+                      {isPast && (
+                        importedTaskIds.has(task.id) ? (
+                          <View style={styles.importedBadge}>
+                            <Feather name="check" size={12} color="#10b981" />
+                            <Text style={styles.importedText}>Added</Text>
+                          </View>
+                        ) : (
+                          <Pressable 
+                            style={[styles.importTaskButton, !isDarkMode && styles.lightImportTaskButton]}
+                            onPress={() => handleImportTask(task)}
+                            hitSlop={8}
+                          >
+                            <Feather name="plus" size={14} color={isDarkMode ? "#fff" : "#000"} />
+                          </Pressable>
+                        )
+                      )}
                     </View>
                   ))}
                 </>
@@ -1173,6 +1235,28 @@ function Footer() {
 export default function History() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const toggleDarkMode = useKriya(s => s.toggleDarkMode);
+  
+  // Defer heavy component rendering until after navigation animation
+  const [isReady, setIsReady] = useState(false);
+  
+  useEffect(() => {
+    // Use requestIdleCallback when available, fallback to setTimeout
+    const scheduleCallback = 
+      typeof requestIdleCallback !== 'undefined' 
+        ? requestIdleCallback 
+        : (cb: () => void) => setTimeout(cb, 100);
+    
+    const cancelCallback = 
+      typeof cancelIdleCallback !== 'undefined'
+        ? cancelIdleCallback
+        : clearTimeout;
+    
+    const handle = scheduleCallback(() => {
+      setIsReady(true);
+    });
+    
+    return () => cancelCallback(handle as any);
+  }, []);
 
   return (
     <View style={[styles.container, !isDarkMode && styles.lightContainer]}>
@@ -1192,7 +1276,7 @@ export default function History() {
       />
 
       <SafeAreaView style={styles.safeAreaContent}>
-        {/* Header */}
+        {/* Header - Always render immediately */}
         <View style={styles.headerRow}>
           <Pressable onPress={() => {
             buttonPressHaptic(); // Changed from direct Haptics call
@@ -1216,32 +1300,36 @@ export default function History() {
           </TouchableOpacity>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-
-
-          {/* Gita Progress */}
-          <GitaProgress />
+        {/* Deferred Content - Only render after navigation animation */}
+        {isReady ? (
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Gita Progress */}
+            <GitaProgress />
    
-          {/* Main Calendar */}
-          <MainCalendar />
-          
-          {/* Weekly Summary */}
-          <WeeklySummary />
-           
-
+            {/* Main Calendar */}
+            <MainCalendar />
+            
+            {/* Weekly Summary */}
+            <WeeklySummary />
+             
 
                {/* NEW: Scriptures Progress List */}
-        <ScripturesProgress />
+          <ScripturesProgress />
        
-          {/* Quick Actions */}
-          <QuickActions /> 
-          
-           {/* ADD: Notification Settings - Add this here */}
-          <NotificationSettings />
+            {/* Quick Actions */}
+            <QuickActions /> 
+            
+             {/* ADD: Notification Settings - Add this here */}
+            <NotificationSettings />
 
                     <Footer />
 
-        </ScrollView>
+          </ScrollView>
+        ) : (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={isDarkMode ? "#8ba5e1" : "#4a90e2"} />
+          </View>
+        )}
       </SafeAreaView>
     </View>
   );
@@ -1260,6 +1348,11 @@ const styles = StyleSheet.create({
   safeAreaContent: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerRow: {
     flexDirection: 'row',
@@ -1674,6 +1767,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     width: width - 40,
+    minHeight: 400,
     maxHeight: '80%',
     borderWidth: 1,
     borderColor: 'rgba(93, 123, 158, 0.6)',
@@ -2283,5 +2377,57 @@ lockOverlay: {
     color: '#888',
     fontSize: 12,
     fontStyle: 'italic',
+  },
+  // Import tasks styles
+  pendingSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  importAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#10b98120',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    gap: 4,
+  },
+  lightImportAllButton: {
+    backgroundColor: '#05966920',
+  },
+  importAllText: {
+    color: '#10b981',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  lightImportAllText: {
+    color: '#059669',
+  },
+  allImportedText: {
+    color: '#10b981',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  importTaskButton: {
+    backgroundColor: '#374151',
+    padding: 6,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  lightImportTaskButton: {
+    backgroundColor: '#e5e7eb',
+  },
+  importedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginLeft: 8,
+  },
+  importedText: {
+    color: '#10b981',
+    fontSize: 11,
+    fontWeight: '500',
   },
 });

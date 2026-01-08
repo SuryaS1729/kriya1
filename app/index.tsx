@@ -215,8 +215,8 @@ export default function Home() {
   const getShloka = useKriya(s => s.currentShloka);
   const toggle    = useKriya(s => s.toggleTask);
   const remove    = useKriya(s => s.removeTask);
-  const addTask   = useKriya(s => s.addTask); // Add this
-  const getTasksForDay = useKriya(s => s.getTasksForDay); // Add this
+  const addTask   = useKriya(s => s.addTask); 
+  const getTasksForDay = useKriya(s => s.getTasksForDay); 
   const isDarkMode = useKriya(s => s.isDarkMode);
   const hasCompletedOnboarding = useKriya(s => s.hasCompletedOnboarding);
   const refresh   = useKriya(s => s.refresh);
@@ -244,15 +244,15 @@ export default function Home() {
     React.useCallback(() => {
       if (ready) {
 
-        refresh(); // This will reload tasks from SQLite
+        refresh(); 
                 // console.log('🧹 Home screen focused - refreshing state');
 
-        // // Clear the navigation stack
+
         if (router.canGoBack()) {
           router.dismissAll();
         }
         
-        // Reset animation values to prevent accumulation
+
         fade.value = 0;
         fade.value = withSpring(1);
       }
@@ -507,14 +507,14 @@ console.log('🔍 Guided Tour Debug:', {
     }
   }, [ready, hasCompletedOnboarding, notificationsEnabled, initializeNotifications]);
 
-  // ADD: Handle notifications
+
   useEffect(() => {
-    // Listener for notifications received while app is open
+
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
       // console.log('📱 Notification received:', notification);
     });
 
-    // Listener for when user taps notification
+
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       // console.log('📱 Notification response:', response);
       const data = response.notification.request.content.data;
@@ -684,13 +684,22 @@ console.log('🔍 Guided Tour Debug:', {
       ]}>
         <View style={styles.tasksHeader}>
           <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#5a6173ff' }]}>Today's Tasks</Text>
-          <Link href="/history" asChild>
-            <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
-              <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
-              <Feather name='user' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
-              </View>
-            </TouchableOpacity>
-          </Link>
+          <View style={styles.headerButtons}>
+            <Link href="/goals" asChild>
+              <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
+                <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
+                  <Feather name='file-text' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
+                </View>
+              </TouchableOpacity>
+            </Link>
+            <Link href="/history" asChild>
+              <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
+                <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
+                  <Feather name='user' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
+                </View>
+              </TouchableOpacity>
+            </Link>
+          </View>
         </View>
         
         <FlatList
@@ -737,7 +746,7 @@ console.log('🔍 Guided Tour Debug:', {
         />
         
         <Link href="/add" asChild>
-          <TouchableOpacity onPress={() => buttonPressHaptic()} activeOpacity={0.7}>{/* Changed from direct Haptics call */}
+          <TouchableOpacity onPress={() => buttonPressHaptic()} activeOpacity={0.7}>
             <View style={[styles.addTaskButton, {backgroundColor: isDarkMode ? '#1b293d91' : '#f9fafb'}]}>
             <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#081623ff' : '#E6E6E6' }]}>
               <Feather name="plus" size={20} color={isDarkMode ? "#ffffffff" : "#606060"} />
@@ -780,18 +789,18 @@ const styles = StyleSheet.create({
 
   card: {
     alignItems: 'center',
-    justifyContent: 'flex-start', // Changed from 'space-between'
-    flex: 1, // Take remaining space
+    justifyContent: 'flex-start', 
+    flex: 1,
     borderRadius: 16,
     paddingTop: 20,
     paddingHorizontal: 5,
-    marginBottom: 8, // Small gap before toggle button
+    marginBottom: 8, 
   },
   
-  // New container for the toggle button
+
   toggleButtonContainer: {
     alignItems: 'center',
-    paddingBottom: 16, // Fixed distance from tasks container
+    paddingBottom: 16,
   },
   headerSection: {
     width: '100%',
@@ -821,12 +830,12 @@ const styles = StyleSheet.create({
   justifyContent: 'center',
   paddingBottom: 16,
   paddingHorizontal: 20,
-  position: 'relative', // Enable absolute positioning for children if needed
+  position: 'relative', 
 },
 
 leftSpacer: {
-  width: 32, // Same width as descButton (8px padding + 16px icon + 8px padding)
-  // This invisible spacer balances the book button on the right
+  width: 32, 
+
 },
 
 toggleButton: {
@@ -843,11 +852,11 @@ descButton: {
   borderRadius: 16,
   backgroundColor: '#fffffffe',
   overflow: 'hidden',
-  marginLeft: 8, // Space between the two buttons
+  marginLeft: 8,
 },
   
   shlokaContentContainer: {
-    flex: 1, // Take all remaining space in the card
+    flex: 1, 
     width: '100%',
     paddingHorizontal: 8,
   },
@@ -859,17 +868,17 @@ descButton: {
  scrollContentEnglish: {
   paddingVertical: 20,
   paddingHorizontal: 10,
-  minHeight: '100%', // This ensures the content takes full height
-  justifyContent: 'center', // Centers the text vertically
-  alignItems: 'center', // Centers the text horizontally
+  minHeight: '100%', 
+  justifyContent: 'center',
+  alignItems: 'center', 
 },
 
 scrollContentSanskrit: {
   paddingVertical: 20,
   paddingHorizontal: 16,
-  minHeight: '100%', // This ensures the content takes full height
-  justifyContent: 'center', // Centers the text vertically
-  alignItems: 'center', // Centers the text horizontally
+  minHeight: '100%',
+  justifyContent: 'center',
+  alignItems: 'center',
 },
   toggleText: {
     color: '#000000ff',
@@ -894,7 +903,7 @@ scrollContentSanskrit: {
     fontWeight: "300",
     fontStyle: "normal",
     paddingTop: 10,
-    lineHeight: 26, // Fixed line height for better readability
+    lineHeight: 26, 
   },
   
   en: { 
@@ -904,7 +913,7 @@ scrollContentSanskrit: {
     fontFamily: "Source Serif Pro",
     fontWeight: "400",
     fontStyle: "italic",
-    lineHeight: 28, // Fixed line height for better readability
+    lineHeight: 28, 
   },
   
   tasksContainer: {
@@ -922,6 +931,10 @@ scrollContentSanskrit: {
     alignItems: 'center',
     marginBottom: 8,
 
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 8,
   },
   h1: { 
     fontSize: 17, 

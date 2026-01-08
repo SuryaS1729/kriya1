@@ -62,6 +62,19 @@ if (current < 3) {
   setVersion(db, 3);
 }
 
+// v4: goals table for long-term goals
+if (current < 4) {
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS goals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      created_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_goals_created_at ON goals(created_at);
+  `);
+  setVersion(db, 4);
+}
+
 function startOfDay(ms: number) {
   const d = new Date(ms);
   d.setHours(0,0,0,0);

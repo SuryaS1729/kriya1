@@ -57,7 +57,9 @@
     "react-stately": "^3.41.0",
     "tailwind-variants": "^0.1.20",
     "tailwindcss": "^3.4.17",
-    "zustand": "^5.0.7"
+    "zustand": "^5.0.7",
+    "react-native-view-shot": "4.0.3",
+    "expo-sharing": "~13.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

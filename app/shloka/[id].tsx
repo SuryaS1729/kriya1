@@ -259,9 +259,18 @@ const handleBookPress = () => {
   const [showTooltip, setShowTooltip] = useState(false);
 
   const handleSharePress = () => {
-    selectionHaptic(); // Light haptic for interaction
-    setShowTooltip(true);
-    setTimeout(() => setShowTooltip(false), 1500); // Hide tooltip after 1.5 seconds
+    if (!row || currentIndex === null) return;
+    buttonPressHaptic();
+    router.push({
+      pathname: '/share2',
+      params: {
+        id: String(currentIndex),
+        chapter: String(row.chapter_number),
+        verse: String(row.verse_number),
+        text: row.text,
+        translation: row.translation_2 ?? row.description ?? '',
+      },
+    });
   };
 
 const headerHeight = insets.top + 12 + 36 + 12; // safeArea + paddingTop + buttonHeight + paddingBottom

@@ -24,14 +24,28 @@ import { Toast, ToastTitle, useToast } from '@/components/ui/toast';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Card format configurations
+// Card format configurations - 4K resolution
 const FORMATS = [
-  { id: 'post', label: 'Post', aspectRatio: 1, width: 1080, height: 1080 },
-  { id: 'story', label: 'Story', aspectRatio: 9/16, width: 1080, height: 1920 },
-  { id: 'twitter', label: 'Twitter', aspectRatio: 16/9, width: 1200, height: 675 },
+  { id: 'post', label: 'Post', aspectRatio: 1, width: 4096, height: 4096 },
+  { id: 'story', label: 'Story', aspectRatio: 9/16, width: 2304, height: 4096 },
+  { id: 'twitter', label: 'Twitter', aspectRatio: 16/9, width: 4096, height: 2304 },
 ] as const;
 
 type FormatId = typeof FORMATS[number]['id'];
+
+// Beautiful gradient backgrounds
+const BACKGROUNDS = [
+  { id: 'image', label: 'Krishna', type: 'image' as const, colors: ['#1a1a2e', '#16213e'] },
+  { id: 'sunset', label: 'Sunset', type: 'gradient' as const, colors: ['#ff6b6b', '#ee5a24', '#f0932b'] },
+  { id: 'ocean', label: 'Ocean', type: 'gradient' as const, colors: ['#0f3460', '#16537e', '#1e6f9f'] },
+  { id: 'forest', label: 'Forest', type: 'gradient' as const, colors: ['#134e5e', '#1a5d37', '#2d6a4f'] },
+  { id: 'twilight', label: 'Twilight', type: 'gradient' as const, colors: ['#2c3e50', '#4a69bd', '#6a89cc'] },
+  { id: 'rose', label: 'Rose', type: 'gradient' as const, colors: ['#c44569', '#cf6a87', '#e7a8a8'] },
+  { id: 'midnight', label: 'Midnight', type: 'gradient' as const, colors: ['#0f0c29', '#302b63', '#24243e'] },
+  { id: 'gold', label: 'Gold', type: 'gradient' as const, colors: ['#8b6914', '#b8860b', '#daa520'] },
+] as const;
+
+type BackgroundId = typeof BACKGROUNDS[number]['id'];
 
 export default function Share2() {
   const params = useLocalSearchParams<{
@@ -46,12 +60,14 @@ export default function Share2() {
   const toast = useToast();
   
   const [selectedFormat, setSelectedFormat] = useState<FormatId>('post');
+  const [selectedBackground, setSelectedBackground] = useState<BackgroundId>('image');
   const [isSharing, setIsSharing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
   const viewShotRef = useRef<ViewShot>(null);
   
   const currentFormat = FORMATS.find(f => f.id === selectedFormat)!;
+  const currentBackground = BACKGROUNDS.find(b => b.id === selectedBackground)!;
   
   // Calculate preview dimensions to fit screen
   const PREVIEW_PADDING = 40;
@@ -147,11 +163,21 @@ export default function Share2() {
   // Card Component - This gets captured as image
   const ShareCard = () => (
     <View style={[styles.cardContainer, { width: previewWidth, height: previewHeight }]}>
-      <Image 
-        source={getBackgroundSource()} 
-        style={styles.cardBackground}
-        resizeMode="cover"
-      />
+      {/* Background - either image or gradient */}
+      {currentBackground.type === 'image' ? (
+        <Image 
+          source={getBackgroundSource()} 
+          style={styles.cardBackground}
+          resizeMode="cover"
+        />
+      ) : (
+        <LinearGradient
+          colors={currentBackground.colors as unknown as [string, string, ...string[]]}
+          style={styles.cardBackground}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+      )}
       
       {/* Content Overlay */}
       <View style={styles.cardOverlay}>
@@ -168,6 +194,7 @@ export default function Share2() {
           styles.textBox,
           selectedFormat === 'story' && styles.textBoxStory,
           selectedFormat === 'post' && styles.textBoxPost,
+          selectedFormat === 'twitter' && styles.textBoxTwitter,
         ]}>
           {/* Sanskrit Text */}
           <Text style={[
@@ -254,6 +281,42 @@ export default function Share2() {
             </Pressable>
           ))}
         </View>
+        
+        {/* Background Selector */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.backgroundSelector}
+        >
+          {BACKGROUNDS.map((bg) => (
+            <Pressable
+              key={bg.id}
+              onPress={() => {
+                selectionHaptic();
+                setSelectedBackground(bg.id);
+              }}
+              style={[
+                styles.backgroundSwatch,
+                selectedBackground === bg.id && styles.backgroundSwatchActive,
+              ]}
+            >
+              {bg.type === 'image' ? (
+                <Image 
+                  source={require('../assets/images/rawInstagramPost.png')}
+                  style={styles.backgroundSwatchImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <LinearGradient
+                  colors={bg.colors as unknown as [string, string, ...string[]]}
+                  style={styles.backgroundSwatchGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                />
+              )}
+            </Pressable>
+          ))}
+        </ScrollView>
         
         {/* Preview Area */}
         <ScrollView 
@@ -362,10 +425,11 @@ const styles = StyleSheet.create({
   previewContainer: {
     flexGrow: 1,
     alignItems: 'center',
+
     paddingVertical: 20,
   },
   cardContainer: {
-    borderRadius: 12,
+
     overflow: 'hidden',
     position: 'relative',
   },
@@ -373,35 +437,47 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
+    opacity:0.6
   },
   cardOverlay: {
     flex: 1,
-    padding: 20,
+
     justifyContent: 'center',
+    alignItems: 'center',
+
   },
   textBox: {
-    backgroundColor: 'rgba(30, 30, 30, 0.6)',
-    borderRadius: 8,
+    backgroundColor: 'rgba(30, 30, 30, 0.9)',
     padding: 16,
+    width: '100%',
+    alignItems: 'center',
   },
   textBoxStory: {
-    marginTop: 'auto',
-    marginBottom: 80,
+    // Story format - centered vertically with slight offset from bottom for branding
   },
   textBoxPost: {
-    marginTop: 60,
+    // Post format - perfectly centered (default from cardOverlay)
+    backgroundColor:'rgba(30, 30, 30, 0.9)'
+
+  },
+  textBoxTwitter: {
+    // Twitter format - centered with space for top reference
+    marginTop: 40,
   },
   sanskritText: {
     fontFamily: 'Kalam',
     fontSize: 14,
-    lineHeight: 22,
+    lineHeight: 12,
     color: '#f5f5f5',
     fontWeight: '700',
+    marginTop: 12,
+    paddingTop:12,
     marginBottom: 12,
+    textAlign:'center'
   },
   sanskritTextStory: {
     fontSize: 16,
-    lineHeight: 26,
+    lineHeight: 16,
   },
   translationText: {
     fontFamily: 'Alegreya',
@@ -468,5 +544,30 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  backgroundSelector: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    gap: 10,
+  },
+  backgroundSwatch: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  backgroundSwatchActive: {
+    borderColor: '#3b82f6',
+    borderWidth: 3,
+  },
+  backgroundSwatchImage: {
+    width: '100%',
+    height: '100%',
+  },
+  backgroundSwatchGradient: {
+    width: '100%',
+    height: '100%',
   },
 });

@@ -185,7 +185,7 @@ export default function Share2() {
         {selectedFormat === 'twitter' && (
           <>
             <Text style={styles.brandingTopRight}>kriya</Text>
-            <Text style={styles.referenceTop}>Bhagavad Gita {params.chapter}.{params.verse}</Text>
+            <Text style={styles.referenceTop}>BG{params.chapter}.{params.verse}</Text>
           </>
         )}
         
@@ -215,7 +215,7 @@ export default function Share2() {
           {/* Reference for Story/Post */}
           {selectedFormat !== 'twitter' && (
             <Text style={styles.referenceBottom}>
-              Bhagavad Gita {params.chapter}.{params.verse}
+              BG {params.chapter}.{params.verse}
             </Text>
           )}
         </View>

@@ -224,7 +224,7 @@ export default function Share2() {
         
         {/* Bottom branding for Story/Post */}
         {selectedFormat !== 'twitter' && (
-          <Text style={styles.brandingBottom}>kriyā</Text>
+          <Text style={selectedFormat === 'story' ? styles.brandingBottom : selectedFormat === 'post' ? styles.brandingBottomPost : styles.brandingBottom}>kriya</Text>
         )}
       </View>
     </View>
@@ -522,10 +522,21 @@ const styles = StyleSheet.create({
   },
   brandingBottom: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 10,
     alignSelf: 'center',
     fontFamily: 'Instrument Serif',
-    fontSize: 24,
+    fontSize: 18,
+    color: '#ffffff',
+    fontStyle: 'italic',
+  },
+  brandingBottomPost:{
+ position: 'absolute',
+    top: 10,
+    alignSelf: 'flex-end',
+    fontFamily: 'Instrument Serif',
+    fontSize: 18,
+    marginRight:16,
+
     color: '#ffffff',
     fontStyle: 'italic',
   },

@@ -121,8 +121,9 @@ export default function Share2() {
       if (status !== 'granted') {
         toast.show({
           id: 'permission-denied',
-          placement: 'bottom',
+          placement: 'top',
           duration: 2000,
+          containerStyle: { marginTop: 50 },
           render: ({ id }) => (
             <Toast nativeID={`toast-${id}`} action="error" variant="solid">
               <ToastTitle>Permission denied</ToastTitle>
@@ -138,8 +139,9 @@ export default function Share2() {
       taskCompleteHaptic();
       toast.show({
         id: 'saved-success',
-        placement: 'bottom',
+        placement: 'top',
         duration: 2000,
+        containerStyle: { marginTop: 50 },
         render: ({ id }) => (
           <Toast 
             nativeID={`toast-${id}`} 
@@ -253,72 +255,7 @@ export default function Share2() {
           <View style={{ width: 24 }} />
         </View>
         
-        {/* Format Selector */}
-        <View style={styles.formatSelector}>
-          {FORMATS.map((format) => (
-            <Pressable
-              key={format.id}
-              onPress={() => {
-                selectionHaptic();
-                setSelectedFormat(format.id);
-              }}
-              style={[
-                styles.formatTab,
-                selectedFormat === format.id && styles.formatTabActive,
-                { 
-                  backgroundColor: selectedFormat === format.id 
-                    ? (isDarkMode ? '#3b82f6' : '#2563eb')
-                    : (isDarkMode ? '#374151' : '#e5e7eb')
-                }
-              ]}
-            >
-              <Text style={[
-                styles.formatTabText,
-                { color: selectedFormat === format.id ? '#fff' : (isDarkMode ? '#9ca3af' : '#6b7280') }
-              ]}>
-                {format.label}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-        
-        {/* Background Selector */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.backgroundSelector}
-        >
-          {BACKGROUNDS.map((bg) => (
-            <Pressable
-              key={bg.id}
-              onPress={() => {
-                selectionHaptic();
-                setSelectedBackground(bg.id);
-              }}
-              style={[
-                styles.backgroundSwatch,
-                selectedBackground === bg.id && styles.backgroundSwatchActive,
-              ]}
-            >
-              {bg.type === 'image' ? (
-                <Image 
-                  source={require('../assets/images/rawInstagramPost.png')}
-                  style={styles.backgroundSwatchImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <LinearGradient
-                  colors={bg.colors as unknown as [string, string, ...string[]]}
-                  style={styles.backgroundSwatchGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                />
-              )}
-            </Pressable>
-          ))}
-        </ScrollView>
-        
-        {/* Preview Area */}
+        {/* Preview Area - Now at the top */}
         <ScrollView 
           contentContainerStyle={styles.previewContainer}
           showsVerticalScrollIndicator={false}
@@ -336,49 +273,117 @@ export default function Share2() {
           </ViewShot>
         </ScrollView>
         
-        {/* Action Buttons */}
-        <View style={styles.actionButtons}>
-          <Pressable
-            onPress={handleSave}
-            disabled={isSaving}
-            style={[
-              styles.actionButton,
-              styles.saveButton,
-              { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }
-            ]}
-          >
-            {isSaving ? (
-              <ActivityIndicator size="small" color={isDarkMode ? '#fff' : '#000'} />
-            ) : (
-              <>
-                <Feather name="download" size={20} color={isDarkMode ? '#fff' : '#000'} />
-                <Text style={[styles.actionButtonText, { color: isDarkMode ? '#fff' : '#000' }]}>
-                  Save
+        {/* Bottom Controls Panel */}
+        <View style={[styles.bottomPanel, { backgroundColor: isDarkMode ? '#1f2937' : '#ffffff' }]}>
+          {/* Format Selector */}
+          <View style={styles.formatSelector}>
+            {FORMATS.map((format) => (
+              <Pressable
+                key={format.id}
+                onPress={() => {
+                  selectionHaptic();
+                  setSelectedFormat(format.id);
+                }}
+                style={[
+                  styles.formatTab,
+                  selectedFormat === format.id && styles.formatTabActive,
+                  { 
+                    backgroundColor: selectedFormat === format.id 
+                      ? (isDarkMode ? '#3b82f6' : '#2563eb')
+                      : (isDarkMode ? '#374151' : '#e5e7eb')
+                  }
+                ]}
+              >
+                <Text style={[
+                  styles.formatTabText,
+                  { color: selectedFormat === format.id ? '#fff' : (isDarkMode ? '#9ca3af' : '#6b7280') }
+                ]}>
+                  {format.label}
                 </Text>
-              </>
-            )}
-          </Pressable>
+              </Pressable>
+            ))}
+          </View>
           
-          <Pressable
-            onPress={handleShare}
-            disabled={isSharing}
-            style={[
-              styles.actionButton,
-              styles.shareButton,
-              { backgroundColor: isDarkMode ? '#3b82f6' : '#2563eb' }
-            ]}
+          {/* Background Selector */}
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.backgroundSelector}
           >
-            {isSharing ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <Feather name="share" size={20} color="#fff" />
-                <Text style={[styles.actionButtonText, { color: '#fff' }]}>
-                  Share
-                </Text>
-              </>
-            )}
-          </Pressable>
+            {BACKGROUNDS.map((bg) => (
+              <Pressable
+                key={bg.id}
+                onPress={() => {
+                  selectionHaptic();
+                  setSelectedBackground(bg.id);
+                }}
+                style={[
+                  styles.backgroundSwatch,
+                  selectedBackground === bg.id && styles.backgroundSwatchActive,
+                ]}
+              >
+                {bg.type === 'image' ? (
+                  <Image 
+                    source={require('../assets/images/rawInstagramPost.png')}
+                    style={styles.backgroundSwatchImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <LinearGradient
+                    colors={bg.colors as unknown as [string, string, ...string[]]}
+                    style={styles.backgroundSwatchGradient}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  />
+                )}
+              </Pressable>
+            ))}
+          </ScrollView>
+
+          {/* Action Buttons */}
+          <View style={styles.actionButtons}>
+            <Pressable
+              onPress={handleSave}
+              disabled={isSaving}
+              style={[
+                styles.actionButton,
+                styles.saveButton,
+                { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }
+              ]}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color={isDarkMode ? '#fff' : '#000'} />
+              ) : (
+                <>
+                  <Feather name="download" size={20} color={isDarkMode ? '#fff' : '#000'} />
+                  <Text style={[styles.actionButtonText, { color: isDarkMode ? '#fff' : '#000' }]}>
+                    Save
+                  </Text>
+                </>
+              )}
+            </Pressable>
+            
+            <Pressable
+              onPress={handleShare}
+              disabled={isSharing}
+              style={[
+                styles.actionButton,
+                styles.shareButton,
+                { backgroundColor: isDarkMode ? '#3b82f6' : '#2563eb' }
+              ]}
+            >
+              {isSharing ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <>
+                  <Feather name="share" size={20} color="#fff" />
+                  <Text style={[styles.actionButtonText, { color: '#fff' }]}>
+                    Share
+                  </Text>
+                </>
+              )}
+            </Pressable>
+          </View>
         </View>
       </SafeAreaView>
     </LinearGradient>
@@ -523,6 +528,17 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: '#ffffff',
     fontStyle: 'italic',
+  },
+  bottomPanel: {
+    paddingTop: 16,
+    paddingBottom: 8,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10,
   },
   actionButtons: {
     flexDirection: 'row',

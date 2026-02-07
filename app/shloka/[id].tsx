@@ -1,5 +1,5 @@
 // app/shloka/[id].tsx
-import {  useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useLocalSearchParams, router, Link } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,6 +9,7 @@ import {
   Text,
   View,
   Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import {
   getShlokaAt,
@@ -19,9 +20,10 @@ import {
 
 import { StatusBar } from 'expo-status-bar';
 import { useKriya } from '../../lib/store';
-// Remove this line: import * as Haptics from 'expo-haptics';
-// Add this instead:
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../../lib/haptics';
+import { textToSpeech, type TTSLanguage } from '../../lib/tts';
+import { useAudioPlayer } from 'expo-audio';
+import * as FileSystem from 'expo-file-system';
 
 // Add toast imports
 import {
@@ -258,6 +260,114 @@ const handleBookPress = () => {
 
   const [showTooltip, setShowTooltip] = useState(false);
 
+  // TTS state
+  const [ttsLoading, setTtsLoading] = useState(false);
+  const [ttsPlaying, setTtsPlaying] = useState(false);
+  const ttsAbortRef = useRef(false);
+  const audioPlayer = useAudioPlayer(null);
+
+  // Cleanup audio on unmount or index change
+  useEffect(() => {
+    return () => {
+      ttsAbortRef.current = true;
+      try {
+        audioPlayer.pause();
+      } catch {
+        // Player may already be released, ignore
+      }
+    };
+  }, [currentIndex]);
+
+  const playAudio = useCallback(async (base64Audio: string): Promise<boolean> => {
+    try {
+      // Write base64 to temp file
+      const tempFile = `${FileSystem.cacheDirectory}tts_audio_${Date.now()}.wav`;
+      await FileSystem.writeAsStringAsync(tempFile, base64Audio, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Replace the audio source
+      audioPlayer.replace({ uri: tempFile });
+      audioPlayer.play();
+
+      // Wait for playback to complete
+      return new Promise((resolve) => {
+        const checkStatus = setInterval(() => {
+          if (ttsAbortRef.current) {
+            clearInterval(checkStatus);
+            audioPlayer.pause();
+            resolve(false);
+          } else if (!audioPlayer.playing && audioPlayer.currentTime > 0) {
+            clearInterval(checkStatus);
+            // Cleanup temp file
+            FileSystem.deleteAsync(tempFile, { idempotent: true });
+            resolve(true);
+          }
+        }, 100);
+      });
+    } catch (error) {
+      console.error('[TTS] Playback error:', error);
+      return false;
+    }
+  }, [audioPlayer]);
+
+  const handlePlayPress = useCallback(async () => {
+    if (!row) return;
+
+    // If already playing, stop
+    if (ttsPlaying) {
+      ttsAbortRef.current = true;
+      audioPlayer.pause();
+      setTtsPlaying(false);
+      setTtsLoading(false);
+      return;
+    }
+
+    buttonPressHaptic();
+    ttsAbortRef.current = false;
+    setTtsLoading(true);
+    setTtsPlaying(true);
+
+    try {
+      // 1. Play shloka in Hindi
+      const shlokaAudio = await textToSpeech(row.text, 'hi-IN');
+      if (ttsAbortRef.current || !shlokaAudio) {
+        setTtsLoading(false);
+        setTtsPlaying(false);
+        return;
+      }
+
+      setTtsLoading(false);
+      const shlokaComplete = await playAudio(shlokaAudio);
+      if (!shlokaComplete || ttsAbortRef.current) {
+        setTtsPlaying(false);
+        return;
+      }
+
+      // 2. Play translation in English
+      const translation = row.translation_2 ?? row.description ?? '';
+      if (translation) {
+        setTtsLoading(true);
+        const translationAudio = await textToSpeech(translation, 'en-IN');
+        if (ttsAbortRef.current || !translationAudio) {
+          setTtsLoading(false);
+          setTtsPlaying(false);
+          return;
+        }
+
+        setTtsLoading(false);
+        await playAudio(translationAudio);
+      }
+
+      taskCompleteHaptic();
+    } catch (error) {
+      console.error('[TTS] Error:', error);
+    } finally {
+      setTtsLoading(false);
+      setTtsPlaying(false);
+    }
+  }, [row, ttsPlaying, audioPlayer, playAudio]);
+
   const handleSharePress = () => {
     if (!row || currentIndex === null) return;
     buttonPressHaptic();
@@ -333,6 +443,29 @@ return (
               } 
             />
           </Animated.View>
+        </Pressable>
+
+        {/* Play TTS Button */}
+        <Pressable 
+          onPress={handlePlayPress} 
+          hitSlop={16} 
+          style={[
+            styles.circularButton,
+            { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)' }
+          ]}
+        >
+          {ttsLoading ? (
+            <ActivityIndicator size="small" color={isDarkMode ? '#ffffffff' : '#18464aff'} />
+          ) : (
+            <FontAwesome5 
+              name={ttsPlaying ? 'stop' : 'play'} 
+              size={14} 
+              color={ttsPlaying 
+                ? (isDarkMode ? '#f87171' : '#dc2626') 
+                : (isDarkMode ? '#ffffffff' : '#18464aff')
+              } 
+            />
+          )}
         </Pressable>
         
         {/* Share Button */}

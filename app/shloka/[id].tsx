@@ -329,11 +329,18 @@ const handleBookPress = () => {
     setTtsPlaying(true);
 
     try {
-      // Fetch both audio files in parallel to eliminate the gap
+      // Build merged English text: "Translation. {text} ... Commentary. {text}"
       const translation = row.translation_2 ?? row.description ?? '';
-      const [shlokaAudio, translationAudio] = await Promise.all([
-        textToSpeech(row.text, 'hi-IN'),
-        translation ? textToSpeech(translation, 'en-IN') : Promise.resolve(null),
+      let englishText = '';
+      if (translation) englishText += `Translation. ${translation}`;
+      if (row.commentary) englishText += ` ... Commentary. ${row.commentary}`;
+
+      // Fetch all audio files in parallel (from cache/R2/Sarvam)
+      // Commentary may be in a separate file if merged text was > 2500 chars
+      const [shlokaAudio, englishAudio, commentaryAudio] = await Promise.all([
+        textToSpeech(row.text, 'hi-IN', row.chapter_number, row.verse_number),
+        englishText ? textToSpeech(englishText, 'en-IN', row.chapter_number, row.verse_number) : Promise.resolve(null),
+        row.commentary ? textToSpeech(`Commentary. ${row.commentary}`, 'en-IN', row.chapter_number, row.verse_number, 'commentary') : Promise.resolve(null),
       ]);
 
       if (ttsAbortRef.current || !shlokaAudio) {
@@ -350,9 +357,18 @@ const handleBookPress = () => {
         return;
       }
 
-      // Then play translation (already fetched, no network wait)
-      if (translationAudio) {
-        await playAudio(translationAudio);
+      // Play English (translation, possibly with commentary merged)
+      if (englishAudio) {
+        const engComplete = await playAudio(englishAudio);
+        if (!engComplete || ttsAbortRef.current) {
+          setTtsPlaying(false);
+          return;
+        }
+      }
+
+      // Play separate commentary if it exists (for long texts that were split)
+      if (commentaryAudio) {
+        await playAudio(commentaryAudio);
       }
 
       taskCompleteHaptic();

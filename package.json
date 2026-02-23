@@ -37,6 +37,7 @@
     "expo-navigation-bar": "~4.2.7",
     "expo-notifications": "~0.31.4",
     "expo-router": "~5.1.4",
+    "expo-sharing": "~13.1.5",
     "expo-splash-screen": "~0.30.7",
     "expo-sqlite": "~15.2.14",
     "expo-status-bar": "~2.2.3",
@@ -52,19 +53,20 @@
     "react-native-screens": "~4.11.1",
     "react-native-svg": "^15.12.1",
     "react-native-svg-transformer": "^1.5.1",
+    "react-native-view-shot": "4.0.3",
     "react-native-web": "^0.20.0",
     "react-native-worklets": "^0.5.0",
     "react-stately": "^3.41.0",
     "tailwind-variants": "^0.1.20",
     "tailwindcss": "^3.4.17",
-    "zustand": "^5.0.7",
-    "react-native-view-shot": "4.0.3",
-    "expo-sharing": "~13.1.5"
+    "zustand": "^5.0.7"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.995.0",
     "@babel/core": "^7.20.0",
     "@types/react": "~19.0.10",
     "@types/react-native": "^0.72.8",
+    "better-sqlite3": "^12.6.2",
     "typescript": "~5.8.3"
   },
   "private": true

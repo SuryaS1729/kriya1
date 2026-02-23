@@ -114,7 +114,7 @@ export default function Goals() {
         {/* Description */}
         <View style={styles.descriptionContainer}>
           <Text style={[styles.description, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
-            Note down your longer-term aspirations and goals. These stay here permanently until you remove them.
+            Note down your longer-term aspirations and goals. These stay here permanently until you remove them. Weekly chores etc...
           </Text>
         </View>
 

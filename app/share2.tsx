@@ -28,7 +28,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const FORMATS = [
   { id: 'post', label: 'Post', aspectRatio: 1, width: 4096, height: 4096 },
   { id: 'story', label: 'Story', aspectRatio: 9/16, width: 2304, height: 4096 },
-  { id: 'twitter', label: 'Twitter', aspectRatio: 16/9, width: 4096, height: 2304 },
 ] as const;
 
 type FormatId = typeof FORMATS[number]['id'];
@@ -77,14 +76,9 @@ export default function Share2() {
   
   // Get background image based on format
   const getBackgroundSource = () => {
-    switch (selectedFormat) {
-      case 'twitter':
-        return require('../assets/images/rawTwitter.png');
-      case 'story':
-        return require('../assets/images/rawInstagramStory.png');
-      case 'post':
-        return require('../assets/images/rawInstagramPost.png');
-    }
+    return selectedFormat === 'story'
+      ? require('../assets/images/rawInstagramStory.png')
+      : require('../assets/images/rawInstagramPost.png');
   };
   
   const handleShare = async () => {
@@ -183,20 +177,10 @@ export default function Share2() {
       
       {/* Content Overlay */}
       <View style={styles.cardOverlay}>
-        {/* Twitter layout - branding top right */}
-        {selectedFormat === 'twitter' && (
-          <>
-            <Text style={styles.brandingTopRight}>kriya</Text>
-            <Text style={styles.referenceTop}>BG{params.chapter}.{params.verse}</Text>
-          </>
-        )}
-        
         {/* Text Box */}
         <View style={[
           styles.textBox,
-          selectedFormat === 'story' && styles.textBoxStory,
-          selectedFormat === 'post' && styles.textBoxPost,
-          selectedFormat === 'twitter' && styles.textBoxTwitter,
+          selectedFormat === 'story' ? styles.textBoxStory : styles.textBoxPost,
         ]}>
           {/* Sanskrit Text */}
           <Text style={[
@@ -214,18 +198,16 @@ export default function Share2() {
             {params.translation || 'Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra...'}
           </Text>
           
-          {/* Reference for Story/Post */}
-          {selectedFormat !== 'twitter' && (
-            <Text style={styles.referenceBottom}>
-              BG {params.chapter}.{params.verse}
-            </Text>
-          )}
+          {/* Reference */}
+          <Text style={styles.referenceBottom}>
+            BG {params.chapter}.{params.verse}
+          </Text>
         </View>
         
-        {/* Bottom branding for Story/Post */}
-        {selectedFormat !== 'twitter' && (
-          <Text style={selectedFormat === 'story' ? styles.brandingBottom : selectedFormat === 'post' ? styles.brandingBottomPost : styles.brandingBottom}>kriya</Text>
-        )}
+        {/* Bottom branding */}
+        <Text style={selectedFormat === 'story' ? styles.brandingBottom : styles.brandingBottomPost}>
+          kriya
+        </Text>
       </View>
     </View>
   );
@@ -463,11 +445,6 @@ const styles = StyleSheet.create({
   textBoxPost: {
     // Post format - perfectly centered (default from cardOverlay)
     backgroundColor:'rgba(30, 30, 30, 0.9)'
-
-  },
-  textBoxTwitter: {
-    // Twitter format - centered with space for top reference
-    marginTop: 40,
   },
   sanskritText: {
     fontFamily: 'Kalam',
@@ -494,15 +471,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
   },
-  referenceTop: {
-    fontFamily: 'Source Serif Pro',
-    fontSize: 10,
-    color: '#d0d0d0',
-    fontStyle: 'italic',
-    position: 'absolute',
-    top: 12,
-    left: 16,
-  },
   referenceBottom: {
     fontFamily: 'Source Serif Pro',
     fontSize: 10,
@@ -510,15 +478,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     textAlign: 'right',
     marginTop: 12,
-  },
-  brandingTopRight: {
-    position: 'absolute',
-    top: 12,
-    right: 16,
-    fontFamily: 'Instrument Serif',
-    fontSize: 16,
-    color: '#ffffff',
-    fontStyle: 'italic',
   },
   brandingBottom: {
     position: 'absolute',

@@ -329,14 +329,20 @@ const handleBookPress = () => {
     setTtsPlaying(true);
 
     try {
-      // 1. Play shloka in Hindi
-      const shlokaAudio = await textToSpeech(row.text, 'hi-IN');
+      // Fetch both audio files in parallel to eliminate the gap
+      const translation = row.translation_2 ?? row.description ?? '';
+      const [shlokaAudio, translationAudio] = await Promise.all([
+        textToSpeech(row.text, 'hi-IN'),
+        translation ? textToSpeech(translation, 'en-IN') : Promise.resolve(null),
+      ]);
+
       if (ttsAbortRef.current || !shlokaAudio) {
         setTtsLoading(false);
         setTtsPlaying(false);
         return;
       }
 
+      // Play shloka first
       setTtsLoading(false);
       const shlokaComplete = await playAudio(shlokaAudio);
       if (!shlokaComplete || ttsAbortRef.current) {
@@ -344,18 +350,8 @@ const handleBookPress = () => {
         return;
       }
 
-      // 2. Play translation in English
-      const translation = row.translation_2 ?? row.description ?? '';
-      if (translation) {
-        setTtsLoading(true);
-        const translationAudio = await textToSpeech(translation, 'en-IN');
-        if (ttsAbortRef.current || !translationAudio) {
-          setTtsLoading(false);
-          setTtsPlaying(false);
-          return;
-        }
-
-        setTtsLoading(false);
+      // Then play translation (already fetched, no network wait)
+      if (translationAudio) {
         await playAudio(translationAudio);
       }
 

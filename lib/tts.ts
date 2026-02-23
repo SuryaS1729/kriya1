@@ -41,7 +41,7 @@ export async function textToSpeech(
   const truncatedText = text.slice(0, 2500);
 
   // Slower pace for Hindi (Sanskrit shlokas), normal for English
-  const pace = language === 'hi-IN' ? 0.95 : 1.05;
+  const pace = language === 'hi-IN' ? 0.95 : 1.1;
 
   const requestBody: TTSRequest = {
     text: truncatedText,

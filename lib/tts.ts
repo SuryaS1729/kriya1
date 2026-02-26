@@ -33,9 +33,8 @@ async function ensureCacheDir() {
   }
 }
 
-function getCacheKey(language: TTSLanguage, chapter: number, verse: number, suffix?: string): string {
-  const name = suffix ? `${chapter}_${verse}_${suffix}` : `${chapter}_${verse}`;
-  return `${CACHE_DIR}${language}_${name}.wav`;
+function getCacheKey(language: TTSLanguage, chapter: number, verse: number): string {
+  return `${CACHE_DIR}${language}_${chapter}_${verse}.wav`;
 }
 
 async function getFromDeviceCache(cacheKey: string): Promise<string | null> {
@@ -69,14 +68,12 @@ async function saveToDeviceCache(cacheKey: string, base64Audio: string): Promise
 async function fetchFromR2(
   language: TTSLanguage,
   chapter: number,
-  verse: number,
-  suffix?: string
+  verse: number
 ): Promise<string | null> {
   const r2BaseUrl = process.env.EXPO_PUBLIC_R2_TTS_URL;
   if (!r2BaseUrl) return null;
 
-  const name = suffix ? `${chapter}_${verse}_${suffix}` : `${chapter}_${verse}`;
-  const url = `${r2BaseUrl}/${language}/${name}.wav`;
+  const url = `${r2BaseUrl}/${language}/${chapter}_${verse}.wav`;
 
   try {
     const response = await fetch(url);
@@ -172,13 +169,12 @@ export async function textToSpeech(
   text: string,
   language: TTSLanguage,
   chapter?: number,
-  verse?: number,
-  suffix?: string
+  verse?: number
 ): Promise<string | null> {
   // If chapter/verse provided, use cache → R2 → Sarvam flow
   if (chapter != null && verse != null) {
-    const cacheKey = getCacheKey(language, chapter, verse, suffix);
-    const logName = suffix ? `${language}/${chapter}_${verse}_${suffix}` : `${language}/${chapter}_${verse}`;
+    const cacheKey = getCacheKey(language, chapter, verse);
+    const logName = `${language}/${chapter}_${verse}`;
 
     // 1. Check device cache
     const cached = await getFromDeviceCache(cacheKey);
@@ -188,19 +184,14 @@ export async function textToSpeech(
     }
 
     // 2. Try R2
-    const r2Audio = await fetchFromR2(language, chapter, verse, suffix);
+    const r2Audio = await fetchFromR2(language, chapter, verse);
     if (r2Audio) {
-      console.log(`[TTS] R2 hit: ${language}/${chapter}_${verse}`);
+      console.log(`[TTS] R2 hit: ${logName}`);
       await saveToDeviceCache(cacheKey, r2Audio);
       return r2Audio;
     }
 
-    // 3. Fallback to Sarvam (skip for suffixed lookups — those are R2-only)
-    if (suffix) {
-      console.log(`[TTS] No R2 file for ${logName}, skipping (commentary was merged)`);
-      return null;
-    }
-
+    // 3. Fallback to Sarvam
     console.log(`[TTS] Sarvam fallback: ${logName}`);
     const sarvamAudio = await callSarvamAPI(text, language);
     if (sarvamAudio) {

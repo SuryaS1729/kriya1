@@ -1,0 +1,4 @@
+# Shlokas skipped because English text > 2500 chars
+# Generate these manually and upload to R2 as en-IN/<ch>_<v>.wav
+
+Ch1 V1 — 3816 chars

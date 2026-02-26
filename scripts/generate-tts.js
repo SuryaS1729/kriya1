@@ -6,15 +6,15 @@
 //   npm install better-sqlite3 @aws-sdk/client-s3
 //
 // Usage:
-//   SARVAM_API_KEY=sk_xxx R2_ACCOUNT_ID=xxx R2_ACCESS_KEY_ID=xxx R2_SECRET_ACCESS_KEY=xxx R2_BUCKET_NAME=xxx node scripts/generate-tts.js
+//   source .env && SARVAM_API_KEY=$EXPO_PUBLIC_SARVAM_API_KEY node scripts/generate-tts.js
 //
 // The script is resumable: it skips any file that already exists in R2.
-// Use --force-english to re-generate all English files (e.g. after fixing truncation).
-const FORCE_ENGLISH = process.argv.includes('--force-english');
+// Shlokas with English text > 2500 chars are skipped and logged to skipped_shlokas.txt.
 
 const Database = require('better-sqlite3');
 const { S3Client, PutObjectCommand, HeadObjectCommand } = require('@aws-sdk/client-s3');
 const path = require('path');
+const fs = require('fs');
 
 // --------------- Config ---------------
 
@@ -23,7 +23,7 @@ const SARVAM_API_KEY = process.env.SARVAM_API_KEY;
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
 const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
 const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'kriya-tts';
+const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || 'kriya';
 
 if (!SARVAM_API_KEY) {
   console.error('Missing SARVAM_API_KEY env var');
@@ -79,7 +79,7 @@ async function callSarvamTTS(text, language) {
       'api-subscription-key': SARVAM_API_KEY,
     },
     body: JSON.stringify({
-      text: text.slice(0, 2500),
+      text,
       target_language_code: language,
       speaker: 'aditya',
       model: 'bulbul:v3',
@@ -109,7 +109,7 @@ async function processWithRetry(fn, retries = 3) {
     } catch (err) {
       if (attempt === retries) throw err;
       console.warn(`  Retry ${attempt}/${retries}: ${err.message}`);
-      await sleep(2000 * attempt); // Backoff: 2s, 4s, 6s
+      await sleep(2000 * attempt);
     }
   }
 }
@@ -117,7 +117,6 @@ async function processWithRetry(fn, retries = 3) {
 // --------------- Main ---------------
 
 async function main() {
-  // Open the SQLite DB
   const dbPath = path.resolve(__dirname, '..', 'assets', 'db', 'gita.db');
   const db = new Database(dbPath, { readonly: true });
 
@@ -129,8 +128,12 @@ async function main() {
 
   console.log(`Found ${shlokas.length} shlokas. Starting TTS generation...\n`);
 
+  const skippedFile = path.resolve(__dirname, 'skipped_shlokas.txt');
+  fs.writeFileSync(skippedFile, '# Shlokas skipped because English text > 2500 chars\n# Generate these manually and upload to R2 as en-IN/<ch>_<v>.wav\n\n');
+
   let processed = 0;
   let skipped = 0;
+  let tooLong = 0;
 
   for (const shloka of shlokas) {
     const { chapter_number: ch, verse_number: v, text, translation_2, description, commentary } = shloka;
@@ -147,88 +150,49 @@ async function main() {
         await uploadToR2(hiKey, audio);
         console.log(`[${label}] ✓ Uploaded ${hiKey} (${(audio.length / 1024).toFixed(0)} KB)`);
       });
-      // Rate limit: small delay between API calls
       await sleep(500);
     }
 
-    // ---- 2. English audio ----
-    const translation = translation_2 || description || '';
-    let translationText = translation ? `Translation. ${translation}` : '';
-    let commentaryText = commentary ? `Commentary. ${commentary}` : '';
-    const mergedText = translationText + (commentaryText ? ` ... ${commentaryText}` : '');
-
+    // ---- 2. English (translation + commentary merged) ----
     const enKey = `en-IN/${ch}_${v}.wav`;
-    const commentaryKey = `en-IN/${ch}_${v}_commentary.wav`;
+    if (await existsInR2(enKey)) {
+      skipped++;
+    } else {
+      const translation = translation_2 || description || '';
+      let englishText = '';
+      if (translation) englishText += `Translation. ${translation}`;
+      if (commentary) englishText += ` ... Commentary. ${commentary}`;
 
-    if (mergedText.length <= 2500) {
-      // Merged text fits in one call
-      if (!FORCE_ENGLISH && await existsInR2(enKey)) {
-        skipped++;
-      } else if (mergedText) {
+      if (!englishText) {
+        console.log(`[${label}] ⚠ No English text, skipping`);
+      } else if (englishText.length > 2500) {
+        // Too long — skip and log
+        tooLong++;
+        const logLine = `Ch${ch} V${v} — ${englishText.length} chars\n`;
+        fs.appendFileSync(skippedFile, logLine);
+        console.log(`[${label}] ⏭ SKIPPED (${englishText.length} chars > 2500) — logged to skipped_shlokas.txt`);
+      } else {
         await processWithRetry(async () => {
-          console.log(`[${label}] Generating English merged (${mergedText.length} chars)...`);
-          const audio = await callSarvamTTS(mergedText, 'en-IN');
+          console.log(`[${label}] Generating English (${englishText.length} chars)...`);
+          const audio = await callSarvamTTS(englishText, 'en-IN');
           await uploadToR2(enKey, audio);
           console.log(`[${label}] ✓ Uploaded ${enKey} (${(audio.length / 1024).toFixed(0)} KB)`);
         });
         await sleep(500);
       }
-    } else {
-      // Text too long — split into separate translation and commentary files
-      console.log(`[${label}] ⚠ Merged text ${mergedText.length} chars > 2500, splitting...`);
-
-      // Translation file
-      if (translationText) {
-        if (!FORCE_ENGLISH && await existsInR2(enKey)) {
-          // Check if this was a truncated merged file — re-upload if commentary key doesn't exist
-          const commentaryExists = await existsInR2(commentaryKey);
-          if (!commentaryExists && commentaryText) {
-            // Previously uploaded as truncated merged — re-upload as translation only
-            await processWithRetry(async () => {
-              console.log(`[${label}] Re-uploading translation only (${translationText.length} chars)...`);
-              const audio = await callSarvamTTS(translationText, 'en-IN');
-              await uploadToR2(enKey, audio);
-              console.log(`[${label}] ✓ Re-uploaded ${enKey} (${(audio.length / 1024).toFixed(0)} KB)`);
-            });
-            await sleep(500);
-          } else {
-            skipped++;
-          }
-        } else {
-          await processWithRetry(async () => {
-            console.log(`[${label}] Generating translation (${translationText.length} chars)...`);
-            const audio = await callSarvamTTS(translationText, 'en-IN');
-            await uploadToR2(enKey, audio);
-            console.log(`[${label}] ✓ Uploaded ${enKey} (${(audio.length / 1024).toFixed(0)} KB)`);
-          });
-          await sleep(500);
-        }
-      }
-
-      // Commentary file (separate)
-      if (commentaryText) {
-        if (!FORCE_ENGLISH && await existsInR2(commentaryKey)) {
-          skipped++;
-        } else {
-          await processWithRetry(async () => {
-            console.log(`[${label}] Generating commentary (${commentaryText.length} chars)...`);
-            const audio = await callSarvamTTS(commentaryText, 'en-IN');
-            await uploadToR2(commentaryKey, audio);
-            console.log(`[${label}] ✓ Uploaded ${commentaryKey} (${(audio.length / 1024).toFixed(0)} KB)`);
-          });
-          await sleep(500);
-        }
-      }
     }
 
     processed++;
     if (processed % 50 === 0) {
-      console.log(`\n--- Progress: ${processed}/${shlokas.length} processed, ${skipped} skipped ---\n`);
+      console.log(`\n--- Progress: ${processed}/${shlokas.length} processed, ${skipped} cached, ${tooLong} too long ---\n`);
     }
   }
 
   db.close();
-  console.log(`\n✅ Done! ${processed} shlokas processed, ${skipped} files skipped (already in R2).`);
+  console.log(`\n✅ Done! ${processed} shlokas processed, ${skipped} already in R2, ${tooLong} skipped (too long).`);
+  if (tooLong > 0) {
+    console.log(`📝 See scripts/skipped_shlokas.txt for the list of skipped shlokas.`);
+  }
 }
 
 main().catch((err) => {

@@ -270,11 +270,7 @@ const handleBookPress = () => {
   useEffect(() => {
     return () => {
       ttsAbortRef.current = true;
-      try {
-        audioPlayer.pause();
-      } catch {
-        // Player may already be released, ignore
-      }
+      // Don't pause audio on unmount — allow background playback
     };
   }, [currentIndex]);
 
@@ -295,7 +291,7 @@ const handleBookPress = () => {
         const checkStatus = setInterval(() => {
           if (ttsAbortRef.current) {
             clearInterval(checkStatus);
-            audioPlayer.pause();
+            try { audioPlayer.pause(); } catch {}
             resolve(false);
           } else if (!audioPlayer.playing && audioPlayer.currentTime > 0) {
             clearInterval(checkStatus);
@@ -317,7 +313,7 @@ const handleBookPress = () => {
     // If already playing, stop
     if (ttsPlaying) {
       ttsAbortRef.current = true;
-      audioPlayer.pause();
+      try { audioPlayer.pause(); } catch {}
       setTtsPlaying(false);
       setTtsLoading(false);
       return;

@@ -2,3 +2,26 @@
 # Generate these manually and upload to R2 as en-IN/<ch>_<v>.wav
 
 Ch1 V1 — 3816 chars
+Ch1 V32 — 3047 chars
+Ch1 V33 — 3047 chars
+Ch1 V34 — 3047 chars
+Ch1 V35 — 3047 chars
+Ch1 V36 — 2537 chars
+Ch1 V37 — 2537 chars
+Ch2 V2 — 5602 chars
+Ch2 V7 — 3848 chars
+Ch2 V8 — 3966 chars
+Ch2 V12 — 4975 chars
+Ch2 V13 — 3366 chars
+Ch2 V17 — 4222 chars
+Ch2 V20 — 3648 chars
+Ch2 V22 — 2656 chars
+Ch2 V29 — 2900 chars
+Ch2 V31 — 3030 chars
+Ch2 V39 — 6175 chars
+Ch2 V41 — 3182 chars
+Ch2 V46 — 3175 chars
+Ch2 V51 — 2501 chars
+Ch2 V61 — 2901 chars
+Ch3 V10 — 2822 chars
+Ch3 V12 — 3382 chars

@@ -123,6 +123,10 @@ interface KriyaState {
   removeGoal: (id: number) => void;
   updateGoal: (id: number, title: string) => void;
   refreshGoals: () => void;
+
+  // Listen mode
+  listenProgress: { shlokaIndex: number };
+  setListenProgress: (index: number) => void;
 }
 
 // Updated helper function for notifications - Following official docs exactly
@@ -216,6 +220,7 @@ export const useKriya = create<KriyaState>()(
       hasCompletedOnboarding: false,
       focusSessions: {},
       goals: [],
+      listenProgress: { shlokaIndex: 0 },
       hasCompletedTour: false,
         hasSeenGuidedTour: false,
         setHasSeenGuidedTour: (seen: boolean) => {
@@ -501,6 +506,10 @@ export const useKriya = create<KriyaState>()(
         dbUpdateGoal(id, title);
         set({ goals: getAllGoals() });
       },
+
+      setListenProgress: (index: number) => {
+        set({ listenProgress: { shlokaIndex: index } });
+      },
     }),
     {
       name: 'kriya-storage',
@@ -512,7 +521,8 @@ export const useKriya = create<KriyaState>()(
         focusSessions: state.focusSessions,
         notificationsEnabled: state.notificationsEnabled,
         reminderTime: state.reminderTime,
-                hasSeenGuidedTour: state.hasSeenGuidedTour, // Add this line
+                hasSeenGuidedTour: state.hasSeenGuidedTour,
+                listenProgress: state.listenProgress,
 
         // Don't persist notification token
       }),

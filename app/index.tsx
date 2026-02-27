@@ -674,6 +674,19 @@ console.log('🔍 Guided Tour Debug:', {
       <Feather name="book-open" size={16} color={isDarkMode ? "#f9fafb" : "#000000ff"} />
     </Animated.View>
   </TouchableOpacity>
+
+  <TouchableOpacity onPress={() => {
+    buttonPressHaptic();
+    router.push('/listen');
+  }}
+  activeOpacity={0.7}>
+    <Animated.View style={[
+      styles.descButton,
+      { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
+    ]}>
+      <Feather name="headphones" size={16} color={isDarkMode ? "#f9fafb" : "#000000ff"} />
+    </Animated.View>
+  </TouchableOpacity>
 </View>
 </View>
 

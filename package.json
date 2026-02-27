@@ -64,6 +64,7 @@
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.995.0",
     "@babel/core": "^7.20.0",
+    "@google/genai": "^1.43.0",
     "@types/react": "~19.0.10",
     "@types/react-native": "^0.72.8",
     "better-sqlite3": "^12.6.2",

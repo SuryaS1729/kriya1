@@ -24,10 +24,10 @@ import { Toast, ToastTitle, useToast } from '@/components/ui/toast';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Card format configurations - 4K resolution
+// Card format configurations - optimized resolution (2K — fast to encode, plenty for social media)
 const FORMATS = [
-  { id: 'post', label: 'Post', aspectRatio: 1, width: 4096, height: 4096 },
-  { id: 'story', label: 'Story', aspectRatio: 9/16, width: 2304, height: 4096 },
+  { id: 'post', label: 'Post', aspectRatio: 1, width: 2048, height: 2048 },
+  { id: 'story', label: 'Story', aspectRatio: 9/16, width: 1152, height: 2048 },
 ] as const;
 
 type FormatId = typeof FORMATS[number]['id'];
@@ -92,7 +92,7 @@ export default function Share2() {
       
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, {
-          mimeType: 'image/png',
+          mimeType: 'image/jpeg',
           dialogTitle: 'Share Shloka',
         });
         taskCompleteHaptic();
@@ -245,8 +245,8 @@ export default function Share2() {
           <ViewShot 
             ref={viewShotRef} 
             options={{ 
-              format: 'png', 
-              quality: 1,
+              format: 'jpg', 
+              quality: 0.95,
               width: currentFormat.width,
               height: currentFormat.height,
             }}

@@ -26,23 +26,69 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Card format configurations - optimized resolution (2K — fast to encode, plenty for social media)
 const FORMATS = [
-  { id: 'post', label: 'Post', aspectRatio: 1, width: 2048, height: 2048 },
   { id: 'story', label: 'Story', aspectRatio: 9/16, width: 1152, height: 2048 },
+    { id: 'post', label: 'Post', aspectRatio: 1, width: 2048, height: 2048 },
+
 ] as const;
 
 type FormatId = typeof FORMATS[number]['id'];
 
-// Beautiful gradient backgrounds
+// Background configurations with per-background styling
 const BACKGROUNDS = [
-  { id: 'image', label: 'Krishna', type: 'image' as const, colors: ['#1a1a2e', '#16213e'] },
-  { id: 'sunset', label: 'Sunset', type: 'gradient' as const, colors: ['#ff6b6b', '#ee5a24', '#f0932b'] },
-  { id: 'ocean', label: 'Ocean', type: 'gradient' as const, colors: ['#0f3460', '#16537e', '#1e6f9f'] },
-  { id: 'forest', label: 'Forest', type: 'gradient' as const, colors: ['#134e5e', '#1a5d37', '#2d6a4f'] },
-  { id: 'twilight', label: 'Twilight', type: 'gradient' as const, colors: ['#2c3e50', '#4a69bd', '#6a89cc'] },
-  { id: 'rose', label: 'Rose', type: 'gradient' as const, colors: ['#c44569', '#cf6a87', '#e7a8a8'] },
-  { id: 'midnight', label: 'Midnight', type: 'gradient' as const, colors: ['#0f0c29', '#302b63', '#24243e'] },
-  { id: 'gold', label: 'Gold', type: 'gradient' as const, colors: ['#8b6914', '#b8860b', '#daa520'] },
-] as const;
+  {
+    id: 'krishna',
+    label: 'Krishna',
+    type: 'image' as const,
+    colors: ['#1a1a2e', '#16213e'],
+    // Per-background style overrides
+    textBoxBg: 'rgba(30, 30, 30, 0.9)',
+    textBoxPosition: 'center' as const,   // 'top' | 'center' | 'bottom'
+    textColor: '#f5f5f5',
+    translationColor: '#e0e0e0',
+    refColor: '#b0b0b0',
+    brandingColor: '#ffffff',
+    bgOpacity: 0.6,
+  },
+  {
+    id: 'temple',
+    label: 'Temple',
+    type: 'image' as const,
+    colors: ['#2d1b3d', '#1a1a2e'],
+    textBoxBg: 'rgba(20, 10, 30, 0.09)',
+    textBoxPosition: 'center' as const,
+    textColor: '#f5f5f5',
+    translationColor: '#e0e0e0',
+    refColor: '#b0b0b0',
+    brandingColor: '#ffffff',
+    bgOpacity: 0.65,
+  },
+  {
+    id: 'ocean',
+    label: 'Ocean',
+    type: 'gradient' as const,
+    colors: ['#0f0c29', '#16537e', '#0f0c29'],
+    textBoxBg: 'rgba(15, 52, 96, 0)',
+    textBoxPosition: 'center' as const,
+    textColor: '#e0f0ff',
+    translationColor: '#b8d8f0',
+    refColor: '#8ab4d4',
+    brandingColor: '#cce5ff',
+    bgOpacity: 1,
+  },
+  {
+    id: 'midnight',
+    label: 'Midnight',
+    type: 'gradient' as const,
+    colors: ['#0f0c29', '#302b63', '#24243e'],
+    textBoxBg: 'rgba(15, 12, 41, 0)',
+    textBoxPosition: 'center' as const,
+    textColor: '#e8e6f0',
+    translationColor: '#c8c4d8',
+    refColor: '#9a96b0',
+    brandingColor: '#d4d0e8',
+    bgOpacity: 1,
+  },
+];
 
 type BackgroundId = typeof BACKGROUNDS[number]['id'];
 
@@ -58,8 +104,8 @@ export default function Share2() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const toast = useToast();
   
-  const [selectedFormat, setSelectedFormat] = useState<FormatId>('post');
-  const [selectedBackground, setSelectedBackground] = useState<BackgroundId>('image');
+  const [selectedFormat, setSelectedFormat] = useState<FormatId>('story');
+  const [selectedBackground, setSelectedBackground] = useState<BackgroundId>('krishna');
   const [isSharing, setIsSharing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
@@ -74,8 +120,12 @@ export default function Share2() {
   const previewWidth = Math.min(maxWidth, 350);
   const previewHeight = previewWidth / currentFormat.aspectRatio;
   
-  // Get background image based on format
+  // Get background image based on selected background
   const getBackgroundSource = () => {
+    if (selectedBackground === 'temple') {
+      return require('../assets/images/background2.jpg');
+    }
+    // Krishna background
     return selectedFormat === 'story'
       ? require('../assets/images/rawInstagramStory.png')
       : require('../assets/images/rawInstagramPost.png');
@@ -156,6 +206,14 @@ export default function Share2() {
     }
   };
   
+  // Resolve text box positioning based on per-background config
+  const getOverlayJustify = () => {
+    const pos = currentBackground.textBoxPosition as string;
+    if (pos === 'top') return 'flex-start' as const;
+    if (pos === 'bottom') return 'flex-end' as const;
+    return 'center' as const;
+  };
+
   // Card Component - This gets captured as image
   const ShareCard = () => (
     <View style={[styles.cardContainer, { width: previewWidth, height: previewHeight }]}>
@@ -163,29 +221,29 @@ export default function Share2() {
       {currentBackground.type === 'image' ? (
         <Image 
           source={getBackgroundSource()} 
-          style={styles.cardBackground}
+          style={[styles.cardBackground, { opacity: currentBackground.bgOpacity }]}
           resizeMode="cover"
         />
       ) : (
         <LinearGradient
           colors={currentBackground.colors as unknown as [string, string, ...string[]]}
-          style={styles.cardBackground}
+          style={[styles.cardBackground, { opacity: currentBackground.bgOpacity }]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         />
       )}
       
       {/* Content Overlay */}
-      <View style={styles.cardOverlay}>
+      <View style={[styles.cardOverlay, { justifyContent: getOverlayJustify() }]}>
         {/* Text Box */}
         <View style={[
           styles.textBox,
-          selectedFormat === 'story' ? styles.textBoxStory : styles.textBoxPost,
+          { backgroundColor: currentBackground.textBoxBg },
         ]}>
           {/* Sanskrit Text */}
           <Text style={[
             styles.sanskritText,
-            selectedFormat === 'story' && styles.sanskritTextStory,
+            { color: currentBackground.textColor },
           ]}>
             {params.text || 'धृतराष्ट्र उवाच |\nधर्मक्षेत्रे कुरुक्षेत्रे समवेता युयुत्सवः |'}
           </Text>
@@ -193,19 +251,22 @@ export default function Share2() {
           {/* English Translation */}
           <Text style={[
             styles.translationText,
-            selectedFormat === 'story' && styles.translationTextStory,
+            { color: currentBackground.translationColor },
           ]}>
             {params.translation || 'Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra...'}
           </Text>
           
           {/* Reference */}
-          <Text style={styles.referenceBottom}>
+          <Text style={[styles.referenceBottom, { color: currentBackground.refColor }]}>
             BG {params.chapter}.{params.verse}
           </Text>
         </View>
         
         {/* Bottom branding */}
-        <Text style={selectedFormat === 'story' ? styles.brandingBottom : styles.brandingBottomPost}>
+        <Text style={[
+          selectedFormat === 'story' ? styles.brandingBottom : styles.brandingBottomPost,
+          { color: currentBackground.brandingColor },
+        ]}>
           kriya
         </Text>
       </View>
@@ -306,7 +367,10 @@ export default function Share2() {
               >
                 {bg.type === 'image' ? (
                   <Image 
-                    source={require('../assets/images/rawInstagramPost.png')}
+                    source={bg.id === 'temple' 
+                      ? require('../assets/images/background2.jpg')
+                      : require('../assets/images/rawInstagramPost.png')
+                    }
                     style={styles.backgroundSwatchImage}
                     resizeMode="cover"
                   />
@@ -424,7 +488,6 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
-    opacity:0.6
   },
   cardOverlay: {
     flex: 1,
@@ -434,42 +497,24 @@ const styles = StyleSheet.create({
 
   },
   textBox: {
-    backgroundColor: 'rgba(30, 30, 30, 0.9)',
     padding: 16,
     width: '100%',
     alignItems: 'center',
-  },
-  textBoxStory: {
-    // Story format - centered vertically with slight offset from bottom for branding
-  },
-  textBoxPost: {
-    // Post format - perfectly centered (default from cardOverlay)
-    backgroundColor:'rgba(30, 30, 30, 0.9)'
   },
   sanskritText: {
     fontFamily: 'Kalam',
     fontSize: 14,
     lineHeight: 12,
-    color: '#f5f5f5',
     fontWeight: '700',
     marginTop: 12,
-    paddingTop:12,
+    paddingTop: 12,
     marginBottom: 12,
-    textAlign:'center'
-  },
-  sanskritTextStory: {
-    fontSize: 16,
-    lineHeight: 16,
+    textAlign: 'center',
   },
   translationText: {
     fontFamily: 'Alegreya',
     fontSize: 11,
     lineHeight: 16,
-    color: '#e0e0e0',
-  },
-  translationTextStory: {
-    fontSize: 12,
-    lineHeight: 18,
   },
   referenceBottom: {
     fontFamily: 'Source Serif Pro',

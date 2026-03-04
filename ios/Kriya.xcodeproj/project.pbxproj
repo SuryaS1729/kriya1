@@ -7,24 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0C484CD781B1458592C178D8 /* SourceSerifPro-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 846E0A9451A64819B1F7C037 /* SourceSerifPro-Semibold.otf */; };
+		0995E4D207B34B77AE7E753B /* Alegreya-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2A24BDBD9AC243F0AE1815DB /* Alegreya-Regular.otf */; };
+		0C7F3189EDBC441DBAC3728E /* SourceSerifPro-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = B422F5D49F2E4A21B54ADADC /* SourceSerifPro-Light.otf */; };
+		1112F4C242CF428BB3C355A8 /* SourceSerifPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = E3435B82F8C441D4A8380F83 /* SourceSerifPro-Regular.otf */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		1B9B26158DC5CC3A09C91941 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C397F72FE569E544CAF20EAB /* ExpoModulesProvider.swift */; };
-		2EE8867B8BED4B8093DEDA9F /* SourceSerifPro-It.otf in Resources */ = {isa = PBXBuildFile; fileRef = FE250E0D77B84BAD978A285C /* SourceSerifPro-It.otf */; };
+		3490D6F0CB4A84165BCD25D3 /* libPods-Kriya.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A2518750A6690BED01433B19 /* libPods-Kriya.a */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		3F333736C1A64DCD8606FC2F /* InstrumentSerif-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93152D51DA97484387CA8E31 /* InstrumentSerif-Italic.ttf */; };
-		67190E624EF67837331A8BAF /* libPods-Kriya.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B584A8E1150FCE8C1DE24248 /* libPods-Kriya.a */; };
-		71F1EF776CB341E3AF7532EE /* spacemono_italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 867CD10322984618B41F6473 /* spacemono_italic.ttf */; };
-		916981AF3AA94484A9BADD42 /* Kalam-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E47D0F4DE62B49F2AC3CD555 /* Kalam-Light.ttf */; };
-		999F210CEF9353CC54AF02BD /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F7583E98F979FB617D1E6571 /* PrivacyInfo.xcprivacy */; };
-		A0F77521CAF74195A07DB8D0 /* SourceSerifPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 8A4890A8CA1E4371AC2B5210 /* SourceSerifPro-Regular.otf */; };
-		A22C375407834B9E8556C517 /* InstrumentSerif-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AA8F11D31B714035A9B3225B /* InstrumentSerif-Regular.ttf */; };
-		AE16B1002DAD4F028E1F5839 /* SourceSerifPro-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 1D06F7361A0F4CBAAF693364 /* SourceSerifPro-Light.otf */; };
-		B38EE4F38DDB4A24B5C0FB67 /* SourceSerifPro-SemiboldIt.otf in Resources */ = {isa = PBXBuildFile; fileRef = DB00732B3C6C4639B3403876 /* SourceSerifPro-SemiboldIt.otf */; };
+		4A8F9CF6A5674BCA85D152A9 /* InstrumentSerif-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FD2B919A5A754BD3951B5D5F /* InstrumentSerif-Italic.ttf */; };
+		4F533CC8D5698F174DD23B6B /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DB7AAD375870D6D8CA2373A /* ExpoModulesProvider.swift */; };
+		53FCE855CF7F4DD484D6501F /* spacemono_italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7512E6C74DF84B95B2D17AF4 /* spacemono_italic.ttf */; };
+		6F6A61712C7B483DAC40DBCD /* SourceSerifPro-It.otf in Resources */ = {isa = PBXBuildFile; fileRef = 6E1AF6FD3F624ABBA00FCCE2 /* SourceSerifPro-It.otf */; };
+		7046AD4CF64443F79A87D456 /* SourceSerifPro-Semibold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2BDEA0FCE713449BB90C8716 /* SourceSerifPro-Semibold.otf */; };
+		8489472DB6414C70BA5524F7 /* Kalam-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7B8BDDF06ECB460BBE2B8A89 /* Kalam-Regular.ttf */; };
+		88F1A3E5A3FF4F1C960C1C93 /* spacemono_regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 866D9666D0CF4ADA89C9D780 /* spacemono_regular.ttf */; };
+		AAD1C5C7724A4FD4A5ABFEAA /* Kalam-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F970D14F54E44151B07190CD /* Kalam-Light.ttf */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		CE401B8C5E3041529DE450AA /* Kalam-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 74E3EDF20B2245699B69D2A5 /* Kalam-Regular.ttf */; };
-		D33BE669CF6D4980AEA45F49 /* Alegreya-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = FF5A744FA6174C908F58DFE4 /* Alegreya-Regular.otf */; };
-		E2285720681E406CB7C04C07 /* spacemono_regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9E4F016D1AFA4D5E9924A1B8 /* spacemono_regular.ttf */; };
+		CF4ABB07317DCA5C8862D880 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 19714108D91A8E33E3EB052D /* PrivacyInfo.xcprivacy */; };
+		E23F58E13E364366B393FC0A /* InstrumentSerif-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9717211B1ECA43EC93779491 /* InstrumentSerif-Regular.ttf */; };
+		EE2566814E34493BB34FCA87 /* SourceSerifPro-SemiboldIt.otf in Resources */ = {isa = PBXBuildFile; fileRef = B2AF9A709FDA4975BE0B50C5 /* SourceSerifPro-SemiboldIt.otf */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
@@ -32,28 +32,28 @@
 		13B07F961A680F5B00A75B9A /* Kriya.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kriya.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Kriya/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Kriya/Info.plist; sourceTree = "<group>"; };
-		188F6DC79CE614C9AD1A4EB8 /* Pods-Kriya.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Kriya.release.xcconfig"; path = "Target Support Files/Pods-Kriya/Pods-Kriya.release.xcconfig"; sourceTree = "<group>"; };
-		1D06F7361A0F4CBAAF693364 /* SourceSerifPro-Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-Light.otf"; path = "../assets/fonts/SourceSerifPro-Light.otf"; sourceTree = "<group>"; };
-		3588C6247D8877356978177E /* Pods-Kriya.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Kriya.debug.xcconfig"; path = "Target Support Files/Pods-Kriya/Pods-Kriya.debug.xcconfig"; sourceTree = "<group>"; };
-		74E3EDF20B2245699B69D2A5 /* Kalam-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Kalam-Regular.ttf"; path = "../assets/fonts/Kalam-Regular.ttf"; sourceTree = "<group>"; };
-		846E0A9451A64819B1F7C037 /* SourceSerifPro-Semibold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-Semibold.otf"; path = "../assets/fonts/SourceSerifPro-Semibold.otf"; sourceTree = "<group>"; };
-		867CD10322984618B41F6473 /* spacemono_italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = spacemono_italic.ttf; path = ../assets/fonts/spacemono_italic.ttf; sourceTree = "<group>"; };
-		8A4890A8CA1E4371AC2B5210 /* SourceSerifPro-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-Regular.otf"; path = "../assets/fonts/SourceSerifPro-Regular.otf"; sourceTree = "<group>"; };
-		93152D51DA97484387CA8E31 /* InstrumentSerif-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "InstrumentSerif-Italic.ttf"; path = "../assets/fonts/InstrumentSerif-Italic.ttf"; sourceTree = "<group>"; };
-		9E4F016D1AFA4D5E9924A1B8 /* spacemono_regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = spacemono_regular.ttf; path = ../assets/fonts/spacemono_regular.ttf; sourceTree = "<group>"; };
+		19714108D91A8E33E3EB052D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Kriya/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		2A24BDBD9AC243F0AE1815DB /* Alegreya-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Alegreya-Regular.otf"; path = "../assets/fonts/Alegreya-Regular.otf"; sourceTree = "<group>"; };
+		2BDEA0FCE713449BB90C8716 /* SourceSerifPro-Semibold.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-Semibold.otf"; path = "../assets/fonts/SourceSerifPro-Semibold.otf"; sourceTree = "<group>"; };
+		6DB7AAD375870D6D8CA2373A /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Kriya/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		6E1AF6FD3F624ABBA00FCCE2 /* SourceSerifPro-It.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-It.otf"; path = "../assets/fonts/SourceSerifPro-It.otf"; sourceTree = "<group>"; };
+		7512E6C74DF84B95B2D17AF4 /* spacemono_italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = spacemono_italic.ttf; path = ../assets/fonts/spacemono_italic.ttf; sourceTree = "<group>"; };
+		7B8BDDF06ECB460BBE2B8A89 /* Kalam-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Kalam-Regular.ttf"; path = "../assets/fonts/Kalam-Regular.ttf"; sourceTree = "<group>"; };
+		866D9666D0CF4ADA89C9D780 /* spacemono_regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = spacemono_regular.ttf; path = ../assets/fonts/spacemono_regular.ttf; sourceTree = "<group>"; };
+		9717211B1ECA43EC93779491 /* InstrumentSerif-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "InstrumentSerif-Regular.ttf"; path = "../assets/fonts/InstrumentSerif-Regular.ttf"; sourceTree = "<group>"; };
+		A2518750A6690BED01433B19 /* libPods-Kriya.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Kriya.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Kriya/SplashScreen.storyboard; sourceTree = "<group>"; };
-		AA8F11D31B714035A9B3225B /* InstrumentSerif-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "InstrumentSerif-Regular.ttf"; path = "../assets/fonts/InstrumentSerif-Regular.ttf"; sourceTree = "<group>"; };
-		B584A8E1150FCE8C1DE24248 /* libPods-Kriya.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Kriya.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2AF9A709FDA4975BE0B50C5 /* SourceSerifPro-SemiboldIt.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-SemiboldIt.otf"; path = "../assets/fonts/SourceSerifPro-SemiboldIt.otf"; sourceTree = "<group>"; };
+		B422F5D49F2E4A21B54ADADC /* SourceSerifPro-Light.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-Light.otf"; path = "../assets/fonts/SourceSerifPro-Light.otf"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		C397F72FE569E544CAF20EAB /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Kriya/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		DB00732B3C6C4639B3403876 /* SourceSerifPro-SemiboldIt.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-SemiboldIt.otf"; path = "../assets/fonts/SourceSerifPro-SemiboldIt.otf"; sourceTree = "<group>"; };
-		E47D0F4DE62B49F2AC3CD555 /* Kalam-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Kalam-Light.ttf"; path = "../assets/fonts/Kalam-Light.ttf"; sourceTree = "<group>"; };
+		DBA9303CE7432CA5B9B972BC /* Pods-Kriya.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Kriya.debug.xcconfig"; path = "Target Support Files/Pods-Kriya/Pods-Kriya.debug.xcconfig"; sourceTree = "<group>"; };
+		DDC75E227FC8063C063DA6FE /* Pods-Kriya.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Kriya.release.xcconfig"; path = "Target Support Files/Pods-Kriya/Pods-Kriya.release.xcconfig"; sourceTree = "<group>"; };
+		E3435B82F8C441D4A8380F83 /* SourceSerifPro-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-Regular.otf"; path = "../assets/fonts/SourceSerifPro-Regular.otf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Kriya/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* Kriya-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Kriya-Bridging-Header.h"; path = "Kriya/Kriya-Bridging-Header.h"; sourceTree = "<group>"; };
-		F7583E98F979FB617D1E6571 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Kriya/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		FE250E0D77B84BAD978A285C /* SourceSerifPro-It.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-It.otf"; path = "../assets/fonts/SourceSerifPro-It.otf"; sourceTree = "<group>"; };
-		FF5A744FA6174C908F58DFE4 /* Alegreya-Regular.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Alegreya-Regular.otf"; path = "../assets/fonts/Alegreya-Regular.otf"; sourceTree = "<group>"; };
+		F970D14F54E44151B07190CD /* Kalam-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Kalam-Light.ttf"; path = "../assets/fonts/Kalam-Light.ttf"; sourceTree = "<group>"; };
+		FD2B919A5A754BD3951B5D5F /* InstrumentSerif-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "InstrumentSerif-Italic.ttf"; path = "../assets/fonts/InstrumentSerif-Italic.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,13 +61,23 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				67190E624EF67837331A8BAF /* libPods-Kriya.a in Frameworks */,
+				3490D6F0CB4A84165BCD25D3 /* libPods-Kriya.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		017ECC46740D7B83D67C794C /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				DBA9303CE7432CA5B9B972BC /* Pods-Kriya.debug.xcconfig */,
+				DDC75E227FC8063C063DA6FE /* Pods-Kriya.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		13B07FAE1A68108700A75B9A /* Kriya */ = {
 			isa = PBXGroup;
 			children = (
@@ -77,7 +87,7 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				F7583E98F979FB617D1E6571 /* PrivacyInfo.xcprivacy */,
+				19714108D91A8E33E3EB052D /* PrivacyInfo.xcprivacy */,
 			);
 			name = Kriya;
 			sourceTree = "<group>";
@@ -86,27 +96,9 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				B584A8E1150FCE8C1DE24248 /* libPods-Kriya.a */,
+				A2518750A6690BED01433B19 /* libPods-Kriya.a */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		4900D395159A98F0FB4EAA93 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				C7085EFBD52CB39A75F1B840 /* Kriya */,
-			);
-			name = ExpoModulesProviders;
-			sourceTree = "<group>";
-		};
-		792FD68FEC77075AA6EEAF9A /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				3588C6247D8877356978177E /* Pods-Kriya.debug.xcconfig */,
-				188F6DC79CE614C9AD1A4EB8 /* Pods-Kriya.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -123,9 +115,9 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				C8AD74738F7E44E6B603BCF8 /* Resources */,
-				792FD68FEC77075AA6EEAF9A /* Pods */,
-				4900D395159A98F0FB4EAA93 /* ExpoModulesProviders */,
+				EE585274A0AE4C6DB81CB8CA /* Resources */,
+				017ECC46740D7B83D67C794C /* Pods */,
+				9351AC6731337D70EB492982 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -140,6 +132,22 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		9351AC6731337D70EB492982 /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				9C3DC493D74165AD5EF63B4D /* Kriya */,
+			);
+			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
+		9C3DC493D74165AD5EF63B4D /* Kriya */ = {
+			isa = PBXGroup;
+			children = (
+				6DB7AAD375870D6D8CA2373A /* ExpoModulesProvider.swift */,
+			);
+			name = Kriya;
+			sourceTree = "<group>";
+		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
@@ -149,29 +157,21 @@
 			path = Kriya/Supporting;
 			sourceTree = "<group>";
 		};
-		C7085EFBD52CB39A75F1B840 /* Kriya */ = {
+		EE585274A0AE4C6DB81CB8CA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				C397F72FE569E544CAF20EAB /* ExpoModulesProvider.swift */,
-			);
-			name = Kriya;
-			sourceTree = "<group>";
-		};
-		C8AD74738F7E44E6B603BCF8 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				FF5A744FA6174C908F58DFE4 /* Alegreya-Regular.otf */,
-				FE250E0D77B84BAD978A285C /* SourceSerifPro-It.otf */,
-				1D06F7361A0F4CBAAF693364 /* SourceSerifPro-Light.otf */,
-				8A4890A8CA1E4371AC2B5210 /* SourceSerifPro-Regular.otf */,
-				846E0A9451A64819B1F7C037 /* SourceSerifPro-Semibold.otf */,
-				DB00732B3C6C4639B3403876 /* SourceSerifPro-SemiboldIt.otf */,
-				867CD10322984618B41F6473 /* spacemono_italic.ttf */,
-				9E4F016D1AFA4D5E9924A1B8 /* spacemono_regular.ttf */,
-				74E3EDF20B2245699B69D2A5 /* Kalam-Regular.ttf */,
-				E47D0F4DE62B49F2AC3CD555 /* Kalam-Light.ttf */,
-				93152D51DA97484387CA8E31 /* InstrumentSerif-Italic.ttf */,
-				AA8F11D31B714035A9B3225B /* InstrumentSerif-Regular.ttf */,
+				2A24BDBD9AC243F0AE1815DB /* Alegreya-Regular.otf */,
+				6E1AF6FD3F624ABBA00FCCE2 /* SourceSerifPro-It.otf */,
+				B422F5D49F2E4A21B54ADADC /* SourceSerifPro-Light.otf */,
+				E3435B82F8C441D4A8380F83 /* SourceSerifPro-Regular.otf */,
+				2BDEA0FCE713449BB90C8716 /* SourceSerifPro-Semibold.otf */,
+				B2AF9A709FDA4975BE0B50C5 /* SourceSerifPro-SemiboldIt.otf */,
+				7512E6C74DF84B95B2D17AF4 /* spacemono_italic.ttf */,
+				866D9666D0CF4ADA89C9D780 /* spacemono_regular.ttf */,
+				7B8BDDF06ECB460BBE2B8A89 /* Kalam-Regular.ttf */,
+				F970D14F54E44151B07190CD /* Kalam-Light.ttf */,
+				FD2B919A5A754BD3951B5D5F /* InstrumentSerif-Italic.ttf */,
+				9717211B1ECA43EC93779491 /* InstrumentSerif-Regular.ttf */,
 			);
 			name = Resources;
 			path = "";
@@ -185,13 +185,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Kriya" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				9B606026277F6A44294BBD4B /* [Expo] Configure project */,
+				6871F46A34522F50429B0D2F /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				D273A4ACE6FDFF0F4EC98208 /* [CP] Embed Pods Frameworks */,
+				57CF8F148ABFA47480D5C056 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -241,19 +241,19 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				D33BE669CF6D4980AEA45F49 /* Alegreya-Regular.otf in Resources */,
-				2EE8867B8BED4B8093DEDA9F /* SourceSerifPro-It.otf in Resources */,
-				AE16B1002DAD4F028E1F5839 /* SourceSerifPro-Light.otf in Resources */,
-				A0F77521CAF74195A07DB8D0 /* SourceSerifPro-Regular.otf in Resources */,
-				0C484CD781B1458592C178D8 /* SourceSerifPro-Semibold.otf in Resources */,
-				B38EE4F38DDB4A24B5C0FB67 /* SourceSerifPro-SemiboldIt.otf in Resources */,
-				71F1EF776CB341E3AF7532EE /* spacemono_italic.ttf in Resources */,
-				E2285720681E406CB7C04C07 /* spacemono_regular.ttf in Resources */,
-				CE401B8C5E3041529DE450AA /* Kalam-Regular.ttf in Resources */,
-				916981AF3AA94484A9BADD42 /* Kalam-Light.ttf in Resources */,
-				3F333736C1A64DCD8606FC2F /* InstrumentSerif-Italic.ttf in Resources */,
-				A22C375407834B9E8556C517 /* InstrumentSerif-Regular.ttf in Resources */,
-				999F210CEF9353CC54AF02BD /* PrivacyInfo.xcprivacy in Resources */,
+				0995E4D207B34B77AE7E753B /* Alegreya-Regular.otf in Resources */,
+				6F6A61712C7B483DAC40DBCD /* SourceSerifPro-It.otf in Resources */,
+				0C7F3189EDBC441DBAC3728E /* SourceSerifPro-Light.otf in Resources */,
+				1112F4C242CF428BB3C355A8 /* SourceSerifPro-Regular.otf in Resources */,
+				7046AD4CF64443F79A87D456 /* SourceSerifPro-Semibold.otf in Resources */,
+				EE2566814E34493BB34FCA87 /* SourceSerifPro-SemiboldIt.otf in Resources */,
+				53FCE855CF7F4DD484D6501F /* spacemono_italic.ttf in Resources */,
+				88F1A3E5A3FF4F1C960C1C93 /* spacemono_regular.ttf in Resources */,
+				8489472DB6414C70BA5524F7 /* Kalam-Regular.ttf in Resources */,
+				AAD1C5C7724A4FD4A5ABFEAA /* Kalam-Light.ttf in Resources */,
+				4A8F9CF6A5674BCA85D152A9 /* InstrumentSerif-Italic.ttf in Resources */,
+				E23F58E13E364366B393FC0A /* InstrumentSerif-Regular.ttf in Resources */,
+				CF4ABB07317DCA5C8862D880 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -267,6 +267,8 @@
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/.xcode.env",
+				"$(SRCROOT)/.xcode.env.local",
 			);
 			name = "Bundle React Native code and images";
 			outputPaths = (
@@ -297,6 +299,52 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		57CF8F148ABFA47480D5C056 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Kriya/Pods-Kriya-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/React-Core-prebuilt/React.framework/React",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ReactNativeDependencies/ReactNativeDependencies.framework/ReactNativeDependencies",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/React.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ReactNativeDependencies.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Kriya/Pods-Kriya-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6871F46A34522F50429B0D2F /* [Expo] Configure project */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.xcode.env",
+				"$(SRCROOT)/.xcode.env.local",
+				"$(SRCROOT)/Kriya/Kriya.entitlements",
+				"$(SRCROOT)/Pods/Target Support Files/Pods-Kriya/expo-configure-project.sh",
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/Pods/Target Support Files/Pods-Kriya/ExpoModulesProvider.swift",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Kriya/expo-configure-project.sh\"\n";
+		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -312,13 +360,10 @@
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoMediaLibrary/ExpoMediaLibrary_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoSystemUI/ExpoSystemUI_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/RCT-Folly/RCT-Folly_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RNCAsyncStorage/RNCAsyncStorage_resources.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RNSVG/RNSVGFilters.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/React-Core_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-cxxreact/React-cxxreact_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/boost/boost_privacy.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/glog/glog_privacy.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
@@ -330,54 +375,14 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoFileSystem_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoMediaLibrary_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoSystemUI_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCT-Folly_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNCAsyncStorage_resources.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RNSVGFilters.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-Core_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/React-cxxreact_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/boost_privacy.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/glog_privacy.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Kriya/Pods-Kriya-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		9B606026277F6A44294BBD4B /* [Expo] Configure project */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "[Expo] Configure project";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Kriya/expo-configure-project.sh\"\n";
-		};
-		D273A4ACE6FDFF0F4EC98208 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Kriya/Pods-Kriya-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Kriya/Pods-Kriya-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -388,7 +393,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				1B9B26158DC5CC3A09C91941 /* ExpoModulesProvider.swift in Sources */,
+				4F533CC8D5698F174DD23B6B /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -397,7 +402,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3588C6247D8877356978177E /* Pods-Kriya.debug.xcconfig */;
+			baseConfigurationReference = DBA9303CE7432CA5B9B972BC /* Pods-Kriya.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -422,18 +427,18 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.surya7314.kriya;
-				PRODUCT_NAME = Kriya;
+				PRODUCT_NAME = "Kriya";
 				SWIFT_OBJC_BRIDGING_HEADER = "Kriya/Kriya-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 188F6DC79CE614C9AD1A4EB8 /* Pods-Kriya.release.xcconfig */;
+			baseConfigurationReference = DDC75E227FC8063C063DA6FE /* Pods-Kriya.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -453,10 +458,10 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.surya7314.kriya;
-				PRODUCT_NAME = Kriya;
+				PRODUCT_NAME = "Kriya";
 				SWIFT_OBJC_BRIDGING_HEADER = "Kriya/Kriya-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -516,13 +521,10 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				USE_HERMES = true;
 			};
 			name = Debug;
@@ -574,12 +576,9 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
 			};

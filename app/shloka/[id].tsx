@@ -1,16 +1,17 @@
 // app/shloka/[id].tsx
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { useLocalSearchParams, router, Link } from 'expo-router';
+import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
-  Animated,
   StyleSheet,
   Text,
   View,
+  ScrollView,
   Pressable,
   ActivityIndicator,
 } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, Easing, runOnJS } from 'react-native-reanimated';
 import {
   getShlokaAt,
   getTotalShlokas,
@@ -23,21 +24,17 @@ import { useKriya } from '../../lib/store';
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../../lib/haptics';
 import { textToSpeech, type TTSLanguage } from '../../lib/tts';
 import { useAudioPlayer } from 'expo-audio';
-import * as FileSystem from 'expo-file-system';
-
-// Add toast imports
-import {
-  Toast,
-  ToastTitle,
-  ToastDescription,
-  useToast,
-} from '@/components/ui/toast';
+import * as FileSystem from 'expo-file-system/legacy';
+import { showAppToast } from '../../lib/appToast';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const PILL_W = 180;
+const SHLOKA_FADE_OUT_MS = 140;
+const SHLOKA_FADE_IN_MS = 800;
+const SHLOKA_LIFT_PX = 15;
 
 export default function ShlokaDetail() {
   // --- Always-on hooks ---
@@ -45,21 +42,20 @@ export default function ShlokaDetail() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const isDarkMode = useKriya(s => s.isDarkMode);
 
-   // Fix: Use separate toast IDs for saved and removed toasts
-  const toast = useToast();
-  const [savedToastId, setSavedToastId] = useState<string>('0');
-  const [removedToastId, setRemovedToastId] = useState<string>('0');
-
   // Treat URL param as *index* (0-based)
   const initialIndex = useMemo(() => {
     const raw = Array.isArray(params.id) ? params.id[0] : params.id;
     const n = Number(raw);
-    return Number.isFinite(n) ? n : null;
+    return Number.isFinite(n) && n >= 0 ? n : null;
   }, [params.id]);
 
   const [currentIndex, setCurrentIndex] = useState<number | null>(initialIndex);
   const [row, setRow] = useState<ShlokaRow | null>(null);
   const [total, setTotal] = useState<number>(0);
+  const hasLoadedOnce = useRef(false);
+  const transitionIdRef = useRef(0);
+  const pendingRowRef = useRef<ShlokaRow | null>(null);
+  const bookmarkLongPressRef = useRef(false);
 
   // sync if route changes externally
   useEffect(() => {
@@ -75,16 +71,75 @@ export default function ShlokaDetail() {
     }
   }, []);
 
-  // cross-fade on verse change
-  const fade = useRef(new Animated.Value(1)).current;
+  // Smooth verse transition on index change.
+  const fade = useSharedValue(1);
+  const contentTranslateY = useSharedValue(0);
+
+  const commitRowAndFadeIn = useCallback((transitionId: number) => {
+    if (transitionId !== transitionIdRef.current) return;
+    setRow(pendingRowRef.current);
+    fade.value = 0;
+    contentTranslateY.value = SHLOKA_LIFT_PX;
+    fade.value = withTiming(1, {
+      duration: SHLOKA_FADE_IN_MS,
+      easing: Easing.bezier(0.22, 1, 0.36, 1),
+    });
+    contentTranslateY.value = withTiming(0, {
+      duration: SHLOKA_FADE_IN_MS,
+      easing: Easing.bezier(0.22, 1, 0.36, 1),
+    });
+  }, [fade, contentTranslateY]);
+
+  useEffect(() => {
+    if (currentIndex == null) {
+      transitionIdRef.current += 1;
+      setRow(null);
+      fade.value = 1;
+      contentTranslateY.value = 0;
+      return;
+    }
+    let nextRow: ShlokaRow | null = null;
+    try {
+      nextRow = getShlokaAt(currentIndex) ?? null;
+    } catch {
+      nextRow = null;
+    }
+    if (!hasLoadedOnce.current) {
+      hasLoadedOnce.current = true;
+      setRow(nextRow);
+      fade.value = 1;
+      contentTranslateY.value = 0;
+      return;
+    }
+
+    pendingRowRef.current = nextRow;
+    const transitionId = ++transitionIdRef.current;
+
+    fade.value = withTiming(0, {
+      duration: SHLOKA_FADE_OUT_MS,
+      easing: Easing.out(Easing.quad),
+    }, (finished) => {
+      if (!finished) return;
+      runOnJS(commitRowAndFadeIn)(transitionId);
+    });
+  }, [currentIndex, fade, contentTranslateY, commitRowAndFadeIn]);
+
+  // Guard route param against out-of-range values once total is known.
   useEffect(() => {
     if (currentIndex == null) return;
-    Animated.timing(fade, { toValue: 0, duration: 120, useNativeDriver: true }).start(() => {
-      const r = getShlokaAt(currentIndex) ?? null;
-      setRow(r);
-      Animated.timing(fade, { toValue: 1, duration: 180, useNativeDriver: true }).start();
-    });
-  }, [currentIndex, fade]);
+    if (total <= 0) return;
+    if (currentIndex >= total) {
+      setCurrentIndex(total - 1);
+      router.setParams({ id: String(total - 1) });
+    }
+  }, [currentIndex, total]);
+
+  const animatedFadeStyle = useAnimatedStyle(() => {
+    return {
+      opacity: fade.value,
+      transform: [{ translateY: contentTranslateY.value }],
+    };
+  }, []);
 
   // prev/next indices from current index and total
   const { prevIndex, nextIndex } = getPrevNextIndices(currentIndex ?? 0, total);
@@ -119,10 +174,18 @@ const handleBookPress = () => {
   const bookmarked = currentIndex !== null ? bookmarks.some(b => b.shlokaIndex === currentIndex) : false;
 
   // Add animation ref (remove rotation ref)
-  const bookmarkScale = useRef(new Animated.Value(1)).current;
+  const bookmarkScale = useSharedValue(1);
 
   const toggleBookmark = () => {
-    if (currentIndex === null || !row) return;
+    // On some RN versions, onLongPress can be followed by onPress on release.
+    // Ignore that trailing onPress so long press only navigates.
+    if (bookmarkLongPressRef.current) {
+      bookmarkLongPressRef.current = false;
+      return;
+    }
+    if (currentIndex === null) return;
+    const rowForBookmark = row ?? getShlokaAt(currentIndex);
+    if (!rowForBookmark) return;
     
     // Enhanced haptic feedback based on action
     if (bookmarked) {
@@ -132,122 +195,50 @@ const handleBookPress = () => {
     }
     
     // Snappier animation sequence - no rotation
-     // Simple bounce animation
-    const bounceAnimation = Animated.sequence([
-      Animated.timing(bookmarkScale, {
-        toValue: 1.2,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(bookmarkScale, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]);
-
-    // Run animation
-    bounceAnimation.start();
+    // Simple bounce animation
+    bookmarkScale.value = withSequence(
+      withTiming(1.2, { duration: 100 }),
+      withTiming(1, { duration: 100 })
+    );
     
     // Update state and show appropriate toast
     if (bookmarked) {
       removeBookmark(currentIndex);
       showRemovedToast();
     } else {
-      addBookmark(currentIndex, row);
+      addBookmark(currentIndex, rowForBookmark);
       showSavedToast();
     }
   };
 
-   // Toast function
+  const animatedBookmarkStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: bookmarkScale.value }],
+    };
+  });
+
   const showSavedToast = () => {
-    if (!toast.isActive(savedToastId)) {
-      const newId = Math.random().toString();
-      setSavedToastId(newId);
-      toast.show({
-        id: newId,
-        placement: 'bottom',
-        duration: 2000,
-        render: ({ id }) => {
-          const uniqueToastId = 'toast-' + id;
-          return (
-            <Toast 
-              nativeID={uniqueToastId} 
-              action="success" 
-              variant="solid"
-              style={[
-                styles.toastContainer,
-                { backgroundColor: isDarkMode ? '#064e3b' : '#ecfdf5' }
-              ]}
-            >
-              <View style={styles.toastContent}>
-                <MaterialIcons 
-                  name="bookmark" 
-                  size={16} 
-                  color={isDarkMode ? '#10b981' : '#059669'} 
-                />
-                <ToastTitle style={[
-                  styles.toastTitle,
-                  { color: isDarkMode ? '#d1fae5' : '#064e3b' }
-                ]}>
-                  Saved to Bookmarks
-                </ToastTitle>
-              </View>
-              <ToastDescription style={[
-                styles.toastDescription,
-                { color: isDarkMode ? '#a7f3d0' : '#047857' }
-              ]}>
-                Find it in Profile → Bookmarks or long press the bookmark icon
-              </ToastDescription>
-            </Toast>
-          );
-        },
-      });
-    }
+    showAppToast({
+      type: 'success',
+      text1: 'Saved to Bookmarks',
+      text2: 'Find it in Profile -> Bookmarks or long press the bookmark icon',
+      duration: 2000,
+      bottomOffset: 80,
+    });
   };
 
   const showRemovedToast = () => {
-    if (!toast.isActive(removedToastId)) {
-      const newId = Math.random().toString();
-      setRemovedToastId(newId);
-      toast.show({
-        id: newId,
-        placement: 'bottom',
-        duration: 1000,
-        render: ({ id }) => {
-          const uniqueToastId = 'toast-' + id;
-          return (
-            <Toast 
-              nativeID={uniqueToastId} 
-              action="muted" 
-              variant="solid"
-              style={[
-                styles.toastContainerRemoved,
-                { backgroundColor: isDarkMode ? '#374151' : '#f3f4f6' }
-              ]}
-            >
-              <View style={styles.toastContent}>
-                <MaterialIcons 
-                  name="bookmark-border" 
-                  size={16} 
-                  color={isDarkMode ? '#9ca3af' : '#6b7280'} 
-                />
-                <ToastTitle style={[
-                  styles.toastTitle,
-                  { color: isDarkMode ? '#e5e7eb' : '#374151' }
-                ]}>
-                  Bookmark Removed
-                </ToastTitle>
-              </View>
-            </Toast>
-          );
-        },
-      });
-    }
+    showAppToast({
+      type: 'info',
+      text1: 'Bookmark Removed',
+      duration: 1000,
+      bottomOffset: 80,
+    });
   };
 
   // Add long press handler
   const handleLongPressBookmark = () => {
+    bookmarkLongPressRef.current = true;
     // Stronger haptic feedback for long press
     buttonPressHaptic(); // Medium haptic for navigation to bookmarks
     
@@ -256,8 +247,6 @@ const handleBookPress = () => {
   };
 
   // Create interpolated values
-  const animatedScale = bookmarkScale;
-
   const [showTooltip, setShowTooltip] = useState(false);
 
   // TTS state
@@ -426,11 +415,7 @@ return (
             { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)'  }
           ]}
         >
-          <Animated.View
-            style={{
-              transform: [{ scale: bookmarkScale }],
-            }}
-          >
+          <Animated.View style={animatedBookmarkStyle}>
             <MaterialIcons 
               name={bookmarked ? "bookmark" : "bookmark-border"} 
               size={20} 
@@ -494,7 +479,7 @@ return (
       </View>
     </View>
 
-    <Animated.ScrollView
+    <ScrollView
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
         paddingTop: headerHeight + 20, // Dynamic top padding
@@ -512,7 +497,7 @@ return (
           <Text style={{ color: isDarkMode ? '#d1d5db' : '#545454' }}>Loading…</Text>
         </View>
       ) : (
-        <Animated.View style={{ opacity: fade }}>
+        <Animated.View style={animatedFadeStyle}>
           <Text style={[styles.headerTitle, { color: isDarkMode ? '#d1d5db' : '#545454' }]}>
             Adhyaya {row!.chapter_number}, Shloka {row!.verse_number}
           </Text>
@@ -551,11 +536,11 @@ return (
           ) : null}
         </Animated.View>
       )}
-    </Animated.ScrollView>
+    </ScrollView>
 
     {/* Floating pill navigation - unchanged */}
     {!invalidIndex && (
-      <Animated.View
+      <View
         style={[
           styles.pillWrap,
           {
@@ -574,7 +559,7 @@ return (
         >
           <AntDesign 
             style={[styles.pillIcon, { color: prevIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 
-            name="arrowleft" 
+            name="arrow-left" 
             size={32} 
           />
         </Pressable>
@@ -596,11 +581,11 @@ return (
         >
           <AntDesign 
             style={[styles.pillIcon, { color: nextIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 
-            name="arrowright" 
+            name="arrow-right" 
             size={32} 
           />
         </Pressable>
-      </Animated.View>
+      </View>
     )}
   </SafeAreaView>
 );
@@ -711,63 +696,4 @@ const styles = StyleSheet.create({
     fontWeight: '700' 
   },
 
-  // Toast styles
-  toastContainer: {
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom:80,
-    borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.2)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-
-  // New style for removed toast
-  toastContainerRemoved: {
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 80,
-    borderWidth: 1,
-    borderColor: 'rgba(107, 114, 128, 0.2)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  
-  toastContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  
-  toastTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'Source Serif Pro',
-    marginLeft: 8,
-  },
-  
-  toastDescription: {
-    fontSize: 12,
-    fontWeight: '400',
-    fontFamily: 'Source Serif Pro',
-    lineHeight: 16,
-  },
 });

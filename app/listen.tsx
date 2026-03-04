@@ -22,7 +22,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useAudioPlayer } from 'expo-audio';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 import { useKriya } from '../lib/store';
 import { getShlokaAt, getTotalShlokas } from '../lib/shloka';

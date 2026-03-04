@@ -8,6 +8,7 @@ import { useKriya } from '../lib/store';
 import { setDb } from '../lib/db';
 import * as NavigationBar from 'expo-navigation-bar';
 import { Platform } from 'react-native';
+import AppToastHost from '../components/AppToastHost';
 
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import '@/global.css';
@@ -105,7 +106,7 @@ export default function Root() {
       );
     `);
 
-    const cols = db.getAllSync<{ name: string }>(`PRAGMA table_info(tasks)`) || [];
+    const cols = (db.getAllSync(`PRAGMA table_info(tasks)`) as unknown as { name: string }[]) || [];
     const has = (n: string) => cols.some(c => c.name === n);
 
     if (!has('completed_at')) {
@@ -149,6 +150,7 @@ export default function Root() {
 
         </Stack>
       </SQLiteProvider>
+      <AppToastHost />
     </SafeAreaProvider>
     </GluestackUIProvider>
   

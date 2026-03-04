@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Asset } from 'expo-asset';
 
 type EnsureOpts = { forceReplace?: boolean };
@@ -26,9 +26,13 @@ export async function ensureDatabasePresent(
     await FileSystem.copyAsync({ from: asset.localUri, to: dest });
 
     const info = await FileSystem.getInfoAsync(dest);
-    console.log('DB copied to', dest, 'size:', info.size);
+    if (info.exists) {
+      console.log('DB copied to', dest, 'size:', info.size);
+    }
   } else {
     const info = await FileSystem.getInfoAsync(dest);
-    console.log('DB already present at', dest, 'size:', info.size);
+    if (info.exists) {
+      console.log('DB already present at', dest, 'size:', info.size);
+    }
   }
 }

@@ -26,7 +26,7 @@ export default function FocusMode() {
   const [timeLeft, setTimeLeft] = React.useState(25 * 60);
   const [isRunning, setIsRunning] = React.useState(true);
   const [sessionCompleted, setSessionCompleted] = React.useState(false);
-  const fadeTimeoutRef = useRef<number | null>(null);
+  const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Animated values for content fade (everything except buttons)
   const contentOpacity = useSharedValue(1);

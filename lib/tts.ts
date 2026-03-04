@@ -1,7 +1,7 @@
 // lib/tts.ts
 // Text-to-Speech with Cloudflare R2 caching + Sarvam AI fallback
 
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 const SARVAM_API_URL = 'https://api.sarvam.ai/text-to-speech';
 

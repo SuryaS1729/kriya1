@@ -81,7 +81,7 @@ export default function Bookmarks() {
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} hitSlop={16}>
             <AntDesign 
-              name="arrowleft" 
+              name="arrow-left" 
               size={24} 
               color={isDarkMode ? '#d1d5db' : '#374151'} 
             />

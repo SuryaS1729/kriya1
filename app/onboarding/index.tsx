@@ -82,7 +82,7 @@ const onboardingSteps = [
   {
     title: "Add Your Tasks",
     description: "Create your daily to-do list just like any other task app. Simple, clean, and focused on what matters to you.",
-    icon: "checkcircle"
+    icon: "check-circle"
   },
   {
     title: "Complete & Learn",
@@ -764,7 +764,7 @@ const animatedNextButtonStyle = useAnimatedStyle(() => ({
               <Text style={[styles.nextText, { color: theme.text }]}>
                 {isNotificationSlide ? 'Set Reminder' : 'Next'}
               </Text>
-              <AntDesign name="arrowright" size={20} color={theme.text} />
+              <AntDesign name="arrow-right" size={20} color={theme.text} />
             </TouchableOpacity>
           </Animated.View>
   </Animated.View>

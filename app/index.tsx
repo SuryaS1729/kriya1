@@ -261,6 +261,13 @@ export default function Home() {
 
   // Only compute shloka after store is ready
   const { index: shlokaIndex, data: shloka } = ready ? getShloka() : { index: 0, data: null as any };
+  const openShlokaDetail = () => {
+    if (!Number.isFinite(shlokaIndex) || shlokaIndex < 0) return;
+    router.push({
+      pathname: '/shloka/[id]',
+      params: { id: String(shlokaIndex) }
+    });
+  };
 
   // State for toggling between Sanskrit and English
   const [showTranslation, setShowTranslation] = useState(false);
@@ -585,10 +592,7 @@ console.log('🔍 Guided Tour Debug:', {
        <Pressable 
       onPress={() => {
         buttonPressHaptic(); 
-        router.push({
-          pathname: '/shloka/[id]',
-          params: { id: String(shlokaIndex) }
-        });
+        openShlokaDetail();
       }}
     >
       <Text style={[styles.meta, { color: isDarkMode ? '#eef1f4ff' : '#545454' }]}>
@@ -661,18 +665,15 @@ console.log('🔍 Guided Tour Debug:', {
 
   <TouchableOpacity onPress={() => {
      buttonPressHaptic();
-    router.push({
-      pathname: '/shloka/[id]',
-      params: { id: String(shlokaIndex) }
-    });
+    openShlokaDetail();
   }}
   activeOpacity={0.7}>
-    <Animated.View style={[
+    <View style={[
       styles.descButton,
       { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
     ]}>
       <Feather name="book-open" size={16} color={isDarkMode ? "#f9fafb" : "#000000ff"} />
-    </Animated.View>
+    </View>
   </TouchableOpacity>
 
   <TouchableOpacity onPress={() => {
@@ -680,12 +681,12 @@ console.log('🔍 Guided Tour Debug:', {
     router.push('/listen');
   }}
   activeOpacity={0.7}>
-    <Animated.View style={[
+    <View style={[
       styles.descButton,
       { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
     ]}>
       <Feather name="headphones" size={16} color={isDarkMode ? "#f9fafb" : "#000000ff"} />
-    </Animated.View>
+    </View>
   </TouchableOpacity>
 </View>
 </View>

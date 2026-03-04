@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -25,6 +25,7 @@ import Animated, {
   interpolate
 } from 'react-native-reanimated';
 import { InteractionManager } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { mediumImpactHaptic, selectionHaptic, errorHaptic } from '../lib/haptics';
 
@@ -53,10 +54,32 @@ export default function Add() {
     return tasksToday.length > 6 ? "Easy there, overachiever 😅" : "Fulfill your dharma today 🏹";
   }, [tasksToday.length]);
 
-  useEffect(() => {
-    const t = setTimeout(() => inputRef.current?.focus(), 150);
-    return () => clearTimeout(t);
+  const focusInput = useCallback(() => {
+    inputRef.current?.focus();
   }, []);
+
+  // SDK54 timing can mount this screen before it is truly focused.
+  // Focus after navigation interactions complete.
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      const interaction = InteractionManager.runAfterInteractions(() => {
+        if (cancelled) return;
+        requestAnimationFrame(() => {
+          if (cancelled) return;
+          focusInput();
+          setTimeout(() => {
+            if (!cancelled) focusInput();
+          }, 120);
+        });
+      });
+
+      return () => {
+        cancelled = true;
+        interaction.cancel();
+      };
+    }, [focusInput])
+  );
 
   // Animate rotation when text changes
   useEffect(() => {
@@ -247,6 +270,7 @@ export default function Add() {
             </TouchableOpacity>
             <TextInput
               ref={inputRef}
+              autoFocus
               value={text}
               onChangeText={setText}
               placeholder={placeholderText}
@@ -365,4 +389,3 @@ const styles = StyleSheet.create({
 
   },
 });
-

@@ -6,7 +6,6 @@
     "scheme": "acme",
     "icon": "./assets/icons/androidicon1.png",
     "userInterfaceStyle": "automatic",
-
     "plugins": [
       [
         "expo-splash-screen",
@@ -144,7 +143,11 @@
         {
           "enableBackgroundPlayback": true
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-asset",
+      "expo-router",
+      "expo-sqlite"
     ],
     "assetBundlePatterns": [
       "**/*"

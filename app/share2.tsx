@@ -16,7 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import { useKriya } from '../lib/store';
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../lib/haptics';
-import ViewShot from 'react-native-view-shot';
+import ViewShot, { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { Toast, ToastTitle, useToast } from '@/components/ui/toast';
@@ -109,6 +109,7 @@ export default function Share2() {
   const [isSaving, setIsSaving] = useState(false);
   
   const viewShotRef = useRef<ViewShot>(null);
+  const captureTargetRef = useRef<View>(null);
   
   const currentFormat = FORMATS.find(f => f.id === selectedFormat)!;
   const currentBackground = BACKGROUNDS.find(b => b.id === selectedBackground)!;
@@ -137,7 +138,7 @@ export default function Share2() {
     buttonPressHaptic();
     
     try {
-      const uri = await viewShotRef.current.capture();
+      const uri = await captureCardUri();
       
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, {
@@ -160,6 +161,7 @@ export default function Share2() {
     buttonPressHaptic();
     
     try {
+      console.log('[Save] Requesting permissions...');
       const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status !== 'granted') {
         toast.show({
@@ -176,8 +178,12 @@ export default function Share2() {
         return;
       }
       
-      const uri = await viewShotRef.current.capture();
+      console.log('[Save] Permission granted, capturing...');
+      const uri = await captureCardUri();
+      console.log('[Save] Captured URI:', uri);
+      
       await MediaLibrary.saveToLibraryAsync(uri);
+      console.log('[Save] Saved successfully');
       
       taskCompleteHaptic();
       toast.show({
@@ -199,9 +205,56 @@ export default function Share2() {
         ),
       });
     } catch (error) {
-      console.error('Save failed:', error);
+      console.error('[Save] Failed:', error);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const captureCardUri = async () => {
+    const options = {
+      format: 'jpg' as const,
+      quality: 0.92,
+      width: currentFormat.width,
+      height: currentFormat.height,
+      result: 'tmpfile' as const,
+    };
+    const captureTimeoutMs = 15000;
+
+    const withTimeout = async <T,>(promise: Promise<T>, label: string): Promise<T> => {
+      let timeoutId: ReturnType<typeof setTimeout>;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error(`${label} timed out after ${captureTimeoutMs}ms`));
+        }, captureTimeoutMs);
+      });
+      try {
+        return await Promise.race([promise, timeoutPromise]);
+      } finally {
+        clearTimeout(timeoutId!);
+      }
+    };
+
+    // Let the UI settle before taking snapshot, especially after button press/layout updates.
+    await new Promise(resolve => requestAnimationFrame(() => resolve(null)));
+    await new Promise(resolve => setTimeout(resolve, 60));
+
+    const primaryTarget = captureTargetRef.current;
+    const fallbackTarget = viewShotRef.current;
+
+    if (!primaryTarget && !fallbackTarget) {
+      throw new Error('Capture view is not ready yet');
+    }
+
+    try {
+      if (primaryTarget) {
+        return await withTimeout(captureRef(primaryTarget, options), 'captureRef(primary)');
+      }
+      return await withTimeout(captureRef(fallbackTarget!, options), 'captureRef(fallback)');
+    } catch (firstError) {
+      console.warn('[Capture] Primary capture failed, trying fallback target:', firstError);
+      if (!fallbackTarget || fallbackTarget === primaryTarget) throw firstError;
+      return withTimeout(captureRef(fallbackTarget, options), 'captureRef(fallback)');
     }
   };
   
@@ -311,7 +364,9 @@ export default function Share2() {
               height: currentFormat.height,
             }}
           >
-            <ShareCard />
+            <View ref={captureTargetRef} collapsable={false}>
+              <ShareCard />
+            </View>
           </ViewShot>
         </ScrollView>
         

@@ -185,7 +185,9 @@ const ToastTitle = React.forwardRef<
   React.useEffect(() => {
     // Issue from react-native side
     // Hack for now, will fix this later
-    AccessibilityInfo.announceForAccessibility(children as string);
+    if (typeof children === 'string') {
+      AccessibilityInfo.announceForAccessibility(children);
+    }
   }, [children]);
 
   return (

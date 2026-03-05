@@ -6,6 +6,9 @@
     "scheme": "acme",
     "icon": "./assets/icons/androidicon1.png",
     "userInterfaceStyle": "automatic",
+      "experiments": {
+      "reactCompiler": true
+    },
     "plugins": [
       [
         "expo-splash-screen",
@@ -146,6 +149,14 @@
       ],
       "@react-native-community/datetimepicker",
       "expo-asset",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Kriya to access your photos.",
+          "savePhotosPermission": "Allow Kriya to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
       "expo-router",
       "expo-sqlite"
     ],

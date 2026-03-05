@@ -263,7 +263,7 @@ const handleBookPress = () => {
     };
   }, [currentIndex]);
 
-  const playAudio = useCallback(async (base64Audio: string): Promise<boolean> => {
+  const playAudio = async (base64Audio: string): Promise<boolean> => {
     try {
       // Write base64 to temp file
       const tempFile = `${FileSystem.cacheDirectory}tts_audio_${Date.now()}.wav`;
@@ -294,9 +294,9 @@ const handleBookPress = () => {
       console.error('[TTS] Playback error:', error);
       return false;
     }
-  }, [audioPlayer]);
+  };
 
-  const handlePlayPress = useCallback(async () => {
+  const handlePlayPress = async () => {
     if (!row) return;
 
     // If already playing, stop
@@ -352,7 +352,7 @@ const handleBookPress = () => {
       setTtsLoading(false);
       setTtsPlaying(false);
     }
-  }, [row, ttsPlaying, audioPlayer, playAudio]);
+  };
 
   const handleSharePress = () => {
     if (!row || currentIndex === null) return;

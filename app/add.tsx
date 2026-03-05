@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -47,9 +47,9 @@ export default function Add() {
   const isDarkMode = useKriya(s => s.isDarkMode);
 
   // Calculate dynamic placeholder text
-  const placeholderText = useMemo(() => {
-    return tasksToday.length > 6 ? "Easy there, overachiever 😅" : "Fulfill your dharma today 🏹";
-  }, [tasksToday.length]);
+  const placeholderText = tasksToday.length > 6
+    ? "Easy there, overachiever 😅"
+    : "Fulfill your dharma today 🏹";
 
   const focusInput = useCallback(() => {
     inputRef.current?.focus();
@@ -132,10 +132,7 @@ export default function Add() {
   }
 
 
-  const remaining = useMemo(
-    () => tasksToday.filter(t => !t.completed).length,
-    [tasksToday]
-  );
+  const remaining = tasksToday.filter(t => !t.completed).length;
 
   const renderItem = ({ item }: { item: Task }) => (
     <Pressable

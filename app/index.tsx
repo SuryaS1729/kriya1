@@ -27,7 +27,7 @@ const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
 // Update the Checkbox component for better timing
 
-const Checkbox = React.memo(({ completed, isDarkMode }: { completed: boolean, isDarkMode: boolean }) => {
+const Checkbox = ({ completed, isDarkMode }: { completed: boolean, isDarkMode: boolean }) => {
   const progress = useSharedValue(completed ? 1 : 0);
 
   React.useEffect(() => {
@@ -80,13 +80,10 @@ const Checkbox = React.memo(({ completed, isDarkMode }: { completed: boolean, is
       )}
     </Animated.View>
   );
-}, (prevProps, nextProps) => {
-  return prevProps.completed === nextProps.completed && prevProps.isDarkMode === nextProps.isDarkMode;
-});
-Checkbox.displayName = 'Checkbox';
+};
 
 // Add this new component before the Home component
-const YesterdayTasksBanner = React.memo(({ 
+const YesterdayTasksBanner = ({ 
   tasks, 
   isDarkMode, 
   onImportTasks 
@@ -207,8 +204,7 @@ const YesterdayTasksBanner = React.memo(({
       </View>
     </View>
   );
-});
-YesterdayTasksBanner.displayName = 'YesterdayTasksBanner';
+};
 
 export default function Home() {
   const ready     = useKriya(s => s.ready);
@@ -329,7 +325,7 @@ const handleTogglePress = () => {
 
   // Memoized callbacks to prevent unnecessary re-renders
    // Update the onToggle callback
-  const onToggle = React.useCallback((id: number) => {
+  const onToggle = (id: number) => {
     const task = tasks.find(t => t.id === id);
     if (task && !task.completed) {
       taskCompleteHaptic(); // Success haptic for completing tasks
@@ -337,16 +333,16 @@ const handleTogglePress = () => {
       selectionHaptic(); // Light haptic for uncompleting
     }
     toggle(id);
-  }, [toggle, tasks]);
+  };
 
   // Update the onRemove callback
-  const onRemove = React.useCallback((id: number) => {
+  const onRemove = (id: number) => {
     errorHaptic(); // Error haptic for deletion
     remove(id);
-  }, [remove]);
+  };
 
   // Update the onFocus callback
-  const onFocus = React.useCallback((task: Task) => {
+  const onFocus = (task: Task) => {
     buttonPressHaptic(); // Light haptic for navigation
     router.push({
       pathname: '/focus',
@@ -355,10 +351,10 @@ const handleTogglePress = () => {
         title: task.title,   
       },
     });
-  }, []);
-  const handleTourComplete = React.useCallback(() => {
+  };
+  const handleTourComplete = () => {
     setHasSeenGuidedTour(true);
-  }, [setHasSeenGuidedTour]);
+  };
 
     const shouldShowGuidedTour = ready && hasCompletedOnboarding && !hasSeenGuidedTour;
 
@@ -371,7 +367,7 @@ console.log('🔍 Guided Tour Debug:', {
   });
 
   // Enhanced TaskRow with cleanup
-  const TaskRow = React.memo(({ 
+  const TaskRow = ({ 
     item, 
     isDarkMode, 
     onToggle, 
@@ -384,9 +380,9 @@ console.log('🔍 Guided Tour Debug:', {
     onRemove: (id: number) => void;
     onFocus: (task: Task) => void; 
   }) => {
-    const handleToggle = React.useCallback(() => onToggle(item.id), [onToggle, item.id]);
-    const handleRemove = React.useCallback(() => onRemove(item.id), [onRemove, item.id]);
-    const handleFocus = React.useCallback(() => onFocus(item), [onFocus, item]); // Handle long press
+    const handleToggle = () => onToggle(item.id);
+    const handleRemove = () => onRemove(item.id);
+    const handleFocus = () => onFocus(item); // Handle long press
 
     
     return (
@@ -431,40 +427,28 @@ console.log('🔍 Guided Tour Debug:', {
       )}
       </View>
     )
-    }, (prevProps, nextProps) => {
-    // More strict comparison to prevent unnecessary re-renders
-    return (
-      prevProps.item.id === nextProps.item.id &&
-      prevProps.item.completed === nextProps.item.completed &&
-      prevProps.item.title === nextProps.item.title &&
-      prevProps.isDarkMode === nextProps.isDarkMode
-    );
-  });
-  TaskRow.displayName = 'TaskRow';
+  };
 
 
 
   // Enhanced renderItem with cleanup
-  const renderItem = React.useCallback(
-    ({ item }: { item: Task }) => (
-      <Animated.View  
-        entering={FadeIn.duration(200).delay(100)}
-        layout={LinearTransition.springify().duration(200).delay(200)}
-        key={`task-${item.id}`} // Explicit key for better reconciliation
-      >
-        <TaskRow 
-          item={item} 
-          isDarkMode={isDarkMode} 
-          onToggle={onToggle} 
-          onRemove={onRemove}
-          onFocus={onFocus} 
-        />
-      </Animated.View>
-    ),
-    [TaskRow, isDarkMode, onToggle, onRemove, onFocus]
+  const renderItem = ({ item }: { item: Task }) => (
+    <Animated.View  
+      entering={FadeIn.duration(200).delay(100)}
+      layout={LinearTransition.springify().duration(200).delay(200)}
+      key={`task-${item.id}`} // Explicit key for better reconciliation
+    >
+      <TaskRow 
+        item={item} 
+        isDarkMode={isDarkMode} 
+        onToggle={onToggle} 
+        onRemove={onRemove}
+        onFocus={onFocus} 
+      />
+    </Animated.View>
   );
 
-    const keyExtractor = React.useCallback((item: Task) => `task-${item.id}`, []);
+  const keyExtractor = (item: Task) => `task-${item.id}`;
 
   // Clear animation states when component unmounts
   React.useEffect(() => {
@@ -489,8 +473,7 @@ console.log('🔍 Guided Tour Debug:', {
     }
   }, [ready, hasCompletedOnboarding]);
 
-  // Add function to get yesterday's unfinished tasks
-  const getYesterdayUnfinishedTasks = React.useCallback(() => {
+  const yesterdayUnfinishedTasks = useMemo(() => {
     if (!ready) return [];
     
     const yesterday = new Date();
@@ -501,14 +484,12 @@ console.log('🔍 Guided Tour Debug:', {
     return yesterdayTasks.filter(task => !task.completed);
   }, [ready, getTasksForDay]);
 
-  const yesterdayUnfinishedTasks = getYesterdayUnfinishedTasks();
-
   // Handle importing tasks from yesterday
-  const handleImportTasks = React.useCallback((tasksToImport: Task[]) => {
+  const handleImportTasks = (tasksToImport: Task[]) => {
     tasksToImport.forEach(task => {
       addTask(task.title); // This will create a new task for today
     });
-  }, [addTask]);
+  };
 
   // ADD: Initialize notifications when app loads
   useEffect(() => {

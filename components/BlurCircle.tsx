@@ -75,7 +75,7 @@ const BlurCircle: React.FC<BlurCircleProps> = ({ cx, cy, r, delay = 0 }) => {
         -1
       )
     );
-  }, [r, delay, radiusAnimationSize, colorAnimationDuration]);
+  }, [r, delay, radiusAnimationSize, colorAnimationDuration, color, radius]);
 
   return (
     <Circle 

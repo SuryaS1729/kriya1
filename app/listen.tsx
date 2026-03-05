@@ -61,7 +61,7 @@ export default function ListenScreen() {
     } else {
       pulseScale.value = withSpring(1);
     }
-  }, [isPlaying]);
+  }, [isPlaying, pulseScale]);
 
   const pulseStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pulseScale.value }],
@@ -72,7 +72,7 @@ export default function ListenScreen() {
     const data = getShlokaAt(currentIndex);
     setShloka(data);
     setListenProgress(currentIndex);
-  }, [currentIndex]);
+  }, [currentIndex, setListenProgress]);
 
   // Cleanup on unmount
   useEffect(() => {

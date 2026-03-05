@@ -228,7 +228,6 @@ function MainCalendar() {
     const month = currentDate.getMonth();
     
     const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
     const calendarStart = new Date(firstDay);
     calendarStart.setDate(firstDay.getDate() - firstDay.getDay());
     
@@ -569,7 +568,7 @@ function NotificationSettings() {
         showSuccessToast(timeString);
         
         taskCompleteHaptic(); // Changed from direct Haptics call
-      } catch (error) {
+      } catch {
         // console.error('❌ Failed to update reminder time:', error);
         
         // Show error toast

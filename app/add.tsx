@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
+  InteractionManager,
   Platform,
   Pressable,
   StyleSheet,
@@ -10,7 +11,6 @@ import {
   TextInput,
   View,
   FlatList,
-  BackHandler,
   TouchableOpacity
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,7 +24,6 @@ import Animated, {
   withSpring,
   interpolate
 } from 'react-native-reanimated';
-import { InteractionManager } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { mediumImpactHaptic, selectionHaptic, errorHaptic } from '../lib/haptics';
@@ -32,8 +31,6 @@ import { mediumImpactHaptic, selectionHaptic, errorHaptic } from '../lib/haptics
 
 // Create animated Feather component
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
-
-const HEADER_HEIGHT = 54; // approx TopBar height (tweak if needed)
 
 export default function Add() {
   const insets = useSafeAreaInsets();
@@ -88,7 +85,7 @@ export default function Add() {
       stiffness: 300,
       mass: 0.3
     });
-  }, [text]);
+  }, [text, rotationValue]);
 
   // Animated style for rotation
   const animatedIconStyle = useAnimatedStyle(() => {

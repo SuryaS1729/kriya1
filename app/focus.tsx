@@ -6,8 +6,7 @@ import { Feather } from '@expo/vector-icons';
 // Add this instead:
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic, errorHaptic } from '../lib/haptics';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useSharedValue, withTiming, useAnimatedStyle, interpolateColor, Easing, runOnJS } from 'react-native-reanimated';
-import Animated from 'react-native-reanimated';
+import Animated, { useSharedValue, withTiming, useAnimatedStyle, interpolateColor, Easing, runOnJS } from 'react-native-reanimated';
 
 // Import components
 import BlurBackground from '../components/BlurBackground';
@@ -18,7 +17,7 @@ import { useKriya } from '../lib/store';
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
 export default function FocusMode() {
-  const { id, title } = useLocalSearchParams();
+  const { title } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const isDarkMode = useKriya(s => s.isDarkMode);
   const addFocusSession = useKriya(s => s.addFocusSession);

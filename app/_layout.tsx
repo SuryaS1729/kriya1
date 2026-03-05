@@ -28,7 +28,7 @@ export default function Root() {
     (async () => {
       try {
         await ensureDatabasePresent(DB_NAME, DB_ASSET, { forceReplace: false });
-      } catch (e) {
+      } catch {
         // console.warn('ensureDatabasePresent failed:', e);
       } finally {
         setBooted(true);
@@ -52,7 +52,7 @@ export default function Root() {
       await runMigrationsSafe(db);
       setDb(db);
 
-      const tables = db.getAllSync(
+      db.getAllSync(
         `SELECT name FROM sqlite_master WHERE type='table' ORDER BY name`
       ) as { name: string }[];
       // console.log('SQLite tables:', tables.map(t => t.name).join(', '));
@@ -66,7 +66,7 @@ export default function Root() {
       setTimeout(() => {
         useKriya.getState().init();
       }, 100);
-    } catch (e) {
+    } catch {
       // console.warn('DB migrate/init failed:', e);
       setDbReady(false);
       globalDbInitialized = false; // Reset on error

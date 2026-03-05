@@ -1,5 +1,5 @@
 // app/index.tsx
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { FlatList, StyleSheet, Text, View, Pressable, ScrollView, TouchableOpacity } from 'react-native';
 import Animated, {
@@ -20,7 +20,6 @@ import { taskCompleteHaptic, selectionHaptic, buttonPressHaptic, errorHaptic } f
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
 import { Spinner } from '@/components/ui/spinner';
-import { router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import { GuidedTour } from '../components/GuidedTour/GuidedTour';
 
@@ -38,7 +37,7 @@ const Checkbox = React.memo(({ completed, isDarkMode }: { completed: boolean, is
       damping: 25,    // Reduced from 30
       mass: 0.8,
     });
-  }, [completed]);
+  }, [completed, progress]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -84,6 +83,7 @@ const Checkbox = React.memo(({ completed, isDarkMode }: { completed: boolean, is
 }, (prevProps, nextProps) => {
   return prevProps.completed === nextProps.completed && prevProps.isDarkMode === nextProps.isDarkMode;
 });
+Checkbox.displayName = 'Checkbox';
 
 // Add this new component before the Home component
 const YesterdayTasksBanner = React.memo(({ 
@@ -208,6 +208,7 @@ const YesterdayTasksBanner = React.memo(({
     </View>
   );
 });
+YesterdayTasksBanner.displayName = 'YesterdayTasksBanner';
 
 export default function Home() {
   const ready     = useKriya(s => s.ready);
@@ -230,8 +231,6 @@ export default function Home() {
  // ADD refs to track listeners
   const notificationListener = useRef<Notifications.EventSubscription | null>(null);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
-
-  const [hasCheckedOnboarding, setHasCheckedOnboarding] = useState(false);
 
   // Fade animation for shloka card
   const fade = useSharedValue(0);
@@ -376,12 +375,14 @@ console.log('🔍 Guided Tour Debug:', {
     item, 
     isDarkMode, 
     onToggle, 
+    onRemove,
     onFocus 
   }: { 
     item: Task; 
     isDarkMode: boolean; 
     onToggle: (id: number) => void; 
-  onFocus: (task: Task) => void; 
+    onRemove: (id: number) => void;
+    onFocus: (task: Task) => void; 
   }) => {
     const handleToggle = React.useCallback(() => onToggle(item.id), [onToggle, item.id]);
     const handleRemove = React.useCallback(() => onRemove(item.id), [onRemove, item.id]);
@@ -439,6 +440,7 @@ console.log('🔍 Guided Tour Debug:', {
       prevProps.isDarkMode === nextProps.isDarkMode
     );
   });
+  TaskRow.displayName = 'TaskRow';
 
 
 
@@ -454,11 +456,12 @@ console.log('🔍 Guided Tour Debug:', {
           item={item} 
           isDarkMode={isDarkMode} 
           onToggle={onToggle} 
+          onRemove={onRemove}
           onFocus={onFocus} 
         />
       </Animated.View>
     ),
-    [isDarkMode, onToggle, onRemove]
+    [TaskRow, isDarkMode, onToggle, onRemove, onFocus]
   );
 
     const keyExtractor = React.useCallback((item: Task) => `task-${item.id}`, []);

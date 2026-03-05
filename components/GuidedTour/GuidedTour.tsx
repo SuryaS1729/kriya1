@@ -16,9 +16,6 @@ interface GuidedTourProps {
 export function GuidedTour({ children, onComplete, hasUserTasks }: GuidedTourProps) {
   const [step, setStep] = useState(0);
 
-  // Adjust tour flow based on whether user has tasks
-  const totalSteps = hasUserTasks ? 4 : 1; // If has tasks: shloka -> toggle -> focus -> book; If no tasks: shloka -> add task
-
   useEffect(() => {
     // If user adds a task during the tour, advance to the task interaction steps
     if (!hasUserTasks && step === 1) {

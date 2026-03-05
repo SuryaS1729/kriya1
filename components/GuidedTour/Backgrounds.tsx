@@ -5,13 +5,9 @@ import {
   ADD_TASK_MASK_BOTTOM, 
   ADD_TASK_MASK_HEIGHT,
   BOOK_MASK_TOP,
-  BOOK_MASK_SIZE,
   SHLOKA_MASK_TOP,
-  SHLOKA_MASK_HEIGHT,
   FIRST_TASK_MASK_TOP,
-  FIRST_TASK_MASK_HEIGHT,
   COMBINED_MASK_TOP,
-  COMBINED_MASK_HEIGHT
 } from './masks';
 
 const { height } = Dimensions.get('window');

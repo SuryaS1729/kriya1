@@ -22,7 +22,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useKriya } from '../../lib/store';
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../../lib/haptics';
-import { textToSpeech, type TTSLanguage } from '../../lib/tts';
+import { textToSpeech } from '../../lib/tts';
 import { useAudioPlayer } from 'expo-audio';
 import * as FileSystem from 'expo-file-system/legacy';
 import { showAppToast } from '../../lib/appToast';
@@ -247,7 +247,7 @@ const handleBookPress = () => {
   };
 
   // Create interpolated values
-  const [showTooltip, setShowTooltip] = useState(false);
+  const [showTooltip] = useState(false);
 
   // TTS state
   const [ttsLoading, setTtsLoading] = useState(false);

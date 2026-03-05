@@ -1,18 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Dimensions,
-  Pressable,
   StatusBar,
   Platform,
   Image,
-  useColorScheme,
-  Touchable,
   TouchableOpacity
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../../lib/haptics';
 import { useAudioPlayer } from 'expo-audio';
@@ -109,7 +106,6 @@ const onboardingSteps = [
 const NotificationSlide = ({ onNext, theme }: { onNext: () => void, theme: any }) => {
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
-  const setReminderTime = useKriya(s => s.setReminderTime);
 
   // Initialize with 8:00 AM
   useEffect(() => {
@@ -132,14 +128,6 @@ const NotificationSlide = ({ onNext, theme }: { onNext: () => void, theme: any }
    const handleTimePickerOpen = () => {
     buttonPressHaptic(); // Add haptic for opening time picker
     setShowPicker(true);
-  };
-
-  const handleContinue = async () => {
-    const hours = selectedTime.getHours();
-    const minutes = selectedTime.getMinutes();
-    await setReminderTime(hours, minutes);
-    taskCompleteHaptic(); // Changed from direct Haptics call - success haptic for setting reminder
-    onNext();
   };
 
   const getReminderTime = () => {
@@ -248,8 +236,7 @@ const NotificationSlide = ({ onNext, theme }: { onNext: () => void, theme: any }
 
 export default function Onboarding() {
   // console.log('🎯 Onboarding component rendering');
-  const insets = useSafeAreaInsets();
-  
+
   // Clean color scheme detection
   const colorScheme = "dark"; 
   const theme = themes[colorScheme === 'dark' ? 'dark' : 'light'];
@@ -264,9 +251,6 @@ export default function Onboarding() {
   const audioPlayer = useAudioPlayer(AUDIO_URL);
 
    // Add state to track if audio is loading
-  const [audioLoading, setAudioLoading] = useState(true);
-  const [audioError, setAudioError] = useState(false);
-  const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
 
   // Animation values
@@ -318,7 +302,6 @@ const shimmerTranslateX = useSharedValue(-200);
           audioPlayer.play();
 
             
-          setAudioLoading(false);
           // console.log('🎵 Ambient music started successfully');
           
           
@@ -336,10 +319,9 @@ const shimmerTranslateX = useSharedValue(-200);
             }
           }, 33); // ~30fps for smooth fade
         }
-      } catch (error) {
+      } catch {
 //  console.warn('Audio setup failed:', error);
-        setAudioError(true);
-        setAudioLoading(false);      }
+      }
     };
 
     startAmbientAudio();
@@ -371,7 +353,7 @@ const shimmerTranslateX = useSharedValue(-200);
           clearInterval(fadeOutInterval);
         }
       }, 30); // 1.2 second fade out
-    } catch (error) {
+    } catch {
       // console.warn('Audio fade out failed:', error);
     }
   };
@@ -663,15 +645,12 @@ const animatedNextButtonStyle = useAnimatedStyle(() => ({
           {isLoading && (
             <Animated.View style={[styles.loadingContainer, animatedLoadingStyle]}>
              
-               <Image 
+              <Image 
                 source={{ uri: IMAGE_URL }}
                 style={styles.gitaImage}
                 resizeMode="contain"
-                onLoadStart={() => setImageLoading(true)}
-                onLoadEnd={() => setImageLoading(false)}
                 onError={() => {
                   setImageError(true);
-                  setImageLoading(false);
                 }}
               />
                {imageError && (

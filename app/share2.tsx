@@ -19,7 +19,7 @@ import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../lib/h
 import ViewShot, { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
-import { Toast, ToastTitle, useToast } from '@/components/ui/toast';
+import { showAppToast } from '../lib/appToast';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -101,8 +101,6 @@ export default function Share2() {
   }>();
   
   const isDarkMode = useKriya(s => s.isDarkMode);
-  const toast = useToast();
-  
   const [selectedFormat, setSelectedFormat] = useState<FormatId>('story');
   const [selectedBackground, setSelectedBackground] = useState<BackgroundId>('krishna');
   const [isSharing, setIsSharing] = useState(false);
@@ -164,16 +162,13 @@ export default function Share2() {
       console.log('[Save] Requesting permissions...');
       const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status !== 'granted') {
-        toast.show({
-          id: 'permission-denied',
-          placement: 'top',
+        showAppToast({
+          type: 'error',
+          text1: 'Permission denied',
+          text2: 'Please allow photo access to save this image.',
           duration: 2000,
-          containerStyle: { marginTop: 50 },
-          render: ({ id }) => (
-            <Toast nativeID={`toast-${id}`} action="error" variant="solid">
-              <ToastTitle>Permission denied</ToastTitle>
-            </Toast>
-          ),
+          position: 'top',
+          topOffset: 64,
         });
         return;
       }
@@ -186,26 +181,24 @@ export default function Share2() {
       console.log('[Save] Saved successfully');
       
       taskCompleteHaptic();
-      toast.show({
-        id: 'saved-success',
-        placement: 'top',
+      showAppToast({
+        type: 'success',
+        text1: 'Saved to gallery',
+        text2: 'Your shloka card is ready to share.',
         duration: 2000,
-        containerStyle: { marginTop: 50 },
-        render: ({ id }) => (
-          <Toast 
-            nativeID={`toast-${id}`} 
-            action="success" 
-            variant="solid"
-            style={{ backgroundColor: isDarkMode ? '#064e3b' : '#ecfdf5' }}
-          >
-            <ToastTitle style={{ color: isDarkMode ? '#d1fae5' : '#064e3b' }}>
-              Saved to gallery!
-            </ToastTitle>
-          </Toast>
-        ),
+        position: 'top',
+        topOffset: 64,
       });
     } catch (error) {
       console.error('[Save] Failed:', error);
+      showAppToast({
+        type: 'error',
+        text1: 'Save failed',
+        text2: 'Please try again.',
+        duration: 1800,
+        position: 'top',
+        topOffset: 64,
+      });
     } finally {
       setIsSaving(false);
     }

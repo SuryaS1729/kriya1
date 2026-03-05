@@ -7,10 +7,13 @@ type ToastState = {
   type: AppToastType;
   text1: string;
   text2?: string;
+  position: 'top' | 'bottom';
+  topOffset: number;
   bottomOffset: number;
 };
 
 const DEFAULT_DURATION_MS = 1800;
+const DEFAULT_TOP_OFFSET = 64;
 const DEFAULT_BOTTOM_OFFSET = 80;
 
 function colorsForType(type: AppToastType) {
@@ -73,6 +76,8 @@ export default function AppToastHost() {
       type: options.type ?? 'info',
       text1: options.text1,
       text2: options.text2,
+      position: options.position ?? 'bottom',
+      topOffset: options.topOffset ?? DEFAULT_TOP_OFFSET,
       bottomOffset: options.bottomOffset ?? DEFAULT_BOTTOM_OFFSET,
     });
     opacity.value = 0;
@@ -105,7 +110,14 @@ export default function AppToastHost() {
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <View style={[styles.anchor, { bottom: toast.bottomOffset }]}>
+      <View
+        style={[
+          styles.anchor,
+          toast.position === 'top'
+            ? { top: toast.topOffset }
+            : { bottom: toast.bottomOffset },
+        ]}
+      >
         <Animated.View
           style={[
             styles.card,
@@ -160,4 +172,3 @@ const styles = StyleSheet.create({
     fontFamily: 'Source Serif Pro',
   },
 });
-

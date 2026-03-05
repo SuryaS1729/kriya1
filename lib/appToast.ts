@@ -5,6 +5,8 @@ export type AppToastOptions = {
   text1: string;
   text2?: string;
   duration?: number;
+  position?: 'top' | 'bottom';
+  topOffset?: number;
   bottomOffset?: number;
 };
 
@@ -26,4 +28,3 @@ export function showAppToast(options: AppToastOptions) {
 export function hideAppToast() {
   handler?.hide();
 }
-

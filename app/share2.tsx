@@ -32,6 +32,40 @@ const FORMATS = [
 
 type FormatId = typeof FORMATS[number]['id'];
 
+const EXTRA_BACKGROUND_IMAGE_SOURCES = {
+  b1: require('../assets/images/b1.jpeg'),
+  b2: require('../assets/images/b2.jpeg'),
+  b3: require('../assets/images/b3.jpeg'),
+  b4: require('../assets/images/b4.jpeg'),
+  b5: require('../assets/images/b5.jpeg'),
+  b6: require('../assets/images/b6.jpeg'),
+  b7: require('../assets/images/b7.jpeg'),
+  b8: require('../assets/images/b8.jpeg'),
+  b9: require('../assets/images/b9.jpeg'),
+  b10: require('../assets/images/b10.jpeg'),
+  b11: require('../assets/images/b11.jpeg'),
+  b12: require('../assets/images/b12.jpeg'),
+  b13: require('../assets/images/b13.jpeg'),
+  b14: require('../assets/images/b14.png'),
+} as const;
+
+const EXTRA_IMAGE_BACKGROUNDS = [
+  { id: 'b1', label: 'B1' },
+  { id: 'b2', label: 'B2' },
+  { id: 'b3', label: 'B3' },
+  { id: 'b4', label: 'B4' },
+  { id: 'b5', label: 'B5' },
+  { id: 'b6', label: 'B6' },
+  { id: 'b7', label: 'B7' },
+  { id: 'b8', label: 'B8' },
+  { id: 'b9', label: 'B9' },
+  { id: 'b10', label: 'B10' },
+  { id: 'b11', label: 'B11' },
+  { id: 'b12', label: 'B12' },
+  { id: 'b13', label: 'B13' },
+  { id: 'b14', label: 'B14' },
+] as const;
+
 // Background configurations with per-background styling
 const BACKGROUNDS = [
   {
@@ -87,6 +121,19 @@ const BACKGROUNDS = [
     brandingColor: '#d4d0e8',
     bgOpacity: 1,
   },
+  ...EXTRA_IMAGE_BACKGROUNDS.map((bg) => ({
+    id: bg.id,
+    label: bg.label,
+    type: 'image' as const,
+    colors: ['#1a1a2e', '#16213e'],
+    textBoxBg: 'rgba(20, 10, 30, 0.15)',
+    textBoxPosition: 'center' as const,
+    textColor: '#ffffff',
+    translationColor: '#f5f5f5',
+    refColor: '#ffffff',
+    brandingColor: '#ffffff',
+    bgOpacity: 0.6,
+  })),
 ];
 
 type BackgroundId = typeof BACKGROUNDS[number]['id'];
@@ -119,14 +166,19 @@ export default function Share2() {
   const previewHeight = previewWidth / currentFormat.aspectRatio;
   
   // Get background image based on selected background
-  const getBackgroundSource = () => {
-    if (selectedBackground === 'temple') {
+  const getBackgroundSource = (backgroundId: BackgroundId, format: FormatId = selectedFormat) => {
+    if (backgroundId === 'krishna') {
+      return format === 'story'
+        ? require('../assets/images/rawInstagramStory.png')
+        : require('../assets/images/rawInstagramPost.png');
+    }
+    if (backgroundId === 'temple') {
       return require('../assets/images/background2.jpg');
     }
-    // Krishna background
-    return selectedFormat === 'story'
-      ? require('../assets/images/rawInstagramStory.png')
-      : require('../assets/images/rawInstagramPost.png');
+    if (backgroundId in EXTRA_BACKGROUND_IMAGE_SOURCES) {
+      return EXTRA_BACKGROUND_IMAGE_SOURCES[backgroundId as keyof typeof EXTRA_BACKGROUND_IMAGE_SOURCES];
+    }
+    return require('../assets/images/rawInstagramPost.png');
   };
   
   const handleShare = async () => {
@@ -265,7 +317,7 @@ export default function Share2() {
       {/* Background - either image or gradient */}
       {currentBackground.type === 'image' ? (
         <Image 
-          source={getBackgroundSource()} 
+          source={getBackgroundSource(selectedBackground)} 
           style={[styles.cardBackground, { opacity: currentBackground.bgOpacity }]}
           resizeMode="cover"
         />
@@ -414,10 +466,7 @@ export default function Share2() {
               >
                 {bg.type === 'image' ? (
                   <Image 
-                    source={bg.id === 'temple' 
-                      ? require('../assets/images/background2.jpg')
-                      : require('../assets/images/rawInstagramPost.png')
-                    }
+                    source={getBackgroundSource(bg.id, 'post')}
                     style={styles.backgroundSwatchImage}
                     resizeMode="cover"
                   />

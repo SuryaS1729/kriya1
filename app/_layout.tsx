@@ -39,9 +39,16 @@ export default function Root() {
   if (!booted) return null;
 
   async function onInit(db: any) {
+    // Always store the latest provider DB handle to avoid stale/closed references.
+    setDb(db);
+
     // Use global flag to prevent multiple initializations
     if (globalDbInitialized) {
       // console.log('DB already initialized globally, skipping...');
+      setDbReady(true);
+      setTimeout(() => {
+        useKriya.getState().init();
+      }, 0);
       return;
     }
     
@@ -50,7 +57,6 @@ export default function Root() {
     
     try {
       await runMigrationsSafe(db);
-      setDb(db);
 
       db.getAllSync(
         `SELECT name FROM sqlite_master WHERE type='table' ORDER BY name`
@@ -147,6 +153,8 @@ export default function Root() {
           <Stack.Screen name="goals" options={{animation:'slide_from_bottom', animationDuration:200}}/>
           <Stack.Screen name="share2" options={{animation:'slide_from_bottom', animationDuration:200}}/>
           <Stack.Screen name="listen" options={{animation:'slide_from_bottom', animationDuration:300}}/>
+                    <Stack.Screen name="testwidget" options={{animation:'default', animationDuration:200}}/>
+
 
         </Stack>
       </SQLiteProvider>

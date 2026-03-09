@@ -683,6 +683,13 @@ console.log('🔍 Guided Tour Debug:', {
         <View style={styles.tasksHeader}>
           <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#5a6173ff' }]}>Today's Tasks</Text>
           <View style={styles.headerButtons}>
+            <Link href="/testwidget" asChild>
+              <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
+                <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
+                  <Feather name='anchor' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
+                </View>
+              </TouchableOpacity>
+            </Link>
             <Link href="/goals" asChild>
               <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
                 <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>

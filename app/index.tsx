@@ -1,6 +1,6 @@
 // app/index.tsx
 import { Link, router } from 'expo-router';
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { FlatList, StyleSheet, Text, View, Pressable, ScrollView, TouchableOpacity } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -206,6 +206,63 @@ const YesterdayTasksBanner = ({
   );
 };
 
+const TaskRow = React.memo(({
+  item,
+  isDarkMode,
+  onToggle,
+  onRemove,
+  onFocus,
+}: {
+  item: Task;
+  isDarkMode: boolean;
+  onToggle: (id: number, completed: boolean) => void;
+  onRemove: (id: number) => void;
+  onFocus: (task: Task) => void;
+}) => {
+  const handleToggle = () => onToggle(item.id, item.completed);
+  const handleRemove = () => onRemove(item.id);
+  const handleFocus = () => onFocus(item);
+
+  return (
+    <View style={[styles.row, { borderBottomColor: isDarkMode ? '#1a2535ff' : '#d8dde1ff' }]}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+        <Pressable
+          onPress={handleToggle}
+          hitSlop={12}
+          style={{ padding: 4 }}
+        >
+          <Checkbox completed={item.completed} isDarkMode={isDarkMode} />
+        </Pressable>
+
+        <Pressable
+          onPress={handleToggle}
+          onLongPress={handleFocus}
+          style={{ flex: 1, paddingVertical: 5, paddingLeft: 8 }}
+        >
+          <Text
+            style={[
+              styles.title,
+              {
+                color: item.completed ? '#94a3b8' : (isDarkMode ? '#f9fafb' : '#000000ff'),
+                textDecorationLine: item.completed ? 'line-through' : 'none',
+              },
+            ]}
+            numberOfLines={1}
+          >
+            {item.title}
+          </Text>
+        </Pressable>
+      </View>
+
+      {!item.completed && (
+        <Pressable onPress={handleRemove} hitSlop={8} style={styles.deleteButton}>
+          <Text style={[styles.deleteIcon, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>✕</Text>
+        </Pressable>
+      )}
+    </View>
+  );
+});
+
 export default function Home() {
   const ready     = useKriya(s => s.ready);
   const tasks     = useKriya(s => s.tasksToday);
@@ -300,49 +357,32 @@ const handleTogglePress = () => {
     transform: [{ scale: toggleScale.value }],
   }));
 
-  // Optimized sorting - avoid double reverse
-   const sortedTasks = useMemo(() => {
-    const incomplete: Task[] = [];
-    const completed: Task[] = [];
-    
-    // Single pass through tasks
-    for (const task of tasks) {
-      if (task.completed) {
-        completed.push(task);
-      } else {
-        incomplete.push(task);
-      }
-    }
-    
-    // Sort by creation time (newest first for better UX)
-    incomplete.sort((a, b) => a.created_at - b.created_at);
-    completed.sort((a, b) => a.created_at - b.created_at);
-    
+  // Incomplete tasks first, completed tasks after, preserving entry order in each bucket.
+  const sortedTasks = useMemo(() => {
+    const incomplete = tasks
+      .filter((task) => !task.completed)
+      .sort((a, b) => a.created_at - b.created_at);
+    const completed = tasks
+      .filter((task) => task.completed)
+      .sort((a, b) => a.created_at - b.created_at);
     return [...incomplete, ...completed];
   }, [tasks]);
 
-
-
-  // Memoized callbacks to prevent unnecessary re-renders
-   // Update the onToggle callback
-  const onToggle = (id: number) => {
-    const task = tasks.find(t => t.id === id);
-    if (task && !task.completed) {
+  const onToggle = useCallback((id: number, completed: boolean) => {
+    if (!completed) {
       taskCompleteHaptic(); // Success haptic for completing tasks
     } else {
       selectionHaptic(); // Light haptic for uncompleting
     }
     toggle(id);
-  };
+  }, [toggle]);
 
-  // Update the onRemove callback
-  const onRemove = (id: number) => {
+  const onRemove = useCallback((id: number) => {
     errorHaptic(); // Error haptic for deletion
     remove(id);
-  };
+  }, [remove]);
 
-  // Update the onFocus callback
-  const onFocus = (task: Task) => {
+  const onFocus = useCallback((task: Task) => {
     buttonPressHaptic(); // Light haptic for navigation
     router.push({
       pathname: '/focus',
@@ -351,7 +391,7 @@ const handleTogglePress = () => {
         title: task.title,   
       },
     });
-  };
+  }, []);
   const handleTourComplete = () => {
     setHasSeenGuidedTour(true);
   };
@@ -366,77 +406,10 @@ console.log('🔍 Guided Tour Debug:', {
     shouldShowGuidedTour
   });
 
-  // Enhanced TaskRow with cleanup
-  const TaskRow = ({ 
-    item, 
-    isDarkMode, 
-    onToggle, 
-    onRemove,
-    onFocus 
-  }: { 
-    item: Task; 
-    isDarkMode: boolean; 
-    onToggle: (id: number) => void; 
-    onRemove: (id: number) => void;
-    onFocus: (task: Task) => void; 
-  }) => {
-    const handleToggle = () => onToggle(item.id);
-    const handleRemove = () => onRemove(item.id);
-    const handleFocus = () => onFocus(item); // Handle long press
-
-    
-    return (
-       <View style={[styles.row, { borderBottomColor: isDarkMode ? '#1a2535ff' : '#d8dde1ff' }]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-          {/* Separate Pressable for checkbox with hitSlop */}
-          <Pressable 
-            onPress={handleToggle}
-            hitSlop={12}
-            style={{ padding: 4 }} // Optional: add some padding for better touch area
-          >
-            <Checkbox completed={item.completed} isDarkMode={isDarkMode} />
-          </Pressable>
-          
-          {/* Pressable for the text area */}
-          <Pressable 
-            onPress={handleToggle} 
-            onLongPress={handleFocus}
-            style={{ flex: 1, paddingVertical: 5, paddingLeft: 8 }}
-          >
-            <Text
-              style={[
-                styles.title,
-                {
-                  color: item.completed ? '#94a3b8' : (isDarkMode ? '#f9fafb' : '#000000ff'),
-                  textDecorationLine: item.completed ? 'line-through' : 'none',
-                },
-              ]}
-              numberOfLines={1}
-            >
-              {item.title}
-            </Text>
-          </Pressable>
-        </View>
-        
-         {/* UPDATED: Simple conditional rendering */}
-      {!item.completed && (
-        
-        <Pressable onPress={handleRemove} hitSlop={8} style={styles.deleteButton}>
-          <Text style={[styles.deleteIcon, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>✕</Text>
-        </Pressable>
-      )}
-      </View>
-    )
-  };
-
-
-
-  // Enhanced renderItem with cleanup
-  const renderItem = ({ item }: { item: Task }) => (
+  const renderItem = useCallback(({ item }: { item: Task }) => (
     <Animated.View  
-      entering={FadeIn.duration(200).delay(100)}
-      layout={LinearTransition.springify().duration(200).delay(200)}
-      key={`task-${item.id}`} // Explicit key for better reconciliation
+      entering={FadeIn.duration(90)}
+      layout={LinearTransition.duration(100)}
     >
       <TaskRow 
         item={item} 
@@ -446,9 +419,9 @@ console.log('🔍 Guided Tour Debug:', {
         onFocus={onFocus} 
       />
     </Animated.View>
-  );
+  ), [isDarkMode, onToggle, onRemove, onFocus]);
 
-  const keyExtractor = (item: Task) => `task-${item.id}`;
+  const keyExtractor = useCallback((item: Task) => `task-${item.id}`, []);
 
   // Clear animation states when component unmounts
   React.useEffect(() => {

@@ -23,7 +23,6 @@ import Animated, {
   useAnimatedStyle, 
   withSpring,
   interpolate,
-  FadeInUp,
   LinearTransition,
   FadeInDown
 } from 'react-native-reanimated';
@@ -137,11 +136,15 @@ export default function Add() {
 
 
   const remaining = tasksToday.filter(t => !t.completed).length;
+  const orderedTasks = [
+    ...tasksToday.filter((task) => !task.completed).sort((a, b) => a.created_at - b.created_at),
+    ...tasksToday.filter((task) => task.completed).sort((a, b) => a.created_at - b.created_at),
+  ];
 
   const renderItem = ({ item, index }: { item: Task; index: number }) => (
     <AnimatedPressable
-      entering={FadeInDown.duration(260).delay(Math.min(index, 6) * 24)}
-      layout={LinearTransition.springify().damping(18).stiffness(180)}
+      entering={FadeInDown.duration(100).delay(Math.min(index, 3) * 6)}
+      layout={LinearTransition.duration(100)}
       onPress={() => {
         selectionHaptic(); // Add haptic feedback
         toggle(item.id);
@@ -218,7 +221,7 @@ export default function Add() {
 
           <FlatList
           
-            data={[...tasksToday].reverse()}
+            data={orderedTasks}
             keyExtractor={t => String(t.id)}
             renderItem={renderItem}
             ItemSeparatorComponent={() => <View style={[styles.sep, { backgroundColor: isDarkMode ? '#1a2535ff' : '#f1f5f9' }]} />}

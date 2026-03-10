@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useKriya } from '../lib/store';
-import type { Task } from '../lib/tasks';
+import { setTaskCompleted, removeTask as removeTaskDb, type Task } from '../lib/tasks';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import { taskCompleteHaptic, selectionHaptic, buttonPressHaptic, errorHaptic } from '../lib/haptics';
@@ -82,130 +82,6 @@ const Checkbox = ({ completed, isDarkMode }: { completed: boolean, isDarkMode: b
   );
 };
 
-// Add this new component before the Home component
-const YesterdayTasksBanner = ({ 
-  tasks, 
-  isDarkMode, 
-  onImportTasks 
-}: { 
-  tasks: Task[]; 
-  isDarkMode: boolean; 
-  onImportTasks: (tasks: Task[]) => void;
-}) => {
-  const [selectedTasks, setSelectedTasks] = useState<Set<number>>(new Set());
-  const [showAll, setShowAll] = useState(false);
-
-  const displayTasks = showAll ? tasks : tasks.slice(0, 3);
-
-  const toggleTask = (taskId: number) => {
-    selectionHaptic(); 
-    setSelectedTasks(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(taskId)) {
-        newSet.delete(taskId);
-      } else {
-        newSet.add(taskId);
-      }
-      return newSet;
-    });
-  };
-
-  const handleImport = () => {
-    const tasksToImport = tasks.filter(task => selectedTasks.has(task.id));
-    if (tasksToImport.length > 0) {
-      taskCompleteHaptic(); 
-      onImportTasks(tasksToImport);
-    }
-  };
-
-  return (
-    <View style={[
-      styles.yesterdayBanner, 
-      { backgroundColor: isDarkMode ? '#1f293789' : '#f8fafc', borderColor: isDarkMode ? '#526d7071' : '#e2e8f0' }
-    ]}>
-      <View style={styles.bannerHeader}>
-        <Text style={[styles.bannerTitle, { color: isDarkMode ? '#f9fafb' : '#1f2937' }]}>
-          📋 {tasks.length} unfinished task{tasks.length > 1 ? 's' : ''} from yesterday
-        </Text>
-        <Text style={[styles.bannerSubtitle, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
-          Select which ones to bring forward:
-        </Text>
-      </View>
-
-      <View style={styles.taskSelection}>
-        {displayTasks.map((task) => (
-          <Pressable
-            key={task.id}
-            onPress={() => toggleTask(task.id)}
-            style={[
-              styles.selectableTask,
-              { 
-                backgroundColor: selectedTasks.has(task.id) 
-                  ? (isDarkMode ? '#0c4f3c36' : '#dcfce7') 
-                  : 'transparent'
-              }
-            ]}
-          >
-            <View style={[
-              styles.selectionCheckbox,
-              {
-                backgroundColor: selectedTasks.has(task.id)
-                  ? (isDarkMode ? '#10b981' : '#22c55e')
-                  : 'transparent',
-                borderColor: isDarkMode ? '#4b5563' : '#d1d5db'
-              }
-            ]}>
-              {selectedTasks.has(task.id) && (
-                <Feather name="check" size={12} color="white" />
-              )}
-            </View>
-            <Text 
-              style={[
-                styles.selectableTaskText, 
-                { color: isDarkMode ? '#e5e7eb' : '#374151' }
-              ]} 
-              numberOfLines={1}
-            >
-              {task.title}
-            </Text>
-          </Pressable>
-        ))}
-
-        {tasks.length > 3 && (
-          <Pressable onPress={() => setShowAll(!showAll)} style={styles.showMoreButton}>
-            <Text style={[styles.showMoreText, { color: isDarkMode ? '#60a5fa' : '#3b82f6' }]}>
-              {showAll ? 'Show less' : `Show ${tasks.length - 3} more...`}
-            </Text>
-          </Pressable>
-        )}
-      </View>
-
-      <View style={styles.bannerActions}>
-        <Pressable
-          onPress={handleImport}
-          disabled={selectedTasks.size === 0}
-          style={[
-            styles.importButton,
-            {
-              backgroundColor: selectedTasks.size > 0 
-                ? (isDarkMode ? '#059669' : '#10b981') 
-                : (isDarkMode ? '#374151' : '#e5e7eb'),
-              opacity: selectedTasks.size > 0 ? 1 : 0.5
-            }
-          ]}
-        >
-          <Text style={[
-            styles.importButtonText,
-            { color: selectedTasks.size > 0 ? 'white' : (isDarkMode ? '#6b7280' : '#9ca3af') }
-          ]}>
-            Import {selectedTasks.size > 0 ? `${selectedTasks.size} ` : ''}Task{selectedTasks.size !== 1 ? 's' : ''}
-          </Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-};
-
 const TaskRow = React.memo(({
   item,
   isDarkMode,
@@ -269,7 +145,6 @@ export default function Home() {
   const getShloka = useKriya(s => s.currentShloka);
   const toggle    = useKriya(s => s.toggleTask);
   const remove    = useKriya(s => s.removeTask);
-  const addTask   = useKriya(s => s.addTask); 
   const getTasksForDay = useKriya(s => s.getTasksForDay); 
   const isDarkMode = useKriya(s => s.isDarkMode);
   const hasCompletedOnboarding = useKriya(s => s.hasCompletedOnboarding);
@@ -284,6 +159,7 @@ export default function Home() {
  // ADD refs to track listeners
   const notificationListener = useRef<Notifications.EventSubscription | null>(null);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
+  const [yesterdayTasksState, setYesterdayTasksState] = useState<Task[]>([]);
 
   // Fade animation for shloka card
   const fade = useSharedValue(0);
@@ -291,12 +167,20 @@ export default function Home() {
    // Add scale animation for toggle button
   const toggleScale = useSharedValue(1);
 
+  const loadYesterdayTasks = useCallback(() => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayKey = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate()).getTime();
+    setYesterdayTasksState(getTasksForDay(yesterdayKey));
+  }, [getTasksForDay]);
+
   // Clear cache and refresh when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
       if (ready) {
 
-        refresh(); 
+        refresh();
+        loadYesterdayTasks();
                 // console.log('🧹 Home screen focused - refreshing state');
 
 
@@ -308,7 +192,7 @@ export default function Home() {
         fade.value = 0;
         fade.value = withSpring(1);
       }
-    }, [ready, refresh, fade])
+    }, [ready, refresh, fade, loadYesterdayTasks])
   );
 
   // Only compute shloka after store is ready
@@ -327,7 +211,7 @@ export default function Home() {
     if (!ready || !shloka) return;
     fade.value = 0;
     fade.value = withSpring(1);
-  }, [ready, shloka, fade, showTranslation]);
+  }, [ready, shlokaIndex, fade, showTranslation]);
 
   const fadeStyle = useAnimatedStyle(() => ({
     opacity: fade.value,
@@ -446,23 +330,83 @@ console.log('🔍 Guided Tour Debug:', {
     }
   }, [ready, hasCompletedOnboarding]);
 
-  const yesterdayUnfinishedTasks = useMemo(() => {
-    if (!ready) return [];
-    
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayKey = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate()).getTime();
-    
-    const yesterdayTasks = getTasksForDay(yesterdayKey);
-    return yesterdayTasks.filter(task => !task.completed);
-  }, [ready, getTasksForDay]);
+  useEffect(() => {
+    if (ready) {
+      loadYesterdayTasks();
+    }
+  }, [ready, loadYesterdayTasks]);
 
-  // Handle importing tasks from yesterday
-  const handleImportTasks = (tasksToImport: Task[]) => {
-    tasksToImport.forEach(task => {
-      addTask(task.title); // This will create a new task for today
-    });
-  };
+  const sortedYesterdayTasks = useMemo(() => {
+    const incomplete = yesterdayTasksState
+      .filter((task) => !task.completed)
+      .sort((a, b) => a.created_at - b.created_at);
+    const completed = yesterdayTasksState
+      .filter((task) => task.completed)
+      .sort((a, b) => a.created_at - b.created_at);
+    return [...incomplete, ...completed];
+  }, [yesterdayTasksState]);
+
+  const onToggleYesterdayTask = useCallback((id: number, completed: boolean) => {
+    const next = !completed;
+    if (next) {
+      taskCompleteHaptic();
+    } else {
+      selectionHaptic();
+    }
+    setTaskCompleted(id, next, null);
+    setYesterdayTasksState((state) =>
+      state.map((task) =>
+        task.id === id
+          ? { ...task, completed: next, completed_at: next ? Date.now() : null }
+          : task
+      )
+    );
+  }, []);
+
+  const onRemoveYesterday = useCallback((id: number) => {
+    errorHaptic();
+    removeTaskDb(id);
+    setYesterdayTasksState((state) => state.filter((task) => task.id !== id));
+  }, []);
+
+  const renderYesterdayItem = useCallback(({ item }: { item: Task }) => (
+    <Animated.View
+      entering={FadeIn.duration(90)}
+      layout={LinearTransition.duration(100)}
+    >
+      <TaskRow
+        item={item}
+        isDarkMode={isDarkMode}
+        onToggle={onToggleYesterdayTask}
+        onRemove={onRemoveYesterday}
+        onFocus={onFocus}
+      />
+    </Animated.View>
+  ), [isDarkMode, onToggleYesterdayTask, onRemoveYesterday, onFocus]);
+
+  const yesterdayKeyExtractor = useCallback((item: Task) => `yesterday-task-${item.id}`, []);
+
+  const yesterdayFooter = useMemo(() => {
+    if (sortedYesterdayTasks.length === 0) return null;
+
+    return (
+      <View style={styles.yesterdaySection}>
+        <View style={styles.yesterdayDividerRow}>
+          <View style={[styles.yesterdayDivider, { backgroundColor: isDarkMode ? '#334155' : '#d1d5db' }]} />
+          <Text style={[styles.yesterdayDividerText, { color: isDarkMode ? '#9ca3af' : '#6b7280' }]}>
+            Yesterday's Tasks
+          </Text>
+          <View style={[styles.yesterdayDivider, { backgroundColor: isDarkMode ? '#334155' : '#d1d5db' }]} />
+        </View>
+        <FlatList
+          data={sortedYesterdayTasks}
+          renderItem={renderYesterdayItem}
+          keyExtractor={yesterdayKeyExtractor}
+          scrollEnabled={false}
+        />
+      </View>
+    );
+  }, [sortedYesterdayTasks, isDarkMode, renderYesterdayItem, yesterdayKeyExtractor]);
 
   // ADD: Initialize notifications when app loads
   useEffect(() => {
@@ -685,17 +629,9 @@ console.log('🔍 Guided Tour Debug:', {
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           contentContainerStyle={styles.tasksList}
+          ListFooterComponent={yesterdayFooter}
           ListEmptyComponent={() => (
             <View>
-
-              {/* Show yesterday's tasks banner if available */}
-              {yesterdayUnfinishedTasks.length > 0 && (
-                <YesterdayTasksBanner
-                  tasks={yesterdayUnfinishedTasks}
-                  isDarkMode={isDarkMode}
-                  onImportTasks={handleImportTasks}
-                />
-              )}
               <Pressable onPress={() => {
                 buttonPressHaptic(); // Add haptic for empty state press
                 router.push('/add');
@@ -1038,69 +974,22 @@ marginLeft:10
 
   },
 
-  // Add these new styles for the banner
-  yesterdayBanner: {
-    marginTop: 0,
-    marginHorizontal: 4,
-    padding: 13,
-    borderRadius: 12,
-    borderWidth: 1,
+  yesterdaySection: {
+    marginTop: 8,
   },
-  bannerHeader: {
-    marginBottom: 12,
-  },
-  bannerTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  bannerSubtitle: {
-    fontSize: 14,
-    opacity: 0.8,
-  },
-  taskSelection: {
-    marginBottom: 16,
-  },
-  selectableTask: {
+  yesterdayDividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginVertical: 2,
+    marginVertical: 8,
   },
-  selectionCheckbox: {
-    width: 16,
-    height: 16,
-    borderRadius: 3,
-    borderWidth: 1.5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  selectableTaskText: {
+  yesterdayDivider: {
     flex: 1,
-    fontSize: 14,
+    height: 1,
   },
-  showMoreButton: {
-    paddingVertical: 8,
-    alignItems: 'center',
-  },
-  showMoreText: {
+  yesterdayDividerText: {
     fontSize: 13,
-    fontWeight: '500',
-  },
-  bannerActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  importButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  importButtonText: {
-    fontSize: 14,
     fontWeight: '600',
+    letterSpacing: 0.3,
+    marginHorizontal: 10,
   },
 });

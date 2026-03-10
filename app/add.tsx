@@ -22,7 +22,10 @@ import Animated, {
   useSharedValue, 
   useAnimatedStyle, 
   withSpring,
-  interpolate
+  interpolate,
+  FadeInUp,
+  LinearTransition,
+  FadeInDown
 } from 'react-native-reanimated';
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -31,6 +34,7 @@ import { mediumImpactHaptic, selectionHaptic, errorHaptic } from '../lib/haptics
 
 // Create animated Feather component
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function Add() {
   const insets = useSafeAreaInsets();
@@ -134,8 +138,10 @@ export default function Add() {
 
   const remaining = tasksToday.filter(t => !t.completed).length;
 
-  const renderItem = ({ item }: { item: Task }) => (
-    <Pressable
+  const renderItem = ({ item, index }: { item: Task; index: number }) => (
+    <AnimatedPressable
+      entering={FadeInDown.duration(260).delay(Math.min(index, 6) * 24)}
+      layout={LinearTransition.springify().damping(18).stiffness(180)}
       onPress={() => {
         selectionHaptic(); // Add haptic feedback
         toggle(item.id);
@@ -178,7 +184,7 @@ export default function Add() {
       ]} numberOfLines={2}>
         {item.title}
       </Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 
   return (

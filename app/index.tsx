@@ -138,6 +138,7 @@ const TaskRow = React.memo(({
     </View>
   );
 });
+TaskRow.displayName = 'TaskRow';
 
 export default function Home() {
   const ready     = useKriya(s => s.ready);
@@ -208,7 +209,7 @@ export default function Home() {
   // State for toggling between Sanskrit and English
   const [showTranslation, setShowTranslation] = useState(false);
   useEffect(() => {
-    if (!ready || !shloka) return;
+    if (!ready || shlokaIndex < 0) return;
     fade.value = 0;
     fade.value = withSpring(1);
   }, [ready, shlokaIndex, fade, showTranslation]);

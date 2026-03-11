@@ -19,10 +19,13 @@ type Row = {
 };
 
 export function getAllTasks(): Task[] {
-  const db = getDb();
-
-  const rows = db.getAllSync<Row>('SELECT * FROM tasks ORDER BY id DESC');
-  return rows.map(r => ({ ...r, completed: !!r.completed }));
+  try {
+    const db = getDb();
+    const rows = db.getAllSync<Row>('SELECT * FROM tasks ORDER BY id DESC');
+    return rows.map(r => ({ ...r, completed: !!r.completed }));
+  } catch {
+    return [];
+  }
 }
 export function insertTask(title: string, shlokaId: number | null = null) {
   const db = getDb();
@@ -43,22 +46,28 @@ function startOfDay(ms: number) {
 }
 
 export function getTasksForDay(dayKey: number): Task[] {
-  const db = getDb();
-
-  const rows = db.getAllSync<Row>(
-    'SELECT * FROM tasks WHERE day_key = ? ORDER BY id DESC',
-    [dayKey]
-  );
-  return rows.map(r => ({ ...r, completed: !!r.completed }));
+  try {
+    const db = getDb();
+    const rows = db.getAllSync<Row>(
+      'SELECT * FROM tasks WHERE day_key = ? ORDER BY id DESC',
+      [dayKey]
+    );
+    return rows.map(r => ({ ...r, completed: !!r.completed }));
+  } catch {
+    return [];
+  }
 }
 
 export function getDistinctPastDays(limit = 30): { day_key: number; count: number }[] {
-  const db = getDb();
-
-  return db.getAllSync<{ day_key: number; count: number }>(
-    'SELECT day_key, COUNT(*) as count FROM tasks WHERE day_key < ? GROUP BY day_key ORDER BY day_key DESC LIMIT ?',
-    [startOfToday(Date.now()), limit]
-  );
+  try {
+    const db = getDb();
+    return db.getAllSync<{ day_key: number; count: number }>(
+      'SELECT day_key, COUNT(*) as count FROM tasks WHERE day_key < ? GROUP BY day_key ORDER BY day_key DESC LIMIT ?',
+      [startOfToday(Date.now()), limit]
+    );
+  } catch {
+    return [];
+  }
 }
 
 function startOfToday(ms: number) {

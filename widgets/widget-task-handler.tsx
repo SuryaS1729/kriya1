@@ -1,11 +1,15 @@
 import React from 'react';
 import type { WidgetTaskHandlerProps } from 'react-native-android-widget';
 import { HelloWidget } from './HelloWidget';
+import { QuickAddWidget } from './QuickAddWidget';
+import { TopTasksWidget } from './TopTasksWidget';
 
 
 const nameToWidget = {
   // Hello will be the **name** with which we will reference our widget.
   Hello: HelloWidget,
+  TopTasks: TopTasksWidget,
+  QuickAdd: QuickAddWidget,
 };
 
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
@@ -13,17 +17,19 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
   const Widget =
     nameToWidget[widgetInfo.widgetName as keyof typeof nameToWidget];
 
+  if (!Widget) return;
+
   switch (props.widgetAction) {
     case 'WIDGET_ADDED':
       props.renderWidget(<Widget />);
       break;
 
     case 'WIDGET_UPDATE':
-      // Not needed for now
+      props.renderWidget(<Widget />);
       break;
 
     case 'WIDGET_RESIZED':
-      // Not needed for now
+      props.renderWidget(<Widget />);
       break;
 
     case 'WIDGET_DELETED':

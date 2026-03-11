@@ -9,10 +9,18 @@ type Props = {
 };
 
 export function TopBar({ title, variant = 'back', right, isDarkMode }: Props) {
+  function handlePrimaryAction() {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace('/');
+  }
+
   return (
     <View style={styles.wrap}>
       {variant === 'none' ? <View style={styles.side} /> : (
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.btn}>
+        <Pressable onPress={handlePrimaryAction} hitSlop={12} style={styles.btn}>
           <Text style={[styles.icon, { color: isDarkMode ? '#f9fafb' : '#111827' }]}>{variant === 'back' ? '←' : '✕'}</Text>
         </Pressable>
       )}

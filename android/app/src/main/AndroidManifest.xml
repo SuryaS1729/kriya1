@@ -47,5 +47,19 @@
       </intent-filter>
       <meta-data android:name="android.appwidget.provider" android:resource="@xml/widgetprovider_hello"/>
     </receiver>
+    <receiver android:name=".widget.TopTasks" android:exported="false" android:label="Kriya - Top 3 Tasks">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+        <action android:name="com.surya7314.kriya.WIDGET_CLICK"/>
+      </intent-filter>
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/widgetprovider_toptasks"/>
+    </receiver>
+    <receiver android:name=".widget.QuickAdd" android:exported="false" android:label="Kriya - Quick Add">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+        <action android:name="com.surya7314.kriya.WIDGET_CLICK"/>
+      </intent-filter>
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/widgetprovider_quickadd"/>
+    </receiver>
   </application>
 </manifest>

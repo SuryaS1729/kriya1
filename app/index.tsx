@@ -185,11 +185,6 @@ export default function Home() {
                 // console.log('🧹 Home screen focused - refreshing state');
 
 
-        if (router.canGoBack()) {
-          router.dismissAll();
-        }
-        
-
         fade.value = 0;
         fade.value = withSpring(1);
       }

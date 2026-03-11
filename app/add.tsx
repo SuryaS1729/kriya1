@@ -131,7 +131,11 @@ export default function Add() {
   
   function doneAndClose() {
     Keyboard.dismiss();
-    router.back();
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace('/');
   }
 
 

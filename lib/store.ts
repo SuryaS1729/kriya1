@@ -9,6 +9,7 @@ import {
   getTasksForDay,
   getDistinctPastDays,
   insertTask,
+  insertTaskForDay,
   setTaskCompleted,
   removeTask as dbRemoveTask,
   type Task,
@@ -69,6 +70,7 @@ interface KriyaState {
   init: () => void;
   refresh: () => void;
   addTask: (title: string) => void;
+  addTaskForDay: (title: string, dayKey: number) => void;
   toggleTask: (id: number) => void;
   removeTask: (id: number) => void;
 
@@ -304,6 +306,13 @@ export const useKriya = create<KriyaState>()(
       addTask: (title) => {
         insertTask(title);
         set({ tasksToday: getTasksForDay(get().todayKey()) });
+      },
+
+      addTaskForDay: (title, dayKey) => {
+        insertTaskForDay(title, dayKey);
+        if (dayKey === get().todayKey()) {
+          set({ tasksToday: getTasksForDay(get().todayKey()) });
+        }
       },
 
       toggleTask: (id) => {

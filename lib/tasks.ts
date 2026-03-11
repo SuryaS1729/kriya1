@@ -7,6 +7,7 @@ export type Task = {
   created_at: number;        // epoch ms
   completed_at: number | null;
   shloka_id: number | null;  // optional link to the shloka at completion time
+  day_key?: number;
 };
 
 type Row = {
@@ -16,6 +17,7 @@ type Row = {
   created_at: number;
   completed_at: number | null;
   shloka_id: number | null;
+  day_key: number;
 };
 
 export function getAllTasks(): Task[] {
@@ -27,15 +29,23 @@ export function getAllTasks(): Task[] {
     return [];
   }
 }
-export function insertTask(title: string, shlokaId: number | null = null) {
+export function insertTaskForDay(
+  title: string,
+  dayKey: number,
+  shlokaId: number | null = null
+) {
   const db = getDb();
-
   const now = Date.now();
-  const dayKey = startOfDay(now);
   db.runSync(
     'INSERT INTO tasks (title, completed, created_at, completed_at, shloka_id, day_key) VALUES (?, 0, ?, NULL, ?, ?)',
     [title.trim(), now, shlokaId, dayKey]
   );
+}
+
+export function insertTask(title: string, shlokaId: number | null = null) {
+  const now = Date.now();
+  const dayKey = startOfDay(now);
+  insertTaskForDay(title, dayKey, shlokaId);
 }
 
 

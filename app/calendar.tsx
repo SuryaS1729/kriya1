@@ -12,15 +12,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Animated, {
-  FadeIn,
   FadeInDown,
   LinearTransition,
-  interpolateColor,
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withSpring,
-  withTiming,
 } from 'react-native-reanimated';
 import {
   Calendar,
@@ -177,47 +170,6 @@ const useCalendarTaskStore = create<CalendarTaskStore>((set, get) => ({
   },
 }));
 
-const BouncyCalendarPressable = ({
-  children,
-  style,
-  disabled,
-  onPress,
-}: {
-  children: React.ReactNode | ((state: { pressed: boolean; hovered?: boolean; focused?: boolean }) => React.ReactNode);
-  style?: any;
-  disabled?: boolean;
-  onPress: () => void;
-}) => {
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  return (
-    <Pressable
-      disabled={disabled}
-      onPress={onPress}
-      onPressIn={() => {
-        scale.value = withTiming(0.96, { duration: 70 });
-      }}
-      onPressOut={() => {
-        scale.value = withSequence(
-          withTiming(1.025, { duration: 90 }),
-          withSpring(1, { stiffness: 460, damping: 24, mass: 0.28 })
-        );
-      }}
-      style={style}
-    >
-      {(state) => (
-        <Animated.View style={animatedStyle}>
-          {typeof children === 'function' ? children(state) : children}
-        </Animated.View>
-      )}
-    </Pressable>
-  );
-};
-
 const CalendarDayPill = ({
   label,
   isSelected,
@@ -237,20 +189,19 @@ const CalendarDayPill = ({
   accent: string;
   isDisabled: boolean;
 }) => {
-  const selectionProgress = useSharedValue(isSelected ? 1 : 0);
-
-  useEffect(() => {
-    selectionProgress.value = withTiming(isSelected ? 1 : 0, { duration: 180 });
-  }, [isSelected, selectionProgress]);
-
   const isTodayOnly = isToday && !isSelected;
-  const baseBorderWidth = isTodayOnly || pressed ? 1 : 0;
-  const baseBg = isTodayOnly
+  const bgColor = isSelected
+    ? accent
+    : isTodayOnly
     ? (isDarkMode ? 'rgba(95, 159, 230, 0.12)' : 'rgba(116, 147, 215, 0.14)')
     : pressed
     ? (isDarkMode ? 'rgba(95, 159, 230, 0.16)' : 'rgba(116, 147, 215, 0.16)')
     : 'transparent';
-  const baseTextColor = isToday
+  const borderColor = isSelected || isTodayOnly || pressed ? accent : 'transparent';
+  const borderWidth = isSelected ? 1.5 : (isTodayOnly || pressed ? 1 : 0);
+  const textColor = isSelected
+    ? '#ffffff'
+    : isToday
     ? accent
     : isWeekend
     ? (isDarkMode ? '#94a3b8' : '#64748b')
@@ -258,46 +209,27 @@ const CalendarDayPill = ({
     ? '#f8fafc'
     : '#0f172a';
 
-  const pillStyle = useAnimatedStyle(() => ({
-    borderWidth: baseBorderWidth + (1.5 - baseBorderWidth) * selectionProgress.value,
-    borderColor: interpolateColor(
-      selectionProgress.value,
-      [0, 1],
-      [baseBorderWidth > 0 ? accent : 'transparent', accent]
-    ),
-    backgroundColor: interpolateColor(selectionProgress.value, [0, 1], [baseBg, accent]),
-    opacity: isDisabled ? 0.45 : 1,
-  }));
-
-  const textStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(selectionProgress.value, [0, 1], [baseTextColor, '#ffffff']),
-  }));
-
   return (
-    <Animated.View
+    <View
       style={[
+        styles.dayPill,
         {
-          width: 30,
-          height: 30,
-          borderRadius: 8,
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
-        pillStyle,
+          borderWidth,
+          borderColor,
+          backgroundColor: bgColor,
+          opacity: isDisabled ? 0.45 : 1,
+        }
       ]}
     >
-      <Animated.Text
+      <Text
         style={[
-          {
-            textAlign: 'center',
-            fontWeight: (isSelected || isToday || pressed) ? '700' : '500',
-          },
-          textStyle,
+          styles.dayPillText,
+          { color: textColor, fontWeight: (isSelected || isToday || pressed) ? '700' : '500' },
         ]}
       >
         {label}
-      </Animated.Text>
-    </Animated.View>
+      </Text>
+    </View>
   );
 };
 
@@ -373,13 +305,9 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
         <Pressable onPress={() => shiftMonth(-1)} hitSlop={12} style={styles.monthControlBtn}>
           <Feather name="chevron-left" size={18} color={isDarkMode ? '#f9fafb' : '#0f172a'} />
         </Pressable>
-        <Animated.Text
-          entering={FadeIn.duration(180)}
-          key={calendarMonthId}
-          style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}
-        >
+        <Text style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}>
           {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-        </Animated.Text>
+        </Text>
         <Pressable onPress={() => shiftMonth(1)} hitSlop={12} style={styles.monthControlBtn}>
           <Feather name="chevron-right" size={18} color={isDarkMode ? '#f9fafb' : '#0f172a'} />
         </Pressable>
@@ -432,7 +360,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
                     daySpacing={20}
                     isStartOfWeek={dayProps.isStartOfWeek}
                   >
-                    <BouncyCalendarPressable
+                    <Pressable
                       disabled={dayProps.state === 'disabled'}
                       onPress={() => {
                         buttonPressHaptic();
@@ -458,7 +386,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
                           isDisabled={dayProps.state === 'disabled'}
                         />
                       )}
-                    </BouncyCalendarPressable>
+                    </Pressable>
                   </Calendar.Item.Day.Container>
                 );
               })}
@@ -685,6 +613,16 @@ const styles = StyleSheet.create({
   monthLabel: {
     fontSize: 18,
     fontWeight: '700',
+  },
+  dayPill: {
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayPillText: {
+    textAlign: 'center',
   },
   calendarCard: {
     borderRadius: 18,

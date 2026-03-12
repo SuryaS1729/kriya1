@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -593,10 +594,18 @@ export default function CalendarScreen() {
   const loadTasks = useCalendarTaskStore((s) => s.loadTasks);
   const loaded = useCalendarTaskStore((s) => s.loaded);
   const setSelectedDate = useCalendarTaskStore((s) => s.setSelectedDate);
+  const [isScreenLoading, setIsScreenLoading] = useState(true);
 
   useEffect(() => {
+    setIsScreenLoading(true);
     setSelectedDate(toDateId(new Date()));
-    loadTasks();
+
+    const id = requestAnimationFrame(() => {
+      loadTasks();
+      setIsScreenLoading(false);
+    });
+
+    return () => cancelAnimationFrame(id);
   }, [loadTasks, setSelectedDate]);
 
   useFocusEffect(
@@ -604,6 +613,8 @@ export default function CalendarScreen() {
       loadTasks();
     }, [loadTasks])
   );
+
+  const showLoading = isScreenLoading || !loaded;
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top']}>
@@ -613,11 +624,18 @@ export default function CalendarScreen() {
       />
 
       <View style={[styles.container, { paddingBottom: insets.bottom + 12 }]}> 
-        <CalendarSectionMemo isDarkMode={isDarkMode} />
-        {loaded ? (
-          <TasksSection isDarkMode={isDarkMode} onWriteForToday={refreshTodayTasks} />
+        {showLoading ? (
+          <View style={styles.loadingScreen}>
+            <ActivityIndicator size="small" color={isDarkMode ? '#93c5fd' : '#2563eb'} />
+            <Text style={[styles.loadingText, { color: isDarkMode ? '#cbd5e1' : '#475569' }]}>
+              Loading calendar...
+            </Text>
+          </View>
         ) : (
-          <View style={styles.bottomHalf} />
+          <>
+            <CalendarSectionMemo isDarkMode={isDarkMode} />
+            <TasksSection isDarkMode={isDarkMode} onWriteForToday={refreshTodayTasks} />
+          </>
         )}
       </View>
     </SafeAreaView>
@@ -629,6 +647,16 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     gap: 10,
+  },
+  loadingScreen: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   topHalf: {
     flex: 1,

@@ -1,6 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  FlatList,
   Pressable,
   StyleSheet,
   Text,
@@ -12,17 +11,39 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  LinearTransition,
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import {
   Calendar,
-  type CalendarTheme,
   fromDateId,
   toDateId,
+  useCalendar,
 } from '@marceloterreiro/flash-calendar';
+import { FlashList } from '@shopify/flash-list';
+import { create } from 'zustand';
 
 import { TopBar } from '../components/TopBar';
 import { useKriya } from '../lib/store';
-import { removeTask, setTaskCompleted, type Task } from '../lib/tasks';
+import {
+  getAllTasks,
+  getTasksForDay,
+  insertTaskForDay,
+  removeTask,
+  setTaskCompleted,
+  type Task,
+} from '../lib/tasks';
 import { buttonPressHaptic, errorHaptic, selectionHaptic, taskCompleteHaptic } from '../lib/haptics';
+
+const EMPTY_TASKS: Task[] = [];
 
 function dayKeyFromDateId(dateId: string) {
   const d = fromDateId(dateId);
@@ -38,135 +59,464 @@ function toReadableDate(date: Date) {
   });
 }
 
-export default function CalendarScreen() {
-  const insets = useSafeAreaInsets();
-  const isDarkMode = useKriya((s) => s.isDarkMode);
-  const getTasksForDay = useKriya((s) => s.getTasksForDay);
-  const addTaskForDay = useKriya((s) => s.addTaskForDay);
-  const refresh = useKriya((s) => s.refresh);
-  const todayKey = useKriya((s) => s.todayKey);
+function dateIdFromTask(task: Task) {
+  const dayMs = typeof task.day_key === 'number'
+    ? task.day_key
+    : new Date(task.created_at).setHours(0, 0, 0, 0);
+  return toDateId(new Date(dayMs));
+}
 
-  const [selectedDateId, setSelectedDateId] = useState(toDateId(new Date()));
-  const [calendarMonthId, setCalendarMonthId] = useState(toDateId(new Date()));
-  const [taskText, setTaskText] = useState('');
-  const [tasksForSelectedDay, setTasksForSelectedDay] = useState<Task[]>([]);
+type CalendarTaskStore = {
+  tasksByDate: Record<string, Task[]>;
+  selectedDate: string;
+  loaded: boolean;
+  setSelectedDate: (date: string) => void;
+  loadTasks: () => void;
+  addTask: (title: string, dateId: string) => void;
+  toggleTask: (task: Task, dateId: string) => void;
+  deleteTask: (id: number, dateId: string) => void;
+};
 
-  const selectedDate = useMemo(() => fromDateId(selectedDateId), [selectedDateId]);
-  const selectedDayKey = useMemo(() => dayKeyFromDateId(selectedDateId), [selectedDateId]);
+const useCalendarTaskStore = create<CalendarTaskStore>((set, get) => ({
+  tasksByDate: {},
+  selectedDate: toDateId(new Date()),
+  loaded: false,
 
-  const loadTasksForSelectedDate = useCallback(() => {
-    setTasksForSelectedDay(getTasksForDay(selectedDayKey));
-  }, [getTasksForDay, selectedDayKey]);
+  setSelectedDate: (date) => set({ selectedDate: date }),
 
-  useFocusEffect(
-    useCallback(() => {
-      loadTasksForSelectedDate();
-    }, [loadTasksForSelectedDate])
+  loadTasks: () => {
+    const allTasks = getAllTasks();
+    const grouped: Record<string, Task[]> = {};
+
+    allTasks.forEach((task) => {
+      const dateId = dateIdFromTask(task);
+      if (!grouped[dateId]) grouped[dateId] = [];
+      grouped[dateId].push(task);
+    });
+
+    set({ tasksByDate: grouped, loaded: true });
+  },
+
+  addTask: (title, dateId) => {
+    const trimmed = title.trim();
+    if (!trimmed) return;
+
+    const dayKey = dayKeyFromDateId(dateId);
+    const optimistic: Task = {
+      id: -Date.now(),
+      title: trimmed,
+      completed: false,
+      created_at: Date.now(),
+      completed_at: null,
+      shloka_id: null,
+      day_key: dayKey,
+    };
+
+    set((state) => ({
+      tasksByDate: {
+        ...state.tasksByDate,
+        [dateId]: [optimistic, ...(state.tasksByDate[dateId] ?? [])],
+      },
+    }));
+
+    try {
+      insertTaskForDay(trimmed, dayKey, null);
+      const persisted = getTasksForDay(dayKey);
+      set((state) => ({
+        tasksByDate: {
+          ...state.tasksByDate,
+          [dateId]: persisted,
+        },
+      }));
+    } catch {
+      get().loadTasks();
+    }
+  },
+
+  toggleTask: (task, dateId) => {
+    const next = !task.completed;
+
+    set((state) => ({
+      tasksByDate: {
+        ...state.tasksByDate,
+        [dateId]: (state.tasksByDate[dateId] ?? []).map((t) =>
+          t.id === task.id
+            ? { ...t, completed: next, completed_at: next ? Date.now() : null }
+            : t
+        ),
+      },
+    }));
+
+    try {
+      setTaskCompleted(task.id, next, null);
+    } catch {
+      get().loadTasks();
+    }
+  },
+
+  deleteTask: (id, dateId) => {
+    set((state) => {
+      const current = state.tasksByDate[dateId] ?? [];
+      const next = current.filter((t) => t.id !== id);
+      const updated = { ...state.tasksByDate };
+
+      if (next.length === 0) {
+        delete updated[dateId];
+      } else {
+        updated[dateId] = next;
+      }
+
+      return { tasksByDate: updated };
+    });
+
+    try {
+      removeTask(id);
+    } catch {
+      get().loadTasks();
+    }
+  },
+}));
+
+const BouncyCalendarPressable = ({
+  children,
+  style,
+  disabled,
+  onPress,
+}: {
+  children: React.ReactNode | ((state: { pressed: boolean; hovered?: boolean; focused?: boolean }) => React.ReactNode);
+  style?: any;
+  disabled?: boolean;
+  onPress: () => void;
+}) => {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Pressable
+      disabled={disabled}
+      onPress={onPress}
+      onPressIn={() => {
+        scale.value = withTiming(0.96, { duration: 70 });
+      }}
+      onPressOut={() => {
+        scale.value = withSequence(
+          withTiming(1.025, { duration: 90 }),
+          withSpring(1, { stiffness: 460, damping: 24, mass: 0.28 })
+        );
+      }}
+      style={style}
+    >
+      {(state) => (
+        <Animated.View style={animatedStyle}>
+          {typeof children === 'function' ? children(state) : children}
+        </Animated.View>
+      )}
+    </Pressable>
   );
+};
+
+const CalendarDayPill = ({
+  label,
+  isSelected,
+  isToday,
+  isWeekend,
+  pressed,
+  isDarkMode,
+  accent,
+  isDisabled,
+}: {
+  label: string;
+  isSelected: boolean;
+  isToday: boolean;
+  isWeekend: boolean;
+  pressed: boolean;
+  isDarkMode: boolean;
+  accent: string;
+  isDisabled: boolean;
+}) => {
+  const selectionProgress = useSharedValue(isSelected ? 1 : 0);
+
+  useEffect(() => {
+    selectionProgress.value = withTiming(isSelected ? 1 : 0, { duration: 180 });
+  }, [isSelected, selectionProgress]);
+
+  const isTodayOnly = isToday && !isSelected;
+  const baseBorderWidth = isTodayOnly || pressed ? 1 : 0;
+  const baseBg = isTodayOnly
+    ? (isDarkMode ? 'rgba(95, 159, 230, 0.12)' : 'rgba(116, 147, 215, 0.14)')
+    : pressed
+    ? (isDarkMode ? 'rgba(95, 159, 230, 0.16)' : 'rgba(116, 147, 215, 0.16)')
+    : 'transparent';
+  const baseTextColor = isToday
+    ? accent
+    : isWeekend
+    ? (isDarkMode ? '#94a3b8' : '#64748b')
+    : isDarkMode
+    ? '#f8fafc'
+    : '#0f172a';
+
+  const pillStyle = useAnimatedStyle(() => ({
+    borderWidth: baseBorderWidth + (1.5 - baseBorderWidth) * selectionProgress.value,
+    borderColor: interpolateColor(
+      selectionProgress.value,
+      [0, 1],
+      [baseBorderWidth > 0 ? accent : 'transparent', accent]
+    ),
+    backgroundColor: interpolateColor(selectionProgress.value, [0, 1], [baseBg, accent]),
+    opacity: isDisabled ? 0.45 : 1,
+  }));
+
+  const textStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(selectionProgress.value, [0, 1], [baseTextColor, '#ffffff']),
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        {
+          width: 30,
+          height: 30,
+          borderRadius: 8,
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        pillStyle,
+      ]}
+    >
+      <Animated.Text
+        style={[
+          {
+            textAlign: 'center',
+            fontWeight: (isSelected || isToday || pressed) ? '700' : '500',
+          },
+          textStyle,
+        ]}
+      >
+        {label}
+      </Animated.Text>
+    </Animated.View>
+  );
+};
+
+type CalendarSectionProps = {
+  isDarkMode: boolean;
+};
+
+const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
+  const setSelectedDate = useCalendarTaskStore((s) => s.setSelectedDate);
+
+  const [selectedDateId, setSelectedDateId] = useState(() => toDateId(new Date()));
+  const [calendarMonthId, setCalendarMonthId] = useState(() => toDateId(new Date()));
+  const [todayDateId, setTodayDateId] = useState(() => toDateId(new Date()));
+
+  const accent = isDarkMode ? '#5f9fe6' : '#7493d7';
+
+  useEffect(() => {
+    let midnightTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const scheduleNextMidnightTick = () => {
+      const now = new Date();
+      const nextMidnight = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1,
+        0,
+        0,
+        0,
+        50
+      );
+
+      midnightTimer = setTimeout(() => {
+        setTodayDateId(toDateId(new Date()));
+        scheduleNextMidnightTick();
+      }, nextMidnight.getTime() - now.getTime());
+    };
+
+    scheduleNextMidnightTick();
+    return () => {
+      if (midnightTimer) clearTimeout(midnightTimer);
+    };
+  }, []);
+
+  const { weeksList, weekDaysList } = useCalendar({
+    calendarMonthId,
+    calendarFirstDayOfWeek: 'sunday',
+  });
+
+  const shiftMonth = useCallback((delta: number) => {
+    setCalendarMonthId((prevMonthId) => {
+      const base = fromDateId(prevMonthId);
+      const shifted = new Date(base.getFullYear(), base.getMonth() + delta, 1);
+      return toDateId(shifted);
+    });
+  }, []);
+
+  const handleSelectDate = useCallback((dateId: string) => {
+    setSelectedDateId(dateId);
+    setSelectedDate(dateId);
+  }, [setSelectedDate]);
+
+  const jumpToToday = useCallback(() => {
+    const today = new Date();
+    const todayId = toDateId(today);
+
+    setCalendarMonthId(toDateId(new Date(today.getFullYear(), today.getMonth(), 1)));
+    handleSelectDate(todayId);
+  }, [handleSelectDate]);
+
+  return (
+    <View style={[styles.topHalf, { backgroundColor: isDarkMode ? '#0f1e2d66' : '#ffffffaa' }]}> 
+      <View style={styles.monthControls}>
+        <Pressable onPress={() => shiftMonth(-1)} hitSlop={12} style={styles.monthControlBtn}>
+          <Feather name="chevron-left" size={18} color={isDarkMode ? '#f9fafb' : '#0f172a'} />
+        </Pressable>
+        <Animated.Text
+          entering={FadeIn.duration(180)}
+          key={calendarMonthId}
+          style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}
+        >
+          {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+        </Animated.Text>
+        <Pressable onPress={() => shiftMonth(1)} hitSlop={12} style={styles.monthControlBtn}>
+          <Feather name="chevron-right" size={18} color={isDarkMode ? '#f9fafb' : '#0f172a'} />
+        </Pressable>
+      </View>
+
+      <View style={[styles.calendarCard, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}> 
+        <Calendar.VStack alignItems="center" spacing={6}>
+          <Calendar.Row.Week
+            spacing={20}
+            theme={{
+              container: {
+                borderBottomWidth: 1,
+                borderBottomColor: isDarkMode ? '#334155' : '#e2e8f0',
+                paddingBottom: 4,
+                marginBottom: 4,
+              },
+            }}
+          >
+            {weekDaysList.map((weekDay, idx) => (
+              <Calendar.Item.WeekName
+                key={`week-day-${idx}`}
+                height={30}
+                theme={{ content: { color: isDarkMode ? '#9ca3af' : '#64748b' } }}
+              >
+                {weekDay}
+              </Calendar.Item.WeekName>
+            ))}
+          </Calendar.Row.Week>
+
+          {weeksList.map((week, weekIndex) => (
+            <Calendar.Row.Week key={`week-${weekIndex}`}>
+              {week.map((dayProps) => {
+                if (dayProps.isDifferentMonth) {
+                  return (
+                    <Calendar.Item.Day.Container
+                      key={dayProps.id}
+                      dayHeight={36}
+                      daySpacing={20}
+                      isStartOfWeek={dayProps.isStartOfWeek}
+                    >
+                      <Calendar.Item.Empty height={36} />
+                    </Calendar.Item.Day.Container>
+                  );
+                }
+
+                return (
+                  <Calendar.Item.Day.Container
+                    key={dayProps.id}
+                    dayHeight={36}
+                    daySpacing={20}
+                    isStartOfWeek={dayProps.isStartOfWeek}
+                  >
+                    <BouncyCalendarPressable
+                      disabled={dayProps.state === 'disabled'}
+                      onPress={() => {
+                        buttonPressHaptic();
+                        handleSelectDate(dayProps.id);
+                      }}
+                      style={() => ({
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flex: 1,
+                        height: 36,
+                        padding: 2,
+                      })}
+                    >
+                      {({ pressed }: { pressed: boolean }) => (
+                        <CalendarDayPill
+                          label={dayProps.displayLabel}
+                          isSelected={dayProps.id === selectedDateId}
+                          isToday={dayProps.id === todayDateId}
+                          isWeekend={dayProps.isWeekend}
+                          pressed={pressed}
+                          isDarkMode={isDarkMode}
+                          accent={accent}
+                          isDisabled={dayProps.state === 'disabled'}
+                        />
+                      )}
+                    </BouncyCalendarPressable>
+                  </Calendar.Item.Day.Container>
+                );
+              })}
+            </Calendar.Row.Week>
+          ))}
+        </Calendar.VStack>
+      </View>
+
+      <TouchableOpacity onPress={jumpToToday} activeOpacity={0.8} style={styles.todayChip}>
+        <Text style={[styles.todayChipText, { color: isDarkMode ? '#bfdbfe' : '#1e40af' }]}>Today</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const CalendarSectionMemo = React.memo(CalendarSectionContent);
+
+type TasksSectionProps = {
+  isDarkMode: boolean;
+  onWriteForToday: () => void;
+};
+
+const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForToday }: TasksSectionProps) {
+  const selectedDate = useCalendarTaskStore((s) => s.selectedDate);
+  const tasks = useCalendarTaskStore((s) => s.tasksByDate[s.selectedDate] ?? EMPTY_TASKS);
+  const addTask = useCalendarTaskStore((s) => s.addTask);
+  const toggleTask = useCalendarTaskStore((s) => s.toggleTask);
+  const deleteTask = useCalendarTaskStore((s) => s.deleteTask);
+
+  const [taskText, setTaskText] = useState('');
 
   const orderedTasks = useMemo(() => {
-    const incomplete = tasksForSelectedDay
+    const incomplete = tasks
       .filter((t) => !t.completed)
       .sort((a, b) => a.created_at - b.created_at);
-    const completed = tasksForSelectedDay
+    const completed = tasks
       .filter((t) => t.completed)
       .sort((a, b) => a.created_at - b.created_at);
     return [...incomplete, ...completed];
-  }, [tasksForSelectedDay]);
+  }, [tasks]);
 
-  const theme = useMemo<CalendarTheme>(() => {
-    const accent = isDarkMode ? '#5f9fe6' : '#7493d7';
-    return {
-      rowMonth: {
-        content: {
-          textAlign: 'left',
-          color: isDarkMode ? '#d1d5db' : '#334155',
-          fontWeight: '700',
-        },
-      },
-      rowWeek: {
-        container: {
-          borderBottomWidth: 1,
-          borderBottomColor: isDarkMode ? '#334155' : '#e2e8f0',
-        },
-      },
-      itemWeekName: {
-        content: {
-          color: isDarkMode ? '#9ca3af' : '#64748b',
-        },
-      },
-      itemDayContainer: {
-        activeDayFiller: {
-          backgroundColor: isDarkMode ? '#1e3a5f' : '#dbeafe',
-        },
-      },
-      itemDay: {
-        idle: ({ isPressed, isWeekend }) => ({
-          container: {
-            backgroundColor: isPressed ? accent : 'transparent',
-            borderRadius: 8,
-          },
-          content: {
-            color: isWeekend
-              ? isDarkMode
-                ? '#94a3b8'
-                : '#64748b'
-              : isDarkMode
-              ? '#f8fafc'
-              : '#0f172a',
-          },
-        }),
-        today: ({ isPressed }) => ({
-          container: {
-            borderColor: accent,
-            borderWidth: 1,
-            borderRadius: isPressed ? 8 : 20,
-            backgroundColor: isPressed ? accent : 'transparent',
-          },
-          content: {
-            color: isPressed ? '#ffffff' : accent,
-          },
-        }),
-        active: ({ isStartOfRange, isEndOfRange }) => ({
-          container: {
-            backgroundColor: accent,
-            borderTopLeftRadius: isStartOfRange ? 8 : 0,
-            borderBottomLeftRadius: isStartOfRange ? 8 : 0,
-            borderTopRightRadius: isEndOfRange ? 8 : 0,
-            borderBottomRightRadius: isEndOfRange ? 8 : 0,
-          },
-          content: {
-            color: '#ffffff',
-          },
-        }),
-      },
-    };
-  }, [isDarkMode]);
-
-  const shiftMonth = useCallback((delta: number) => {
-    const base = fromDateId(calendarMonthId);
-    const shifted = new Date(base.getFullYear(), base.getMonth() + delta, 1);
-    setCalendarMonthId(toDateId(shifted));
-  }, [calendarMonthId]);
-
-  const jumpToToday = useCallback(() => {
-    const todayId = toDateId(new Date());
-    setSelectedDateId(todayId);
-    setCalendarMonthId(todayId);
-  }, []);
+  const selectedDateLabel = useMemo(
+    () => toReadableDate(fromDateId(selectedDate)),
+    [selectedDate]
+  );
 
   const handleAddTask = useCallback(() => {
     const title = taskText.trim();
     if (!title) return;
 
     taskCompleteHaptic();
-    addTaskForDay(title, selectedDayKey);
-    if (selectedDayKey === todayKey()) {
-      refresh();
-    }
+    addTask(title, selectedDate);
     setTaskText('');
-    loadTasksForSelectedDate();
-  }, [addTaskForDay, loadTasksForSelectedDate, refresh, selectedDayKey, taskText, todayKey]);
+
+    if (selectedDate === toDateId(new Date())) {
+      onWriteForToday();
+    }
+  }, [addTask, onWriteForToday, selectedDate, taskText]);
 
   const handleToggleTask = useCallback((task: Task) => {
     const next = !task.completed;
@@ -175,21 +525,113 @@ export default function CalendarScreen() {
     } else {
       selectionHaptic();
     }
-    setTaskCompleted(task.id, next, null);
-    if (selectedDayKey === todayKey()) {
-      refresh();
+
+    toggleTask(task, selectedDate);
+    if (selectedDate === toDateId(new Date())) {
+      onWriteForToday();
     }
-    loadTasksForSelectedDate();
-  }, [loadTasksForSelectedDate, refresh, selectedDayKey, todayKey]);
+  }, [onWriteForToday, selectedDate, toggleTask]);
 
   const handleDeleteTask = useCallback((id: number) => {
     errorHaptic();
-    removeTask(id);
-    if (selectedDayKey === todayKey()) {
-      refresh();
+    deleteTask(id, selectedDate);
+    if (selectedDate === toDateId(new Date())) {
+      onWriteForToday();
     }
-    loadTasksForSelectedDate();
-  }, [loadTasksForSelectedDate, refresh, selectedDayKey, todayKey]);
+  }, [deleteTask, onWriteForToday, selectedDate]);
+
+  return (
+    <View style={styles.bottomHalf}>
+      <View style={styles.selectedDateRow}>
+        <Text style={[styles.selectedDateText, { color: isDarkMode ? '#d1d5db' : '#334155' }]}>
+          {selectedDateLabel}
+        </Text>
+      </View>
+
+      <FlashList
+        data={orderedTasks}
+        keyExtractor={(item) => `calendar-task-${item.id}`}
+        contentContainerStyle={styles.taskList}
+        ListEmptyComponent={
+          <Text style={[styles.emptyText, { color: isDarkMode ? '#7e8a9c' : '#94a3b8' }]}> 
+            No tasks for this date yet.
+          </Text>
+        }
+        renderItem={({ item }) => (
+          <Animated.View
+            entering={FadeInDown.duration(120)}
+            layout={LinearTransition.duration(120)}
+            style={[styles.taskRow, { borderBottomColor: isDarkMode ? '#2c3d51' : '#e2e8f0' }]}
+          >
+            <Pressable onPress={() => handleToggleTask(item)} hitSlop={10} style={styles.checkboxWrap}>
+              <View
+                style={[
+                  styles.checkbox,
+                  item.completed
+                    ? { backgroundColor: '#65a25cff', borderColor: '#65a25cff' }
+                    : { borderColor: isDarkMode ? '#6b7280' : '#cbd5e1' },
+                ]}
+              >
+                {item.completed ? <Feather name="check" size={13} color="#ffffff" /> : null}
+              </View>
+            </Pressable>
+
+            <Text
+              style={[
+                styles.taskTitle,
+                {
+                  color: item.completed ? '#94a3b8' : isDarkMode ? '#f9fafb' : '#111827',
+                  textDecorationLine: item.completed ? 'line-through' : 'none',
+                },
+              ]}
+              numberOfLines={2}
+            >
+              {item.title}
+            </Text>
+
+            <Pressable onPress={() => handleDeleteTask(item.id)} hitSlop={10}>
+              <Feather name="x" size={16} color={isDarkMode ? '#94a3b8' : '#64748b'} />
+            </Pressable>
+          </Animated.View>
+        )}
+      />
+
+      <View style={[styles.inputRow, { borderColor: isDarkMode ? '#243447' : '#e2e8f0' }]}> 
+        <TextInput
+          value={taskText}
+          onChangeText={setTaskText}
+          placeholder="Add a task for this date"
+          placeholderTextColor={isDarkMode ? '#6b7280' : '#94a3b8'}
+          style={[styles.input, { color: isDarkMode ? '#f9fafb' : '#111827' }]}
+          returnKeyType="done"
+          onSubmitEditing={handleAddTask}
+        />
+        <TouchableOpacity onPress={handleAddTask} activeOpacity={0.8} style={styles.addBtn}>
+          <Feather name="plus" size={16} color="#ffffff" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+});
+
+export default function CalendarScreen() {
+  const insets = useSafeAreaInsets();
+  const isDarkMode = useKriya((s) => s.isDarkMode);
+  const refreshTodayTasks = useKriya((s) => s.refresh);
+  const loadTasks = useCalendarTaskStore((s) => s.loadTasks);
+  const loaded = useCalendarTaskStore((s) => s.loaded);
+  const setSelectedDate = useCalendarTaskStore((s) => s.setSelectedDate);
+
+  useEffect(() => {
+    setSelectedDate(toDateId(new Date()));
+    loadTasks();
+  }, [loadTasks, setSelectedDate]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadTasks();
+    }, [loadTasks])
+  );
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top']}>
@@ -201,102 +643,12 @@ export default function CalendarScreen() {
       <TopBar title="Calendar Planner" variant="back" isDarkMode={isDarkMode} />
 
       <View style={[styles.container, { paddingBottom: insets.bottom + 12 }]}> 
-        <View style={styles.monthControls}>
-          <Pressable onPress={() => shiftMonth(-1)} hitSlop={12} style={styles.monthControlBtn}>
-            <Feather name="chevron-left" size={18} color={isDarkMode ? '#f9fafb' : '#0f172a'} />
-          </Pressable>
-          <Text style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}>
-            {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-          </Text>
-          <Pressable onPress={() => shiftMonth(1)} hitSlop={12} style={styles.monthControlBtn}>
-            <Feather name="chevron-right" size={18} color={isDarkMode ? '#f9fafb' : '#0f172a'} />
-          </Pressable>
-        </View>
-
-        <View style={[styles.calendarCard, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}> 
-          <Calendar
-            calendarDayHeight={36}
-            calendarFirstDayOfWeek="sunday"
-            calendarMonthId={calendarMonthId}
-            calendarRowHorizontalSpacing={10}
-            calendarRowVerticalSpacing={12}
-            calendarActiveDateRanges={[{ startId: selectedDateId, endId: selectedDateId }]}
-            onCalendarDayPress={(dateId) => {
-              buttonPressHaptic();
-              setSelectedDateId(dateId);
-              setCalendarMonthId(dateId);
-            }}
-            theme={theme}
-          />
-        </View>
-
-        <View style={styles.selectedDateRow}>
-          <Text style={[styles.selectedDateText, { color: isDarkMode ? '#d1d5db' : '#334155' }]}>
-            {toReadableDate(selectedDate)}
-          </Text>
-          <TouchableOpacity onPress={jumpToToday} activeOpacity={0.8} style={styles.todayChip}>
-            <Text style={[styles.todayChipText, { color: isDarkMode ? '#bfdbfe' : '#1e40af' }]}>Today</Text>
-          </TouchableOpacity>
-        </View>
-
-        <FlatList
-          data={orderedTasks}
-          keyExtractor={(item) => `calendar-task-${item.id}`}
-          contentContainerStyle={styles.taskList}
-          ListEmptyComponent={
-            <Text style={[styles.emptyText, { color: isDarkMode ? '#7e8a9c' : '#94a3b8' }]}>
-              No tasks for this date yet.
-            </Text>
-          }
-          renderItem={({ item }) => (
-            <View style={[styles.taskRow, { borderBottomColor: isDarkMode ? '#2c3d51' : '#e2e8f0' }]}> 
-              <Pressable onPress={() => handleToggleTask(item)} hitSlop={10} style={styles.checkboxWrap}>
-                <View
-                  style={[
-                    styles.checkbox,
-                    item.completed
-                      ? { backgroundColor: '#65a25cff', borderColor: '#65a25cff' }
-                      : { borderColor: isDarkMode ? '#6b7280' : '#cbd5e1' },
-                  ]}
-                >
-                  {item.completed ? <Feather name="check" size={13} color="#ffffff" /> : null}
-                </View>
-              </Pressable>
-
-              <Text
-                style={[
-                  styles.taskTitle,
-                  {
-                    color: item.completed ? '#94a3b8' : isDarkMode ? '#f9fafb' : '#111827',
-                    textDecorationLine: item.completed ? 'line-through' : 'none',
-                  },
-                ]}
-                numberOfLines={2}
-              >
-                {item.title}
-              </Text>
-
-              <Pressable onPress={() => handleDeleteTask(item.id)} hitSlop={10}>
-                <Feather name="x" size={16} color={isDarkMode ? '#94a3b8' : '#64748b'} />
-              </Pressable>
-            </View>
-          )}
-        />
-
-        <View style={[styles.inputRow, { borderColor: isDarkMode ? '#243447' : '#e2e8f0' }]}> 
-          <TextInput
-            value={taskText}
-            onChangeText={setTaskText}
-            placeholder="Add a task for this date"
-            placeholderTextColor={isDarkMode ? '#6b7280' : '#94a3b8'}
-            style={[styles.input, { color: isDarkMode ? '#f9fafb' : '#111827' }]}
-            returnKeyType="done"
-            onSubmitEditing={handleAddTask}
-          />
-          <TouchableOpacity onPress={handleAddTask} activeOpacity={0.8} style={styles.addBtn}>
-            <Feather name="plus" size={16} color="#ffffff" />
-          </TouchableOpacity>
-        </View>
+        <CalendarSectionMemo isDarkMode={isDarkMode} />
+        {loaded ? (
+          <TasksSection isDarkMode={isDarkMode} onWriteForToday={refreshTodayTasks} />
+        ) : (
+          <View style={styles.bottomHalf} />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -308,12 +660,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     gap: 10,
   },
+  topHalf: {
+    flex: 1,
+    borderRadius: 18,
+    padding: 12,
+  },
+  bottomHalf: {
+    flex: 1,
+  },
   monthControls: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 4,
-    marginTop: 6,
+    marginTop: 2,
   },
   monthControlBtn: {
     width: 34,
@@ -328,19 +688,23 @@ const styles = StyleSheet.create({
   },
   calendarCard: {
     borderRadius: 18,
-    padding: 14,
+    padding: 12,
+    marginTop: 6,
   },
   selectedDateRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 2,
+    marginBottom: 2,
   },
   selectedDateText: {
     fontSize: 14,
     fontWeight: '600',
   },
   todayChip: {
+    alignSelf: 'flex-end',
+    marginTop: 8,
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 999,
@@ -351,8 +715,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   taskList: {
-    flexGrow: 1,
     paddingTop: 2,
+    paddingBottom: 8,
   },
   emptyText: {
     paddingVertical: 20,

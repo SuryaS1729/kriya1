@@ -594,10 +594,10 @@ export default function CalendarScreen() {
   const loadTasks = useCalendarTaskStore((s) => s.loadTasks);
   const loaded = useCalendarTaskStore((s) => s.loaded);
   const setSelectedDate = useCalendarTaskStore((s) => s.setSelectedDate);
-  const [isScreenLoading, setIsScreenLoading] = useState(true);
+  const [isScreenLoading, setIsScreenLoading] = useState(false);
 
   useEffect(() => {
-    setIsScreenLoading(true);
+    setIsScreenLoading(false);
     setSelectedDate(toDateId(new Date()));
 
     const id = requestAnimationFrame(() => {
@@ -687,7 +687,7 @@ const styles = StyleSheet.create({
   },
   monthLabel: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
     textAlign: 'right',
   },
   monthLabelSlot: {
@@ -709,7 +709,7 @@ const styles = StyleSheet.create({
   calendarCard: {
     borderRadius: 18,
     padding: 12,
-    marginTop: 6,
+    marginTop: 26,
     
   },
   calendarDatesScroll: {
@@ -762,7 +762,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   taskList: {
-    paddingTop: 2,
+    padding: 10,
     paddingBottom: 8,
   },
   taskListEmpty: {
@@ -776,7 +776,7 @@ const styles = StyleSheet.create({
   taskRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 15,
     borderBottomWidth: 0.5,
     gap: 8,
   },
@@ -793,7 +793,7 @@ const styles = StyleSheet.create({
   },
   taskTitle: {
     flex: 1,
-    fontSize: 17,
+    fontSize: 18,
     fontFamily: 'Source Serif Pro',
     fontWeight: '300',
   },

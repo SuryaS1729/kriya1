@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View, Pressable, ScrollView, Alert, Dimensions, Modal, Platform, Linking, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, Pressable, ScrollView, Alert, Modal, Platform, Linking, TouchableOpacity, Image } from 'react-native';
 import { useKriya } from '../lib/store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -14,412 +14,10 @@ import { Toast, ToastTitle, ToastDescription, useToast } from '@/components/ui/t
 import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic } from '../lib/haptics';
 
 
-const { width } = Dimensions.get('window');
-
-
-
 function getDateKey(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
-
-// Updated DayDetailModal to always show content
-function DayDetailModal({ date, onClose }: { date: Date | null; onClose: () => void }) {
-  const getForDay = useKriya(s => s.getTasksForDay);
-  const getFocusSessionsForDay = useKriya(s => s.getFocusSessionsForDay);
-  const isDarkMode = useKriya(s => s.isDarkMode);
-  const addTask = useKriya(s => s.addTask);
-  
-  const [importedTaskIds, setImportedTaskIds] = useState<Set<number>>(new Set());
-  
-  if (!date) return null;
-  
-  const dayKey = getDateKey(date);
-  const tasks = getForDay(dayKey);
-  const completed = tasks.filter(t => t.completed);
-  const pending = tasks.filter(t => !t.completed);
-  const focusSessions = getFocusSessionsForDay ? getFocusSessionsForDay(dayKey) : 0;
-  const successRate = tasks.length > 0 ? Math.round((completed.length / tasks.length) * 100) : 0;
-  
-  // Check if it's today or future date
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const selectedDay = new Date(date);
-  selectedDay.setHours(0, 0, 0, 0);
-  const isToday = selectedDay.getTime() === today.getTime();
-  const isFuture = selectedDay.getTime() > today.getTime();
-  const isPast = selectedDay.getTime() < today.getTime();
-  
-  // Import a single task to today
-  const handleImportTask = (task: { id: number; title: string }) => {
-    if (importedTaskIds.has(task.id)) return;
-    
-    taskCompleteHaptic();
-    addTask(task.title);
-    setImportedTaskIds(prev => new Set(prev).add(task.id));
-  };
-  
-  // Import all pending tasks to today
-  const handleImportAllPending = () => {
-    if (pending.length === 0) return;
-    
-    taskCompleteHaptic();
-    pending.forEach(task => {
-      if (!importedTaskIds.has(task.id)) {
-        addTask(task.title);
-      }
-    });
-    setImportedTaskIds(new Set(pending.map(t => t.id)));
-  };
-  
-  const allPendingImported = pending.length > 0 && pending.every(t => importedTaskIds.has(t.id));
-  
-  return (
-    <Modal
-      visible={!!date}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalOverlay}>
-        <Pressable style={styles.modalBackdrop} onPress={() => {
-          selectionHaptic(); // Add haptic for modal close
-          onClose();
-        }} />
-        <View style={[styles.modalContent, !isDarkMode && styles.lightModalContent]}>
-          <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, !isDarkMode && styles.lightText]}>
-              {date.toLocaleDateString(undefined, { 
-                weekday: 'long', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
-              {isToday && ' (Today)'}
-              {isFuture && ' (Future)'}
-            </Text>
-           <Pressable onPress={() => {
-              selectionHaptic(); // Add haptic for close button
-              onClose();
-            }}>
-              <Feather name="x" size={24} color={isDarkMode ? "#fff" : "#000"} />
-            </Pressable>
-          </View>
-          
-          <View style={[styles.modalStats, !isDarkMode && styles.lightModalStats]}>
-            <View style={styles.modalStat}>
-              <Text style={styles.modalStatValue}>{successRate}%</Text>
-              <Text style={[styles.modalStatLabel, !isDarkMode && styles.lightSubText]}>Success Rate</Text>
-            </View>
-            <View style={styles.modalStat}>
-              <Text style={styles.modalStatValue}>{completed.length}</Text>
-              <Text style={[styles.modalStatLabel, !isDarkMode && styles.lightSubText]}>Completed</Text>
-            </View>
-            <View style={styles.modalStat}>
-              <Text style={styles.modalStatValue}>{focusSessions}</Text>
-              <Text style={[styles.modalStatLabel, !isDarkMode && styles.lightSubText]}>Focus Sessions</Text>
-            </View>
-          </View>
-          
-          {tasks.length > 0 ? (
-            <ScrollView style={styles.tasksList}>
-              {completed.length > 0 && (
-                <>
-                  <Text style={[styles.tasksSection, !isDarkMode && styles.lightText]}>Completed Tasks</Text>
-                  {completed.map((task, index) => (
-                    <View key={`completed-${index}`} style={[styles.taskItem, styles.completedTask]}>
-                      <Feather name="check-circle" size={16} color="#8ba5e1" />
-                      <Text style={[styles.taskText, !isDarkMode && styles.lightText]}>{task.title}</Text>
-                    </View>
-                  ))}
-                </>
-              )}
-              
-              {pending.length > 0 && (
-                <>
-                  <View style={styles.pendingSectionHeader}>
-                    <Text style={[styles.tasksSection, !isDarkMode && styles.lightText]}>Pending Tasks</Text>
-                    {/* Import All button - only show for past dates */}
-                    {isPast && !allPendingImported && (
-                      <Pressable 
-                        style={[styles.importAllButton, !isDarkMode && styles.lightImportAllButton]}
-                        onPress={handleImportAllPending}
-                      >
-                        <Feather name="download" size={14} color={isDarkMode ? "#10b981" : "#059669"} />
-                        <Text style={[styles.importAllText, !isDarkMode && styles.lightImportAllText]}>
-                          Import All
-                        </Text>
-                      </Pressable>
-                    )}
-                    {allPendingImported && (
-                      <Text style={styles.allImportedText}>✓ All Imported</Text>
-                    )}
-                  </View>
-                  {pending.map((task, index) => (
-                    <View key={`pending-${index}`} style={[styles.taskItem, styles.pendingTask]}>
-                      <Feather name="circle" size={16} color="#888" />
-                      <Text style={[styles.taskText, styles.pendingTaskText, { flex: 1 }]}>{task.title}</Text>
-                      {/* Import button for individual tasks - only show for past dates */}
-                      {isPast && (
-                        importedTaskIds.has(task.id) ? (
-                          <View style={styles.importedBadge}>
-                            <Feather name="check" size={12} color="#10b981" />
-                            <Text style={styles.importedText}>Added</Text>
-                          </View>
-                        ) : (
-                          <Pressable 
-                            style={[styles.importTaskButton, !isDarkMode && styles.lightImportTaskButton]}
-                            onPress={() => handleImportTask(task)}
-                            hitSlop={8}
-                          >
-                            <Feather name="plus" size={14} color={isDarkMode ? "#fff" : "#000"} />
-                          </Pressable>
-                        )
-                      )}
-                    </View>
-                  ))}
-                </>
-              )}
-            </ScrollView>
-          ) : (
-            <View style={styles.noTasksContainer}>
-              <Feather 
-                name={isFuture ? "calendar" : "coffee"} 
-                size={48} 
-                color="#979797ff" 
-              />
-              <Text style={[styles.noTasksText, !isDarkMode && styles.lightSubText]}>
-                {isFuture 
-                  ? "No tasks planned for this day" 
-                  : isToday 
-                    ? "No tasks for today yet - time to add some!"
-                    : "No tasks were recorded for this day"
-                }
-              </Text>
-              {(isToday || isFuture) && (
-                <Pressable 
-                  style={[styles.addTaskButton]}
-                  onPress={() => {
-                    buttonPressHaptic(); // Add haptic for add task button
-                    onClose();
-                    router.push('/add');
-                  }}
-                >
-                  <Text style={styles.addTaskButtonText}>Add Tasks</Text>
-                </Pressable>
-              )}
-            </View>
-          )}
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
-// Main Calendar Component
-function MainCalendar() {
-  const getForDay = useKriya(s => s.getTasksForDay);
-  const getFocusSessionsForDay = useKriya(s => s.getFocusSessionsForDay);
-  const isDarkMode = useKriya(s => s.isDarkMode);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  
-  const calendarData = useMemo(() => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    
-    const firstDay = new Date(year, month, 1);
-    const calendarStart = new Date(firstDay);
-    calendarStart.setDate(firstDay.getDate() - firstDay.getDay());
-    
-    const days = [];
-    const totalDays = 42;
-    
-    for (let i = 0; i < totalDays; i++) {
-      const date = new Date(calendarStart);
-      date.setDate(calendarStart.getDate() + i);
-      
-      const dayKey = getDateKey(date);
-      const tasks = getForDay(dayKey);
-      const completed = tasks.filter(t => t.completed).length;
-      const total = tasks.length;
-      const focusSessions = getFocusSessionsForDay ? getFocusSessionsForDay(dayKey) : 0;
-      
-      days.push({
-        date: new Date(date),
-        dayKey,
-        completed,
-        total,
-        focusSessions,
-        isCurrentMonth: date.getMonth() === month,
-        isToday: new Date().toDateString() === date.toDateString(),
-        hasActivity: total > 0 || focusSessions > 0,
-        completionRate: total > 0 ? completed / total : 0
-      });
-    }
-    
-    return {
-      days,
-      monthName: firstDay.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
-    };
-  }, [currentDate, getForDay, getFocusSessionsForDay]);
-
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      buttonPressHaptic();
-    setCurrentDate(prev => {
-      const newDate = new Date(prev);
-      newDate.setMonth(prev.getMonth() + (direction === 'next' ? 1 : -1));
-      return newDate;
-    });
-  };
-
-  const getActivityStyle = (day: any) => {
-    if (!day.isCurrentMonth) {
-      return [styles.inactiveDay, !isDarkMode && styles.lightInactiveDay];
-    }
-    
-    if (day.isToday) {
-      return [styles.todayDay, { backgroundColor: '#7c9fb0' }]; // Updated today color
-    }
-    
-    if (!day.hasActivity) {
-      return [styles.noActivityDay, !isDarkMode && styles.lightNoActivityDay];
-    }
-    
-    // Calculate activity intensity
-    const taskScore = day.total > 0 ? day.completionRate : 0;
-    const focusScore = Math.min(day.focusSessions / 3, 1);
-    const combinedScore = (taskScore + focusScore) / 2;
-    
-    if (combinedScore >= 0.8) {
-      return styles.completedDay; // #8ba5e1
-    } else if (combinedScore >= 0.6) {
-      return styles.highActivityDay; // #6b8db5
-    } else if (combinedScore >= 0.3) {
-      return styles.partialDay; // #5a7a9a
-    } else {
-      return styles.lowActivityDay; // #4a6b8a
-    }
-  };
-
-const handleDayPress = (day: any) => {
-  if (day.isCurrentMonth) { // Remove the hasActivity condition
-    setSelectedDate(day.date);
-      selectionHaptic(); // Changed from direct Haptics call
-  }
-};
-
-  // Create weeks array for better layout control
-  const weeks = [];
-  for (let i = 0; i < calendarData.days.length; i += 7) {
-    weeks.push(calendarData.days.slice(i, i + 7));
-  }
-
-  return (
-    <>
-      <View style={styles.calendarSection}>
-        <View style={styles.calendarHeader}>
-          <Text style={[styles.calendarTitle, !isDarkMode && styles.lightText]}>{calendarData.monthName}</Text>
-          <View style={styles.monthNavigation}>
-            <Pressable 
-            onPress={() => navigateMonth('prev')} 
-            style={styles.navButton} 
-            android_ripple={{ color: '#cccccc18', radius: 22 }} >
-              <Feather name="chevron-left" size={20} color="#888" />
-            </Pressable>
-            <Pressable onPress={() => navigateMonth('next')} style={styles.navButton} android_ripple={{ color: '#cccccc18', radius: 22 }}>
-              <Feather name="chevron-right" size={20} color="#888" />
-            </Pressable>
-          </View>
-        </View>
-
-        {/* Week Labels */}
-        <View style={styles.weekLabels}>
-          {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-            <View key={day} style={styles.weekLabelContainer}>
-              <Text style={[styles.weekLabel, !isDarkMode && styles.lightSubText]}>{day}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Calendar Grid - Now using weeks */}
-        <View style={[styles.calendarContainer, !isDarkMode && styles.lightCalendarContainer]}>
-          {weeks.map((week, weekIndex) => (
-            <View key={weekIndex} style={styles.weekRow}>
-              {week.map((day, dayIndex) => (
-                <Pressable 
-                  key={dayIndex} 
-                  style={[
-                    styles.dayCell, 
-                    getActivityStyle(day)
-                  ]}
-                  onPress={() => handleDayPress(day)}
-                  // disabled={!day.hasActivity || !day.isCurrentMonth}
-                    disabled={!day.isCurrentMonth} // Only disable for non-current month days
-android_ripple={{ color: '#cccccc18', radius: 25 }}
-                >
-                  <Text style={[
-                    styles.dayText,
-                    !day.isCurrentMonth && styles.inactiveDayText,
-                    day.isToday && styles.todayText,
-                    !isDarkMode && day.isCurrentMonth && !day.isToday && styles.lightText
-                  ]}>
-                    {day.date.getDate()}
-                  </Text>
-                  {/* {day.hasActivity && day.isCurrentMonth && (
-                    <View style={styles.activityIndicator}>
-                      <Text style={styles.activityCount}>
-                        {day.completed > 0 && `${day.completed}t`}
-                        {day.focusSessions > 0 && ` ${day.focusSessions}f`}
-                      </Text>
-                    </View>
-                  )} */}
-                </Pressable>
-              ))}
-            </View>
-          ))}
-        </View>
-        
-        {/* Legend */}
-        <View style={styles.legend}>
-          <Text style={[styles.legendTitle, !isDarkMode && styles.lightSubText]}>Activity Level</Text>
-          <View style={styles.legendItems}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#444' }]} />
-              <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>None</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#4a6b8a' }]} />
-              <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>Low</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#5a7a9a' }]} />
-              <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>Medium</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#6b8db5' }]} />
-              <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>High</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#8ba5e1' }]} />
-              <Text style={[styles.legendText, !isDarkMode && styles.lightSubText]}>Perfect</Text>
-            </View>
-          </View>
-          <Text style={[styles.legendNote, !isDarkMode && styles.lightSubText]}>
-            Activity combines task completion and focus sessions. t = tasks, f = focus sessions
-          </Text>
-        </View>
-      </View>
-      
-      {selectedDate && (
-        <DayDetailModal 
-          date={selectedDate} 
-          onClose={() => setSelectedDate(null)} 
-        />
-      )}
-    </>
-  );
-}
 
 // Weekly Summary Component
 function WeeklySummary() {
@@ -1234,28 +832,6 @@ function Footer() {
 export default function History() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const toggleDarkMode = useKriya(s => s.toggleDarkMode);
-  
-  // Defer heavy component rendering until after navigation animation
-  const [isReady, setIsReady] = useState(false);
-  
-  useEffect(() => {
-    // Use requestIdleCallback when available, fallback to setTimeout
-    const scheduleCallback = 
-      typeof requestIdleCallback !== 'undefined' 
-        ? requestIdleCallback 
-        : (cb: () => void) => setTimeout(cb, 100);
-    
-    const cancelCallback = 
-      typeof cancelIdleCallback !== 'undefined'
-        ? cancelIdleCallback
-        : clearTimeout;
-    
-    const handle = scheduleCallback(() => {
-      setIsReady(true);
-    });
-    
-    return () => cancelCallback(handle as any);
-  }, []);
 
   return (
     <View style={[styles.container, !isDarkMode && styles.lightContainer]}>
@@ -1299,36 +875,26 @@ export default function History() {
           </TouchableOpacity>
         </View>
 
-        {/* Deferred Content - Only render after navigation animation */}
-        {isReady ? (
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Gita Progress */}
-            <GitaProgress />
-   
-            {/* Main Calendar */}
-            <MainCalendar />
-            
-            {/* Weekly Summary */}
-            <WeeklySummary />
-             
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Gita Progress */}
+          <GitaProgress />
+ 
+          {/* Weekly Summary */}
+          <WeeklySummary />
+           
 
-               {/* NEW: Scriptures Progress List */}
-          <ScripturesProgress />
-       
-            {/* Quick Actions */}
-            <QuickActions /> 
-            
-             {/* ADD: Notification Settings - Add this here */}
-            <NotificationSettings />
+             {/* NEW: Scriptures Progress List */}
+        <ScripturesProgress />
+     
+          {/* Quick Actions */}
+          <QuickActions /> 
+          
+           {/* ADD: Notification Settings - Add this here */}
+          <NotificationSettings />
 
-                    <Footer />
+                  <Footer />
 
-          </ScrollView>
-        ) : (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={isDarkMode ? "#8ba5e1" : "#4a90e2"} />
-          </View>
-        )}
+        </ScrollView>
       </SafeAreaView>
     </View>
   );
@@ -1348,11 +914,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1370,26 +931,6 @@ const styles = StyleSheet.create({
   },
   lightSubText: {
     color: '#666',
-  },
-  
-  // Calendar Section
-  calendarSection: {
-    marginBottom: 30,
-  },
-  calendarHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  calendarTitle: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  monthNavigation: {
-    flexDirection: 'row',
-    gap: 12,
   },
     toggle: {
     width: 44,
@@ -1430,20 +971,6 @@ const styles = StyleSheet.create({
   notificationSettings: {
     gap: 8,
   },
-    addTaskButton: {
-    marginTop: 26,
-    backgroundColor: '#111724ff',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    
-  },
-  addTaskButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1547,136 +1074,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  navButton: {
-    padding: 8,
-  },
-  weekLabels: {
-    flexDirection: 'row',
-    marginBottom: 12,
-    paddingHorizontal: 16,
-  },
-  weekLabelContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  weekLabel: {
-    color: '#888',
-    fontSize: 12,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
-  calendarContainer: {
-    backgroundColor: 'rgba(52, 76, 103, 0.4)',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(93, 123, 158, 0.3)',
-    marginBottom: 16,
-    gap: 4,
-  },
-  lightCalendarContainer: {
-    backgroundColor: 'rgba(248, 248, 248, 0.4)',
-    borderColor: 'rgba(224, 224, 224, 0.6)',
-  },
-  weekRow: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  dayCell: {
-    flex: 1,
-    aspectRatio: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 15,
-    position: 'relative',
-  },
-  dayText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  activityIndicator: {
-    position: 'absolute',
-    bottom: 2,
-    right: 2,
-  },
-  activityCount: {
-    color: '#fff',
-    fontSize: 7,
-    fontWeight: '600',
-  },
-  inactiveDay: {
-    backgroundColor: 'transparent',
-  },
-  lightInactiveDay: {
-    backgroundColor: 'transparent',
-  },
-  inactiveDayText: {
-    color: '#444',
-  },
-  todayDay: {
-    backgroundColor: '#7c9fb0',
-  },
-  todayText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
-  noActivityDay: {
-    backgroundColor: 'transparent',
-  },
-  lightNoActivityDay: {
-    backgroundColor: 'transparent',
-  },
-  completedDay: {
-    backgroundColor: '#8ba5e1',
-  },
-  highActivityDay: {
-    backgroundColor: '#6b8db5',
-  },
-  partialDay: {
-    backgroundColor: '#5a7a9a',
-  },
-  lowActivityDay: {
-    backgroundColor: '#4a6b8a',
-  },
-  
-  // Legend
-  legend: {
-    marginTop: 8,
-  },
-  legendTitle: {
-    color: '#888',
-    fontSize: 12,
-    marginBottom: 8,
-    fontWeight: '500',
-  },
-  legendItems: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 8,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  legendText: {
-    color: '#666',
-    fontSize: 10,
-  },
-  legendNote: {
-    color: '#666',
-    fontSize: 10,
-    fontStyle: 'italic',
-  },
-  
   // Weekly Summary
   summarySection: {
     marginBottom: 30,
@@ -1747,13 +1144,6 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   
-  // Modal Styles
-   modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent background
-  },
   modalBackdrop: {
     position: 'absolute',
     top: 0,
@@ -1761,107 +1151,6 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  modalContent: {
-    backgroundColor: 'rgba(31, 54, 81, 1)',
-    borderRadius: 16,
-    padding: 20,
-    width: width - 40,
-    minHeight: 400,
-    maxHeight: '80%',
-    borderWidth: 1,
-    borderColor: 'rgba(93, 123, 158, 0.6)',
-    elevation: 10, // Android shadow
-    shadowColor: '#000', // iOS shadow
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-  },
-  lightModalContent: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderColor: 'rgba(224, 224, 224, 0.7)',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  modalTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  modalStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
-    backgroundColor: 'rgba(36, 60, 85, 0.8)',
-    borderRadius: 12,
-    padding: 16,
-  },
-  lightModalStats: {
-    backgroundColor: '#f0f0f0',
-  },
-  modalStat: {
-    alignItems: 'center',
-  },
-  modalStatValue: {
-    color: '#8ba5e1',
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  modalStatLabel: {
-    color: '#888',
-    fontSize: 11,
-    marginTop: 4,
-  },
-  tasksList: {
-    maxHeight: 200,
-  },
-  tasksSection: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  taskItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginBottom: 4,
-  },
-  completedTask: {
-    backgroundColor: 'rgba(139, 165, 225, 0.15)',
-  },
-  pendingTask: {
-    backgroundColor: 'rgba(136, 136, 136, 0.1)',
-  },
-  taskText: {
-    color: '#fff',
-    fontSize: 14,
-    flex: 1,
-  },
-  pendingTaskText: {
-    color: '#888',
-  },
-  noTasksContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
-  },
-  noTasksText: {
-    color: '#dfdfdfff',
-    fontSize: 12,
-    marginTop: 12,
-  },
-  
   // Gita Progress Styles
   gitaProgressCard: {
     marginBottom: 20, // Reduced margin since scriptures section follows
@@ -2376,57 +1665,5 @@ lockOverlay: {
     color: '#888',
     fontSize: 12,
     fontStyle: 'italic',
-  },
-  // Import tasks styles
-  pendingSectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  importAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#10b98120',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-    gap: 4,
-  },
-  lightImportAllButton: {
-    backgroundColor: '#05966920',
-  },
-  importAllText: {
-    color: '#10b981',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  lightImportAllText: {
-    color: '#059669',
-  },
-  allImportedText: {
-    color: '#10b981',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  importTaskButton: {
-    backgroundColor: '#374151',
-    padding: 6,
-    borderRadius: 8,
-    marginLeft: 8,
-  },
-  lightImportTaskButton: {
-    backgroundColor: '#e5e7eb',
-  },
-  importedBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginLeft: 8,
-  },
-  importedText: {
-    color: '#10b981',
-    fontSize: 11,
-    fontWeight: '500',
   },
 });

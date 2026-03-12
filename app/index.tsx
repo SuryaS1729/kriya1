@@ -573,18 +573,6 @@ console.log('🔍 Guided Tour Debug:', {
     </View>
   </TouchableOpacity>
 
-  <TouchableOpacity onPress={() => {
-    buttonPressHaptic();
-    router.push('/listen');
-  }}
-  activeOpacity={0.7}>
-    <View style={[
-      styles.descButton,
-      { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
-    ]}>
-      <Feather name="headphones" size={16} color={isDarkMode ? "#f9fafb" : "#000000ff"} />
-    </View>
-  </TouchableOpacity>
 </View>
 </View>
 

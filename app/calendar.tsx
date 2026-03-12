@@ -21,10 +21,10 @@ import {
   toDateId,
   useCalendar,
 } from '@marceloterreiro/flash-calendar';
+import { router } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { create } from 'zustand';
 
-import { TopBar } from '../components/TopBar';
 import { useKriya } from '../lib/store';
 import {
   getAllTasks,
@@ -301,46 +301,67 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
 
   return (
     <View style={[styles.topHalf, { backgroundColor: isDarkMode ? '#0f1e2d66' : '#ffffffaa' }]}> 
-      <View style={styles.monthControls}>
-        <Pressable onPress={() => shiftMonth(-1)} hitSlop={12} style={styles.monthControlBtn}>
-          <Feather name="chevron-left" size={18} color={isDarkMode ? '#f9fafb' : '#0f172a'} />
+      <View style={styles.calendarHeaderRow}>
+        <Pressable
+          onPress={() => {
+            buttonPressHaptic();
+            router.back();
+          }}
+          hitSlop={16}
+          style={[
+            styles.closeButton,
+            { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)' },
+          ]}
+        >
+          <Text style={[styles.closeIcon, { color: isDarkMode ? '#d1d5db' : '#18464a' }]}>✕</Text>
         </Pressable>
+
         <Text style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}>
           {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
         </Text>
-        <Pressable onPress={() => shiftMonth(1)} hitSlop={12} style={styles.monthControlBtn}>
-          <Feather name="chevron-right" size={18} color={isDarkMode ? '#f9fafb' : '#0f172a'} />
-        </Pressable>
       </View>
 
       <View style={[styles.calendarCard, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}> 
-        <Calendar.VStack alignItems="center" spacing={6}>
-          <Calendar.Row.Week
-            spacing={20}
-            theme={{
-              container: {
-                borderBottomWidth: 1,
-                borderBottomColor: isDarkMode ? '#334155' : '#e2e8f0',
-                paddingBottom: 4,
-                marginBottom: 4,
-              },
-            }}
-          >
-            {weekDaysList.map((weekDay, idx) => (
-              <Calendar.Item.WeekName
-                key={`week-day-${idx}`}
-                height={30}
-                theme={{ content: { color: isDarkMode ? '#9ca3af' : '#64748b' } }}
-              >
-                {weekDay}
-              </Calendar.Item.WeekName>
-            ))}
-          </Calendar.Row.Week>
+        <View style={styles.calendarGridFrame}>
+          <Calendar.VStack alignItems="center" spacing={6}>
+            <Calendar.Row.Week
+              spacing={20}
+              theme={{
+                container: {
+                  borderBottomWidth: 1,
+                  borderBottomColor: isDarkMode ? '#334155' : '#e2e8f0',
+                  paddingBottom: 4,
+                  marginBottom: 4,
+                },
+              }}
+            >
+              {weekDaysList.map((weekDay, idx) => (
+                <Calendar.Item.WeekName
+                  key={`week-day-${idx}`}
+                  height={30}
+                  theme={{ content: { color: isDarkMode ? '#9ca3af' : '#64748b' } }}
+                >
+                  {weekDay}
+                </Calendar.Item.WeekName>
+              ))}
+            </Calendar.Row.Week>
 
-          {weeksList.map((week, weekIndex) => (
-            <Calendar.Row.Week key={`week-${weekIndex}`}>
-              {week.map((dayProps) => {
-                if (dayProps.isDifferentMonth) {
+            {weeksList.map((week, weekIndex) => (
+              <Calendar.Row.Week key={`week-${weekIndex}`}>
+                {week.map((dayProps) => {
+                  if (dayProps.isDifferentMonth) {
+                    return (
+                      <Calendar.Item.Day.Container
+                        key={dayProps.id}
+                        dayHeight={36}
+                        daySpacing={20}
+                        isStartOfWeek={dayProps.isStartOfWeek}
+                      >
+                        <Calendar.Item.Empty height={36} />
+                      </Calendar.Item.Day.Container>
+                    );
+                  }
+
                   return (
                     <Calendar.Item.Day.Container
                       key={dayProps.id}
@@ -348,56 +369,57 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
                       daySpacing={20}
                       isStartOfWeek={dayProps.isStartOfWeek}
                     >
-                      <Calendar.Item.Empty height={36} />
+                      <Pressable
+                        disabled={dayProps.state === 'disabled'}
+                        onPress={() => {
+                          buttonPressHaptic();
+                          handleSelectDate(dayProps.id);
+                        }}
+                        style={() => ({
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flex: 1,
+                          height: 36,
+                          padding: 2,
+                        })}
+                      >
+                        {({ pressed }: { pressed: boolean }) => (
+                          <CalendarDayPill
+                            label={dayProps.displayLabel}
+                            isSelected={dayProps.id === selectedDateId}
+                            isToday={dayProps.id === todayDateId}
+                            isWeekend={dayProps.isWeekend}
+                            pressed={pressed}
+                            isDarkMode={isDarkMode}
+                            accent={accent}
+                            isDisabled={dayProps.state === 'disabled'}
+                          />
+                        )}
+                      </Pressable>
                     </Calendar.Item.Day.Container>
                   );
-                }
-
-                return (
-                  <Calendar.Item.Day.Container
-                    key={dayProps.id}
-                    dayHeight={36}
-                    daySpacing={20}
-                    isStartOfWeek={dayProps.isStartOfWeek}
-                  >
-                    <Pressable
-                      disabled={dayProps.state === 'disabled'}
-                      onPress={() => {
-                        buttonPressHaptic();
-                        handleSelectDate(dayProps.id);
-                      }}
-                      style={() => ({
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flex: 1,
-                        height: 36,
-                        padding: 2,
-                      })}
-                    >
-                      {({ pressed }: { pressed: boolean }) => (
-                        <CalendarDayPill
-                          label={dayProps.displayLabel}
-                          isSelected={dayProps.id === selectedDateId}
-                          isToday={dayProps.id === todayDateId}
-                          isWeekend={dayProps.isWeekend}
-                          pressed={pressed}
-                          isDarkMode={isDarkMode}
-                          accent={accent}
-                          isDisabled={dayProps.state === 'disabled'}
-                        />
-                      )}
-                    </Pressable>
-                  </Calendar.Item.Day.Container>
-                );
-              })}
-            </Calendar.Row.Week>
-          ))}
-        </Calendar.VStack>
+                })}
+              </Calendar.Row.Week>
+            ))}
+          </Calendar.VStack>
+        </View>
       </View>
 
-      <TouchableOpacity onPress={jumpToToday} activeOpacity={0.8} style={styles.todayChip}>
-        <Text style={[styles.todayChipText, { color: isDarkMode ? '#bfdbfe' : '#1e40af' }]}>Today</Text>
-      </TouchableOpacity>
+      <View style={styles.calendarActionsRow}>
+        <View style={[styles.monthShiftGroup, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}>
+          <Pressable onPress={() => shiftMonth(-1)} hitSlop={12} style={styles.monthShiftBtn}>
+            <Feather name="chevron-left" size={18} color={isDarkMode ? '#f9fafb' : '#0f172a'} />
+          </Pressable>
+          <View style={[styles.monthShiftDivider, { backgroundColor: isDarkMode ? '#334155' : '#e2e8f0' }]} />
+          <Pressable onPress={() => shiftMonth(1)} hitSlop={12} style={styles.monthShiftBtn}>
+            <Feather name="chevron-right" size={18} color={isDarkMode ? '#f9fafb' : '#0f172a'} />
+          </Pressable>
+        </View>
+
+        <TouchableOpacity onPress={jumpToToday} activeOpacity={0.8} style={styles.todayChip}>
+          <Text style={[styles.todayChipText, { color: isDarkMode ? '#bfdbfe' : '#1e40af' }]}>Today</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -568,8 +590,6 @@ export default function CalendarScreen() {
         style={StyleSheet.absoluteFill}
       />
 
-      <TopBar title="Calendar Planner" variant="back" isDarkMode={isDarkMode} />
-
       <View style={[styles.container, { paddingBottom: insets.bottom + 12 }]}> 
         <CalendarSectionMemo isDarkMode={isDarkMode} />
         {loaded ? (
@@ -596,19 +616,23 @@ const styles = StyleSheet.create({
   bottomHalf: {
     flex: 1,
   },
-  monthControls: {
+  calendarHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 4,
-    marginTop: 2,
+    marginTop: 4,
   },
-  monthControlBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+  closeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  closeIcon: {
+    fontSize: 20,
+    fontWeight: '500',
+    lineHeight: 22,
   },
   monthLabel: {
     fontSize: 18,
@@ -629,6 +653,32 @@ const styles = StyleSheet.create({
     padding: 12,
     marginTop: 6,
   },
+  calendarGridFrame: {
+    minHeight: 286,
+    justifyContent: 'flex-start',
+  },
+  calendarActionsRow: {
+    marginTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  monthShiftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  monthShiftBtn: {
+    width: 40,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  monthShiftDivider: {
+    width: 1,
+    height: 22,
+  },
   selectedDateRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -641,8 +691,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   todayChip: {
-    alignSelf: 'flex-end',
-    marginTop: 8,
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 999,

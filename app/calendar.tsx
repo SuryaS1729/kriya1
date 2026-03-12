@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -16,7 +15,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import Animated, {
   FadeIn,
   FadeOut,
-  LinearTransition,
 } from 'react-native-reanimated';
 import {
   Calendar,
@@ -310,7 +308,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
   }, [calendarMonthId, handleSelectDate]);
 
   return (
-    <View style={[styles.topHalf, { backgroundColor: isDarkMode ? '#0f1e2d66' : '#ffffffaa' }]}> 
+    <View style={[styles.topHalf, { backgroundColor: isDarkMode ? '#0f1e2d30' : '#ffffffaa' }]}> 
       <View style={styles.calendarHeaderRow}>
         <Pressable
           onPress={() => {
@@ -532,10 +530,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
           </Text>
         }
         renderItem={({ item }) => (
-          <Animated.View
-            layout={LinearTransition.duration(120)}
-            style={[styles.taskRow, { borderBottomColor: isDarkMode ? '#2c3d51' : '#e2e8f0' }]}
-          >
+          <View style={[styles.taskRow, { borderBottomColor: isDarkMode ? '#2c3d51' : '#e2e8f0' }]}>
             <Pressable onPress={() => handleToggleTask(item)} hitSlop={10} style={styles.checkboxWrap}>
               <View
                 style={[
@@ -565,22 +560,26 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
             <Pressable onPress={() => handleDeleteTask(item.id)} hitSlop={10}>
               <Feather name="x" size={16} color={isDarkMode ? '#94a3b8' : '#64748b'} />
             </Pressable>
-          </Animated.View>
+          </View>
         )}
       />
 
-      <View style={[styles.inputRow, { borderColor: isDarkMode ? '#243447' : '#e2e8f0' }]}> 
+      <View style={[styles.inputRow, { backgroundColor: isDarkMode ? '#1b293d91' : '#f9fafb' }]}> 
         <TextInput
           value={taskText}
           onChangeText={setTaskText}
           placeholder="Add a task for this date"
-          placeholderTextColor={isDarkMode ? '#6b7280' : '#94a3b8'}
+          placeholderTextColor={isDarkMode ? '#9ca3af' : '#64748b'}
           style={[styles.input, { color: isDarkMode ? '#f9fafb' : '#111827' }]}
           returnKeyType="done"
           onSubmitEditing={handleAddTask}
         />
-        <TouchableOpacity onPress={handleAddTask} activeOpacity={0.8} style={styles.addBtn}>
-          <Feather name="plus" size={16} color="#ffffff" />
+        <TouchableOpacity
+          onPress={handleAddTask}
+          activeOpacity={0.8}
+          style={[styles.addBtn, { backgroundColor: isDarkMode ? '#081623ff' : '#E6E6E6' }]}
+        >
+          <Feather name="plus" size={20} color={isDarkMode ? '#ffffff' : '#606060'} />
         </TouchableOpacity>
       </View>
     </View>
@@ -592,17 +591,13 @@ export default function CalendarScreen() {
   const isDarkMode = useKriya((s) => s.isDarkMode);
   const refreshTodayTasks = useKriya((s) => s.refresh);
   const loadTasks = useCalendarTaskStore((s) => s.loadTasks);
-  const loaded = useCalendarTaskStore((s) => s.loaded);
   const setSelectedDate = useCalendarTaskStore((s) => s.setSelectedDate);
-  const [isScreenLoading, setIsScreenLoading] = useState(false);
 
   useEffect(() => {
-    setIsScreenLoading(false);
     setSelectedDate(toDateId(new Date()));
 
     const id = requestAnimationFrame(() => {
       loadTasks();
-      setIsScreenLoading(false);
     });
 
     return () => cancelAnimationFrame(id);
@@ -614,8 +609,6 @@ export default function CalendarScreen() {
     }, [loadTasks])
   );
 
-  const showLoading = isScreenLoading || !loaded;
-
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top']}>
       <LinearGradient
@@ -624,19 +617,8 @@ export default function CalendarScreen() {
       />
 
       <View style={[styles.container, { paddingBottom: insets.bottom + 12 }]}> 
-        {showLoading ? (
-          <View style={styles.loadingScreen}>
-            <ActivityIndicator size="small" color={isDarkMode ? '#93c5fd' : '#2563eb'} />
-            <Text style={[styles.loadingText, { color: isDarkMode ? '#cbd5e1' : '#475569' }]}>
-              Loading calendar...
-            </Text>
-          </View>
-        ) : (
-          <>
-            <CalendarSectionMemo isDarkMode={isDarkMode} />
-            <TasksSection isDarkMode={isDarkMode} onWriteForToday={refreshTodayTasks} />
-          </>
-        )}
+        <CalendarSectionMemo isDarkMode={isDarkMode} />
+        <TasksSection isDarkMode={isDarkMode} onWriteForToday={refreshTodayTasks} />
       </View>
     </SafeAreaView>
   );
@@ -647,16 +629,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     gap: 10,
-  },
-  loadingScreen: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  loadingText: {
-    fontSize: 14,
-    fontWeight: '500',
   },
   topHalf: {
     flex: 1,
@@ -800,23 +772,26 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingLeft: 12,
-    paddingRight: 6,
-    paddingVertical: 4,
-    marginBottom: 2,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+    borderRadius: 30,
+    paddingVertical: 14,
+    paddingHorizontal: 11,
+    marginTop: 10,
+    marginBottom: 20,
   },
   input: {
     flex: 1,
     fontSize: 15,
-    paddingVertical: 8,
+    paddingVertical: 0,
+    marginLeft: 12,
+    fontFamily: 'Space Mono',
+    fontWeight: '400',
   },
   addBtn: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#5f9fe6',
     alignItems: 'center',
     justifyContent: 'center',
   },

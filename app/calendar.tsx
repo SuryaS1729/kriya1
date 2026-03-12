@@ -13,7 +13,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import Animated, {
-  FadeInDown,
+  FadeIn,
+  FadeOut,
   LinearTransition,
 } from 'react-native-reanimated';
 import {
@@ -244,6 +245,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
   const [selectedDateId, setSelectedDateId] = useState(() => toDateId(new Date()));
   const [calendarMonthId, setCalendarMonthId] = useState(() => toDateId(new Date()));
   const [todayDateId, setTodayDateId] = useState(() => toDateId(new Date()));
+  const [animateMonthLabel, setAnimateMonthLabel] = useState(false);
 
   const accent = isDarkMode ? '#5f9fe6' : '#7493d7';
 
@@ -280,6 +282,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
   });
 
   const shiftMonth = useCallback((delta: number) => {
+    setAnimateMonthLabel(true);
     setCalendarMonthId((prevMonthId) => {
       const base = fromDateId(prevMonthId);
       const shifted = new Date(base.getFullYear(), base.getMonth() + delta, 1);
@@ -295,10 +298,15 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
   const jumpToToday = useCallback(() => {
     const today = new Date();
     const todayId = toDateId(today);
+    const todayMonthId = toDateId(new Date(today.getFullYear(), today.getMonth(), 1));
 
-    setCalendarMonthId(toDateId(new Date(today.getFullYear(), today.getMonth(), 1)));
+    if (todayMonthId !== calendarMonthId) {
+      setAnimateMonthLabel(true);
+    }
+
+    setCalendarMonthId(todayMonthId);
     handleSelectDate(todayId);
-  }, [handleSelectDate]);
+  }, [calendarMonthId, handleSelectDate]);
 
   return (
     <View style={[styles.topHalf, { backgroundColor: isDarkMode ? '#0f1e2d66' : '#ffffffaa' }]}> 
@@ -317,9 +325,16 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
           <Text style={[styles.closeIcon, { color: isDarkMode ? '#d1d5db' : '#18464a' }]}>✕</Text>
         </Pressable>
 
-        <Text style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}>
-          {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-        </Text>
+        <View style={styles.monthLabelSlot}>
+          <Animated.Text
+            key={calendarMonthId}
+            entering={animateMonthLabel ? FadeIn.duration(250) : undefined}
+            exiting={animateMonthLabel ? FadeOut.duration(250) : undefined}
+            style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}
+          >
+            {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+          </Animated.Text>
+        </View>
       </View>
 
       <View style={[styles.calendarCard, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}> 
@@ -506,7 +521,10 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
       <FlashList
         data={orderedTasks}
         keyExtractor={(item) => `calendar-task-${item.id}`}
-        contentContainerStyle={styles.taskList}
+        contentContainerStyle={[
+          styles.taskList,
+          orderedTasks.length === 0 && styles.taskListEmpty,
+        ]}
         ListEmptyComponent={
           <Text style={[styles.emptyText, { color: isDarkMode ? '#7e8a9c' : '#94a3b8' }]}> 
             No tasks for this date yet.
@@ -514,7 +532,6 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
         }
         renderItem={({ item }) => (
           <Animated.View
-            entering={FadeInDown.duration(120)}
             layout={LinearTransition.duration(120)}
             style={[styles.taskRow, { borderBottomColor: isDarkMode ? '#2c3d51' : '#e2e8f0' }]}
           >
@@ -619,13 +636,14 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   bottomHalf: {
-    flex: 1,
+    flex: 1.2,
   },
   calendarHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 4,
+
   },
   closeButton: {
     width: 36,
@@ -642,6 +660,13 @@ const styles = StyleSheet.create({
   monthLabel: {
     fontSize: 18,
     fontWeight: '700',
+    textAlign: 'right',
+  },
+  monthLabelSlot: {
+    minHeight: 26,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    overflow: 'hidden',
   },
   dayPill: {
     width: 30,
@@ -657,6 +682,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 12,
     marginTop: 6,
+    
   },
   calendarDatesScroll: {
     height: 212,
@@ -665,7 +691,7 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
   },
   calendarActionsRow: {
-    marginTop: 10,
+    marginTop: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -711,8 +737,11 @@ const styles = StyleSheet.create({
     paddingTop: 2,
     paddingBottom: 8,
   },
+  taskListEmpty: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
   emptyText: {
-    paddingVertical: 20,
     textAlign: 'center',
     fontSize: 14,
   },

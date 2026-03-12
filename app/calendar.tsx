@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -322,30 +323,34 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
       </View>
 
       <View style={[styles.calendarCard, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}> 
-        <View style={styles.calendarGridFrame}>
-          <Calendar.VStack alignItems="center" spacing={6}>
-            <Calendar.Row.Week
-              spacing={20}
-              theme={{
-                container: {
-                  borderBottomWidth: 1,
-                  borderBottomColor: isDarkMode ? '#334155' : '#e2e8f0',
-                  paddingBottom: 4,
-                  marginBottom: 4,
-                },
-              }}
-            >
-              {weekDaysList.map((weekDay, idx) => (
-                <Calendar.Item.WeekName
-                  key={`week-day-${idx}`}
-                  height={30}
-                  theme={{ content: { color: isDarkMode ? '#9ca3af' : '#64748b' } }}
-                >
-                  {weekDay}
-                </Calendar.Item.WeekName>
-              ))}
-            </Calendar.Row.Week>
+        <Calendar.VStack alignItems="center" spacing={6}>
+          <Calendar.Row.Week
+            spacing={20}
+            theme={{
+              container: {
+                borderBottomWidth: 1,
+                borderBottomColor: isDarkMode ? '#334155' : '#e2e8f0',
+                paddingBottom: 4,
+                marginBottom: 4,
+              },
+            }}
+          >
+            {weekDaysList.map((weekDay, idx) => (
+              <Calendar.Item.WeekName
+                key={`week-day-${idx}`}
+                height={30}
+                theme={{ content: { color: isDarkMode ? '#9ca3af' : '#64748b' } }}
+              >
+                {weekDay}
+              </Calendar.Item.WeekName>
+            ))}
+          </Calendar.Row.Week>
 
+          <ScrollView
+            style={styles.calendarDatesScroll}
+            contentContainerStyle={styles.calendarDatesContent}
+            showsVerticalScrollIndicator={false}
+          >
             {weeksList.map((week, weekIndex) => (
               <Calendar.Row.Week key={`week-${weekIndex}`}>
                 {week.map((dayProps) => {
@@ -401,8 +406,8 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
                 })}
               </Calendar.Row.Week>
             ))}
-          </Calendar.VStack>
-        </View>
+          </ScrollView>
+        </Calendar.VStack>
       </View>
 
       <View style={styles.calendarActionsRow}>
@@ -653,9 +658,11 @@ const styles = StyleSheet.create({
     padding: 12,
     marginTop: 6,
   },
-  calendarGridFrame: {
-    minHeight: 286,
-    justifyContent: 'flex-start',
+  calendarDatesScroll: {
+    height: 212,
+  },
+  calendarDatesContent: {
+    paddingBottom: 2,
   },
   calendarActionsRow: {
     marginTop: 10,

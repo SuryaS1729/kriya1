@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import { 
   StyleSheet, 
@@ -20,6 +20,12 @@ import ViewShot, { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { showAppToast } from '../lib/appToast';
+import {
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
+} from '@/components/ui/slider';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -138,6 +144,37 @@ const BACKGROUNDS = [
 
 type BackgroundId = typeof BACKGROUNDS[number]['id'];
 
+const SLIDER_MIN = 0;
+const SLIDER_MAX = 1;
+
+const clamp = (value: number, min: number, max: number) => {
+  'worklet';
+  return Math.min(Math.max(value, min), max);
+};
+
+const parseRgba = (color: string) => {
+  const match = color.match(/rgba?\(([^)]+)\)/i);
+  if (!match) {
+    return { red: 20, green: 10, blue: 30, alpha: 0.15 };
+  }
+
+  const [red = '20', green = '10', blue = '30', alpha = '1'] = match[1]
+    .split(',')
+    .map((part) => part.trim());
+
+  return {
+    red: Number(red),
+    green: Number(green),
+    blue: Number(blue),
+    alpha: clamp(Number(alpha), SLIDER_MIN, SLIDER_MAX),
+  };
+};
+
+const formatRgba = (
+  { red, green, blue }: ReturnType<typeof parseRgba>,
+  alpha: number,
+) => `rgba(${red}, ${green}, ${blue}, ${clamp(alpha, SLIDER_MIN, SLIDER_MAX).toFixed(2)})`;
+
 export default function Share2() {
   const params = useLocalSearchParams<{
     id?: string;
@@ -152,12 +189,23 @@ export default function Share2() {
   const [selectedBackground, setSelectedBackground] = useState<BackgroundId>('krishna');
   const [isSharing, setIsSharing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [textboxOpacity, setTextboxOpacity] = useState(parseRgba(BACKGROUNDS[0].textBoxBg).alpha);
   
   const viewShotRef = useRef<ViewShot>(null);
   const captureTargetRef = useRef<View>(null);
   
   const currentFormat = FORMATS.find(f => f.id === selectedFormat)!;
   const currentBackground = BACKGROUNDS.find(b => b.id === selectedBackground)!;
+  const currentTextBoxColor = parseRgba(currentBackground.textBoxBg);
+  const resolvedTextBoxBg = formatRgba(currentTextBoxColor, textboxOpacity);
+
+  useEffect(() => {
+    setTextboxOpacity(parseRgba(currentBackground.textBoxBg).alpha);
+  }, [currentBackground]);
+
+  const updateTextboxOpacity = (nextOpacity: number) => {
+    setTextboxOpacity(Math.round(clamp(nextOpacity, SLIDER_MIN, SLIDER_MAX) * 100) / 100);
+  };
   
   // Calculate preview dimensions to fit screen
   const PREVIEW_PADDING = 40;
@@ -335,7 +383,7 @@ export default function Share2() {
         {/* Text Box */}
         <View style={[
           styles.textBox,
-          { backgroundColor: currentBackground.textBoxBg },
+          { backgroundColor: resolvedTextBoxBg },
         ]}>
           {/* Sanskrit Text */}
           <Text style={[
@@ -481,6 +529,51 @@ export default function Share2() {
               </Pressable>
             ))}
           </ScrollView>
+
+          <View style={styles.opacitySection}>
+            <View style={styles.opacityHeader}>
+              <Text style={[styles.opacityLabel, { color: isDarkMode ? '#fff' : '#111827' }]}>
+                Text box opacity
+              </Text>
+              <Text style={[styles.opacityValue, { color: isDarkMode ? '#d1d5db' : '#6b7280' }]}>
+                {Math.round(textboxOpacity * 100)}%
+              </Text>
+            </View>
+
+            <Pressable onPress={() => updateTextboxOpacity(parseRgba(currentBackground.textBoxBg).alpha)}>
+              <Text style={[styles.opacityReset, { color: isDarkMode ? '#93c5fd' : '#2563eb' }]}>
+                Reset to background default
+              </Text>
+            </Pressable>
+
+            <Slider
+              value={Math.round(textboxOpacity * 100)}
+              minValue={0}
+              maxValue={100}
+              step={1}
+              size="md"
+              orientation="horizontal"
+              isDisabled={false}
+              isReversed={false}
+              onChange={(value) => {
+                if (typeof value === 'number') {
+                  updateTextboxOpacity(value / 100);
+                }
+              }}
+              className="w-full"
+            >
+              <SliderTrack
+                className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}
+              >
+                <SliderFilledTrack
+                  className={isDarkMode ? 'bg-blue-400' : 'bg-blue-600'}
+                />
+              </SliderTrack>
+              <SliderThumb
+                className={isDarkMode ? 'bg-white border border-gray-900' : 'bg-slate-50 border border-slate-300'}
+              />
+            </Slider>
+          </View>
 
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
@@ -650,6 +743,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 10,
+  },
+  opacitySection: {
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  opacityHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  opacityLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  opacityValue: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  opacityReset: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginBottom: 10,
   },
   actionButtons: {
     flexDirection: 'row',

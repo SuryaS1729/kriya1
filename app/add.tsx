@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Keyboard,
@@ -16,7 +16,12 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '../components/TopBar';
 import { useKriya } from '../lib/store';
-import type { Task } from '../lib/tasks';
+import {
+  getTasksForDay,
+  removeTask as removeTaskDb,
+  setTaskCompleted,
+  type Task,
+} from '../lib/tasks';
 import { Feather } from '@expo/vector-icons';
 import Animated, { 
   useSharedValue, 
@@ -35,24 +40,73 @@ import { mediumImpactHaptic, selectionHaptic, errorHaptic } from '../lib/haptics
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
+function normalizeDayKey(input?: string | string[]) {
+  const raw = Array.isArray(input) ? input[0] : input;
+  if (!raw) return null;
+
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) return null;
+
+  const date = new Date(parsed);
+  if (Number.isNaN(date.getTime())) return null;
+
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
+function formatDateLabel(dayKey: number) {
+  const selectedDate = new Date(dayKey);
+  const today = new Date();
+  const todayKey = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+
+  if (dayKey === todayKey) {
+    return 'Today';
+  }
+
+  return selectedDate.toLocaleDateString(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+function getRemainingCount(tasks: Task[]) {
+  return tasks.filter((task) => !task.completed).length;
+}
+
 export default function Add() {
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams<{ dayKey?: string | string[] }>();
   const [text, setText] = useState('');
+  const [dayTasks, setDayTasks] = useState<Task[]>([]);
   const inputRef = useRef<TextInput>(null);
 
   // Reanimated shared value for rotation
   const rotationValue = useSharedValue(0);
 
   const tasksToday = useKriya(s => s.tasksToday);
-  const addTask    = useKriya(s => s.addTask);
-  const toggle     = useKriya(s => s.toggleTask);
-  const remove     = useKriya(s => s.removeTask);
+  const addTaskForDay = useKriya(s => s.addTaskForDay);
+  const refresh = useKriya(s => s.refresh);
   const isDarkMode = useKriya(s => s.isDarkMode);
+  const todayKey = useKriya(s => s.todayKey);
+  const selectedDayKey = normalizeDayKey(params.dayKey) ?? todayKey();
+  const isTodayScreen = selectedDayKey === todayKey();
+  const visibleTasks = isTodayScreen ? tasksToday : dayTasks;
+  const dateLabel = formatDateLabel(selectedDayKey);
+  const summaryLabel = `${visibleTasks.length} total, ${getRemainingCount(visibleTasks)} remaining`;
 
   // Calculate dynamic placeholder text
-  const placeholderText = tasksToday.length > 6
+  const placeholderText = visibleTasks.length > 6
     ? "Easy there, overachiever 😅"
     : "Fulfill your dharma today 🏹";
+
+  const refreshSelectedDayTasks = useCallback(() => {
+    if (isTodayScreen) {
+      refresh();
+      return;
+    }
+
+    setDayTasks(getTasksForDay(selectedDayKey));
+  }, [isTodayScreen, refresh, selectedDayKey]);
 
   const focusInput = useCallback(() => {
     inputRef.current?.focus();
@@ -79,6 +133,12 @@ export default function Add() {
         interaction.cancel();
       };
     }, [focusInput])
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshSelectedDayTasks();
+    }, [refreshSelectedDayTasks])
   );
 
   // Animate rotation when text changes
@@ -108,7 +168,10 @@ export default function Add() {
 
     const t = text.trim();
     if (!t) return;
-    addTask(t);
+    addTaskForDay(t, selectedDayKey);
+    if (!isTodayScreen) {
+      setDayTasks(getTasksForDay(selectedDayKey));
+    }
     setText('');
     setTimeout(() => {
       inputRef.current?.focus();
@@ -122,7 +185,10 @@ export default function Add() {
     return;
   }
   // If not empty, add task and stay
-  addTask(t);
+  addTaskForDay(t, selectedDayKey);
+  if (!isTodayScreen) {
+    setDayTasks(getTasksForDay(selectedDayKey));
+  }
   setText('');
   setTimeout(() => {
     inputRef.current?.focus();
@@ -139,10 +205,9 @@ export default function Add() {
   }
 
 
-  const remaining = tasksToday.filter(t => !t.completed).length;
   const orderedTasks = [
-    ...tasksToday.filter((task) => !task.completed).sort((a, b) => a.created_at - b.created_at),
-    ...tasksToday.filter((task) => task.completed).sort((a, b) => a.created_at - b.created_at),
+    ...visibleTasks.filter((task) => !task.completed).sort((a, b) => a.created_at - b.created_at),
+    ...visibleTasks.filter((task) => task.completed).sort((a, b) => a.created_at - b.created_at),
   ];
 
   const renderItem = ({ item, index }: { item: Task; index: number }) => (
@@ -151,11 +216,14 @@ export default function Add() {
       layout={LinearTransition.duration(100)}
       onPress={() => {
         selectionHaptic(); // Add haptic feedback
-        toggle(item.id);
+        const next = !item.completed;
+        setTaskCompleted(item.id, next, null);
+        refreshSelectedDayTasks();
       }}
       onLongPress={() => {
         errorHaptic(); // Different haptic for delete
-        remove(item.id);
+        removeTaskDb(item.id);
+        refreshSelectedDayTasks();
       }}
       style={[styles.row, { borderBottomColor: isDarkMode ? '#374151' : '#f1f5f9' }]}
       android_ripple={{ color: '#eeeeee1c' }}
@@ -218,8 +286,11 @@ export default function Add() {
         {/* Main content column: list grows, input bar sits at the bottom */}
         <View style={{ flex: 1 }}>
           <View style={styles.headerRow}>
+            <Text style={[styles.dateHeading, { color: isDarkMode ? '#e5e7eb' : '#0f172a' }]}>
+              {dateLabel}
+            </Text>
             <Text style={[styles.subhead, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
-              Today • {tasksToday.length} total, {remaining} remaining
+              {summaryLabel}
             </Text>
           </View>
 
@@ -241,7 +312,7 @@ export default function Add() {
                   styles.emptyStateSubtitle,
                   { color: isDarkMode ? '#6b7280' : '#94a3b8' }
                 ]}>
-                  add your tasks for today!
+                  {isTodayScreen ? 'add your tasks for today!' : 'add your tasks for this date!'}
                 </Text>
               </View>
             )}
@@ -296,6 +367,12 @@ export default function Add() {
 
 const styles = StyleSheet.create({
   headerRow: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 },
+  dateHeading: {
+    fontSize: 20,
+    fontFamily: 'Source Serif Pro',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
   subhead: { color: '#64748b' },
 
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, gap: 12, paddingHorizontal: 16 },

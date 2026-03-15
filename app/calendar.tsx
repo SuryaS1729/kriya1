@@ -4,7 +4,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -453,11 +452,8 @@ type TasksSectionProps = {
 const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForToday }: TasksSectionProps) {
   const selectedDate = useCalendarTaskStore((s) => s.selectedDate);
   const tasks = useCalendarTaskStore((s) => s.tasksByDate[s.selectedDate] ?? EMPTY_TASKS);
-  const addTask = useCalendarTaskStore((s) => s.addTask);
   const toggleTask = useCalendarTaskStore((s) => s.toggleTask);
   const deleteTask = useCalendarTaskStore((s) => s.deleteTask);
-
-  const [taskText, setTaskText] = useState('');
 
   const orderedTasks = useMemo(() => {
     const incomplete = tasks
@@ -474,18 +470,13 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
     [selectedDate]
   );
 
-  const handleAddTask = useCallback(() => {
-    const title = taskText.trim();
-    if (!title) return;
-
-    taskCompleteHaptic();
-    addTask(title, selectedDate);
-    setTaskText('');
-
-    if (selectedDate === toDateId(new Date())) {
-      onWriteForToday();
-    }
-  }, [addTask, onWriteForToday, selectedDate, taskText]);
+  const handleOpenAddScreen = useCallback(() => {
+    buttonPressHaptic();
+    router.push({
+      pathname: '/add',
+      params: { dayKey: String(dayKeyFromDateId(selectedDate)) },
+    });
+  }, [selectedDate]);
 
   const handleToggleTask = useCallback((task: Task) => {
     const next = !task.completed;
@@ -564,24 +555,18 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
         )}
       />
 
-      <View style={[styles.inputRow, { backgroundColor: isDarkMode ? '#1b293d91' : '#f9fafb' }]}> 
-        <TextInput
-          value={taskText}
-          onChangeText={setTaskText}
-          placeholder="Add a task for this date"
-          placeholderTextColor={isDarkMode ? '#9ca3af' : '#64748b'}
-          style={[styles.input, { color: isDarkMode ? '#f9fafb' : '#111827' }]}
-          returnKeyType="done"
-          onSubmitEditing={handleAddTask}
-        />
-        <TouchableOpacity
-          onPress={handleAddTask}
-          activeOpacity={0.8}
-          style={[styles.addBtn, { backgroundColor: isDarkMode ? '#081623ff' : '#E6E6E6' }]}
-        >
+      <TouchableOpacity
+        onPress={handleOpenAddScreen}
+        activeOpacity={0.7}
+        style={[styles.addTaskButton, { backgroundColor: isDarkMode ? '#1b293d91' : '#f9fafb' }]}
+      >
+        <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#081623ff' : '#E6E6E6' }]}>
           <Feather name="plus" size={20} color={isDarkMode ? '#ffffff' : '#606060'} />
-        </TouchableOpacity>
-      </View>
+        </View>
+        <Text style={[styles.addTaskText, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
+          Add a task for this date
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 });
@@ -769,30 +754,26 @@ const styles = StyleSheet.create({
     fontFamily: 'Source Serif Pro',
     fontWeight: '300',
   },
-  inputRow: {
+  addTaskButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-    borderRadius: 30,
-    paddingVertical: 14,
-    paddingHorizontal: 11,
+    borderRadius: 15,
+    paddingVertical: 11,
+    paddingHorizontal: 16,
     marginTop: 10,
     marginBottom: 20,
   },
-  input: {
-    flex: 1,
-    fontSize: 15,
-    paddingVertical: 0,
-    marginLeft: 12,
-    fontFamily: 'Space Mono',
-    fontWeight: '400',
-  },
-  addBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  addTaskIcon: {
+    width: 35,
+    height: 35,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  addTaskText: {
+    fontSize: 18,
+    marginLeft: 12,
+    fontFamily: 'Source Serif Pro',
+    fontWeight: '300',
   },
 });

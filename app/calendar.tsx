@@ -15,7 +15,6 @@ import {
   Calendar,
   fromDateId,
   toDateId,
-  useCalendar,
 } from '@marceloterreiro/flash-calendar';
 import { router } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
@@ -34,6 +33,121 @@ import {
 import { buttonPressHaptic, errorHaptic, selectionHaptic, taskCompleteHaptic } from '../lib/haptics';
 
 const EMPTY_TASKS: Task[] = [];
+
+const WEEK_DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const WEEK_DAYS_MON = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+type FastDayMeta = {
+  id: string;
+  displayLabel: string;
+  isDifferentMonth: boolean;
+  isStartOfWeek: boolean;
+  isWeekend: boolean;
+  state: 'idle' | 'today' | 'disabled';
+};
+
+function buildMonthGrid(
+  monthId: string,
+  firstDay: 'sunday' | 'monday' = 'sunday',
+): FastDayMeta[][] {
+  const month = fromDateId(monthId);
+  const year = month.getFullYear();
+  const m = month.getMonth();
+  const firstOfMonth = new Date(year, m, 1);
+  const startDow = firstOfMonth.getDay();
+  const emptyAtStart = firstDay === 'sunday' ? startDow : (startDow === 0 ? 6 : startDow - 1);
+  const daysInMonth = new Date(year, m + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, m, 0).getDate();
+  const startOfWeekIdx = firstDay === 'sunday' ? 0 : 1;
+
+  const todayId = toDateId(new Date());
+
+  const weeks: FastDayMeta[][] = [[]];
+
+  // Previous month trailing days
+  for (let i = 0; i < emptyAtStart; i++) {
+    const day = daysInPrevMonth - emptyAtStart + 1 + i;
+    const d = new Date(year, m - 1, day);
+    const dow = d.getDay();
+    weeks[0].push({
+      id: toDateId(d),
+      displayLabel: String(day),
+      isDifferentMonth: true,
+      isStartOfWeek: dow === startOfWeekIdx,
+      isWeekend: dow === 0 || dow === 6,
+      state: 'idle',
+    });
+  }
+
+  // Current month days
+  for (let day = 1; day <= daysInMonth; day++) {
+    const lastWeek = weeks[weeks.length - 1];
+    if (lastWeek.length === 7) weeks.push([]);
+
+    const d = new Date(year, m, day);
+    const dow = d.getDay();
+    const id = toDateId(d);
+    weeks[weeks.length - 1].push({
+      id,
+      displayLabel: String(day),
+      isDifferentMonth: false,
+      isStartOfWeek: dow === startOfWeekIdx,
+      isWeekend: dow === 0 || dow === 6,
+      state: id === todayId ? 'today' : 'idle',
+    });
+  }
+
+  // Next month leading days
+  const lastWeek = weeks[weeks.length - 1];
+  const remaining = 7 - lastWeek.length;
+  for (let i = 1; i <= remaining; i++) {
+    const d = new Date(year, m + 1, i);
+    const dow = d.getDay();
+    lastWeek.push({
+      id: toDateId(d),
+      displayLabel: String(i),
+      isDifferentMonth: true,
+      isStartOfWeek: dow === startOfWeekIdx,
+      isWeekend: dow === 0 || dow === 6,
+      state: 'idle',
+    });
+  }
+
+  return weeks;
+}
+
+const monthCache = new Map<string, FastDayMeta[][]>();
+
+function getMonthGrid(monthId: string, firstDay: 'sunday' | 'monday' = 'sunday'): FastDayMeta[][] {
+  const cached = monthCache.get(monthId);
+  if (cached) return cached;
+  const grid = buildMonthGrid(monthId, firstDay);
+  monthCache.set(monthId, grid);
+  return grid;
+}
+
+function useFastCalendar({
+  calendarMonthId,
+  calendarFirstDayOfWeek = 'sunday',
+}: {
+  calendarMonthId: string;
+  calendarFirstDayOfWeek?: 'sunday' | 'monday';
+}) {
+  return useMemo(() => {
+    const weeksList = getMonthGrid(calendarMonthId, calendarFirstDayOfWeek);
+
+    // Pre-compute adjacent months into cache
+    const base = fromDateId(calendarMonthId);
+    const prevId = toDateId(new Date(base.getFullYear(), base.getMonth() - 1, 1));
+    const nextId = toDateId(new Date(base.getFullYear(), base.getMonth() + 1, 1));
+    getMonthGrid(prevId, calendarFirstDayOfWeek);
+    getMonthGrid(nextId, calendarFirstDayOfWeek);
+
+    const weekDaysList = calendarFirstDayOfWeek === 'sunday' ? WEEK_DAYS : WEEK_DAYS_MON;
+
+    return { weeksList, weekDaysList };
+  }, [calendarMonthId, calendarFirstDayOfWeek]);
+}
 
 function dayKeyFromDateId(dateId: string) {
   const d = fromDateId(dateId);
@@ -167,7 +281,7 @@ const useCalendarTaskStore = create<CalendarTaskStore>((set, get) => ({
   },
 }));
 
-const CalendarDayPill = ({
+const CalendarDayPill = React.memo(function CalendarDayPill({
   label,
   isSelected,
   isToday,
@@ -185,7 +299,7 @@ const CalendarDayPill = ({
   isDarkMode: boolean;
   accent: string;
   isDisabled: boolean;
-}) => {
+}) {
   const isTodayOnly = isToday && !isSelected;
   const bgColor = isSelected
     ? accent
@@ -228,7 +342,75 @@ const CalendarDayPill = ({
       </Text>
     </View>
   );
+});
+
+const dayCellStyle = {
+  alignItems: 'center' as const,
+  justifyContent: 'center' as const,
+  flex: 1,
+  height: 36,
+  padding: 2,
 };
+
+const DayCell = React.memo(function DayCell({
+  dayProps,
+  selectedDateId,
+  todayDateId,
+  isDarkMode,
+  accent,
+  onSelect,
+}: {
+  dayProps: { id: string; displayLabel: string; isWeekend: boolean; isStartOfWeek: boolean; isDifferentMonth: boolean; state: string };
+  selectedDateId: string;
+  todayDateId: string;
+  isDarkMode: boolean;
+  accent: string;
+  onSelect: (dateId: string) => void;
+}) {
+  const handlePress = useCallback(() => {
+    buttonPressHaptic();
+    onSelect(dayProps.id);
+  }, [dayProps.id, onSelect]);
+
+  if (dayProps.isDifferentMonth) {
+    return (
+      <Calendar.Item.Day.Container
+        dayHeight={36}
+        daySpacing={20}
+        isStartOfWeek={dayProps.isStartOfWeek}
+      >
+        <Calendar.Item.Empty height={36} />
+      </Calendar.Item.Day.Container>
+    );
+  }
+
+  return (
+    <Calendar.Item.Day.Container
+      dayHeight={36}
+      daySpacing={20}
+      isStartOfWeek={dayProps.isStartOfWeek}
+    >
+      <Pressable
+        disabled={dayProps.state === 'disabled'}
+        onPress={handlePress}
+        style={() => dayCellStyle}
+      >
+        {({ pressed }: { pressed: boolean }) => (
+          <CalendarDayPill
+            label={dayProps.displayLabel}
+            isSelected={dayProps.id === selectedDateId}
+            isToday={dayProps.id === todayDateId}
+            isWeekend={dayProps.isWeekend}
+            pressed={pressed}
+            isDarkMode={isDarkMode}
+            accent={accent}
+            isDisabled={dayProps.state === 'disabled'}
+          />
+        )}
+      </Pressable>
+    </Calendar.Item.Day.Container>
+  );
+});
 
 type CalendarSectionProps = {
   isDarkMode: boolean;
@@ -303,7 +485,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
     };
   }, []);
 
-  const { weeksList, weekDaysList } = useCalendar({
+  const { weeksList, weekDaysList } = useFastCalendar({
     calendarMonthId,
     calendarFirstDayOfWeek: 'sunday',
   });
@@ -350,8 +532,8 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
           <EaseView
             key={calendarMonthId}
             initialAnimate={{ opacity: 0, translateX: 36, scale: 0.9 }}
-        animate={{ opacity: 1, translateX: 0, scale: 1 }}
-        transition={{ type: 'timing', duration: 520, easing: 'easeOut' }}
+            animate={{ opacity: 1, translateX: 0, scale: 1 }}
+            transition={{ type: 'timing', duration: 520, easing: 'easeOut' }}
           >
             <Text style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}>
               {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
@@ -362,7 +544,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
 
       <EaseView
         key={`calendar-card-${calendarMonthId}`}
-        initialAnimate={{ opacity: 0, translateX: 36, scale: 0.9 }}
+        initialAnimate={{ opacity: 0, translateX: 50, scale: 0.8 }}
         animate={{ opacity: 1, translateX: 0, scale: 1 }}
         transition={{ type: 'timing', duration: 520, easing: 'easeOut' }}
         style={[styles.calendarCard, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}
@@ -397,57 +579,17 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
           >
             {weeksList.map((week, weekIndex) => (
               <Calendar.Row.Week key={`week-${weekIndex}`}>
-                {week.map((dayProps) => {
-                  if (dayProps.isDifferentMonth) {
-                    return (
-                      <Calendar.Item.Day.Container
-                        key={dayProps.id}
-                        dayHeight={36}
-                        daySpacing={20}
-                        isStartOfWeek={dayProps.isStartOfWeek}
-                      >
-                        <Calendar.Item.Empty height={36} />
-                      </Calendar.Item.Day.Container>
-                    );
-                  }
-
-                  return (
-                    <Calendar.Item.Day.Container
-                      key={dayProps.id}
-                      dayHeight={36}
-                      daySpacing={20}
-                      isStartOfWeek={dayProps.isStartOfWeek}
-                    >
-                      <Pressable
-                        disabled={dayProps.state === 'disabled'}
-                        onPress={() => {
-                          buttonPressHaptic();
-                          handleSelectDate(dayProps.id);
-                        }}
-                        style={() => ({
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flex: 1,
-                          height: 36,
-                          padding: 2,
-                        })}
-                      >
-                        {({ pressed }: { pressed: boolean }) => (
-                          <CalendarDayPill
-                            label={dayProps.displayLabel}
-                            isSelected={dayProps.id === selectedDateId}
-                            isToday={dayProps.id === todayDateId}
-                            isWeekend={dayProps.isWeekend}
-                            pressed={pressed}
-                            isDarkMode={isDarkMode}
-                            accent={accent}
-                            isDisabled={dayProps.state === 'disabled'}
-                          />
-                        )}
-                      </Pressable>
-                    </Calendar.Item.Day.Container>
-                  );
-                })}
+                {week.map((dayProps) => (
+                  <DayCell
+                    key={dayProps.id}
+                    dayProps={dayProps}
+                    selectedDateId={selectedDateId}
+                    todayDateId={todayDateId}
+                    isDarkMode={isDarkMode}
+                    accent={accent}
+                    onSelect={handleSelectDate}
+                  />
+                ))}
               </Calendar.Row.Week>
             ))}
           </ScrollView>

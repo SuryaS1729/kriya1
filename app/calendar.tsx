@@ -11,10 +11,6 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import Animated, {
-  FadeIn,
-  FadeOut,
-} from 'react-native-reanimated';
 import {
   Calendar,
   fromDateId,
@@ -24,6 +20,7 @@ import {
 import { router } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { create } from 'zustand';
+import { EaseView } from 'react-native-ease';
 
 import { useKriya } from '../lib/store';
 import {
@@ -237,13 +234,45 @@ type CalendarSectionProps = {
   isDarkMode: boolean;
 };
 
+const CalendarChevronButton = ({
+  direction,
+  isDarkMode,
+  onPress,
+}: {
+  direction: 'left' | 'right';
+  isDarkMode: boolean;
+  onPress: () => void;
+}) => (
+  <Pressable onPress={onPress} hitSlop={12} style={styles.monthShiftBtn}>
+    {({ pressed }: { pressed: boolean }) => (
+      <EaseView
+        animate={{
+          scale: pressed ? 1.18 : 1,
+        }}
+        transition={{
+          type: 'spring',
+          damping: 18,
+          stiffness: 320,
+          mass: 0.8,
+        }}
+        style={styles.monthShiftIconWrap}
+      >
+        <Feather
+          name={direction === 'left' ? 'chevron-left' : 'chevron-right'}
+          size={18}
+          color={isDarkMode ? '#f9fafb' : '#0f172a'}
+        />
+      </EaseView>
+    )}
+  </Pressable>
+);
+
 const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
   const setSelectedDate = useCalendarTaskStore((s) => s.setSelectedDate);
 
   const [selectedDateId, setSelectedDateId] = useState(() => toDateId(new Date()));
   const [calendarMonthId, setCalendarMonthId] = useState(() => toDateId(new Date()));
   const [todayDateId, setTodayDateId] = useState(() => toDateId(new Date()));
-  const [animateMonthLabel, setAnimateMonthLabel] = useState(false);
 
   const accent = isDarkMode ? '#5f9fe6' : '#7493d7';
 
@@ -280,7 +309,6 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
   });
 
   const shiftMonth = useCallback((delta: number) => {
-    setAnimateMonthLabel(true);
     setCalendarMonthId((prevMonthId) => {
       const base = fromDateId(prevMonthId);
       const shifted = new Date(base.getFullYear(), base.getMonth() + delta, 1);
@@ -297,14 +325,9 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
     const today = new Date();
     const todayId = toDateId(today);
     const todayMonthId = toDateId(new Date(today.getFullYear(), today.getMonth(), 1));
-
-    if (todayMonthId !== calendarMonthId) {
-      setAnimateMonthLabel(true);
-    }
-
     setCalendarMonthId(todayMonthId);
     handleSelectDate(todayId);
-  }, [calendarMonthId, handleSelectDate]);
+  }, [handleSelectDate]);
 
   return (
     <View style={[styles.topHalf, { backgroundColor: isDarkMode ? '#0f1e2d30' : '#ffffffaa' }]}> 
@@ -324,14 +347,16 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
         </Pressable>
 
         <View style={styles.monthLabelSlot}>
-          <Animated.Text
+          <EaseView
             key={calendarMonthId}
-            entering={animateMonthLabel ? FadeIn.duration(250) : undefined}
-            exiting={animateMonthLabel ? FadeOut.duration(250) : undefined}
-            style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}
+            initialAnimate={{ opacity: 0, scale: 0.3, translateY: 8 }}
+            animate={{ opacity: 1, scale: 1, translateY: 0 }}
+            transition={{ type: 'spring', damping: 18, stiffness: 145, mass: 1.05 }}
           >
-            {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-          </Animated.Text>
+            <Text style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}>
+              {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+            </Text>
+          </EaseView>
         </View>
       </View>
 
@@ -425,13 +450,23 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
 
       <View style={styles.calendarActionsRow}>
         <View style={[styles.monthShiftGroup, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}>
-          <Pressable onPress={() => shiftMonth(-1)} hitSlop={12} style={styles.monthShiftBtn}>
-            <Feather name="chevron-left" size={18} color={isDarkMode ? '#f9fafb' : '#0f172a'} />
-          </Pressable>
+          <CalendarChevronButton
+            direction="left"
+            isDarkMode={isDarkMode}
+            onPress={() => {
+              buttonPressHaptic();
+              shiftMonth(-1);
+            }}
+          />
           <View style={[styles.monthShiftDivider, { backgroundColor: isDarkMode ? '#334155' : '#e2e8f0' }]} />
-          <Pressable onPress={() => shiftMonth(1)} hitSlop={12} style={styles.monthShiftBtn}>
-            <Feather name="chevron-right" size={18} color={isDarkMode ? '#f9fafb' : '#0f172a'} />
-          </Pressable>
+          <CalendarChevronButton
+            direction="right"
+            isDarkMode={isDarkMode}
+            onPress={() => {
+              buttonPressHaptic();
+              shiftMonth(1);
+            }}
+          />
         </View>
 
         <TouchableOpacity onPress={jumpToToday} activeOpacity={0.8} style={styles.todayChip}>
@@ -690,6 +725,12 @@ const styles = StyleSheet.create({
   monthShiftBtn: {
     width: 40,
     height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  monthShiftIconWrap: {
+    width: 24,
+    height: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },

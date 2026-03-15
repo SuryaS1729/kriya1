@@ -247,13 +247,13 @@ const CalendarChevronButton = ({
     {({ pressed }: { pressed: boolean }) => (
       <EaseView
         animate={{
-          scale: pressed ? 1.18 : 1,
+          scale: pressed ? 1.2 : 1,
         }}
         transition={{
           type: 'spring',
           damping: 18,
           stiffness: 320,
-          mass: 0.8,
+          mass: 1,
         }}
         style={styles.monthShiftIconWrap}
       >
@@ -349,9 +349,9 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
         <View style={styles.monthLabelSlot}>
           <EaseView
             key={calendarMonthId}
-            initialAnimate={{ opacity: 0, scale: 0.3, translateY: 8 }}
-            animate={{ opacity: 1, scale: 1, translateY: 0 }}
-            transition={{ type: 'spring', damping: 18, stiffness: 145, mass: 1.05 }}
+            initialAnimate={{ opacity: 0, translateX: 36, scale: 0.9 }}
+        animate={{ opacity: 1, translateX: 0, scale: 1 }}
+        transition={{ type: 'timing', duration: 520, easing: 'easeOut' }}
           >
             <Text style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}>
               {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
@@ -360,7 +360,13 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
         </View>
       </View>
 
-      <View style={[styles.calendarCard, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}> 
+      <EaseView
+        key={`calendar-card-${calendarMonthId}`}
+        initialAnimate={{ opacity: 0, translateX: 36, scale: 0.9 }}
+        animate={{ opacity: 1, translateX: 0, scale: 1 }}
+        transition={{ type: 'timing', duration: 520, easing: 'easeOut' }}
+        style={[styles.calendarCard, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}
+      >
         <Calendar.VStack alignItems="center" spacing={6}>
           <Calendar.Row.Week
             spacing={20}
@@ -446,7 +452,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
             ))}
           </ScrollView>
         </Calendar.VStack>
-      </View>
+      </EaseView>
 
       <View style={styles.calendarActionsRow}>
         <View style={[styles.monthShiftGroup, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}>

@@ -69,6 +69,7 @@
     "@aws-sdk/client-s3": "^3.995.0",
     "@babel/core": "^7.20.0",
     "@google/genai": "^1.43.0",
+    "@rozenite/metro": "^1.4.0",
     "@types/react": "~19.1.10",
     "better-sqlite3": "^12.6.2",
     "eslint": "^9.0.0",

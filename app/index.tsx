@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useKriya } from '../lib/store';
-import { setTaskCompleted, removeTask as removeTaskDb, type Task } from '../lib/tasks';
+import { setTaskCompleted, removeTask as removeTaskDb, getAllTasks, type Task } from '../lib/tasks';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import { taskCompleteHaptic, selectionHaptic, buttonPressHaptic, errorHaptic } from '../lib/haptics';
@@ -161,6 +161,8 @@ export default function Home() {
   const notificationListener = useRef<Notifications.EventSubscription | null>(null);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
   const [yesterdayTasksState, setYesterdayTasksState] = useState<Task[]>([]);
+  const [showAllTasks, setShowAllTasks] = useState(false);
+  const [allTasksState, setAllTasksState] = useState<Task[]>([]);
 
   // Fade animation for shloka card
   const fade = useSharedValue(0);
@@ -175,6 +177,19 @@ export default function Home() {
     setYesterdayTasksState(getTasksForDay(yesterdayKey));
   }, [getTasksForDay]);
 
+  const loadAllTasks = useCallback(() => {
+    setAllTasksState(getAllTasks());
+  }, []);
+
+  const handleFilterToggle = useCallback(() => {
+    selectionHaptic();
+    const next = !showAllTasks;
+    setShowAllTasks(next);
+    if (next) {
+      loadAllTasks();
+    }
+  }, [showAllTasks, loadAllTasks]);
+
   // Clear cache and refresh when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
@@ -182,13 +197,16 @@ export default function Home() {
 
         refresh();
         loadYesterdayTasks();
+        if (showAllTasks) {
+          loadAllTasks();
+        }
                 // console.log('🧹 Home screen focused - refreshing state');
 
 
         fade.value = 0;
         fade.value = withSpring(1);
       }
-    }, [ready, refresh, fade, loadYesterdayTasks])
+    }, [ready, refresh, fade, loadYesterdayTasks, showAllTasks, loadAllTasks])
   );
 
   // Only compute shloka after store is ready
@@ -248,6 +266,18 @@ const handleTogglePress = () => {
     return [...incomplete, ...completed];
   }, [tasks]);
 
+  // All tasks: incomplete first (newest→oldest), then completed (newest→oldest), cap completed at 10
+  const sortedAllTasks = useMemo(() => {
+    const incomplete = allTasksState
+      .filter((task) => !task.completed)
+      .sort((a, b) => b.created_at - a.created_at);
+    const completed = allTasksState
+      .filter((task) => task.completed)
+      .sort((a, b) => b.created_at - a.created_at)
+      .slice(0, 10); // keep only the 10 most recently created completed tasks
+    return [...incomplete, ...completed];
+  }, [allTasksState]);
+
   const onToggle = useCallback((id: number, completed: boolean) => {
     if (!completed) {
       taskCompleteHaptic(); // Success haptic for completing tasks
@@ -261,6 +291,35 @@ const handleTogglePress = () => {
     errorHaptic(); // Error haptic for deletion
     remove(id);
   }, [remove]);
+
+  // Handlers for "All Tasks" mode
+  const onToggleAllTask = useCallback((id: number, completed: boolean) => {
+    const next = !completed;
+    if (next) {
+      taskCompleteHaptic();
+    } else {
+      selectionHaptic();
+    }
+    setTaskCompleted(id, next, null);
+    // Update in-place so completed tasks move to bottom (same UX as today's tasks)
+    setAllTasksState(state =>
+      state.map(t =>
+        t.id === id
+          ? { ...t, completed: next, completed_at: next ? Date.now() : null }
+          : t
+      )
+    );
+    // Also refresh today's tasks in case this was a today task
+    refresh();
+  }, [refresh]);
+
+  const onRemoveAllTask = useCallback((id: number) => {
+    errorHaptic();
+    removeTaskDb(id);
+    setAllTasksState(state => state.filter(t => t.id !== id));
+    // Also refresh today's tasks in case this was a today task
+    refresh();
+  }, [refresh]);
 
   const onFocus = useCallback((task: Task) => {
     buttonPressHaptic(); // Light haptic for navigation
@@ -300,6 +359,21 @@ console.log('🔍 Guided Tour Debug:', {
       />
     </Animated.View>
   ), [isDarkMode, onToggle, onRemove, onFocus]);
+
+  const renderAllTaskItem = useCallback(({ item }: { item: Task }) => (
+    <Animated.View  
+      entering={FadeIn.duration(90)}
+      layout={LinearTransition.duration(100)}
+    >
+      <TaskRow 
+        item={item} 
+        isDarkMode={isDarkMode} 
+        onToggle={onToggleAllTask} 
+        onRemove={onRemoveAllTask}
+        onFocus={onFocus} 
+      />
+    </Animated.View>
+  ), [isDarkMode, onToggleAllTask, onRemoveAllTask, onFocus]);
 
   const keyExtractor = useCallback((item: Task) => `task-${item.id}`, []);
 
@@ -582,7 +656,17 @@ console.log('🔍 Guided Tour Debug:', {
         { backgroundColor: isDarkMode ? '#03233181' : '#ffffffff', paddingBottom: insets.bottom }
       ]}>
         <View style={styles.tasksHeader}>
-          <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#5a6173ff' }]}>Today's Tasks</Text>
+          <Pressable onPress={handleFilterToggle} style={styles.filterToggle} hitSlop={8}>
+            <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#5a6173ff' }]}>
+              {showAllTasks ? 'All Tasks' : "Today's Tasks"}
+            </Text>
+            <Feather 
+              name="filter" 
+              size={14} 
+              color={showAllTasks ? (isDarkMode ? '#7cb3ffff' : '#4a7fd4ff') : (isDarkMode ? '#9ca3af' : '#94a3b8')} 
+              style={{ marginLeft: 6 }} 
+            />
+          </Pressable>
           <View style={styles.headerButtons}>
             <Link href="/testwidget" asChild>
               <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
@@ -616,11 +700,11 @@ console.log('🔍 Guided Tour Debug:', {
         </View>
         
         <FlatList
-          data={sortedTasks}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
+          data={showAllTasks ? sortedAllTasks : sortedTasks}
+          renderItem={showAllTasks ? renderAllTaskItem : renderItem}
+          keyExtractor={showAllTasks ? ((item: Task) => `all-task-${item.id}`) : keyExtractor}
           contentContainerStyle={styles.tasksList}
-          ListFooterComponent={yesterdayFooter}
+          ListFooterComponent={showAllTasks ? null : yesterdayFooter}
           ListEmptyComponent={() => (
             <View>
               <Pressable onPress={() => {
@@ -840,6 +924,10 @@ scrollContentSanskrit: {
   headerButtons: {
     flexDirection: 'row',
     gap: 8,
+  },
+  filterToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   h1: { 
     fontSize: 17, 

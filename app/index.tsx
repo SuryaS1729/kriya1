@@ -545,7 +545,7 @@ console.log('🔍 Guided Tour Debug:', {
   {/* Invisible spacer to push toggle button to center */}
   <View style={styles.leftSpacer} />
 
-  <TouchableOpacity onPress={handleTogglePress} activeOpacity={0.7}>
+  <TouchableOpacity onPress={handleTogglePress} activeOpacity={1}>
     <Animated.View style={[
       styles.toggleButton,
       { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },

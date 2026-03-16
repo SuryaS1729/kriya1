@@ -78,6 +78,7 @@ export default function Add() {
   const params = useLocalSearchParams<{ dayKey?: string | string[] }>();
   const [text, setText] = useState('');
   const [dayTasks, setDayTasks] = useState<Task[]>([]);
+  const [isTomorrow, setIsTomorrow] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   // Reanimated shared value for rotation
@@ -88,25 +89,38 @@ export default function Add() {
   const refresh = useKriya(s => s.refresh);
   const isDarkMode = useKriya(s => s.isDarkMode);
   const todayKey = useKriya(s => s.todayKey);
-  const selectedDayKey = normalizeDayKey(params.dayKey) ?? todayKey();
-  const isTodayScreen = selectedDayKey === todayKey();
-  const visibleTasks = isTodayScreen ? tasksToday : dayTasks;
-  const dateLabel = formatDateLabel(selectedDayKey);
+  const paramDayKey = normalizeDayKey(params.dayKey) ?? todayKey();
+  const isTodayScreen = paramDayKey === todayKey();
+
+  // Compute tomorrow's key
+  const tomorrowKey = (() => {
+    const d = new Date(todayKey());
+    d.setDate(d.getDate() + 1);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  })();
+
+  // Active day key: if user toggled "Tomorrow" pill, use tomorrowKey; else use paramDayKey
+  const activeDayKey = (isTodayScreen && isTomorrow) ? tomorrowKey : paramDayKey;
+  const isActiveToday = activeDayKey === todayKey();
+  const visibleTasks = isActiveToday ? tasksToday : dayTasks;
+  const dateLabel = formatDateLabel(activeDayKey);
   const summaryLabel = `${visibleTasks.length} total, ${getRemainingCount(visibleTasks)} remaining`;
 
   // Calculate dynamic placeholder text
   const placeholderText = visibleTasks.length > 6
     ? "Easy there, overachiever 😅"
-    : "Fulfill your dharma today 🏹";
+    : isTomorrow
+      ? "Plan ahead for tomorrow 🌅"
+      : "Fulfill your dharma today 🏹";
 
   const refreshSelectedDayTasks = useCallback(() => {
-    if (isTodayScreen) {
+    if (isActiveToday) {
       refresh();
       return;
     }
 
-    setDayTasks(getTasksForDay(selectedDayKey));
-  }, [isTodayScreen, refresh, selectedDayKey]);
+    setDayTasks(getTasksForDay(activeDayKey));
+  }, [isActiveToday, refresh, activeDayKey]);
 
   const focusInput = useCallback(() => {
     inputRef.current?.focus();
@@ -168,9 +182,9 @@ export default function Add() {
 
     const t = text.trim();
     if (!t) return;
-    addTaskForDay(t, selectedDayKey);
-    if (!isTodayScreen) {
-      setDayTasks(getTasksForDay(selectedDayKey));
+    addTaskForDay(t, activeDayKey);
+    if (!isActiveToday) {
+      setDayTasks(getTasksForDay(activeDayKey));
     }
     setText('');
     setTimeout(() => {
@@ -185,9 +199,9 @@ export default function Add() {
     return;
   }
   // If not empty, add task and stay
-  addTaskForDay(t, selectedDayKey);
-  if (!isTodayScreen) {
-    setDayTasks(getTasksForDay(selectedDayKey));
+  addTaskForDay(t, activeDayKey);
+  if (!isActiveToday) {
+    setDayTasks(getTasksForDay(activeDayKey));
   }
   setText('');
   setTimeout(() => {
@@ -312,7 +326,7 @@ export default function Add() {
                   styles.emptyStateSubtitle,
                   { color: isDarkMode ? '#6b7280' : '#94a3b8' }
                 ]}>
-                  {isTodayScreen ? 'add your tasks for today!' : 'add your tasks for this date!'}
+                  {isActiveToday ? 'add your tasks for today!' : isTomorrow ? 'add your tasks for tomorrow!' : 'add your tasks for this date!'}
                 </Text>
               </View>
             )}
@@ -324,6 +338,41 @@ export default function Add() {
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode={Platform.OS === 'ios' ? 'on-drag' : 'none'}
           />
+
+          {/* TOMORROW PILL — only shown when navigated for today */}
+          {isTodayScreen && (
+            <View style={styles.pillRow}>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => {
+                  selectionHaptic();
+                  setIsTomorrow(prev => !prev);
+                }}
+                style={[
+                  styles.tomorrowPill,
+                  isTomorrow
+                    ? { backgroundColor: isDarkMode ? '#1e3a5f' : '#dbeafe', borderColor: isDarkMode ? '#3b82f6' : '#93c5fd' }
+                    : { backgroundColor: isDarkMode ? '#1f2937' : '#f1f5f9', borderColor: isDarkMode ? '#374151' : '#e2e8f0' },
+                ]}
+              >
+                <Feather
+                  name="sun"
+                  size={13}
+                  color={isTomorrow
+                    ? (isDarkMode ? '#93c5fd' : '#2563eb')
+                    : (isDarkMode ? '#9ca3af' : '#64748b')}
+                />
+                <Text style={[
+                  styles.tomorrowPillText,
+                  { color: isTomorrow
+                    ? (isDarkMode ? '#93c5fd' : '#2563eb')
+                    : (isDarkMode ? '#9ca3af' : '#64748b') }
+                ]}>
+                  Tomorrow
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* INPUT BAR — stays at the bottom, lifted by KeyboardAvoidingView */}
           <View style={[
@@ -471,5 +520,27 @@ const styles = StyleSheet.create({
     fontFamily: "Source Serif Pro",
     fontWeight:"300",
 
+  },
+
+  // Tomorrow pill
+  pillRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingTop: 6,
+    paddingBottom: 2,
+  },
+  tomorrowPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  tomorrowPillText: {
+    fontSize: 13,
+    fontWeight: '500',
+    fontFamily: 'Source Serif Pro',
   },
 });

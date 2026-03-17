@@ -661,10 +661,10 @@ console.log('🔍 Guided Tour Debug:', {
               {showAllTasks ? 'All Tasks' : "Today's Tasks"}
             </Text>
             <Feather 
-              name="filter" 
-              size={14} 
+              name="code" 
+              size={20} 
               color={showAllTasks ? (isDarkMode ? '#7cb3ffff' : '#4a7fd4ff') : (isDarkMode ? '#9ca3af' : '#94a3b8')} 
-              style={{ marginLeft: 6 }} 
+              style={{ marginLeft: 6, transform: [{ rotate: '90deg' }] }} 
             />
           </Pressable>
           <View style={styles.headerButtons}>
@@ -928,6 +928,9 @@ scrollContentSanskrit: {
   filterToggle: {
     flexDirection: 'row',
     alignItems: 'center',
+
+
+
   },
   h1: { 
     fontSize: 17, 

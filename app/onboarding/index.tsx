@@ -246,8 +246,8 @@ export default function Onboarding() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Audio setup with expo-audio
-  const AUDIO_URL = "https://res.cloudinary.com/dztfsdmcv/video/upload/v1757360585/Drifting_Echoes_j5fudj.mp3"
-  const IMAGE_URL= "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757413784/hflxxtpxtyrhrcteczzn_w1ll3e.webp"
+  const AUDIO_URL = "https://pub-4862ee5d51df47c4849ba812da5460ff.r2.dev/Drifting_Echoes_j5fudj.aac"
+  const IMAGE_URL= "https://pub-4862ee5d51df47c4849ba812da5460ff.r2.dev/hflxxtpxtyrhrcteczzn_w1ll3e.webp"
   const audioPlayer = useAudioPlayer(AUDIO_URL);
 
    // Add state to track if audio is loading

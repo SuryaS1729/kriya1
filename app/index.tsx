@@ -22,6 +22,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Spinner } from '@/components/ui/spinner';
 import * as Notifications from 'expo-notifications';
 import { GuidedTour } from '../components/GuidedTour/GuidedTour';
+import { PressableScale } from 'pressto';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
@@ -656,17 +657,17 @@ console.log('🔍 Guided Tour Debug:', {
         { backgroundColor: isDarkMode ? '#03233181' : '#ffffffff', paddingBottom: insets.bottom }
       ]}>
         <View style={styles.tasksHeader}>
-          <Pressable onPress={handleFilterToggle} style={styles.filterToggle} hitSlop={8}>
+          <PressableScale onPress={handleFilterToggle} style={styles.filterToggle} hitSlop={8} rippleColor={"transparent"}>
             <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#5a6173ff' }]}>
               {showAllTasks ? 'All Tasks' : "Today's Tasks"}
             </Text>
             <Feather 
               name="code" 
               size={20} 
-              color={showAllTasks ? (isDarkMode ? '#7cb3ffff' : '#4a7fd4ff') : (isDarkMode ? '#9ca3af' : '#94a3b8')} 
+              color={showAllTasks ? (isDarkMode ? '#9ca3af' : '#4a7fd4ff') : (isDarkMode ? '#9ca3af' : '#94a3b8')} 
               style={{ marginLeft: 6, transform: [{ rotate: '90deg' }] }} 
             />
-          </Pressable>
+          </PressableScale>
           <View style={styles.headerButtons}>
             <Link href="/testwidget" asChild>
               <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>

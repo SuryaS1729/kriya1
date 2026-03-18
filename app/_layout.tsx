@@ -141,7 +141,6 @@ export default function Root() {
           <Stack.Screen name="history" options={{animation:'fade', animationDuration:200	}}/>
           <Stack.Screen name="read" options={{animation:'slide_from_bottom', animationDuration:300}} />
           <Stack.Screen name="shloka/[id]" options={{animation:'fade', animationDuration:100}}/>
-          <Stack.Screen name="share" options={{animation:'slide_from_bottom'}}/>
           <Stack.Screen name="bookmarks" options={{animation:'fade',animationDuration:200}}/>
           <Stack.Screen name="focus" options={{ title: 'Focus Mode' , animation:'fade',animationDuration:100}} />
           <Stack.Screen name="share2" options={{animation:'slide_from_bottom', animationDuration:200}}/>

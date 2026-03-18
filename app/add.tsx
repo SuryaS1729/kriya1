@@ -356,7 +356,7 @@ export default function Add() {
                 ]}
               >
                 <Feather
-                  name="sun"
+                  name="clock"
                   size={13}
                   color={isTomorrow
                     ? (isDarkMode ? '#93c5fd' : '#2563eb')
@@ -525,22 +525,29 @@ const styles = StyleSheet.create({
   // Tomorrow pill
   pillRow: {
     flexDirection: 'row',
+    alignItems:'center',
+    justifyContent:'flex-end',
     paddingHorizontal: 16,
-    paddingTop: 6,
+    paddingTop: 2,
     paddingBottom: 2,
+    // backgroundColor:'red'
   },
   tomorrowPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+
+    gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
+    backgroundColor:'red'
   },
   tomorrowPillText: {
     fontSize: 13,
-    fontWeight: '500',
-    fontFamily: 'Source Serif Pro',
+
+
+
+
   },
 });

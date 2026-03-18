@@ -676,6 +676,13 @@ console.log('🔍 Guided Tour Debug:', {
                 </View>
               </TouchableOpacity>
             </Link>
+            <Link href="/shader-background" asChild>
+              <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
+                <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
+                  <Feather name='droplet' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
+                </View>
+              </TouchableOpacity>
+            </Link>
             <Link href="/calendar" asChild>
               <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
                 <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>

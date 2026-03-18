@@ -13,6 +13,7 @@ import {
   FlatList,
   TouchableOpacity
 } from 'react-native';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '../components/TopBar';
 import { useKriya } from '../lib/store';
@@ -69,6 +70,10 @@ function formatDateLabel(dayKey: number) {
   });
 }
 
+function toStartOfDayKey(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
 function getRemainingCount(tasks: Task[]) {
   return tasks.filter((task) => !task.completed).length;
 }
@@ -79,6 +84,9 @@ export default function Add() {
   const [text, setText] = useState('');
   const [dayTasks, setDayTasks] = useState<Task[]>([]);
   const [isTomorrow, setIsTomorrow] = useState(false);
+  const [isCustom, setIsCustom] = useState(false);
+  const [customDayKey, setCustomDayKey] = useState<number | null>(null);
+  const [showCustomPicker, setShowCustomPicker] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   // Reanimated shared value for rotation
@@ -99,18 +107,25 @@ export default function Add() {
     return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   })();
 
-  // Active day key: if user toggled "Tomorrow" pill, use tomorrowKey; else use paramDayKey
-  const activeDayKey = (isTodayScreen && isTomorrow) ? tomorrowKey : paramDayKey;
+  // Active day key: if user toggled "Tomorrow" or "Custom", use that selection; otherwise use paramDayKey
+  const activeDayKey = (isTodayScreen && isTomorrow)
+    ? tomorrowKey
+    : (isTodayScreen && isCustom && customDayKey != null)
+      ? customDayKey
+      : paramDayKey;
   const isActiveToday = activeDayKey === todayKey();
   const visibleTasks = isActiveToday ? tasksToday : dayTasks;
   const dateLabel = formatDateLabel(activeDayKey);
   const summaryLabel = `${visibleTasks.length} total, ${getRemainingCount(visibleTasks)} remaining`;
+  const customLabel = customDayKey != null ? formatDateLabel(customDayKey) : 'Pick a date';
 
   // Calculate dynamic placeholder text
   const placeholderText = visibleTasks.length > 6
     ? "Easy there, overachiever 😅"
     : isTomorrow
       ? "Plan ahead for tomorrow 🌅"
+      : isCustom
+        ? "Plan ahead for a custom day 📅"
       : "Fulfill your dharma today 🏹";
 
   const refreshSelectedDayTasks = useCallback(() => {
@@ -121,6 +136,10 @@ export default function Add() {
 
     setDayTasks(getTasksForDay(activeDayKey));
   }, [isActiveToday, refresh, activeDayKey]);
+
+  useEffect(() => {
+    refreshSelectedDayTasks();
+  }, [refreshSelectedDayTasks]);
 
   const focusInput = useCallback(() => {
     inputRef.current?.focus();
@@ -217,6 +236,27 @@ export default function Add() {
     }
     router.replace('/');
   }
+
+  const openCustomPicker = () => {
+    selectionHaptic();
+    setIsTomorrow(false);
+    setIsCustom(true);
+    setCustomDayKey((current) => current ?? tomorrowKey);
+    setShowCustomPicker(true);
+  };
+
+  const onCustomDateChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowCustomPicker(false);
+    }
+
+    if (!selectedDate) {
+      return;
+    }
+
+    setCustomDayKey(toStartOfDayKey(selectedDate));
+    setIsCustom(true);
+  };
 
 
   const orderedTasks = [
@@ -339,39 +379,89 @@ export default function Add() {
             keyboardDismissMode={Platform.OS === 'ios' ? 'on-drag' : 'none'}
           />
 
-          {/* TOMORROW PILL — only shown when navigated for today */}
+          {/* DATE PILLS — only shown when navigated for today */}
           {isTodayScreen && (
-            <View style={styles.pillRow}>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => {
-                  selectionHaptic();
-                  setIsTomorrow(prev => !prev);
-                }}
-                style={[
-                  styles.tomorrowPill,
-                  isTomorrow
-                    ? { backgroundColor: isDarkMode ? '#1e3a5f' : '#dbeafe', borderColor: isDarkMode ? '#3b82f6' : '#93c5fd' }
-                    : { backgroundColor: isDarkMode ? '#1f2937' : '#f1f5f9', borderColor: isDarkMode ? '#374151' : '#e2e8f0' },
-                ]}
-              >
-                <Feather
-                  name="clock"
-                  size={13}
-                  color={isTomorrow
-                    ? (isDarkMode ? '#93c5fd' : '#2563eb')
-                    : (isDarkMode ? '#9ca3af' : '#64748b')}
-                />
-                <Text style={[
-                  styles.tomorrowPillText,
-                  { color: isTomorrow
-                    ? (isDarkMode ? '#93c5fd' : '#2563eb')
-                    : (isDarkMode ? '#9ca3af' : '#64748b') }
-                ]}>
-                  Tomorrow
+            <View style={styles.pillWrap}>
+              <View style={styles.pillRow}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    selectionHaptic();
+                    setIsCustom(false);
+                    setShowCustomPicker(false);
+                    setIsTomorrow(prev => !prev);
+                  }}
+                  style={[
+                    styles.datePill,
+                    isTomorrow
+                      ? { backgroundColor: isDarkMode ? '#1e3a5f' : '#dbeafe', borderColor: isDarkMode ? '#3b82f6' : '#93c5fd' }
+                      : { backgroundColor: isDarkMode ? '#1f2937' : '#f1f5f9', borderColor: isDarkMode ? '#374151' : '#e2e8f0' },
+                  ]}
+                >
+                  <Feather
+                    name="clock"
+                    size={13}
+                    color={isTomorrow
+                      ? (isDarkMode ? '#93c5fd' : '#2563eb')
+                      : (isDarkMode ? '#9ca3af' : '#64748b')}
+                  />
+                  <Text style={[
+                    styles.datePillText,
+                    { color: isTomorrow
+                      ? (isDarkMode ? '#93c5fd' : '#2563eb')
+                      : (isDarkMode ? '#9ca3af' : '#64748b') }
+                  ]}>
+                    Tomorrow
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={openCustomPicker}
+                  style={[
+                    styles.datePill,
+                    isCustom
+                      ? { backgroundColor: isDarkMode ? '#143b2f' : '#dcfce7', borderColor: isDarkMode ? '#10b981' : '#86efac' }
+                      : { backgroundColor: isDarkMode ? '#1f2937' : '#f1f5f9', borderColor: isDarkMode ? '#374151' : '#e2e8f0' },
+                  ]}
+                >
+                  <Feather
+                    name="calendar"
+                    size={13}
+                    color={isCustom
+                      ? (isDarkMode ? '#6ee7b7' : '#16a34a')
+                      : (isDarkMode ? '#9ca3af' : '#64748b')}
+                  />
+                  <Text
+                    numberOfLines={1}
+                    style={[
+                      styles.datePillText,
+                      { color: isCustom
+                        ? (isDarkMode ? '#6ee7b7' : '#16a34a')
+                        : (isDarkMode ? '#9ca3af' : '#64748b') }
+                    ]}
+                  >
+                    {isCustom ? customLabel : 'Custom'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {isCustom && (
+                <Text style={[styles.customDateText, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
+                  Selected: {customLabel}
                 </Text>
-              </TouchableOpacity>
+              )}
             </View>
+          )}
+
+          {showCustomPicker && Platform.OS !== 'web' && (
+            <DateTimePicker
+              value={customDayKey != null ? new Date(customDayKey) : new Date(tomorrowKey)}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'inline' : 'default'}
+              onChange={onCustomDateChange}
+              minimumDate={new Date(todayKey())}
+            />
           )}
 
           {/* INPUT BAR — stays at the bottom, lifted by KeyboardAvoidingView */}
@@ -522,7 +612,9 @@ const styles = StyleSheet.create({
 
   },
 
-  // Tomorrow pill
+  pillWrap: {
+    gap: 8,
+  },
   pillRow: {
     flexDirection: 'row',
     alignItems:'center',
@@ -530,24 +622,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 2,
     paddingBottom: 2,
-    // backgroundColor:'red'
+    gap: 8,
   },
-  tomorrowPill: {
+  datePill: {
     flexDirection: 'row',
     alignItems: 'center',
-
     gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    backgroundColor:'red'
   },
-  tomorrowPillText: {
+  datePillText: {
     fontSize: 13,
-
-
-
-
+  },
+  customDateText: {
+    paddingHorizontal: 16,
+    textAlign: 'right',
+    fontSize: 12,
   },
 });

@@ -104,14 +104,7 @@ export default function Root() {
         applied_at INTEGER NOT NULL
       );
     `);
-    // Goals table for long-term goals
-    db.execSync(`
-      CREATE TABLE IF NOT EXISTS goals(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        created_at INTEGER NOT NULL
-      );
-    `);
+    db.execSync(`DROP TABLE IF EXISTS goals`);
 
     const cols = (db.getAllSync(`PRAGMA table_info(tasks)`) as unknown as { name: string }[]) || [];
     const has = (n: string) => cols.some(c => c.name === n);
@@ -133,7 +126,6 @@ export default function Root() {
 
     db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_day_key ON tasks(day_key)`);
     db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_completed_at ON tasks(completed_at)`);
-    db.execSync(`CREATE INDEX IF NOT EXISTS idx_goals_created_at ON goals(created_at)`);
   }
 
   return (
@@ -152,13 +144,8 @@ export default function Root() {
           <Stack.Screen name="share" options={{animation:'slide_from_bottom'}}/>
           <Stack.Screen name="bookmarks" options={{animation:'fade',animationDuration:200}}/>
           <Stack.Screen name="focus" options={{ title: 'Focus Mode' , animation:'fade',animationDuration:100}} />
-          <Stack.Screen name="goals" options={{animation:'slide_from_bottom', animationDuration:200}}/>
           <Stack.Screen name="share2" options={{animation:'slide_from_bottom', animationDuration:200}}/>
           <Stack.Screen name="listen" options={{animation:'slide_from_bottom', animationDuration:300}}/>
-          <Stack.Screen name="testwidget" options={{animation:'default', animationDuration:200}}/>
-          <Stack.Screen name="shader-background" options={{animation:'fade', animationDuration:200}}/>
-
-
         </Stack>
       </SQLiteProvider>
       <AppToastHost />

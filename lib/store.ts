@@ -14,19 +14,10 @@ import {
   removeTask as dbRemoveTask,
   type Task,
 } from './tasks';
-import {
-  getAllGoals,
-  insertGoal,
-  removeGoal as dbRemoveGoal,
-  updateGoal as dbUpdateGoal,
-  type Goal,
-} from './goals';
 import { getShlokaAt, getTotalShlokas } from './shloka';
 import { ensureProgressForToday, countCompletedSince } from './progress';
 import { isDbReady } from './dbReady';
 import type { ShlokaRow } from './shloka';
-
-export type { Goal };
 
 // Configure notification handler - Updated to match official docs
 Notifications.setNotificationHandler({
@@ -118,13 +109,6 @@ interface KriyaState {
   setReminderTime: (hour: number, minute: number) => Promise<void>;
   toggleNotifications: () => Promise<void>;
   initializeNotifications: () => Promise<void>;
-
-  // Goals
-  goals: Goal[];
-  addGoal: (title: string) => void;
-  removeGoal: (id: number) => void;
-  updateGoal: (id: number, title: string) => void;
-  refreshGoals: () => void;
 
   // Listen mode
   listenProgress: { shlokaIndex: number };
@@ -221,7 +205,6 @@ export const useKriya = create<KriyaState>()(
       bookmarks: [],
       hasCompletedOnboarding: false,
       focusSessions: {},
-      goals: [],
       listenProgress: { shlokaIndex: 0 },
       hasCompletedTour: false,
         hasSeenGuidedTour: false,
@@ -488,32 +471,6 @@ export const useKriya = create<KriyaState>()(
         } catch (error) {
           // console.error('❌ Failed to initialize notifications:', error);
         }
-      },
-
-      // Goals methods
-      refreshGoals: () => {
-        try {
-          if (isDbReady()) {
-            set({ goals: getAllGoals() });
-          }
-        } catch (e) {
-          // console.warn('refreshGoals failed:', e);
-        }
-      },
-
-      addGoal: (title: string) => {
-        insertGoal(title);
-        set({ goals: getAllGoals() });
-      },
-
-      removeGoal: (id: number) => {
-        dbRemoveGoal(id);
-        set({ goals: getAllGoals() });
-      },
-
-      updateGoal: (id: number, title: string) => {
-        dbUpdateGoal(id, title);
-        set({ goals: getAllGoals() });
       },
 
       setListenProgress: (index: number) => {

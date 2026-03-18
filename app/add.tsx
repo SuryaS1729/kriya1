@@ -446,11 +446,11 @@ export default function Add() {
                 </TouchableOpacity>
               </View>
 
-              {isCustom && (
+              {/* {isCustom && (
                 <Text style={[styles.customDateText, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
                   Selected: {customLabel}
                 </Text>
-              )}
+              )} */}
             </View>
           )}
 

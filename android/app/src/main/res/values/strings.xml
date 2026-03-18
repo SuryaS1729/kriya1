@@ -3,7 +3,4 @@
   <string name="expo_system_ui_user_interface_style" translatable="false">automatic</string>
   <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
   <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
-  <string name="widget_hello_description" translatable="false">This is my first widget</string>
-  <string name="widget_toptasks_description" translatable="false">Shows your top tasks for today</string>
-  <string name="widget_quickadd_description" translatable="false">Open Add Task screen directly</string>
 </resources>

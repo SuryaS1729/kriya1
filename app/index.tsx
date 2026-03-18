@@ -663,7 +663,7 @@ console.log('🔍 Guided Tour Debug:', {
             </Text>
             <Feather 
               name="code" 
-              size={20} 
+              size={18} 
               color={showAllTasks ? (isDarkMode ? '#9ca3af' : '#4a7fd4ff') : (isDarkMode ? '#9ca3af' : '#94a3b8')} 
               style={{ marginLeft: 6, transform: [{ rotate: '90deg' }] }} 
             />

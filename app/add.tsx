@@ -35,6 +35,7 @@ import Animated, {
 import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { mediumImpactHaptic, selectionHaptic, errorHaptic } from '../lib/haptics';
+import { PressableScale } from 'pressto';
 
 
 // Create animated Feather component
@@ -383,14 +384,14 @@ export default function Add() {
           {isTodayScreen && (
             <View style={styles.pillWrap}>
               <View style={styles.pillRow}>
-                <TouchableOpacity
-                  activeOpacity={0.7}
+                <PressableScale
                   onPress={() => {
                     selectionHaptic();
                     setIsCustom(false);
                     setShowCustomPicker(false);
                     setIsTomorrow(prev => !prev);
                   }}
+                  rippleColor="transparent"
                   style={[
                     styles.datePill,
                     isTomorrow
@@ -413,11 +414,11 @@ export default function Add() {
                   ]}>
                     Tomorrow
                   </Text>
-                </TouchableOpacity>
+                </PressableScale>
 
-                <TouchableOpacity
-                  activeOpacity={0.7}
+                <PressableScale
                   onPress={openCustomPicker}
+                  rippleColor="transparent"
                   style={[
                     styles.datePill,
                     isCustom
@@ -443,7 +444,7 @@ export default function Add() {
                   >
                     {isCustom ? customLabel : 'Custom'}
                   </Text>
-                </TouchableOpacity>
+                </PressableScale>
               </View>
 
               {/* {isCustom && (

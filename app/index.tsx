@@ -25,6 +25,7 @@ import { GuidedTour } from '../components/GuidedTour/GuidedTour';
 import { PressableScale } from 'pressto';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
+const ALL_TASK_REORDER_DELAY_MS = 320;
 
 // Update the Checkbox component for better timing
 
@@ -161,9 +162,15 @@ export default function Home() {
  // ADD refs to track listeners
   const notificationListener = useRef<Notifications.EventSubscription | null>(null);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
+  const todayTaskReorderTimeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+  const allTaskReorderTimeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+  const yesterdayTaskReorderTimeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
   const [yesterdayTasksState, setYesterdayTasksState] = useState<Task[]>([]);
   const [showAllTasks, setShowAllTasks] = useState(false);
   const [allTasksState, setAllTasksState] = useState<Task[]>([]);
+  const [delayedTodayCompletedTaskIds, setDelayedTodayCompletedTaskIds] = useState<number[]>([]);
+  const [delayedCompletedTaskIds, setDelayedCompletedTaskIds] = useState<number[]>([]);
+  const [delayedYesterdayCompletedTaskIds, setDelayedYesterdayCompletedTaskIds] = useState<number[]>([]);
 
   // Fade animation for shloka card
   const fade = useSharedValue(0);
@@ -259,50 +266,80 @@ const handleTogglePress = () => {
   // Incomplete tasks first, completed tasks after, preserving entry order in each bucket.
   const sortedTasks = useMemo(() => {
     const incomplete = tasks
-      .filter((task) => !task.completed)
+      .filter((task) => !task.completed || delayedTodayCompletedTaskIds.includes(task.id))
       .sort((a, b) => a.created_at - b.created_at);
     const completed = tasks
-      .filter((task) => task.completed)
+      .filter((task) => task.completed && !delayedTodayCompletedTaskIds.includes(task.id))
       .sort((a, b) => a.created_at - b.created_at);
     return [...incomplete, ...completed];
-  }, [tasks]);
+  }, [tasks, delayedTodayCompletedTaskIds]);
 
   // All tasks: incomplete first (newest→oldest), then completed (newest→oldest), cap completed at 10
   const sortedAllTasks = useMemo(() => {
     const incomplete = allTasksState
-      .filter((task) => !task.completed)
+      .filter((task) => !task.completed || delayedCompletedTaskIds.includes(task.id))
       .sort((a, b) => b.created_at - a.created_at);
     const completed = allTasksState
-      .filter((task) => task.completed)
+      .filter((task) => task.completed && !delayedCompletedTaskIds.includes(task.id))
       .sort((a, b) => b.created_at - a.created_at)
       .slice(0, 10); // keep only the 10 most recently created completed tasks
     return [...incomplete, ...completed];
-  }, [allTasksState]);
+  }, [allTasksState, delayedCompletedTaskIds]);
 
   const onToggle = useCallback((id: number, completed: boolean) => {
+    const existingTimeout = todayTaskReorderTimeouts.current[id];
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+      delete todayTaskReorderTimeouts.current[id];
+    }
+
     if (!completed) {
       taskCompleteHaptic(); // Success haptic for completing tasks
+      setDelayedTodayCompletedTaskIds((state) => (state.includes(id) ? state : [...state, id]));
     } else {
       selectionHaptic(); // Light haptic for uncompleting
+      setDelayedTodayCompletedTaskIds((state) => state.filter((taskId) => taskId !== id));
     }
+
     toggle(id);
+
+    if (!completed) {
+      todayTaskReorderTimeouts.current[id] = setTimeout(() => {
+        setDelayedTodayCompletedTaskIds((state) => state.filter((taskId) => taskId !== id));
+        delete todayTaskReorderTimeouts.current[id];
+      }, ALL_TASK_REORDER_DELAY_MS);
+    }
   }, [toggle]);
 
   const onRemove = useCallback((id: number) => {
+    const existingTimeout = todayTaskReorderTimeouts.current[id];
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+      delete todayTaskReorderTimeouts.current[id];
+    }
     errorHaptic(); // Error haptic for deletion
+    setDelayedTodayCompletedTaskIds((state) => state.filter((taskId) => taskId !== id));
     remove(id);
   }, [remove]);
 
   // Handlers for "All Tasks" mode
   const onToggleAllTask = useCallback((id: number, completed: boolean) => {
     const next = !completed;
+    const existingTimeout = allTaskReorderTimeouts.current[id];
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+      delete allTaskReorderTimeouts.current[id];
+    }
+
     if (next) {
       taskCompleteHaptic();
+      setDelayedCompletedTaskIds((state) => (state.includes(id) ? state : [...state, id]));
     } else {
       selectionHaptic();
+      setDelayedCompletedTaskIds((state) => state.filter((taskId) => taskId !== id));
     }
+
     setTaskCompleted(id, next, null);
-    // Update in-place so completed tasks move to bottom (same UX as today's tasks)
     setAllTasksState(state =>
       state.map(t =>
         t.id === id
@@ -310,13 +347,27 @@ const handleTogglePress = () => {
           : t
       )
     );
+
+    if (next) {
+      allTaskReorderTimeouts.current[id] = setTimeout(() => {
+        setDelayedCompletedTaskIds((state) => state.filter((taskId) => taskId !== id));
+        delete allTaskReorderTimeouts.current[id];
+      }, ALL_TASK_REORDER_DELAY_MS);
+    }
+
     // Also refresh today's tasks in case this was a today task
     refresh();
   }, [refresh]);
 
   const onRemoveAllTask = useCallback((id: number) => {
+    const existingTimeout = allTaskReorderTimeouts.current[id];
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+      delete allTaskReorderTimeouts.current[id];
+    }
     errorHaptic();
     removeTaskDb(id);
+    setDelayedCompletedTaskIds(state => state.filter(taskId => taskId !== id));
     setAllTasksState(state => state.filter(t => t.id !== id));
     // Also refresh today's tasks in case this was a today task
     refresh();
@@ -409,21 +460,30 @@ console.log('🔍 Guided Tour Debug:', {
 
   const sortedYesterdayTasks = useMemo(() => {
     const incomplete = yesterdayTasksState
-      .filter((task) => !task.completed)
+      .filter((task) => !task.completed || delayedYesterdayCompletedTaskIds.includes(task.id))
       .sort((a, b) => a.created_at - b.created_at);
     const completed = yesterdayTasksState
-      .filter((task) => task.completed)
+      .filter((task) => task.completed && !delayedYesterdayCompletedTaskIds.includes(task.id))
       .sort((a, b) => a.created_at - b.created_at);
     return [...incomplete, ...completed];
-  }, [yesterdayTasksState]);
+  }, [yesterdayTasksState, delayedYesterdayCompletedTaskIds]);
 
   const onToggleYesterdayTask = useCallback((id: number, completed: boolean) => {
     const next = !completed;
+    const existingTimeout = yesterdayTaskReorderTimeouts.current[id];
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+      delete yesterdayTaskReorderTimeouts.current[id];
+    }
+
     if (next) {
       taskCompleteHaptic();
+      setDelayedYesterdayCompletedTaskIds((state) => (state.includes(id) ? state : [...state, id]));
     } else {
       selectionHaptic();
+      setDelayedYesterdayCompletedTaskIds((state) => state.filter((taskId) => taskId !== id));
     }
+
     setTaskCompleted(id, next, null);
     setYesterdayTasksState((state) =>
       state.map((task) =>
@@ -432,11 +492,24 @@ console.log('🔍 Guided Tour Debug:', {
           : task
       )
     );
+
+    if (next) {
+      yesterdayTaskReorderTimeouts.current[id] = setTimeout(() => {
+        setDelayedYesterdayCompletedTaskIds((state) => state.filter((taskId) => taskId !== id));
+        delete yesterdayTaskReorderTimeouts.current[id];
+      }, ALL_TASK_REORDER_DELAY_MS);
+    }
   }, []);
 
   const onRemoveYesterday = useCallback((id: number) => {
+    const existingTimeout = yesterdayTaskReorderTimeouts.current[id];
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
+      delete yesterdayTaskReorderTimeouts.current[id];
+    }
     errorHaptic();
     removeTaskDb(id);
+    setDelayedYesterdayCompletedTaskIds((state) => state.filter((taskId) => taskId !== id));
     setYesterdayTasksState((state) => state.filter((task) => task.id !== id));
   }, []);
 
@@ -486,6 +559,17 @@ console.log('🔍 Guided Tour Debug:', {
     }
   }, [ready, hasCompletedOnboarding, notificationsEnabled, initializeNotifications]);
 
+
+  useEffect(() => {
+    const todayReorderTimeouts = todayTaskReorderTimeouts.current;
+    const reorderTimeouts = allTaskReorderTimeouts.current;
+    const yesterdayReorderTimeouts = yesterdayTaskReorderTimeouts.current;
+    return () => {
+      Object.values(todayReorderTimeouts).forEach(clearTimeout);
+      Object.values(reorderTimeouts).forEach(clearTimeout);
+      Object.values(yesterdayReorderTimeouts).forEach(clearTimeout);
+    };
+  }, []);
 
   useEffect(() => {
 

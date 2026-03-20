@@ -92,7 +92,7 @@ export const SHARE_BACKGROUNDS = [
       id,
       label: id.toUpperCase(),
       colors: ['#1a1a2e', '#16213e'],
-      textBoxBg: 'rgba(20, 10, 30, 0.15)',
+      textBoxBg: 'rgba(0, 17, 28, 0.55)',
       textBoxPosition: 'center',
       textColor: '#ffffff',
       translationColor: '#f5f5f5',

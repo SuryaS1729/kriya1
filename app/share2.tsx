@@ -14,6 +14,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useKriya } from '../lib/store';
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../lib/haptics';
 import ViewShot, { captureRef } from 'react-native-view-shot';
@@ -315,12 +317,36 @@ export default function Share2() {
         </View>
         
         {/* Bottom branding */}
-        <Text style={[
-          selectedFormat === 'story' ? styles.brandingBottom : styles.brandingBottomPost,
-          { color: currentBackground.brandingColor },
-        ]}>
-          kriya
-        </Text>
+        <View
+          style={selectedFormat === 'story' ? styles.brandingWrap : styles.brandingWrapPost}
+        >
+          <Text style={[
+            styles.brandingBottom,
+            { color: currentBackground.brandingColor },
+          ]}>
+            kriya
+          </Text>
+          <View style={styles.platformRow}>
+            <Text
+              style={[
+                styles.platformText,
+                { color: currentBackground.brandingColor },
+              ]}
+            >
+              available on
+            </Text>
+            <Ionicons
+              name="logo-google-playstore"
+              size={8}
+              color={currentBackground.brandingColor}
+            />
+            <FontAwesome5
+              name="app-store-ios"
+              size={8}
+              color={currentBackground.brandingColor}
+            />
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -658,25 +684,36 @@ marginTop: 10,
     textAlign: 'right',
     marginTop: 12,
   },
-  brandingBottom: {
+  brandingWrap: {
     position: 'absolute',
     bottom: 10,
     alignSelf: 'center',
+    alignItems: 'center',
+    gap: 4,
+  },
+  brandingWrapPost: {
+    position: 'absolute',
+    top: 10,
+    right: 16,
+    alignItems: 'flex-end',
+    gap: 4,
+  },
+  brandingBottom: {
     fontFamily: 'Instrument Serif',
     fontSize: 18,
     color: '#ffffff',
     fontStyle: 'italic',
   },
-  brandingBottomPost:{
- position: 'absolute',
-    top: 10,
-    alignSelf: 'flex-end',
-    fontFamily: 'Instrument Serif',
-    fontSize: 18,
-    marginRight:16,
-
-    color: '#ffffff',
-    fontStyle: 'italic',
+  platformRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  platformText: {
+    fontFamily: 'Space Mono',
+    fontSize: 6,
+    letterSpacing: 0.3,
+    textTransform: 'lowercase',
   },
   bottomPanel: {
     paddingTop: 16,

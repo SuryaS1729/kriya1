@@ -320,7 +320,7 @@ const handleBookPress = () => {
       if (translation) englishText += `Translation. ${translation}`;
       if (row.commentary) englishText += ` ... Commentary. ${row.commentary}`;
 
-      // Fetch both audio files in parallel (from cache/R2/Sarvam)
+      // Fetch both audio files in parallel from cache/R2 recordings
       const [shlokaAudio, englishAudio] = await Promise.all([
         textToSpeech(row.text, 'hi-IN', row.chapter_number, row.verse_number),
         englishText ? textToSpeech(englishText, 'en-IN', row.chapter_number, row.verse_number) : Promise.resolve(null),

@@ -26,6 +26,12 @@ import {
   SliderFilledTrack,
   SliderThumb,
 } from '@/components/ui/slider';
+import {
+  SHARE_BACKGROUNDS,
+  getShareBackground,
+  getShareBackgroundImageSource,
+  type ShareBackgroundId,
+} from '../lib/shareBackgrounds';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -37,112 +43,6 @@ const FORMATS = [
 ] as const;
 
 type FormatId = typeof FORMATS[number]['id'];
-
-const EXTRA_BACKGROUND_IMAGE_SOURCES = {
-  b1: require('../assets/images/b1.jpeg'),
-  b2: require('../assets/images/b2.jpeg'),
-  b3: require('../assets/images/b3.jpeg'),
-  b4: require('../assets/images/b4.jpeg'),
-  b5: require('../assets/images/b5.jpeg'),
-  b6: require('../assets/images/b6.jpeg'),
-  b7: require('../assets/images/b7.jpeg'),
-  b8: require('../assets/images/b8.jpeg'),
-  b9: require('../assets/images/b9.jpeg'),
-  b10: require('../assets/images/b10.jpeg'),
-  b11: require('../assets/images/b11.jpeg'),
-  b12: require('../assets/images/b12.jpeg'),
-  b13: require('../assets/images/b13.jpeg'),
-  b14: require('../assets/images/b14.png'),
-} as const;
-
-const EXTRA_IMAGE_BACKGROUNDS = [
-  { id: 'b1', label: 'B1' },
-  { id: 'b2', label: 'B2' },
-  { id: 'b3', label: 'B3' },
-  { id: 'b4', label: 'B4' },
-  { id: 'b5', label: 'B5' },
-  { id: 'b6', label: 'B6' },
-  { id: 'b7', label: 'B7' },
-  { id: 'b8', label: 'B8' },
-  { id: 'b9', label: 'B9' },
-  { id: 'b10', label: 'B10' },
-  { id: 'b11', label: 'B11' },
-  { id: 'b12', label: 'B12' },
-  { id: 'b13', label: 'B13' },
-  { id: 'b14', label: 'B14' },
-] as const;
-
-// Background configurations with per-background styling
-const BACKGROUNDS = [
-  {
-    id: 'krishna',
-    label: 'Krishna',
-    type: 'image' as const,
-    colors: ['#1a1a2e', '#16213e'],
-    // Per-background style overrides
-    textBoxBg: 'rgba(30, 30, 30, 0.9)',
-    textBoxPosition: 'center' as const,   // 'top' | 'center' | 'bottom'
-    textColor: '#f5f5f5',
-    translationColor: '#e0e0e0',
-    refColor: '#b0b0b0',
-    brandingColor: '#ffffff',
-    bgOpacity: 0.6,
-  },
-  {
-    id: 'temple',
-    label: 'Temple',
-    type: 'image' as const,
-    colors: ['#2d1b3d', '#1a1a2e'],
-    textBoxBg: 'rgba(20, 10, 30, 0.09)',
-    textBoxPosition: 'center' as const,
-    textColor: '#f5f5f5',
-    translationColor: '#e0e0e0',
-    refColor: '#b0b0b0',
-    brandingColor: '#ffffff',
-    bgOpacity: 0.65,
-  },
-  {
-    id: 'ocean',
-    label: 'Ocean',
-    type: 'gradient' as const,
-    colors: ['#0f0c29', '#16537e', '#0f0c29'],
-    textBoxBg: 'rgba(15, 52, 96, 0)',
-    textBoxPosition: 'center' as const,
-    textColor: '#e0f0ff',
-    translationColor: '#b8d8f0',
-    refColor: '#8ab4d4',
-    brandingColor: '#cce5ff',
-    bgOpacity: 1,
-  },
-  {
-    id: 'midnight',
-    label: 'Midnight',
-    type: 'gradient' as const,
-    colors: ['#0f0c29', '#302b63', '#24243e'],
-    textBoxBg: 'rgba(15, 12, 41, 0)',
-    textBoxPosition: 'center' as const,
-    textColor: '#e8e6f0',
-    translationColor: '#c8c4d8',
-    refColor: '#9a96b0',
-    brandingColor: '#d4d0e8',
-    bgOpacity: 1,
-  },
-  ...EXTRA_IMAGE_BACKGROUNDS.map((bg) => ({
-    id: bg.id,
-    label: bg.label,
-    type: 'image' as const,
-    colors: ['#1a1a2e', '#16213e'],
-    textBoxBg: 'rgba(20, 10, 30, 0.15)',
-    textBoxPosition: 'center' as const,
-    textColor: '#ffffff',
-    translationColor: '#f5f5f5',
-    refColor: '#ffffff',
-    brandingColor: '#ffffff',
-    bgOpacity: 0.6,
-  })),
-];
-
-type BackgroundId = typeof BACKGROUNDS[number]['id'];
 
 const SLIDER_MIN = 0;
 const SLIDER_MAX = 1;
@@ -186,25 +86,39 @@ export default function Share2() {
   
   const isDarkMode = useKriya(s => s.isDarkMode);
   const [selectedFormat, setSelectedFormat] = useState<FormatId>('story');
-  const [selectedBackground, setSelectedBackground] = useState<BackgroundId>('krishna');
+  const [selectedBackground, setSelectedBackground] = useState<ShareBackgroundId>('ocean');
   const [isSharing, setIsSharing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [textboxOpacity, setTextboxOpacity] = useState(parseRgba(BACKGROUNDS[0].textBoxBg).alpha);
+  const [textboxOpacity, setTextboxOpacity] = useState<number>(
+    parseRgba(SHARE_BACKGROUNDS[0].textBoxBg).alpha,
+  );
+  const [backgroundOpacity, setBackgroundOpacity] = useState<number>(
+    SHARE_BACKGROUNDS[0].defaultBgOpacity,
+  );
   
   const viewShotRef = useRef<ViewShot>(null);
   const captureTargetRef = useRef<View>(null);
   
   const currentFormat = FORMATS.find(f => f.id === selectedFormat)!;
-  const currentBackground = BACKGROUNDS.find(b => b.id === selectedBackground)!;
+  const currentBackground = getShareBackground(selectedBackground);
   const currentTextBoxColor = parseRgba(currentBackground.textBoxBg);
   const resolvedTextBoxBg = formatRgba(currentTextBoxColor, textboxOpacity);
+  const currentBackgroundSource =
+    currentBackground.type === 'image'
+      ? getShareBackgroundImageSource(currentBackground)
+      : null;
 
   useEffect(() => {
     setTextboxOpacity(parseRgba(currentBackground.textBoxBg).alpha);
+    setBackgroundOpacity(currentBackground.defaultBgOpacity);
   }, [currentBackground]);
 
   const updateTextboxOpacity = (nextOpacity: number) => {
     setTextboxOpacity(Math.round(clamp(nextOpacity, SLIDER_MIN, SLIDER_MAX) * 100) / 100);
+  };
+
+  const updateBackgroundOpacity = (nextOpacity: number) => {
+    setBackgroundOpacity(Math.round(clamp(nextOpacity, SLIDER_MIN, SLIDER_MAX) * 100) / 100);
   };
   
   // Calculate preview dimensions to fit screen
@@ -214,21 +128,6 @@ export default function Share2() {
   const previewHeight = previewWidth / currentFormat.aspectRatio;
   
   // Get background image based on selected background
-  const getBackgroundSource = (backgroundId: BackgroundId, format: FormatId = selectedFormat) => {
-    if (backgroundId === 'krishna') {
-      return format === 'story'
-        ? require('../assets/images/rawInstagramStory.png')
-        : require('../assets/images/rawInstagramPost.png');
-    }
-    if (backgroundId === 'temple') {
-      return require('../assets/images/background2.jpg');
-    }
-    if (backgroundId in EXTRA_BACKGROUND_IMAGE_SOURCES) {
-      return EXTRA_BACKGROUND_IMAGE_SOURCES[backgroundId as keyof typeof EXTRA_BACKGROUND_IMAGE_SOURCES];
-    }
-    return require('../assets/images/rawInstagramPost.png');
-  };
-  
   const handleShare = async () => {
     if (!viewShotRef.current?.capture) return;
     
@@ -364,15 +263,23 @@ export default function Share2() {
     <View style={[styles.cardContainer, { width: previewWidth, height: previewHeight }]}>
       {/* Background - either image or gradient */}
       {currentBackground.type === 'image' ? (
-        <Image 
-          source={getBackgroundSource(selectedBackground)} 
-          style={[styles.cardBackground, { opacity: currentBackground.bgOpacity }]}
-          resizeMode="cover"
-        />
+        <>
+          <LinearGradient
+            colors={currentBackground.colors as unknown as [string, string, ...string[]]}
+            style={styles.cardBackground}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+          <Image
+            source={currentBackgroundSource!}
+            style={[styles.cardBackground, { opacity: backgroundOpacity }]}
+            resizeMode="cover"
+          />
+        </>
       ) : (
         <LinearGradient
           colors={currentBackground.colors as unknown as [string, string, ...string[]]}
-          style={[styles.cardBackground, { opacity: currentBackground.bgOpacity }]}
+          style={[styles.cardBackground, { opacity: backgroundOpacity }]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         />
@@ -464,7 +371,7 @@ export default function Share2() {
         </ScrollView>
         
         {/* Bottom Controls Panel */}
-        <View style={[styles.bottomPanel, { backgroundColor: isDarkMode ? '#1f2937' : '#ffffff' }]}>
+        <View style={[styles.bottomPanel, { backgroundColor: isDarkMode ? '#00151a' : '#ffffff' }]}>
           {/* Format Selector */}
           <View style={styles.formatSelector}>
             {FORMATS.map((format) => (
@@ -479,8 +386,8 @@ export default function Share2() {
                   selectedFormat === format.id && styles.formatTabActive,
                   { 
                     backgroundColor: selectedFormat === format.id 
-                      ? (isDarkMode ? '#3b82f6' : '#2563eb')
-                      : (isDarkMode ? '#374151' : '#e5e7eb')
+                      ? (isDarkMode ? '#013540' : '#2563eb')
+                      : (isDarkMode ? '#293a3d' : '#e5e7eb')
                   }
                 ]}
               >
@@ -500,7 +407,7 @@ export default function Share2() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.backgroundSelector}
           >
-            {BACKGROUNDS.map((bg) => (
+            {SHARE_BACKGROUNDS.map((bg) => (
               <Pressable
                 key={bg.id}
                 onPress={() => {
@@ -513,11 +420,19 @@ export default function Share2() {
                 ]}
               >
                 {bg.type === 'image' ? (
-                  <Image 
-                    source={getBackgroundSource(bg.id, 'post')}
-                    style={styles.backgroundSwatchImage}
-                    resizeMode="cover"
-                  />
+                  <View style={styles.backgroundSwatchImageContainer}>
+                    <LinearGradient
+                      colors={bg.colors as unknown as [string, string, ...string[]]}
+                      style={styles.backgroundSwatchGradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    />
+                    <Image
+                      source={getShareBackgroundImageSource(bg)}
+                      style={styles.backgroundSwatchImage}
+                      resizeMode="cover"
+                    />
+                  </View>
                 ) : (
                   <LinearGradient
                     colors={bg.colors as unknown as [string, string, ...string[]]}
@@ -533,46 +448,75 @@ export default function Share2() {
           <View style={styles.opacitySection}>
             <View style={styles.opacityHeader}>
               <Text style={[styles.opacityLabel, { color: isDarkMode ? '#fff' : '#111827' }]}>
-                Text box opacity
-              </Text>
-              <Text style={[styles.opacityValue, { color: isDarkMode ? '#d1d5db' : '#6b7280' }]}>
-                {Math.round(textboxOpacity * 100)}%
+                Background opacity
               </Text>
             </View>
-
-            <Pressable onPress={() => updateTextboxOpacity(parseRgba(currentBackground.textBoxBg).alpha)}>
-              <Text style={[styles.opacityReset, { color: isDarkMode ? '#93c5fd' : '#2563eb' }]}>
-                Reset to background default
-              </Text>
-            </Pressable>
-
-            <Slider
-              value={Math.round(textboxOpacity * 100)}
-              minValue={0}
-              maxValue={100}
-              step={1}
-              size="md"
-              orientation="horizontal"
-              isDisabled={false}
-              isReversed={false}
-              onChange={(value) => {
-                if (typeof value === 'number') {
-                  updateTextboxOpacity(value / 100);
-                }
-              }}
-              className="w-full"
-            >
-              <SliderTrack
-                className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}
+            <View style={styles.opacityControlRow}>
+              <Slider
+                value={Math.round(backgroundOpacity * 100)}
+                minValue={0}
+                maxValue={100}
+                step={1}
+                size="md"
+                orientation="horizontal"
+                isDisabled={false}
+                isReversed={false}
+                onChange={(value) => {
+                  if (typeof value === 'number') {
+                    updateBackgroundOpacity(value / 100);
+                  }
+                }}
+                className="w-full"
               >
-                <SliderFilledTrack
-                  className={isDarkMode ? 'bg-blue-400' : 'bg-blue-600'}
+                <SliderTrack
+                  className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}
+                >
+                  <SliderFilledTrack
+                    className={isDarkMode ? 'bg-teal-700' : 'bg-blue-600'}
+                  />
+                </SliderTrack>
+                <SliderThumb
+                  className={isDarkMode ? 'bg-white border border-gray-900' : 'bg-slate-50 border border-slate-300'}
                 />
-              </SliderTrack>
-              <SliderThumb
-                className={isDarkMode ? 'bg-white border border-gray-900' : 'bg-slate-50 border border-slate-300'}
-              />
-            </Slider>
+              </Slider>
+            </View>
+          </View>
+
+          <View style={styles.opacitySection}>
+            <View style={styles.opacityHeader}>
+              <Text style={[styles.opacityLabel, { color: isDarkMode ? '#fff' : '#111827' }]}>
+                Text box opacity
+              </Text>
+            </View>
+            <View style={styles.opacityControlRow}>
+              <Slider
+                value={Math.round(textboxOpacity * 100)}
+                minValue={0}
+                maxValue={100}
+                step={1}
+                size="md"
+                orientation="horizontal"
+                isDisabled={false}
+                isReversed={false}
+                onChange={(value) => {
+                  if (typeof value === 'number') {
+                    updateTextboxOpacity(value / 100);
+                  }
+                }}
+                className="w-full"
+              >
+                <SliderTrack
+                  className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}
+                >
+                  <SliderFilledTrack
+                    className={isDarkMode ? 'bg-teal-700' : 'bg-blue-600'}
+                  />
+                </SliderTrack>
+                <SliderThumb
+                  className={isDarkMode ? 'bg-white border border-gray-900' : 'bg-slate-50 border border-slate-300'}
+                />
+              </Slider>
+            </View>
           </View>
 
           {/* Action Buttons */}
@@ -583,7 +527,7 @@ export default function Share2() {
               style={[
                 styles.actionButton,
                 styles.saveButton,
-                { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb' }
+                { backgroundColor: isDarkMode ? '#293a3d' : '#e5e7eb' }
               ]}
             >
               {isSaving ? (
@@ -604,7 +548,7 @@ export default function Share2() {
               style={[
                 styles.actionButton,
                 styles.shareButton,
-                { backgroundColor: isDarkMode ? '#3b82f6' : '#2563eb' }
+                { backgroundColor: isDarkMode ? '#013540' : '#2563eb' }
               ]}
             >
               {isSharing ? (
@@ -648,6 +592,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 8,
     marginBottom: 20,
+marginTop: 10,
   },
   formatTab: {
     flex: 1,
@@ -743,29 +688,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 10,
+
   },
   opacitySection: {
     paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingBottom: 14,
   },
   opacityHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
+    marginBottom: 10,
   },
   opacityLabel: {
     fontSize: 14,
     fontWeight: '600',
   },
-  opacityValue: {
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  opacityReset: {
-    fontSize: 12,
-    fontWeight: '500',
-    marginBottom: 10,
+  opacityControlRow: {
+    width: '100%',
   },
   actionButtons: {
     flexDirection: 'row',
@@ -806,6 +743,9 @@ const styles = StyleSheet.create({
     borderWidth: 3,
   },
   backgroundSwatchImage: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  backgroundSwatchImageContainer: {
     width: '100%',
     height: '100%',
   },

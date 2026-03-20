@@ -20,6 +20,8 @@ import { router } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { create } from 'zustand';
 import { EaseView } from 'react-native-ease';
+import { PressableScale } from 'pressto';
+import Animated, { interpolate, useAnimatedStyle } from 'react-native-reanimated';
 
 import { useKriya } from '../lib/store';
 import {
@@ -416,6 +418,34 @@ type CalendarSectionProps = {
   isDarkMode: boolean;
 };
 
+const CalendarChevronIcon = ({
+  direction,
+  color,
+  progress,
+}: {
+  direction: 'left' | 'right';
+  color: string;
+  progress: { value: number };
+}) => {
+  const iconAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        scale: interpolate(progress.value, [0, 1], [1, 0.84]),
+      },
+    ],
+  }));
+
+  return (
+    <Animated.View style={[styles.monthShiftIconWrap, iconAnimatedStyle]}>
+      <Feather
+        name={direction === 'left' ? 'chevron-left' : 'chevron-right'}
+        size={24}
+        color={color}
+      />
+    </Animated.View>
+  );
+};
+
 const CalendarChevronButton = ({
   direction,
   isDarkMode,
@@ -424,30 +454,17 @@ const CalendarChevronButton = ({
   direction: 'left' | 'right';
   isDarkMode: boolean;
   onPress: () => void;
-}) => (
-  <Pressable onPress={onPress} hitSlop={12} style={styles.monthShiftBtn}>
-    {({ pressed }: { pressed: boolean }) => (
-      <EaseView
-        animate={{
-          scale: pressed ? 1.2 : 1,
-        }}
-        transition={{
-          type: 'spring',
-          damping: 18,
-          stiffness: 320,
-          mass: 1,
-        }}
-        style={styles.monthShiftIconWrap}
-      >
-        <Feather
-          name={direction === 'left' ? 'chevron-left' : 'chevron-right'}
-          size={18}
-          color={isDarkMode ? '#f9fafb' : '#0f172a'}
-        />
-      </EaseView>
-    )}
-  </Pressable>
-);
+}) => {
+  const iconColor = isDarkMode ? '#f9fafb' : '#0f172a';
+
+  return (
+    <PressableScale onPress={onPress} hitSlop={12} rippleColor="transparent" style={styles.monthShiftBtn}>
+      {({ progress }) => (
+        <CalendarChevronIcon direction={direction} color={iconColor} progress={progress} />
+      )}
+    </PressableScale>
+  );
+};
 
 const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
   const setSelectedDate = useCalendarTaskStore((s) => s.setSelectedDate);
@@ -456,7 +473,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
   const [calendarMonthId, setCalendarMonthId] = useState(() => toDateId(new Date()));
   const [todayDateId, setTodayDateId] = useState(() => toDateId(new Date()));
 
-  const accent = isDarkMode ? '#5f9fe6' : '#7493d7';
+  const accent = isDarkMode ? '#7493d7' : '#7493d7';
 
   useEffect(() => {
     let midnightTimer: ReturnType<typeof setTimeout> | null = null;

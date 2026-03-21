@@ -26,6 +26,15 @@
 		F102AEF724A0415E9D8173E6 /* SourceSerifPro-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 43106E04F58B4A7A9DEC697A /* SourceSerifPro-Regular.otf */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 		FBF96EE35FD9C87983BF0433 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C9857120F727CB7711FC36F1 /* PrivacyInfo.xcprivacy */; };
+		7072D1F49FCA406295CF9BA9 /* CedarvilleCursive-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F6AEC78F22C943C9A9647ACD /* CedarvilleCursive-Regular.ttf */; };
+		D6799FA78673463E89866DB0 /* EduNSWACTCursive-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 70ABB593B4AD4B07A5887AE8 /* EduNSWACTCursive-VariableFont_wght.ttf */; };
+		C5EAEA5E5F6B45EDB4093BFC /* BonheurRoyale-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B9F5E8832A03473295021719 /* BonheurRoyale-Regular.ttf */; };
+		10F743C014B24F1583C1F998 /* RougeScript-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3CC1CEDCABAB44D8A8E2D8A8 /* RougeScript-Regular.ttf */; };
+		FA139872E4B049C9ACC54C2E /* Tangerine-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C2237647A6954F53A8D88A58 /* Tangerine-Regular.ttf */; };
+		5BDA67CCD23142A3BBBD732F /* IslandMoments-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CCB3625EA2CA4F91B648AB57 /* IslandMoments-Regular.ttf */; };
+		EC3ABECA596A422A8A5125C9 /* DancingScript-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 28C53BD3AE1443FA9E86496E /* DancingScript-VariableFont_wght.ttf */; };
+		9AE90F0B8DD04A11A97F4455 /* LavishlyYours-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4929F5A1D29C4359B69C57C0 /* LavishlyYours-Regular.ttf */; };
+		B3B4B9F2031D4FF8BD6EC070 /* StoryScript-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EC0F785DC4E54FF1B46F7F15 /* StoryScript-Regular.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +63,15 @@
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Kriya/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* Kriya-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Kriya-Bridging-Header.h"; path = "Kriya/Kriya-Bridging-Header.h"; sourceTree = "<group>"; };
 		F6A960B9273946B89C4CF4CA /* SourceSerifPro-SemiboldIt.otf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SourceSerifPro-SemiboldIt.otf"; path = "../assets/fonts/SourceSerifPro-SemiboldIt.otf"; sourceTree = "<group>"; };
+		F6AEC78F22C943C9A9647ACD /* CedarvilleCursive-Regular.ttf */ = {isa = PBXFileReference; name = "CedarvilleCursive-Regular.ttf"; path = "../assets/fonts/CedarvilleCursive-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		70ABB593B4AD4B07A5887AE8 /* EduNSWACTCursive-VariableFont_wght.ttf */ = {isa = PBXFileReference; name = "EduNSWACTCursive-VariableFont_wght.ttf"; path = "../assets/fonts/EduNSWACTCursive-VariableFont_wght.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		B9F5E8832A03473295021719 /* BonheurRoyale-Regular.ttf */ = {isa = PBXFileReference; name = "BonheurRoyale-Regular.ttf"; path = "../assets/fonts/BonheurRoyale-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		3CC1CEDCABAB44D8A8E2D8A8 /* RougeScript-Regular.ttf */ = {isa = PBXFileReference; name = "RougeScript-Regular.ttf"; path = "../assets/fonts/RougeScript-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		C2237647A6954F53A8D88A58 /* Tangerine-Regular.ttf */ = {isa = PBXFileReference; name = "Tangerine-Regular.ttf"; path = "../assets/fonts/Tangerine-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		CCB3625EA2CA4F91B648AB57 /* IslandMoments-Regular.ttf */ = {isa = PBXFileReference; name = "IslandMoments-Regular.ttf"; path = "../assets/fonts/IslandMoments-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		28C53BD3AE1443FA9E86496E /* DancingScript-VariableFont_wght.ttf */ = {isa = PBXFileReference; name = "DancingScript-VariableFont_wght.ttf"; path = "../assets/fonts/DancingScript-VariableFont_wght.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		4929F5A1D29C4359B69C57C0 /* LavishlyYours-Regular.ttf */ = {isa = PBXFileReference; name = "LavishlyYours-Regular.ttf"; path = "../assets/fonts/LavishlyYours-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		EC0F785DC4E54FF1B46F7F15 /* StoryScript-Regular.ttf */ = {isa = PBXFileReference; name = "StoryScript-Regular.ttf"; path = "../assets/fonts/StoryScript-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +115,15 @@
 				0C8D25857FDA469792874977 /* Kalam-Light.ttf */,
 				1DEF55B7878E448996D2A760 /* InstrumentSerif-Italic.ttf */,
 				43A03080CA52480DA53722B3 /* InstrumentSerif-Regular.ttf */,
+				F6AEC78F22C943C9A9647ACD /* CedarvilleCursive-Regular.ttf */,
+				70ABB593B4AD4B07A5887AE8 /* EduNSWACTCursive-VariableFont_wght.ttf */,
+				B9F5E8832A03473295021719 /* BonheurRoyale-Regular.ttf */,
+				3CC1CEDCABAB44D8A8E2D8A8 /* RougeScript-Regular.ttf */,
+				C2237647A6954F53A8D88A58 /* Tangerine-Regular.ttf */,
+				CCB3625EA2CA4F91B648AB57 /* IslandMoments-Regular.ttf */,
+				28C53BD3AE1443FA9E86496E /* DancingScript-VariableFont_wght.ttf */,
+				4929F5A1D29C4359B69C57C0 /* LavishlyYours-Regular.ttf */,
+				EC0F785DC4E54FF1B46F7F15 /* StoryScript-Regular.ttf */,
 			);
 			name = Resources;
 			path = "";
@@ -254,6 +281,15 @@
 				9AA96DC4591647DBBE38E14F /* InstrumentSerif-Italic.ttf in Resources */,
 				0F95AE0FB3A646B7ACA04C71 /* InstrumentSerif-Regular.ttf in Resources */,
 				FBF96EE35FD9C87983BF0433 /* PrivacyInfo.xcprivacy in Resources */,
+				7072D1F49FCA406295CF9BA9 /* CedarvilleCursive-Regular.ttf in Resources */,
+				D6799FA78673463E89866DB0 /* EduNSWACTCursive-VariableFont_wght.ttf in Resources */,
+				C5EAEA5E5F6B45EDB4093BFC /* BonheurRoyale-Regular.ttf in Resources */,
+				10F743C014B24F1583C1F998 /* RougeScript-Regular.ttf in Resources */,
+				FA139872E4B049C9ACC54C2E /* Tangerine-Regular.ttf in Resources */,
+				5BDA67CCD23142A3BBBD732F /* IslandMoments-Regular.ttf in Resources */,
+				EC3ABECA596A422A8A5125C9 /* DancingScript-VariableFont_wght.ttf in Resources */,
+				9AE90F0B8DD04A11A97F4455 /* LavishlyYours-Regular.ttf in Resources */,
+				B3B4B9F2031D4FF8BD6EC070 /* StoryScript-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -427,11 +463,11 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.surya7314.kriya;
-				PRODUCT_NAME = Kriya;
+				PRODUCT_NAME = "Kriya";
 				SWIFT_OBJC_BRIDGING_HEADER = "Kriya/Kriya-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -458,10 +494,10 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.surya7314.kriya;
-				PRODUCT_NAME = Kriya;
+				PRODUCT_NAME = "Kriya";
 				SWIFT_OBJC_BRIDGING_HEADER = "Kriya/Kriya-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;

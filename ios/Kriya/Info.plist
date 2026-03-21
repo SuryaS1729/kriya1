@@ -71,6 +71,15 @@
       <string>Kalam-Light.ttf</string>
       <string>InstrumentSerif-Italic.ttf</string>
       <string>InstrumentSerif-Regular.ttf</string>
+      <string>CedarvilleCursive-Regular.ttf</string>
+      <string>EduNSWACTCursive-VariableFont_wght.ttf</string>
+      <string>BonheurRoyale-Regular.ttf</string>
+      <string>RougeScript-Regular.ttf</string>
+      <string>Tangerine-Regular.ttf</string>
+      <string>IslandMoments-Regular.ttf</string>
+      <string>DancingScript-VariableFont_wght.ttf</string>
+      <string>LavishlyYours-Regular.ttf</string>
+      <string>StoryScript-Regular.ttf</string>
     </array>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>

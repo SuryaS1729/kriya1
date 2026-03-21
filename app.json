@@ -45,6 +45,34 @@
                     "style": "normal"
                   }
                 ]
+              },{
+                "fontFamily": "Dancing",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/DancingScript-VariableFont_wght.ttf",
+                    "weight": 400,
+                    "style": "normal"
+                  }
+                ]
+              },{
+                "fontFamily": "Story",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/StoryScript-Regular.ttf",
+                    "weight": 400,
+                    "style": "normal"
+                  }
+                ]
+              },
+              {
+                "fontFamily": "Cedarville",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/CedarvilleCursive-Regular.ttf",
+                    "weight": 400,
+                    "style": "normal"
+                  }
+                ]
               },
               {
                 "fontFamily": "Source Serif Pro",
@@ -136,7 +164,12 @@
               "./assets/fonts/Kalam-Regular.ttf",
               "./assets/fonts/Kalam-Light.ttf",
               "./assets/fonts/InstrumentSerif-Italic.ttf",
-              "./assets/fonts/InstrumentSerif-Regular.ttf"
+              "./assets/fonts/InstrumentSerif-Regular.ttf",
+              "./assets/fonts/CedarvilleCursive-Regular.ttf",
+              "./assets/fonts/DancingScript-VariableFont_wght.ttf",
+              "./assets/fonts/StoryScript-Regular.ttf"
+
+            
             ]
           }
         }

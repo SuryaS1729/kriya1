@@ -41,8 +41,11 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
-    // @generated begin xml-fonts-init - expo prebuild (DO NOT MODIFY) sync-559ecf33123b5468c89d059fb43bcbaeeaae2971
+    // @generated begin xml-fonts-init - expo prebuild (DO NOT MODIFY) sync-fdf9864859a6e1ac91e68ed6cae8f58d85b93164
     ReactFontManager.getInstance().addCustomFont(this, "Alegreya", R.font.xml_alegreya)
+    ReactFontManager.getInstance().addCustomFont(this, "Dancing", R.font.xml_dancing)
+    ReactFontManager.getInstance().addCustomFont(this, "Story", R.font.xml_story)
+    ReactFontManager.getInstance().addCustomFont(this, "Cedarville", R.font.xml_cedarville)
     ReactFontManager.getInstance().addCustomFont(this, "Source Serif Pro", R.font.xml_source_serif_pro)
     ReactFontManager.getInstance().addCustomFont(this, "Space Mono", R.font.xml_space_mono)
     ReactFontManager.getInstance().addCustomFont(this, "Kalam", R.font.xml_kalam)

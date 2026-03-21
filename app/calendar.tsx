@@ -548,9 +548,9 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
         <View style={styles.monthLabelSlot}>
           <EaseView
             key={calendarMonthId}
-            initialAnimate={{ opacity: 0, translateX: 36, scale: 0.9 }}
+            initialAnimate={{ opacity: 0, translateX: 0, scale: 0.8 }}
             animate={{ opacity: 1, translateX: 0, scale: 1 }}
-            transition={{ type: 'timing', duration: 520, easing: 'easeOut' }}
+            transition={{ type: 'spring', damping: 15, stiffness: 100, mass: 1}}
           >
             <Text style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}>
               {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
@@ -559,13 +559,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
         </View>
       </View>
 
-      <EaseView
-        key={`calendar-card-${calendarMonthId}`}
-        initialAnimate={{ opacity: 0, translateX: 50, scale: 0.8 }}
-        animate={{ opacity: 1, translateX: 0, scale: 1 }}
-        transition={{ type: 'timing', duration: 520, easing: 'easeOut' }}
-        style={[styles.calendarCard, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}
-      >
+      <View style={[styles.calendarCard, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}>
         <Calendar.VStack alignItems="center" spacing={6}>
           <Calendar.Row.Week
             spacing={20}
@@ -611,7 +605,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
             ))}
           </ScrollView>
         </Calendar.VStack>
-      </EaseView>
+      </View>
 
       <View style={styles.calendarActionsRow}>
         <View style={[styles.monthShiftGroup, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}>
@@ -843,6 +837,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   monthLabel: {
+
     fontSize: 18,
     fontWeight: '600',
     textAlign: 'right',
@@ -911,16 +906,20 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   selectedDateText: {
+
     fontSize: 14,
     fontWeight: '600',
   },
   todayChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 999,
-    backgroundColor: '#dbeafe33',
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    borderRadius: 20,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#dbeafe88',
   },
   todayChipText: {
+    fontFamily:"Cedarville",
     fontSize: 12,
     fontWeight: '700',
   },

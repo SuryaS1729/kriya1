@@ -208,7 +208,7 @@ export default function Share2() {
   const captureCardUri = async () => {
     const options = {
       format: 'jpg' as const,
-      quality: 0.92,
+      quality: 1,
       width: currentFormat.width,
       height: currentFormat.height,
       result: 'tmpfile' as const,
@@ -312,7 +312,7 @@ export default function Share2() {
           
           {/* Reference */}
           <Text style={[styles.referenceBottom, { color: currentBackground.refColor }]}>
-            BG {params.chapter}.{params.verse}
+            Bhagavad Gita - Chapter {params.chapter}, Verse {params.verse}
           </Text>
         </View>
         
@@ -385,7 +385,7 @@ export default function Share2() {
             ref={viewShotRef} 
             options={{ 
               format: 'jpg', 
-              quality: 0.95,
+              quality: 1,
               width: currentFormat.width,
               height: currentFormat.height,
             }}
@@ -665,16 +665,21 @@ marginTop: 10,
     fontFamily: 'Kalam',
     fontSize: 14,
     lineHeight: 12,
-    fontWeight: '700',
+    fontWeight: '500',
     marginTop: 12,
     paddingTop: 12,
     marginBottom: 12,
     textAlign: 'center',
   },
   translationText: {
-    fontFamily: 'Alegreya',
+    fontFamily: 'Instrument Serif',
+        fontStyle: 'italic',
+
     fontSize: 11,
-    lineHeight: 16,
+    lineHeight: 20,
+    textAlign: 'center',
+    marginTop: 8,
+
   },
   referenceBottom: {
     fontFamily: 'Source Serif Pro',
@@ -682,7 +687,7 @@ marginTop: 10,
     color: '#b0b0b0',
     fontStyle: 'italic',
     textAlign: 'right',
-    marginTop: 12,
+    marginTop: 22,
   },
   brandingWrap: {
     position: 'absolute',

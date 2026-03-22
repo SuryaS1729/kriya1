@@ -46,7 +46,7 @@
                   }
                 ]
               },{
-                "fontFamily": "Dancing",
+                "fontFamily": "Dancing Script",
                 "fontDefinitions": [
                   {
                     "path": "./assets/fonts/DancingScript-VariableFont_wght.ttf",
@@ -65,7 +65,7 @@
                 ]
               },
               {
-                "fontFamily": "Cedarville",
+                "fontFamily": "Cedarville Cursive",
                 "fontDefinitions": [
                   {
                     "path": "./assets/fonts/CedarvilleCursive-Regular.ttf",

@@ -253,23 +253,46 @@ const handleBookPress = () => {
   const [ttsLoading, setTtsLoading] = useState(false);
   const [ttsPlaying, setTtsPlaying] = useState(false);
   const ttsAbortRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const playbackSessionRef = useRef(0);
   const audioPlayer = useAudioPlayer(null);
 
   // Cleanup audio on unmount or index change
   useEffect(() => {
     return () => {
+      isMountedRef.current = false;
       ttsAbortRef.current = true;
+      playbackSessionRef.current += 1;
       // Don't pause audio on unmount — allow background playback
     };
-  }, [currentIndex]);
+  }, []);
+
+  const safelyPauseAudio = useCallback(() => {
+    if (!isMountedRef.current) {
+      return;
+    }
+
+    try {
+      audioPlayer.pause();
+    } catch {
+      // The native player may already be released while the screen is changing.
+    }
+  }, [audioPlayer]);
 
   const playAudio = async (base64Audio: string): Promise<boolean> => {
+    const sessionId = ++playbackSessionRef.current;
+    const tempFile = `${FileSystem.cacheDirectory}tts_audio_${Date.now()}.wav`;
+
     try {
       // Write base64 to temp file
-      const tempFile = `${FileSystem.cacheDirectory}tts_audio_${Date.now()}.wav`;
       await FileSystem.writeAsStringAsync(tempFile, base64Audio, {
         encoding: FileSystem.EncodingType.Base64,
       });
+
+      if (!isMountedRef.current || ttsAbortRef.current || sessionId !== playbackSessionRef.current) {
+        await FileSystem.deleteAsync(tempFile, { idempotent: true });
+        return false;
+      }
 
       // Replace the audio source
       audioPlayer.replace({ uri: tempFile });
@@ -278,9 +301,10 @@ const handleBookPress = () => {
       // Wait for playback to complete
       return new Promise((resolve) => {
         const checkStatus = setInterval(() => {
-          if (ttsAbortRef.current) {
+          if (!isMountedRef.current || sessionId !== playbackSessionRef.current || ttsAbortRef.current) {
             clearInterval(checkStatus);
-            try { audioPlayer.pause(); } catch {}
+            FileSystem.deleteAsync(tempFile, { idempotent: true });
+            safelyPauseAudio();
             resolve(false);
           } else if (!audioPlayer.playing && audioPlayer.currentTime > 0) {
             clearInterval(checkStatus);
@@ -291,6 +315,7 @@ const handleBookPress = () => {
         }, 100);
       });
     } catch (error) {
+      FileSystem.deleteAsync(tempFile, { idempotent: true });
       console.error('[TTS] Playback error:', error);
       return false;
     }
@@ -302,7 +327,8 @@ const handleBookPress = () => {
     // If already playing, stop
     if (ttsPlaying) {
       ttsAbortRef.current = true;
-      try { audioPlayer.pause(); } catch {}
+      playbackSessionRef.current += 1;
+      safelyPauseAudio();
       setTtsPlaying(false);
       setTtsLoading(false);
       return;

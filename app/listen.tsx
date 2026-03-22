@@ -46,6 +46,9 @@ export default function ListenScreen() {
   const [phase, setPhase] = useState<PlaybackPhase>('idle');
 
   const abortRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const playbackSessionRef = useRef(0);
+  const resumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioPlayer = useAudioPlayer(null);
 
   // Pulse animation for the now-playing indicator
@@ -77,25 +80,61 @@ export default function ListenScreen() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      isMountedRef.current = false;
       abortRef.current = true;
+      playbackSessionRef.current += 1;
+      if (resumeTimeoutRef.current) {
+        clearTimeout(resumeTimeoutRef.current);
+        resumeTimeoutRef.current = null;
+      }
     };
   }, []);
 
-  const playAudio = useCallback(async (base64Audio: string): Promise<boolean> => {
+  const safelyPauseAudio = useCallback(() => {
+    if (!isMountedRef.current) {
+      return;
+    }
+
     try {
-      const tempFile = `${FileSystem.cacheDirectory}listen_audio_${Date.now()}.wav`;
+      audioPlayer.pause();
+    } catch {
+      // The native player may already be released while async work is settling.
+    }
+  }, [audioPlayer]);
+
+  const stopPlayback = useCallback(() => {
+    abortRef.current = true;
+    playbackSessionRef.current += 1;
+    if (resumeTimeoutRef.current) {
+      clearTimeout(resumeTimeoutRef.current);
+      resumeTimeoutRef.current = null;
+    }
+    safelyPauseAudio();
+  }, [safelyPauseAudio]);
+
+  const playAudio = useCallback(async (base64Audio: string): Promise<boolean> => {
+    const sessionId = ++playbackSessionRef.current;
+    const tempFile = `${FileSystem.cacheDirectory}listen_audio_${Date.now()}.wav`;
+
+    try {
       await FileSystem.writeAsStringAsync(tempFile, base64Audio, {
         encoding: FileSystem.EncodingType.Base64,
       });
+
+      if (!isMountedRef.current || abortRef.current || sessionId !== playbackSessionRef.current) {
+        await FileSystem.deleteAsync(tempFile, { idempotent: true });
+        return false;
+      }
 
       audioPlayer.replace({ uri: tempFile });
       audioPlayer.play();
 
       return new Promise((resolve) => {
         const checkStatus = setInterval(() => {
-          if (abortRef.current) {
+          if (!isMountedRef.current || sessionId !== playbackSessionRef.current || abortRef.current) {
             clearInterval(checkStatus);
-            try { audioPlayer.pause(); } catch {}
+            FileSystem.deleteAsync(tempFile, { idempotent: true });
+            safelyPauseAudio();
             resolve(false);
           } else if (!audioPlayer.playing && audioPlayer.currentTime > 0) {
             clearInterval(checkStatus);
@@ -105,10 +144,11 @@ export default function ListenScreen() {
         }, 100);
       });
     } catch (error) {
+      FileSystem.deleteAsync(tempFile, { idempotent: true });
       console.error('[Listen] Playback error:', error);
       return false;
     }
-  }, [audioPlayer]);
+  }, [audioPlayer, safelyPauseAudio]);
 
   const playShloka = useCallback(async (index: number) => {
     const data = getShlokaAt(index);
@@ -191,20 +231,18 @@ export default function ListenScreen() {
   const handlePlayPause = useCallback(() => {
     buttonPressHaptic();
     if (isPlaying) {
-      abortRef.current = true;
-      try { audioPlayer.pause(); } catch {}
+      stopPlayback();
       setIsPlaying(false);
       setPhase('idle');
     } else {
       startPlayback();
     }
-  }, [isPlaying, startPlayback, audioPlayer]);
+  }, [isPlaying, startPlayback, stopPlayback]);
 
   const handlePrevious = useCallback(() => {
     buttonPressHaptic();
     if (currentIndex > 0) {
-      abortRef.current = true;
-      try { audioPlayer.pause(); } catch {}
+      stopPlayback();
       const wasPlaying = isPlaying;
       setIsPlaying(false);
       setPhase('idle');
@@ -214,8 +252,9 @@ export default function ListenScreen() {
 
       if (wasPlaying) {
         // Restart playback from new index after a tick
-        setTimeout(() => {
+        resumeTimeoutRef.current = setTimeout(() => {
           abortRef.current = false;
+          resumeTimeoutRef.current = null;
           setIsPlaying(true);
           (async () => {
             let idx = newIndex;
@@ -235,13 +274,12 @@ export default function ListenScreen() {
         }, 100);
       }
     }
-  }, [currentIndex, isPlaying, audioPlayer, totalShlokas, playShloka]);
+  }, [currentIndex, isPlaying, stopPlayback, totalShlokas, playShloka]);
 
   const handleNext = useCallback(() => {
     buttonPressHaptic();
     if (currentIndex < totalShlokas - 1) {
-      abortRef.current = true;
-      try { audioPlayer.pause(); } catch {}
+      stopPlayback();
       const wasPlaying = isPlaying;
       setIsPlaying(false);
       setPhase('idle');
@@ -250,8 +288,9 @@ export default function ListenScreen() {
       setCurrentIndex(newIndex);
 
       if (wasPlaying) {
-        setTimeout(() => {
+        resumeTimeoutRef.current = setTimeout(() => {
           abortRef.current = false;
+          resumeTimeoutRef.current = null;
           setIsPlaying(true);
           (async () => {
             let idx = newIndex;
@@ -271,7 +310,7 @@ export default function ListenScreen() {
         }, 100);
       }
     }
-  }, [currentIndex, isPlaying, audioPlayer, totalShlokas, playShloka]);
+  }, [currentIndex, isPlaying, stopPlayback, totalShlokas, playShloka]);
 
   const phaseLabel = (): string => {
     switch (phase) {

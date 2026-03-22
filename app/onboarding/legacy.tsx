@@ -260,6 +260,7 @@ export default function Onboarding() {
 
   const timeoutRefs = useRef<ReturnType<typeof setTimeout>[]>([]);
   const intervalRefs = useRef<ReturnType<typeof setInterval>[]>([]);
+  const isMountedRef = useRef(true);
 
   const audioPlayer = useAudioPlayer(
     'https://pub-4862ee5d51df47c4849ba812da5460ff.r2.dev/Drifting_Echoes_j5fudj.aac'
@@ -310,7 +311,7 @@ export default function Onboarding() {
   };
 
   const safelyPauseAudio = useCallback((player = audioPlayer) => {
-    if (!player) {
+    if (!player || !isMountedRef.current) {
       return;
     }
 
@@ -328,6 +329,7 @@ export default function Onboarding() {
   }, [reminderTime]);
 
   useEffect(() => {
+    isMountedRef.current = true;
     let isMounted = true;
 
     const startAmbientAudio = async () => {
@@ -403,10 +405,10 @@ export default function Onboarding() {
 
   useEffect(() => {
     return () => {
+      isMountedRef.current = false;
       clearScheduledWork();
-      safelyPauseAudio();
     };
-  }, [safelyPauseAudio]);
+  }, []);
 
   const fadeOutAudio = () => {
     if (!audioPlayer) {
@@ -783,7 +785,7 @@ export default function Onboarding() {
             )}
 
             <PressableScale
-              onPress={handleNext}
+              onPress={isSavingReminder ? undefined : handleNext}
               rippleColor="transparent"
               style={[
                 styles.nextButton,
@@ -793,7 +795,6 @@ export default function Onboarding() {
                   opacity: isSavingReminder ? 0.7 : 1,
                 },
               ]}
-              disabled={isSavingReminder}
             >
               <Text style={[styles.nextText, { color: theme.text }]}>
                 {isReminderStep ? (isSavingReminder ? 'Saving...' : 'Set Reminder') : 'Next'}

@@ -1,4 +1,5 @@
 import type { ImageSourcePropType } from 'react-native';
+import { PUBLIC_ASSET_BASE_URL } from './publicAssetBaseUrl';
 
 export type ShareFormatId = 'story' | 'post';
 export type BackgroundType = 'image' | 'gradient';
@@ -29,10 +30,8 @@ export type ShareGradientBackground = ShareBackgroundBase & {
 
 export type ShareBackground = ShareImageBackground | ShareGradientBackground;
 
-const SHARE_BACKGROUND_BASE_URL = process.env.EXPO_PUBLIC_R2_SHARE_BACKGROUNDS_URL;
-
 const buildR2Url = (path: string) =>
-  `${(SHARE_BACKGROUND_BASE_URL || '').replace(/\/$/, '')}/${path}`;
+  `${PUBLIC_ASSET_BASE_URL.replace(/\/$/, '')}/${path}`;
 
 const imageBackground = (
   config: Omit<ShareImageBackground, 'type'>,

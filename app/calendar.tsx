@@ -306,7 +306,7 @@ const CalendarDayPill = React.memo(function CalendarDayPill({
   const bgColor = isSelected
     ? accent
     : isTodayOnly
-    ? (isDarkMode ? 'rgba(95, 159, 230, 0.12)' : 'rgba(116, 147, 215, 0.14)')
+    ? (isDarkMode ? 'transparent' : 'rgba(116, 147, 215, 0.14)')
     : pressed
     ? (isDarkMode ? 'rgba(95, 159, 230, 0.16)' : 'rgba(116, 147, 215, 0.16)')
     : 'transparent';
@@ -315,7 +315,7 @@ const CalendarDayPill = React.memo(function CalendarDayPill({
   const textColor = isSelected
     ? '#ffffff'
     : isToday
-    ? accent
+    ? "#9ce1ff"
     : isWeekend
     ? (isDarkMode ? '#94a3b8' : '#64748b')
     : isDarkMode
@@ -473,7 +473,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
   const [calendarMonthId, setCalendarMonthId] = useState(() => toDateId(new Date()));
   const [todayDateId, setTodayDateId] = useState(() => toDateId(new Date()));
 
-  const accent = isDarkMode ? '#7493d7' : '#7493d7';
+  const accent = isDarkMode ? '#056c99' : '#7493d7';
 
   useEffect(() => {
     let midnightTimer: ReturnType<typeof setTimeout> | null = null;

@@ -2,6 +2,7 @@
 // Text-to-Speech backed by device cache + Cloudflare R2 recordings
 
 import * as FileSystem from 'expo-file-system/legacy';
+import { PUBLIC_ASSET_BASE_URL } from './publicAssetBaseUrl';
 
 export type TTSLanguage = 'hi-IN' | 'en-IN';
 
@@ -53,10 +54,7 @@ async function fetchFromR2(
   chapter: number,
   verse: number
 ): Promise<string | null> {
-  const r2BaseUrl = process.env.EXPO_PUBLIC_R2_TTS_URL;
-  if (!r2BaseUrl) return null;
-
-  const url = `${r2BaseUrl}/${language}/${chapter}_${verse}.wav`;
+  const url = `${PUBLIC_ASSET_BASE_URL}/${language}/${chapter}_${verse}.wav`;
 
   try {
     const response = await fetch(url);

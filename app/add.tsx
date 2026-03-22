@@ -240,10 +240,15 @@ export default function Add() {
 
   const openCustomPicker = () => {
     selectionHaptic();
+    Keyboard.dismiss();
     setIsTomorrow(false);
     setIsCustom(true);
     setCustomDayKey((current) => current ?? tomorrowKey);
     setShowCustomPicker(true);
+  };
+
+  const closeCustomPicker = () => {
+    setShowCustomPicker(false);
   };
 
   const onCustomDateChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
@@ -456,13 +461,55 @@ export default function Add() {
           )}
 
           {showCustomPicker && Platform.OS !== 'web' && (
-            <DateTimePicker
-              value={customDayKey != null ? new Date(customDayKey) : new Date(tomorrowKey)}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'inline' : 'default'}
-              onChange={onCustomDateChange}
-              minimumDate={new Date(todayKey())}
-            />
+            Platform.OS === 'ios' ? (
+              <View
+                style={[
+                  styles.iosDatePickerCard,
+                  {
+                    backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
+                    borderColor: isDarkMode ? '#1f2937' : '#e2e8f0',
+                  },
+                ]}
+              >
+                <View style={styles.iosDatePickerHeader}>
+                  <Text
+                    style={[
+                      styles.iosDatePickerLabel,
+                      { color: isDarkMode ? '#cbd5e1' : '#475569' },
+                    ]}
+                  >
+                    Choose a date
+                  </Text>
+                  <Pressable onPress={closeCustomPicker} hitSlop={8}>
+                    <Text
+                      style={[
+                        styles.iosDatePickerDone,
+                        { color: isDarkMode ? '#93c5fd' : '#2563eb' },
+                      ]}
+                    >
+                      Done
+                    </Text>
+                  </Pressable>
+                </View>
+                <DateTimePicker
+                  value={customDayKey != null ? new Date(customDayKey) : new Date(tomorrowKey)}
+                  mode="date"
+                  display="spinner"
+                  onChange={onCustomDateChange}
+                  minimumDate={new Date(todayKey())}
+                  style={styles.iosDatePicker}
+                  themeVariant={isDarkMode ? 'dark' : 'light'}
+                />
+              </View>
+            ) : (
+              <DateTimePicker
+                value={customDayKey != null ? new Date(customDayKey) : new Date(tomorrowKey)}
+                mode="date"
+                display="default"
+                onChange={onCustomDateChange}
+                minimumDate={new Date(todayKey())}
+              />
+            )
           )}
 
           {/* INPUT BAR — stays at the bottom, lifted by KeyboardAvoidingView */}
@@ -641,5 +688,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     textAlign: 'right',
     fontSize: 12,
+  },
+  iosDatePickerCard: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  iosDatePickerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 14,
+  },
+  iosDatePickerLabel: {
+    fontSize: 13,
+    fontFamily: 'Space Mono',
+  },
+  iosDatePickerDone: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  iosDatePicker: {
+    alignSelf: 'center',
+    height: 180,
   },
 });

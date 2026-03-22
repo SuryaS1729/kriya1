@@ -545,22 +545,25 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
           <Text style={[styles.closeIcon, { color: isDarkMode ? '#d1d5db' : '#18464a' }]}>✕</Text>
         </Pressable>
 
-        <View style={styles.monthLabelSlot}>
-          <EaseView
-            key={calendarMonthId}
-            initialAnimate={{ opacity: 0, translateX: 0, scale: 0.8 }}
-            animate={{ opacity: 1, translateX: 0, scale: 1 }}
-            transition={{ type: 'spring', damping: 15, stiffness: 100, mass: 1}}
-          >
-            <Text style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}>
-              {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-            </Text>
-          </EaseView>
+        <View style={styles.monthHeaderStack}>
+          <View style={styles.monthLabelSlot}>
+            <EaseView
+              key={calendarMonthId}
+              initialAnimate={{ opacity: 0, translateX: 0, scale: 0.8 }}
+              animate={{ opacity: 1, translateX: 0, scale: 1 }}
+              transition={{ type: 'spring', damping: 15, stiffness: 100, mass: 1}}
+            >
+              <Text style={[styles.monthLabel, { color: isDarkMode ? '#e5e7eb' : '#1e293b' }]}>
+                {fromDateId(calendarMonthId).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+              </Text>
+            </EaseView>
+          </View>
         </View>
       </View>
 
       <View style={[styles.calendarCard, { backgroundColor: isDarkMode ? '#0f1e2d99' : '#ffffffcc' }]}>
-        <Calendar.VStack alignItems="center" spacing={6}>
+        <View style={styles.calendarGridWrap}>
+          <Calendar.VStack alignItems="center" spacing={6}>
           <Calendar.Row.Week
             spacing={20}
             theme={{
@@ -604,7 +607,8 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
               </Calendar.Row.Week>
             ))}
           </ScrollView>
-        </Calendar.VStack>
+          </Calendar.VStack>
+        </View>
       </View>
 
       <View style={styles.calendarActionsRow}>
@@ -695,7 +699,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
   }, [deleteTask, onWriteForToday, selectedDate]);
 
   return (
-    <View style={styles.bottomHalf}>
+    <View style={[styles.bottomHalf, { backgroundColor: isDarkMode ? '#08131f66' : '#ffffffb3' }]}>
       <View style={styles.selectedDateRow}>
         <Text style={[styles.selectedDateText, { color: isDarkMode ? '#d1d5db' : '#334155' }]}>
           {selectedDateLabel}
@@ -703,6 +707,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
       </View>
 
       <FlashList
+        style={styles.taskListView}
         data={orderedTasks}
         keyExtractor={(item) => `calendar-task-${item.id}`}
         contentContainerStyle={[
@@ -810,12 +815,18 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   topHalf: {
-    flex: 1,
+    flex: 0.98,
     borderRadius: 18,
     padding: 12,
+    overflow: 'hidden',
   },
   bottomHalf: {
-    flex: 1.2,
+    flex: 1.02,
+    borderRadius: 18,
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 4,
+    overflow: 'hidden',
   },
   calendarHeaderRow: {
     flexDirection: 'row',
@@ -823,6 +834,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 4,
 
+  },
+  monthHeaderStack: {
+    alignItems: 'flex-end',
+    gap: 0,
+    marginLeft: 12,
   },
   closeButton: {
     width: 36,
@@ -847,6 +863,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-end',
     overflow: 'hidden',
+    maxWidth: '100%',
   },
   dayPill: {
     width: 30,
@@ -861,8 +878,13 @@ const styles = StyleSheet.create({
   calendarCard: {
     borderRadius: 18,
     padding: 12,
-    marginTop: 26,
-    
+    marginTop: 18,
+    flex: 1,
+    overflow: 'hidden',
+  },
+  calendarGridWrap: {
+    flex: 1,
+    width: '100%',
   },
   calendarDatesScroll: {
     height: 212,
@@ -871,7 +893,7 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
   },
   calendarActionsRow: {
-    marginTop: 0,
+    marginTop: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -881,6 +903,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 12,
     overflow: 'hidden',
+    flexShrink: 0,
   },
   monthShiftBtn: {
     width: 40,
@@ -901,22 +924,28 @@ const styles = StyleSheet.create({
   selectedDateRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     marginTop: 2,
-    marginBottom: 2,
+    marginBottom: 8,
   },
   selectedDateText: {
-
+    flex: 1,
     fontSize: 14,
     fontWeight: '600',
   },
+  taskListView: {
+    flex: 1,
+  },
   todayChip: {
     paddingHorizontal: 14,
-    paddingVertical: 4,
+    paddingVertical: 6,
     borderRadius: 20,
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: '#dbeafe88',
+    minHeight: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   todayChipText: {
     fontFamily:"Cedarville",

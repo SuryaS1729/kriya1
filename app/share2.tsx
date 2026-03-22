@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import { 
   StyleSheet, 
@@ -77,6 +77,131 @@ const formatRgba = (
   alpha: number,
 ) => `rgba(${red}, ${green}, ${blue}, ${clamp(alpha, SLIDER_MIN, SLIDER_MAX).toFixed(2)})`;
 
+type ShareCardProps = {
+  previewWidth: number;
+  previewHeight: number;
+  selectedFormat: FormatId;
+  currentBackground: ReturnType<typeof getShareBackground>;
+  currentBackgroundSource: ReturnType<typeof getShareBackgroundImageSource> | null;
+  backgroundOpacity: number;
+  resolvedTextBoxBg: string;
+  chapter?: string;
+  verse?: string;
+  text?: string;
+  translation?: string;
+};
+
+const getOverlayJustify = (textBoxPosition: string) => {
+  if (textBoxPosition === 'top') return 'flex-start' as const;
+  if (textBoxPosition === 'bottom') return 'flex-end' as const;
+  return 'center' as const;
+};
+
+const ShareCard = memo(function ShareCard({
+  previewWidth,
+  previewHeight,
+  selectedFormat,
+  currentBackground,
+  currentBackgroundSource,
+  backgroundOpacity,
+  resolvedTextBoxBg,
+  chapter,
+  verse,
+  text,
+  translation,
+}: ShareCardProps) {
+  return (
+    <View style={[styles.cardContainer, { width: previewWidth, height: previewHeight }]}>
+      {currentBackground.type === 'image' ? (
+        <>
+          <LinearGradient
+            colors={currentBackground.colors as unknown as [string, string, ...string[]]}
+            style={styles.cardBackground}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+          <Image
+            source={currentBackgroundSource!}
+            style={[styles.cardBackground, { opacity: backgroundOpacity }]}
+            resizeMode="cover"
+          />
+        </>
+      ) : (
+        <LinearGradient
+          colors={currentBackground.colors as unknown as [string, string, ...string[]]}
+          style={[styles.cardBackground, { opacity: backgroundOpacity }]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+      )}
+
+      <View style={[styles.cardOverlay, { justifyContent: getOverlayJustify(currentBackground.textBoxPosition) }]}>
+        <View
+          style={[
+            styles.textBox,
+            { backgroundColor: resolvedTextBoxBg },
+          ]}
+        >
+          <Text
+            style={[
+              styles.sanskritText,
+              { color: currentBackground.textColor },
+            ]}
+          >
+            {text || 'धृतराष्ट्र उवाच |\nधर्मक्षेत्रे कुरुक्षेत्रे समवेता युयुत्सवः |'}
+          </Text>
+
+          <Text
+            style={[
+              styles.translationText,
+              { color: currentBackground.translationColor },
+            ]}
+          >
+            {translation || 'Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra...'}
+          </Text>
+
+          <Text style={[styles.referenceBottom, { color: currentBackground.refColor }]}>
+            Bhagavad Gita - Chapter {chapter}, Verse {verse}
+          </Text>
+        </View>
+
+        <View
+          style={selectedFormat === 'story' ? styles.brandingWrap : styles.brandingWrapPost}
+        >
+          <Text
+            style={[
+              styles.brandingBottom,
+              { color: currentBackground.brandingColor },
+            ]}
+          >
+            kriya
+          </Text>
+          <View style={styles.platformRow}>
+            <Text
+              style={[
+                styles.platformText,
+                { color: currentBackground.brandingColor },
+              ]}
+            >
+              available on
+            </Text>
+            <Ionicons
+              name="logo-google-playstore"
+              size={8}
+              color={currentBackground.brandingColor}
+            />
+            <FontAwesome5
+              name="app-store-ios"
+              size={8}
+              color={currentBackground.brandingColor}
+            />
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+});
+
 export default function Share2() {
   const params = useLocalSearchParams<{
     id?: string;
@@ -105,10 +230,12 @@ export default function Share2() {
   const currentBackground = getShareBackground(selectedBackground);
   const currentTextBoxColor = parseRgba(currentBackground.textBoxBg);
   const resolvedTextBoxBg = formatRgba(currentTextBoxColor, textboxOpacity);
-  const currentBackgroundSource =
-    currentBackground.type === 'image'
+  const currentBackgroundSource = useMemo(
+    () => (currentBackground.type === 'image'
       ? getShareBackgroundImageSource(currentBackground)
-      : null;
+      : null),
+    [currentBackground],
+  );
 
   useEffect(() => {
     setTextboxOpacity(parseRgba(currentBackground.textBoxBg).alpha);
@@ -252,105 +379,6 @@ export default function Share2() {
     }
   };
   
-  // Resolve text box positioning based on per-background config
-  const getOverlayJustify = () => {
-    const pos = currentBackground.textBoxPosition as string;
-    if (pos === 'top') return 'flex-start' as const;
-    if (pos === 'bottom') return 'flex-end' as const;
-    return 'center' as const;
-  };
-
-  // Card Component - This gets captured as image
-  const ShareCard = () => (
-    <View style={[styles.cardContainer, { width: previewWidth, height: previewHeight }]}>
-      {/* Background - either image or gradient */}
-      {currentBackground.type === 'image' ? (
-        <>
-          <LinearGradient
-            colors={currentBackground.colors as unknown as [string, string, ...string[]]}
-            style={styles.cardBackground}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          />
-          <Image
-            source={currentBackgroundSource!}
-            style={[styles.cardBackground, { opacity: backgroundOpacity }]}
-            resizeMode="cover"
-          />
-        </>
-      ) : (
-        <LinearGradient
-          colors={currentBackground.colors as unknown as [string, string, ...string[]]}
-          style={[styles.cardBackground, { opacity: backgroundOpacity }]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        />
-      )}
-      
-      {/* Content Overlay */}
-      <View style={[styles.cardOverlay, { justifyContent: getOverlayJustify() }]}>
-        {/* Text Box */}
-        <View style={[
-          styles.textBox,
-          { backgroundColor: resolvedTextBoxBg },
-        ]}>
-          {/* Sanskrit Text */}
-          <Text style={[
-            styles.sanskritText,
-            { color: currentBackground.textColor },
-          ]}>
-            {params.text || 'धृतराष्ट्र उवाच |\nधर्मक्षेत्रे कुरुक्षेत्रे समवेता युयुत्सवः |'}
-          </Text>
-          
-          {/* English Translation */}
-          <Text style={[
-            styles.translationText,
-            { color: currentBackground.translationColor },
-          ]}>
-            {params.translation || 'Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra...'}
-          </Text>
-          
-          {/* Reference */}
-          <Text style={[styles.referenceBottom, { color: currentBackground.refColor }]}>
-            Bhagavad Gita - Chapter {params.chapter}, Verse {params.verse}
-          </Text>
-        </View>
-        
-        {/* Bottom branding */}
-        <View
-          style={selectedFormat === 'story' ? styles.brandingWrap : styles.brandingWrapPost}
-        >
-          <Text style={[
-            styles.brandingBottom,
-            { color: currentBackground.brandingColor },
-          ]}>
-            kriya
-          </Text>
-          <View style={styles.platformRow}>
-            <Text
-              style={[
-                styles.platformText,
-                { color: currentBackground.brandingColor },
-              ]}
-            >
-              available on
-            </Text>
-            <Ionicons
-              name="logo-google-playstore"
-              size={8}
-              color={currentBackground.brandingColor}
-            />
-            <FontAwesome5
-              name="app-store-ios"
-              size={8}
-              color={currentBackground.brandingColor}
-            />
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-  
   return (
     <LinearGradient
       colors={isDarkMode ? ['#1a2634', '#0a0f14'] : ['#f8fafc', '#e2e8f0']}
@@ -391,7 +419,19 @@ export default function Share2() {
             }}
           >
             <View ref={captureTargetRef} collapsable={false}>
-              <ShareCard />
+              <ShareCard
+                previewWidth={previewWidth}
+                previewHeight={previewHeight}
+                selectedFormat={selectedFormat}
+                currentBackground={currentBackground}
+                currentBackgroundSource={currentBackgroundSource}
+                backgroundOpacity={backgroundOpacity}
+                resolvedTextBoxBg={resolvedTextBoxBg}
+                chapter={params.chapter}
+                verse={params.verse}
+                text={params.text}
+                translation={params.translation}
+              />
             </View>
           </ViewShot>
         </ScrollView>

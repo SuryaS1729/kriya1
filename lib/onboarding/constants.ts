@@ -105,6 +105,13 @@ export const onboardingSteps: OnboardingStep[] = [
   },
   {
     type: 'feature',
+    title: 'Focus Mode',
+    description:
+      'Long press a task to go into focus mode.',
+    icon: 'arrows-alt',
+  },
+  {
+    type: 'feature',
     title: 'Action Meets Wisdom',
     description:
       "Follow Krishna's teaching of 'Kriya' - taking action. Complete the entire Gita while building meaningful habits in your life.",

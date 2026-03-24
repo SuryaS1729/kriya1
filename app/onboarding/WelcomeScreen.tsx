@@ -89,7 +89,7 @@ export default function WelcomeScreen({ theme, onBegin }: WelcomeScreenProps) {
     subtitleOpacity.value = withTiming(0, { duration: 500 });
     cardTranslateY.value = withTiming(300, { duration: SLIDE_DURATION });
     cardOpacity.value = withTiming(0, { duration: FADE_DURATION });
-
+  
     setTimeout(onBegin, SLIDE_DURATION);
   };
 

@@ -20,6 +20,10 @@ export const AMBIENT_AUDIO_URL =
   'https://kriyarecordings.bitwisedharma.com/Drifting_Echoes_j5fudj.aac';
 export const GITA_IMAGE_URL =
   'https://kriyarecordings.bitwisedharma.com/hflxxtpxtyrhrcteczzn_w1ll3e.webp';
+export const ADD_TASKS_VIDEO_URL =
+  'https://kriyarecordings.bitwisedharma.com/AddTasksSquare.mp4';
+export const COMPLETE_TASKS_VIDEO_URL =
+  'https://kriyarecordings.bitwisedharma.com/CompleteTasksSquare.mp4';
 
 // ─── Loading Texts ──────────────────────────────────────────────────
 export const LOADING_TEXTS = [
@@ -77,7 +81,8 @@ export type FeatureStep = {
   type: 'feature';
   title: string;
   description: string;
-  icon: React.ComponentProps<typeof AntDesign>['name'];
+  icon?: React.ComponentProps<typeof AntDesign>['name'];
+  videoUrl?: string;
 };
 
 export type ReminderStep = {
@@ -94,40 +99,19 @@ export const onboardingSteps: OnboardingStep[] = [
     title: 'Add Your Tasks',
     description:
       'Create your daily to-do list just like any other task app. Simple, clean, and focused on what matters to you.',
-    icon: 'check-circle',
+    videoUrl: ADD_TASKS_VIDEO_URL,
   },
   {
     type: 'feature',
-    title: 'Complete & Learn',
+    title: 'Complete Your Tasks',
     description:
-      'Every time you check off a task, unlock a new verse from the Bhagavad Gita. Transform productivity into spiritual growth.',
-    icon: 'book',
-  },
-  {
-    type: 'feature',
-    title: 'Focus Mode',
-    description:
-      'Long press a task to go into focus mode.',
-    icon: 'arrows-alt',
-  },
-  {
-    type: 'feature',
-    title: 'Action Meets Wisdom',
-    description:
-      "Follow Krishna's teaching of 'Kriya' - taking action. Complete the entire Gita while building meaningful habits in your life.",
-    icon: 'star',
+      'Tap the 🔄 to translate and the ➕ to read more about the shloka.',
+    videoUrl: COMPLETE_TASKS_VIDEO_URL,
   },
   {
     type: 'reminder',
     title: 'When do you start your day?',
     description:
       "Kriya expects you to write down tasks just before you begin your day. We'll save your preferred time and ask for notification permission when you continue.",
-  },
-  {
-    type: 'feature',
-    title: 'Offline & Private',
-    description:
-      'Everything works offline. No signup required. Your spiritual journey remains completely private.',
-    icon: 'lock',
   },
 ];

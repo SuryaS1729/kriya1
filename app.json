@@ -6,7 +6,7 @@
     "scheme": "acme",
     "icon": "./assets/icons/androidicon1.png",
     "userInterfaceStyle": "automatic",
-      "experiments": {
+    "experiments": {
       "reactCompiler": true
     },
     "plugins": [
@@ -45,7 +45,8 @@
                     "style": "normal"
                   }
                 ]
-              },{
+              },
+              {
                 "fontFamily": "Dancing Script",
                 "fontDefinitions": [
                   {
@@ -54,7 +55,8 @@
                     "style": "normal"
                   }
                 ]
-              },{
+              },
+              {
                 "fontFamily": "Story",
                 "fontDefinitions": [
                   {
@@ -168,8 +170,6 @@
               "./assets/fonts/CedarvilleCursive-Regular.ttf",
               "./assets/fonts/DancingScript-VariableFont_wght.ttf",
               "./assets/fonts/StoryScript-Regular.ttf"
-
-            
             ]
           }
         }
@@ -191,7 +191,8 @@
         }
       ],
       "expo-router",
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-video"
     ],
     "assetBundlePatterns": [
       "**/*"

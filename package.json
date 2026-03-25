@@ -46,6 +46,7 @@
     "expo-sqlite": "~16.0.10",
     "expo-status-bar": "~3.0.9",
     "expo-system-ui": "~6.0.9",
+    "expo-video": "~3.0.16",
     "nativewind": "^4.1.23",
     "pressto": "^0.6.1",
     "react": "19.1.0",

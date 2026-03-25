@@ -123,7 +123,7 @@ export default function OnboardingPager({
                 onOpenTimePicker={onOpenTimePicker}
               />
             ) : (
-              <FeatureSlide step={step} theme={theme} />
+              <FeatureSlide step={step} theme={theme} isActive={index === currentPage} />
             )}
           </View>
         ))}

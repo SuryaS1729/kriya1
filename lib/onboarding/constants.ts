@@ -105,7 +105,7 @@ export const onboardingSteps: OnboardingStep[] = [
     type: 'feature',
     title: 'Complete Your Tasks',
     description:
-      'Tap the 🔄 to translate and the ➕ to read more about the shloka.',
+      'Complete a task to move to the next shloka. Tap {{translate}} to translate and {{readmore}} to read more about the shloka.',
     videoUrl: COMPLETE_TASKS_VIDEO_URL,
   },
   {

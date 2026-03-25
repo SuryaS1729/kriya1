@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import Feather from '@expo/vector-icons/Feather';
 import { useVideoPlayer, VideoView } from 'expo-video';
 
 import type { FeatureStep as FeatureStepType, Theme } from '../../lib/onboarding/constants';
@@ -8,68 +9,176 @@ import type { FeatureStep as FeatureStepType, Theme } from '../../lib/onboarding
 type FeatureSlideProps = {
   step: FeatureStepType;
   theme: Theme;
+  isActive: boolean;
 };
 
-export default function FeatureSlide({ step, theme }: FeatureSlideProps) {
+/** Inline replica of the "View in English" toggle pill */
+function TranslateButton({ isDark }: { isDark: boolean }) {
+  return (
+    <View style={[
+      styles.inlineToggleButton,
+      { backgroundColor: isDark ? '#4b556365' : '#ffffffff' },
+    ]}>
+      <Text style={[
+        styles.inlineToggleText,
+        { color: isDark ? '#f9fafb' : '#000000ff' },
+      ]}>
+        View in English
+      </Text>
+    </View>
+  );
+}
+
+/** Inline replica of the book-open "read more" pill */
+function ReadMoreButton({ isDark }: { isDark: boolean }) {
+  return (
+    <View style={[
+      styles.inlineDescButton,
+      { backgroundColor: isDark ? '#4b556365' : '#ffffffff' },
+    ]}>
+      <Feather name="book-open" size={14} color={isDark ? '#f9fafb' : '#000000ff'} />
+    </View>
+  );
+}
+
+/**
+ * Renders description text with inline button components by splitting
+ * on {{translate}} and {{readmore}} placeholders. Everything is inside
+ * a single <Text> so wrapping is handled natively.
+ */
+function RichDescription({
+  description,
+  textStyle,
+  isDark,
+}: {
+  description: string;
+  textStyle: object;
+  isDark: boolean;
+}) {
+  const parts = description.split(/({{translate}}|{{readmore}})/);
+  return (
+    <Text style={textStyle}>
+      {parts.map((part, i) => {
+        if (part === '{{translate}}') return <TranslateButton key={i} isDark={isDark} />;
+        if (part === '{{readmore}}') return <ReadMoreButton key={i} isDark={isDark} />;
+        return part;
+      })}
+    </Text>
+  );
+}
+
+export default function FeatureSlide({ step, theme, isActive }: FeatureSlideProps) {
   const player = useVideoPlayer(step.videoUrl ?? null, (p) => {
     p.loop = true;
-    p.play();
   });
+
+  React.useEffect(() => {
+    if (!player || !step.videoUrl) return;
+    if (isActive) {
+      player.play();
+    } else {
+      player.pause();
+      player.currentTime = 0;
+    }
+  }, [isActive, player, step.videoUrl]);
+
+  const isDark = theme.text === 'white';
+  const hasPlaceholders = step.description.includes('{{');
 
   return (
     <View style={styles.container}>
-      {step.videoUrl ? (
-        <View style={styles.videoContainer}>
-          <VideoView
-            style={styles.video}
-            player={player}
-            nativeControls={false}
-            allowsPictureInPicture={false}
-          />
-        </View>
-      ) : step.icon ? (
-        <AntDesign name={step.icon} size={60} color={theme.text} style={styles.icon} />
-      ) : null}
+      {/* Video / icon section — fixed in the upper area */}
+      <View style={styles.mediaSection}>
+        {step.videoUrl ? (
+          <View style={styles.videoContainer}>
+            <VideoView
+              style={styles.video}
+              player={player}
+              nativeControls={false}
+              allowsPictureInPicture={false}
+            />
+          </View>
+        ) : step.icon ? (
+          <AntDesign name={step.icon} size={60} color={theme.text} />
+        ) : null}
+      </View>
 
-      <Text style={[styles.title, { color: theme.text }]}>{step.title}</Text>
-      <Text style={[styles.description, { color: theme.textSecondary }]}>
-        {step.description}
-      </Text>
+      {/* Text section — independent from media */}
+      <View style={styles.textSection}>
+        <Text style={[styles.title, { color: theme.text }]}>{step.title}</Text>
+
+        {hasPlaceholders ? (
+          <RichDescription
+            description={step.description}
+            textStyle={[styles.description, { color: theme.textSecondary }]}
+            isDark={isDark}
+          />
+        ) : (
+          <Text style={[styles.description, { color: theme.textSecondary }]}>
+            {step.description}
+          </Text>
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    flex: 1,
+    width: '100%',
     paddingHorizontal: 5,
   },
-  icon: {
-    marginBottom: 30,
+  mediaSection: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   videoContainer: {
     width: '100%',
-    aspectRatio: 3 / 3,
+    aspectRatio: 1,
     borderRadius: 16,
     overflow: 'hidden',
-    marginBottom: 90,
   },
   video: {
     width: '100%',
     height: '100%',
   },
+  textSection: {
+    paddingBottom: 16,
+    alignItems: 'center',
+  },
   title: {
     fontSize: 21,
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 32,
     fontFamily: 'Instrument Serif',
     letterSpacing: 1,
   },
   description: {
     fontSize: 16,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 26,
     fontFamily: 'Source Serif Pro',
+  },
+  // ─── Inline button replicas ──────────────────────────────
+  inlineToggleButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    overflow: 'hidden',
+    transform: [{ translateY: 6 }],
+  },
+  inlineToggleText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  inlineDescButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+    borderRadius: 12,
+    overflow: 'hidden',
+    transform: [{ translateY: 5 }],
   },
 });

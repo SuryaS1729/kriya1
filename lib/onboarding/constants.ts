@@ -17,9 +17,9 @@ export const SHIMMER_START_DELAY = 1000;
 
 // ─── Remote Assets ──────────────────────────────────────────────────
 export const AMBIENT_AUDIO_URL =
-  'https://pub-4862ee5d51df47c4849ba812da5460ff.r2.dev/Drifting_Echoes_j5fudj.aac';
+  'https://kriyarecordings.bitwisedharma.com/Drifting_Echoes_j5fudj.aac';
 export const GITA_IMAGE_URL =
-  'https://pub-4862ee5d51df47c4849ba812da5460ff.r2.dev/hflxxtpxtyrhrcteczzn_w1ll3e.webp';
+  'https://kriyarecordings.bitwisedharma.com/hflxxtpxtyrhrcteczzn_w1ll3e.webp';
 
 // ─── Loading Texts ──────────────────────────────────────────────────
 export const LOADING_TEXTS = [

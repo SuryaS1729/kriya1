@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
+import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
 
 import type { FeatureStep as FeatureStepType, Theme } from '../../lib/onboarding/constants';
@@ -107,6 +108,19 @@ export default function FeatureSlide({ step, theme, isActive }: FeatureSlideProp
       <View style={styles.textSection}>
         <Text style={[styles.title, { color: theme.text }]}>{step.title}</Text>
 
+        {step.showSarvamLogo && (
+          <View style={styles.poweredByRow}>
+            <Text style={[styles.poweredByText, { color: theme.textTertiary }]}>
+              powered by
+            </Text>
+            <Image
+              source={require('../../assets/icons/sarvam.svg')}
+              style={[styles.sarvamLogo, { tintColor: theme.textTertiary }]}
+              contentFit="contain"
+            />
+          </View>
+        )}
+
         {hasPlaceholders ? (
           <RichDescription
             description={step.description}
@@ -152,9 +166,27 @@ const styles = StyleSheet.create({
     fontSize: 21,
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 28,
     fontFamily: 'Instrument Serif',
     letterSpacing: 1,
+  },
+  sarvamLogo: {
+    width: 80,
+    height: 16,
+    marginLeft: 4,
+    transform: [{ translateY: 3 }],
+  },
+  poweredByRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -20,
+    marginBottom: 22,
+  },
+  poweredByText: {
+    fontSize: 13,
+    fontFamily: 'Source Serif Pro',
+    marginRight: 4,
   },
   description: {
     fontSize: 16,

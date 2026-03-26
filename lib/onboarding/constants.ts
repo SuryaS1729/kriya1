@@ -24,6 +24,8 @@ export const ADD_TASKS_VIDEO_URL =
   'https://kriyarecordings.bitwisedharma.com/AddTasksSquare.mp4';
 export const COMPLETE_TASKS_VIDEO_URL =
   'https://kriyarecordings.bitwisedharma.com/CompleteTasksSquare.mp4';
+export const VOICE_BY_SARVAM_VIDEO_URL =
+  'https://kriyarecordings.bitwisedharma.com/VoiceBySarvam.mp4';
 
 // ─── Loading Texts ──────────────────────────────────────────────────
 export const LOADING_TEXTS = [
@@ -83,6 +85,7 @@ export type FeatureStep = {
   description: string;
   icon?: React.ComponentProps<typeof AntDesign>['name'];
   videoUrl?: string;
+  showSarvamLogo?: boolean;
 };
 
 export type ReminderStep = {
@@ -109,9 +112,17 @@ export const onboardingSteps: OnboardingStep[] = [
     videoUrl: COMPLETE_TASKS_VIDEO_URL,
   },
   {
+    type: 'feature',
+    title: 'Voice Translations',
+    description:
+      'Listen to each shloka in natural Sanskrit audio while you follow along with the translation.',
+    videoUrl: VOICE_BY_SARVAM_VIDEO_URL,
+    showSarvamLogo: true,
+  },
+  {
     type: 'reminder',
     title: 'When do you start your day?',
     description:
-      "Kriya expects you to write down tasks just before you begin your day. We'll save your preferred time and ask for notification permission when you continue.",
+      "Set a time for a gentle daily reminder to plan your tasks and stay on track. We'll ask for notification permission when you continue.",
   },
 ];

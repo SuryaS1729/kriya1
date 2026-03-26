@@ -165,7 +165,7 @@ export default function WelcomeScreen({ theme, onBegin }: WelcomeScreenProps) {
               </Animated.View>
             </View>
             <Text style={[styles.buttonText, { color: theme.text }]}>Begin the Journey</Text>
-            <Text style={styles.lotusIcon}>🪷</Text>
+            {/* <Text style={styles.lotusIcon}>🪷</Text> */}
           </PressableScale>
         </View>
       </Animated.View>
@@ -277,11 +277,11 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   buttonText: {
-    fontSize: 18,
-    fontWeight: '300',
-    letterSpacing: 1,
-    marginRight: 12,
-    fontFamily: 'Cedarville Cursive',
+    fontSize: 13,
+    letterSpacing: 2,
+
+    fontFamily: 'Space Mono',
+
   },
   lotusIcon: {
     fontSize: 20,

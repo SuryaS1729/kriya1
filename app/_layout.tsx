@@ -144,7 +144,6 @@ export default function Root() {
           <Stack.Screen name="bookmarks" options={{animation:'fade',animationDuration:200}}/>
           <Stack.Screen name="focus" options={{ title: 'Focus Mode' , animation:'fade',animationDuration:100}} />
           <Stack.Screen name="share2" options={{animation:'slide_from_bottom', animationDuration:200}}/>
-          <Stack.Screen name="listen" options={{animation:'slide_from_bottom', animationDuration:300}}/>
         </Stack>
       </SQLiteProvider>
       <AppToastHost />

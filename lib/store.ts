@@ -110,9 +110,7 @@ interface KriyaState {
   toggleNotifications: () => Promise<void>;
   initializeNotifications: () => Promise<void>;
 
-  // Listen mode
-  listenProgress: { shlokaIndex: number };
-  setListenProgress: (index: number) => void;
+
 }
 
 // Updated helper function for notifications - Following official docs exactly
@@ -205,7 +203,6 @@ export const useKriya = create<KriyaState>()(
       bookmarks: [],
       hasCompletedOnboarding: false,
       focusSessions: {},
-      listenProgress: { shlokaIndex: 0 },
       hasCompletedTour: false,
         hasSeenGuidedTour: false,
         setHasSeenGuidedTour: (seen: boolean) => {
@@ -473,9 +470,6 @@ export const useKriya = create<KriyaState>()(
         }
       },
 
-      setListenProgress: (index: number) => {
-        set({ listenProgress: { shlokaIndex: index } });
-      },
     }),
     {
       name: 'kriya-storage',
@@ -488,7 +482,6 @@ export const useKriya = create<KriyaState>()(
         notificationsEnabled: state.notificationsEnabled,
         reminderTime: state.reminderTime,
                 hasSeenGuidedTour: state.hasSeenGuidedTour,
-                listenProgress: state.listenProgress,
 
         // Don't persist notification token
       }),

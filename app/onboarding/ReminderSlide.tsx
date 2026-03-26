@@ -118,6 +118,24 @@ export default function ReminderSlide({
           You&apos;ll receive a reminder at {getReminderTime()} (10 minutes before)
         </Text>
       </View>
+
+      <Text style={[styles.moreTitle, { color: theme.textTertiary }]}>
+        And there&apos;s more to explore
+      </Text>
+      <View style={styles.featurePills}>
+        <View style={[styles.featurePill, { backgroundColor: theme.buttonBackgroundSecondary }]}> 
+          <Feather name="crosshair" size={14} color={theme.text} />
+          <Text style={[styles.featurePillText, { color: theme.text }]}>Focus Mode</Text>
+        </View>
+        <View style={[styles.featurePill, { backgroundColor: theme.buttonBackgroundSecondary }]}>
+          <Feather name="share-2" size={14} color={theme.text} />
+          <Text style={[styles.featurePillText, { color: theme.text }]}>Shareable Cards</Text>
+        </View>
+        <View style={[styles.featurePill, { backgroundColor: theme.buttonBackgroundSecondary }]}>
+          <Feather name="calendar" size={14} color={theme.text} />
+          <Text style={[styles.featurePillText, { color: theme.text }]}>Calendar</Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -202,5 +220,30 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     paddingHorizontal: 10,
     marginTop: 16,
+  },
+  moreTitle: {
+    fontSize: 13,
+    fontFamily: 'Source Serif Pro',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  featurePills: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  featurePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    gap: 6,
+  },
+  featurePillText: {
+    fontSize: 12,
+    fontWeight: '500',
+    fontFamily: 'Space Mono',
   },
 });

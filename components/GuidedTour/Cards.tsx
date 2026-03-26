@@ -1,19 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import {
-  ADD_TASK_MASK_BOTTOM,
-  ADD_TASK_MASK_HEIGHT,
-  BOOK_MASK_TOP,
-  SHLOKA_MASK_TOP,
-  SHLOKA_MASK_HEIGHT,
-  FIRST_TASK_MASK_TOP,
-  COMBINED_MASK_TOP,
-  COMBINED_MASK_HEIGHT
-} from './masks';
-
-const { width, height } = Dimensions.get('window');
-const CARD_OFFSET = 20;
+import { useMaskLayout } from './masks';
 
 interface CardProps {
   onNext: () => void;
@@ -21,8 +9,9 @@ interface CardProps {
 }
 
 export function ShlokaCard({ onNext, onSkip }: CardProps) {
+  const { cardPositions } = useMaskLayout();
   return (
-    <View style={[styles.card, styles.shlokaCard]}>
+    <View style={[styles.card, cardPositions.shlokaCard]}>
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>📖 Welcome to Kriya</Text>
         <Text style={styles.cardText}>
@@ -45,8 +34,9 @@ export function ShlokaCard({ onNext, onSkip }: CardProps) {
 }
 
 export function AddTaskCard({ onNext, onSkip }: CardProps) {
+  const { cardPositions } = useMaskLayout();
   return (
-    <View style={[styles.card, styles.addTaskCard]}>
+    <View style={[styles.card, cardPositions.addTaskCard]}>
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>✅ Add Your First Task</Text>
         <Text style={styles.cardText}>
@@ -69,8 +59,9 @@ export function AddTaskCard({ onNext, onSkip }: CardProps) {
 }
 
 export function ToggleTaskCard({ onNext, onSkip }: CardProps) {
+  const { cardPositions } = useMaskLayout();
   return (
-    <View style={[styles.card, styles.toggleTaskCard]}>
+    <View style={[styles.card, cardPositions.toggleTaskCard]}>
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>🎯 Complete Your Task</Text>
         <Text style={styles.cardText}>
@@ -93,8 +84,9 @@ export function ToggleTaskCard({ onNext, onSkip }: CardProps) {
 }
 
 export function FocusModeCard({ onNext, onSkip }: CardProps) {
+  const { cardPositions } = useMaskLayout();
   return (
-    <View style={[styles.card, styles.focusModeCard]}>
+    <View style={[styles.card, cardPositions.focusModeCard]}>
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>🧘 Focus Mode</Text>
         <Text style={styles.cardText}>
@@ -117,8 +109,9 @@ export function FocusModeCard({ onNext, onSkip }: CardProps) {
 }
 
 export function BookCard({ onNext, onSkip }: CardProps) {
+  const { cardPositions } = useMaskLayout();
   return (
-    <View style={[styles.card, styles.bookCard]}>
+    <View style={[styles.card, cardPositions.bookCard]}>
       <View style={styles.cardContent}>
         <Text style={styles.cardTitle}>📚 Deep Dive</Text>
         <Text style={styles.cardText}>
@@ -152,28 +145,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 8,
-    maxWidth: width - 40,
-  },
-  shlokaCard: {
-    top: SHLOKA_MASK_TOP + SHLOKA_MASK_HEIGHT + CARD_OFFSET,
-    alignSelf: 'center',
-  },
-  addTaskCard: {
-    bottom: ADD_TASK_MASK_BOTTOM + ADD_TASK_MASK_HEIGHT + CARD_OFFSET,
-    alignSelf: 'center',
-  },
-  toggleTaskCard: {
-    top: COMBINED_MASK_TOP + COMBINED_MASK_HEIGHT + CARD_OFFSET,
-    alignSelf: 'center',
-  },
-  focusModeCard: {
-    bottom: height - FIRST_TASK_MASK_TOP + CARD_OFFSET,
-    alignSelf: 'center',
-  },
-  bookCard: {
-    top: BOOK_MASK_TOP + 60,
-    right: 20,
-    maxWidth: 280,
   },
   cardContent: {
     alignItems: 'flex-start',
@@ -184,7 +155,6 @@ const styles = StyleSheet.create({
     color: '#1f2937',
     marginBottom: 8,
     fontFamily: 'Instrument Serif',
-
     letterSpacing: 0.5,
   },
   cardText: {

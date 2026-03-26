@@ -1,28 +1,20 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { AddTaskMask, BookMask, ShlokaMask, FirstTaskMask, CombinedMask } from './Maskys';
-import { 
-  ADD_TASK_MASK_BOTTOM, 
-  ADD_TASK_MASK_HEIGHT,
-  BOOK_MASK_TOP,
-  SHLOKA_MASK_TOP,
-  FIRST_TASK_MASK_TOP,
-  COMBINED_MASK_TOP,
-} from './masks';
-
-const { height } = Dimensions.get('window');
+import { useMaskLayout } from './masks';
 
 interface BackgroundProps {
   onPress: () => void;
 }
 
 export function AddTaskBackground({ onPress }: BackgroundProps) {
+  const { backgroundHeights } = useMaskLayout();
   return (
     <View style={styles.layout} pointerEvents="box-none">
       <TouchableOpacity
         activeOpacity={1}
         onPress={onPress}
-        style={{ height: height - ADD_TASK_MASK_BOTTOM - ADD_TASK_MASK_HEIGHT }}
+        style={{ height: backgroundHeights.addTaskFill }}
       />
       <AddTaskMask style={{ position: 'relative', opacity: 0 }} />
       <TouchableOpacity
@@ -35,12 +27,13 @@ export function AddTaskBackground({ onPress }: BackgroundProps) {
 }
 
 export function BookBackground({ onPress }: BackgroundProps) {
+  const { backgroundHeights } = useMaskLayout();
   return (
     <View style={styles.layout} pointerEvents="box-none">
       <TouchableOpacity
         activeOpacity={1}
         onPress={onPress}
-        style={{ height: BOOK_MASK_TOP }}
+        style={{ height: backgroundHeights.bookTop }}
       />
       <BookMask style={{ position: 'relative', opacity: 0 }} />
       <TouchableOpacity
@@ -53,12 +46,13 @@ export function BookBackground({ onPress }: BackgroundProps) {
 }
 
 export function ShlokaBackground({ onPress }: BackgroundProps) {
+  const { backgroundHeights } = useMaskLayout();
   return (
     <View style={styles.layout} pointerEvents="box-none">
       <TouchableOpacity
         activeOpacity={1}
         onPress={onPress}
-        style={{ height: SHLOKA_MASK_TOP }}
+        style={{ height: backgroundHeights.shlokaTop }}
       />
       <ShlokaMask style={{ position: 'relative', opacity: 0 }} />
       <TouchableOpacity
@@ -71,12 +65,13 @@ export function ShlokaBackground({ onPress }: BackgroundProps) {
 }
 
 export function FirstTaskBackground({ onPress }: BackgroundProps) {
+  const { backgroundHeights } = useMaskLayout();
   return (
     <View style={styles.layout} pointerEvents="box-none">
       <TouchableOpacity
         activeOpacity={1}
         onPress={onPress}
-        style={{ height: FIRST_TASK_MASK_TOP }}
+        style={{ height: backgroundHeights.firstTaskTop }}
       />
       <FirstTaskMask style={{ position: 'relative', opacity: 0 }} />
       <TouchableOpacity
@@ -89,12 +84,13 @@ export function FirstTaskBackground({ onPress }: BackgroundProps) {
 }
 
 export function CombinedBackground({ onPress }: BackgroundProps) {
+  const { backgroundHeights } = useMaskLayout();
   return (
     <View style={styles.layout} pointerEvents="box-none">
       <TouchableOpacity
         activeOpacity={1}
         onPress={onPress}
-        style={{ height: COMBINED_MASK_TOP }}
+        style={{ height: backgroundHeights.combinedTop }}
       />
       <CombinedMask style={{ position: 'relative', opacity: 0 }} />
       <TouchableOpacity

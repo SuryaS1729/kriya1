@@ -1,36 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import RNMaskedView from '@react-native-masked-view/masked-view';
 import { AddTaskMask, BookMask, ShlokaMask, FirstTaskMask, CombinedMask } from './Maskys';
 import { AddTaskBackground, BookBackground, ShlokaBackground, FirstTaskBackground, CombinedBackground } from './Backgrounds';
 import { ShlokaCard, AddTaskCard, ToggleTaskCard, FocusModeCard, BookCard } from './Cards';
 
-const { width, height } = Dimensions.get('window');
-
 interface GuidedTourProps {
   children: React.ReactNode;
   onComplete: () => void;
-  hasUserTasks: boolean; // New prop to track if user has added tasks
+  hasUserTasks: boolean;
 }
 
 export function GuidedTour({ children, onComplete, hasUserTasks }: GuidedTourProps) {
+  const { width, height } = useWindowDimensions();
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    // If user adds a task during the tour, advance to the task interaction steps
     if (!hasUserTasks && step === 1) {
-      // Stay on step 1 (add task) until they actually add a task
       return;
     }
     if (hasUserTasks && step === 1) {
-      // User just added a task, move to the toggle step
       setStep(2);
     }
   }, [hasUserTasks, step]);
 
   const handleNext = () => {
     if (step === 1 && !hasUserTasks) {
-      // Don't advance from "add task" until they actually add one
       return;
     }
     
@@ -42,7 +37,7 @@ export function GuidedTour({ children, onComplete, hasUserTasks }: GuidedTourPro
   };
 
   const getTotalSteps = () => {
-    return hasUserTasks ? 4 : 1; // shloka, toggle, focus, book OR just shloka + add task
+    return hasUserTasks ? 4 : 1;
   };
 
   const handleSkip = () => {
@@ -74,31 +69,29 @@ export function GuidedTour({ children, onComplete, hasUserTasks }: GuidedTourPro
 
   const currentStep = getCurrentStep();
 
-  const MaskedView = () => (
-    <RNMaskedView
-      style={styles.container}
-      maskElement={
-        <View style={styles.masks}>
-          {currentStep === 'shloka' && <ShlokaMask />}
-          {currentStep === 'addTask' && <AddTaskMask />}
-          {currentStep === 'toggle' && <CombinedMask />}
-          {currentStep === 'focus' && <FirstTaskMask />}
-          {currentStep === 'book' && <BookMask />}
-        </View>
-      }
-    >
-      {children}
-      {currentStep === 'shloka' && <ShlokaBackground onPress={handleBackgroundPress} />}
-      {currentStep === 'addTask' && <AddTaskBackground onPress={handleBackgroundPress} />}
-      {currentStep === 'toggle' && <CombinedBackground onPress={handleBackgroundPress} />}
-      {currentStep === 'focus' && <FirstTaskBackground onPress={handleBackgroundPress} />}
-      {currentStep === 'book' && <BookBackground onPress={handleBackgroundPress} />}
-    </RNMaskedView>
-  );
-
   return (
     <View style={styles.layout}>
-      <MaskedView />
+      {/* Inlined MaskedView — avoids re-creating a component on every render */}
+      <RNMaskedView
+        style={styles.container}
+        maskElement={
+          <View style={[styles.masks, { width, height }]}>
+            {currentStep === 'shloka' && <ShlokaMask />}
+            {currentStep === 'addTask' && <AddTaskMask />}
+            {currentStep === 'toggle' && <CombinedMask />}
+            {currentStep === 'focus' && <FirstTaskMask />}
+            {currentStep === 'book' && <BookMask />}
+          </View>
+        }
+      >
+        {children}
+        {currentStep === 'shloka' && <ShlokaBackground onPress={handleBackgroundPress} />}
+        {currentStep === 'addTask' && <AddTaskBackground onPress={handleBackgroundPress} />}
+        {currentStep === 'toggle' && <CombinedBackground onPress={handleBackgroundPress} />}
+        {currentStep === 'focus' && <FirstTaskBackground onPress={handleBackgroundPress} />}
+        {currentStep === 'book' && <BookBackground onPress={handleBackgroundPress} />}
+      </RNMaskedView>
+
       {currentStep === 'shloka' && <ShlokaCard onNext={handleNext} onSkip={handleSkip} />}
       {currentStep === 'addTask' && <AddTaskCard onNext={handleNext} onSkip={handleSkip} />}
       {currentStep === 'toggle' && <ToggleTaskCard onNext={handleNext} onSkip={handleSkip} />}
@@ -120,7 +113,5 @@ const styles = StyleSheet.create({
   masks: {
     flex: 1,
     backgroundColor: '#00000080',
-    width,
-    height,
   },
 });

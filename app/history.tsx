@@ -10,8 +10,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 // import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { StatusBar } from 'expo-status-bar';
-import { Toast, ToastTitle, ToastDescription, useToast } from '@/components/ui/toast'; // Add this import
 import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic } from '../lib/haptics';
+import { showAppToast } from '../lib/appToast';
 
 
 function getDateKey(date: Date) {
@@ -108,7 +108,6 @@ function NotificationSettings() {
   
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
-  const toast = useToast(); // Add toast hook
 
   // Initialize selectedTime with current reminder time
   useEffect(() => {
@@ -116,26 +115,6 @@ function NotificationSettings() {
     newTime.setHours(reminderTime.hour, reminderTime.minute, 0, 0);
     setSelectedTime(newTime);
   }, [reminderTime]);
-
-  const showSuccessToast = (timeString: string) => {
-    const newId = Math.random().toString();
-    toast.show({
-      id: newId,
-      placement: 'bottom',
-      duration: 3000,
-      render: ({ id }) => {
-        const uniqueToastId = 'toast-' + id;
-        return (
-          <Toast nativeID={uniqueToastId} action="success" variant="solid">
-            <ToastTitle>Reminder Time Set!</ToastTitle>
-            <ToastDescription>
-              Your daily reminder is now set for {timeString}
-            </ToastDescription>
-          </Toast>
-        );
-      },
-    });
-  };
 
   const handleTimeChange = async (event: any, time?: Date) => {
     // Hide picker on Android when user interacts
@@ -162,32 +141,23 @@ function NotificationSettings() {
         
         // console.log(`✅ Time updated to ${hours}:${minutes.toString().padStart(2, '0')}`);
         
-        // Show success toast
-        showSuccessToast(timeString);
+        showAppToast({
+          type: 'success',
+          text1: 'Reminder Time Set',
+          text2: `Your daily reminder is now set for ${timeString}`,
+          duration: 3000,
+          position: 'bottom',
+        });
         
         taskCompleteHaptic(); // Changed from direct Haptics call
       } catch {
-        // console.error('❌ Failed to update reminder time:', error);
-        
-        // Show error toast
-        const errorId = Math.random().toString();
-        toast.show({
-          id: errorId,
-          placement: 'bottom',
+        showAppToast({
+          type: 'error',
+          text1: 'Failed to Set Time',
+          text2: 'Could not update your reminder time. Please try again.',
           duration: 3000,
-          render: ({ id }) => {
-            const uniqueToastId = 'toast-' + id;
-            return (
-              <Toast nativeID={uniqueToastId} action="error" variant="solid">
-                <ToastTitle>Failed to Set Time</ToastTitle>
-                <ToastDescription>
-                  Could not update your reminder time. Please try again.
-                </ToastDescription>
-              </Toast>
-            );
-          },
+          position: 'bottom',
         });
-        
         errorHaptic(); // Changed from direct Haptics call
       }
     } else if (Platform.OS === 'android') {
@@ -212,32 +182,23 @@ function NotificationSettings() {
 
   const handleToggleNotifications = async () => {
     selectionHaptic(); // Changed from direct Haptics call
-    await toggleNotifications();
-    
-    // Show toast based on new state
-    const newState = !notificationsEnabled; // Since toggle happens after this
-    const toastId = Math.random().toString();
-    
-    toast.show({
-      id: toastId,
-      placement: 'bottom',
+    const enabled = await toggleNotifications();
+    const attemptedEnable = !notificationsEnabled;
+
+    showAppToast({
+      type: enabled ? 'success' : attemptedEnable ? 'error' : 'info',
+      text1: enabled
+        ? 'Notifications Enabled'
+        : attemptedEnable
+          ? 'Permission Needed'
+          : 'Notifications Disabled',
+      text2: enabled
+        ? "You'll receive daily reminders to plan your day"
+        : attemptedEnable
+          ? 'Notifications were not enabled because permission was not granted.'
+          : 'Daily reminders have been turned off',
       duration: 2500,
-      render: ({ id }) => {
-        const uniqueToastId = 'toast-' + id;
-        return (
-          <Toast nativeID={uniqueToastId} action={newState ? "success" : "info"} variant="solid">
-            <ToastTitle>
-              {newState ? "Notifications Enabled" : "Notifications Disabled"}
-            </ToastTitle>
-            <ToastDescription>
-              {newState 
-                ? "You'll receive daily reminders to plan your day" 
-                : "Daily reminders have been turned off"
-              }
-            </ToastDescription>
-          </Toast>
-        );
-      },
+      position: 'bottom',
     });
   };
 
@@ -1143,7 +1104,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginLeft: 12,
   },
-  
   modalBackdrop: {
     position: 'absolute',
     top: 0,

@@ -107,8 +107,8 @@ interface KriyaState {
 
   // Notification methods
   setReminderTime: (hour: number, minute: number) => Promise<void>;
-  toggleNotifications: () => Promise<void>;
-  initializeNotifications: () => Promise<void>;
+  toggleNotifications: () => Promise<boolean>;
+  initializeNotifications: () => Promise<boolean>;
 
 
 }
@@ -444,14 +444,14 @@ export const useKriya = create<KriyaState>()(
       toggleNotifications: async () => {
         const { notificationsEnabled } = get();
         const newState = !notificationsEnabled;
-        
-        set({ notificationsEnabled: newState });
-        
+
         if (newState) {
-          await get().initializeNotifications();
+          return get().initializeNotifications();
         } else {
+          set({ notificationsEnabled: false, notificationToken: null });
           await Notifications.cancelAllScheduledNotificationsAsync();
           // console.log('🔕 All notifications cancelled');
+          return false;
         }
       },
 
@@ -459,14 +459,24 @@ export const useKriya = create<KriyaState>()(
         try {
           // console.log('🔔 Initializing notifications...');
           const result = await registerForPushNotificationsAsync();
-          set({ notificationToken: result });
-          
+          if (!result) {
+            set({ notificationsEnabled: false, notificationToken: null });
+            await Notifications.cancelAllScheduledNotificationsAsync();
+            return false;
+          }
+
+          set({ notificationsEnabled: true, notificationToken: result });
+
           const { reminderTime } = get();
           await scheduleTaskReminder(reminderTime.hour, reminderTime.minute);
-          
+
           // console.log('✅ Local notifications initialized successfully');
+          return true;
         } catch (error) {
+          set({ notificationsEnabled: false, notificationToken: null });
+          await Notifications.cancelAllScheduledNotificationsAsync();
           // console.error('❌ Failed to initialize notifications:', error);
+          return false;
         }
       },
 

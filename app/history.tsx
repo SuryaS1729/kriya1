@@ -796,7 +796,7 @@ function Footer() {
       
       {/* App Info */}
       <View style={styles.footerInfo}>
-        <Text style={[styles.footerVersion, !isDarkMode && styles.lightSubText]}>Version 1.0.1</Text>
+        <Text style={[styles.footerVersion, !isDarkMode && styles.lightSubText]}>Version 2.0.0</Text>
         <View style={styles.footerLinks}>
           <Pressable onPress={() => openLink('https://kriyaapp.com/privacy')}>
             <Text style={[styles.footerLink, !isDarkMode && styles.lightFooterLink]}>Privacy Policy</Text>

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Kriya",
     "slug": "kriya",
-    "version": "1.0.1",
+    "version": "2.0.0",
     "scheme": "acme",
     "icon": "./assets/icons/androidicon1.png",
     "userInterfaceStyle": "automatic",

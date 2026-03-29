@@ -361,6 +361,53 @@ function QuickActions() {
   );
 }
 
+function TipsDropdown() {
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <View style={styles.actionsSection}>
+      <Pressable
+        style={[styles.tipsHeader, !isDarkMode && styles.lightCard]}
+        onPress={() => {
+          selectionHaptic();
+          setIsOpen((prev) => !prev);
+        }}
+        android_ripple={{ color: '#cccccc18' }}
+      >
+        <View style={styles.tipsHeaderContent}>
+          <Feather name="info" size={20} color={isDarkMode ? '#cbd5e1' : '#475569'} />
+          <Text style={[styles.actionsTitle, styles.tipsTitle, !isDarkMode && styles.lightText]}>
+            Tips
+          </Text>
+        </View>
+        <Feather
+          name={isOpen ? 'chevron-up' : 'chevron-down'}
+          size={20}
+          color={isDarkMode ? '#cbd5e1' : '#475569'}
+        />
+      </Pressable>
+
+      {isOpen && (
+        <View style={[styles.tipsBody, !isDarkMode && styles.lightCard]}>
+          <View style={styles.tipRow}>
+            <Feather name="target" size={16} color="#00FFFF" />
+            <Text style={[styles.tipText, !isDarkMode && styles.lightSubText]}>
+              Long press a task on the home screen to open Focus Mode.
+            </Text>
+          </View>
+          <View style={styles.tipRow}>
+            <MaterialIcons name="bookmark" size={16} color="#fbbf24" />
+            <Text style={[styles.tipText, !isDarkMode && styles.lightSubText]}>
+              Long press the bookmark icon to view your bookmarks.
+            </Text>
+          </View>
+        </View>
+      )}
+    </View>
+  );
+}
+
 
 
 // Gita Progress Component
@@ -849,6 +896,8 @@ export default function History() {
      
           {/* Quick Actions */}
           <QuickActions /> 
+
+          <TipsDropdown />
           
            {/* ADD: Notification Settings - Add this here */}
           <NotificationSettings />
@@ -1088,6 +1137,45 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     gap: 12,
+  },
+  tipsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(52, 76, 103, 0.5)',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(93, 123, 158, 0.4)',
+  },
+  tipsHeaderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  tipsTitle: {
+    marginBottom: 0,
+    fontSize: 16,
+  },
+  tipsBody: {
+    marginTop: 12,
+    backgroundColor: 'rgba(52, 76, 103, 0.38)',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(93, 123, 158, 0.3)',
+    gap: 14,
+  },
+  tipRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  tipText: {
+    flex: 1,
+    color: '#cbd5e1',
+    fontSize: 14,
+    lineHeight: 20,
   },
   actionButton: {
     flexDirection: 'row',

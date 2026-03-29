@@ -113,7 +113,7 @@ export const onboardingSteps: OnboardingStep[] = [
   },
   {
     type: 'feature',
-    title: 'Voice Translations',
+    title: 'Voice Dictations',
     description:
       'Listen to each shloka in natural Sanskrit audio while you follow along with the translation.',
     videoUrl: VOICE_BY_SARVAM_VIDEO_URL,

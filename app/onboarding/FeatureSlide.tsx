@@ -6,6 +6,7 @@ import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
 
 import type { FeatureStep as FeatureStepType, Theme } from '../../lib/onboarding/constants';
+import type { VideoPlayer } from 'expo-video';
 
 type FeatureSlideProps = {
   step: FeatureStepType;
@@ -69,19 +70,30 @@ function RichDescription({
 }
 
 export default function FeatureSlide({ step, theme, isActive }: FeatureSlideProps) {
-  const player = useVideoPlayer(step.videoUrl ?? null, (p) => {
-    p.loop = true;
-  });
+  const player = useVideoPlayer(step.videoUrl ?? null);
+  const playerRef = React.useRef<VideoPlayer | null>(player);
 
   React.useEffect(() => {
-    if (!player || !step.videoUrl) return;
+    playerRef.current = player;
+
+    if (!step.videoUrl) return;
+
+    playerRef.current.loop = true;
+  }, [player, step.videoUrl]);
+
+  React.useEffect(() => {
+    const currentPlayer = playerRef.current;
+
+    if (!currentPlayer || !step.videoUrl) return;
+
     if (isActive) {
-      player.play();
+      currentPlayer.play();
     } else {
-      player.pause();
-      player.currentTime = 0;
+      currentPlayer.pause();
+      currentPlayer.replay();
+      currentPlayer.pause();
     }
-  }, [isActive, player, step.videoUrl]);
+  }, [isActive, step.videoUrl]);
 
   const isDark = theme.text === 'white';
   const hasPlaceholders = step.description.includes('{{');
@@ -167,13 +179,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 28,
-    fontFamily: 'Instrument Serif',
+    fontFamily: 'Dancing Script',
     letterSpacing: 1,
   },
   sarvamLogo: {
-    width: 80,
+    width: 60,
     height: 16,
-    marginLeft: 4,
+    marginLeft: 2,
+    marginBottom:2,
     transform: [{ translateY: 3 }],
   },
   poweredByRow: {
@@ -189,10 +202,11 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   description: {
-    fontSize: 16,
+    fontSize: 18,
     textAlign: 'center',
     lineHeight: 26,
-    fontFamily: 'Source Serif Pro',
+fontFamily:"Source Serif Pro"
+
   },
   // ─── Inline button replicas ──────────────────────────────
   inlineToggleButton: {

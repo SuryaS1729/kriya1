@@ -4,6 +4,7 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   InteractionManager,
+  Modal,
   Platform,
   Pressable,
   StyleSheet,
@@ -96,6 +97,7 @@ export default function Add() {
   const [isCustom, setIsCustom] = useState(false);
   const [customDayKey, setCustomDayKey] = useState<number | null>(null);
   const [showCustomPicker, setShowCustomPicker] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   // Reanimated shared value for rotation
@@ -247,6 +249,16 @@ export default function Add() {
     router.replace('/');
   }
 
+  const openHelpModal = () => {
+    selectionHaptic();
+    Keyboard.dismiss();
+    setShowHelpModal(true);
+  };
+
+  const closeHelpModal = () => {
+    setShowHelpModal(false);
+  };
+
   const openCustomPicker = () => {
     selectionHaptic();
     Keyboard.dismiss();
@@ -348,6 +360,15 @@ export default function Add() {
         <TopBar
           title="Quick Add"
           variant="close"
+          right={(
+            <Pressable onPress={openHelpModal} hitSlop={12} style={styles.helpButton}>
+              <Feather
+                name="help-circle"
+                size={18}
+                color={isDarkMode ? '#cbd5e1' : '#475569'}
+              />
+            </Pressable>
+          )}
           isDarkMode={isDarkMode}
         />
 
@@ -556,6 +577,54 @@ export default function Add() {
           </View>
         </View>
       </KeyboardAvoidingView>
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={showHelpModal}
+        onRequestClose={closeHelpModal}
+      >
+        <View style={styles.helpModalBackdrop}>
+          <View
+            style={[
+              styles.helpModalCard,
+              {
+                backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
+                shadowColor: isDarkMode ? '#000000' : '#0f172a',
+              },
+            ]}
+          >
+            <View style={styles.helpModalHeader}>
+              <Text style={[styles.helpModalTitle, { color: isDarkMode ? '#f9fafb' : '#111827' }]}>
+                Quick Add shortcut
+              </Text>
+              <Pressable onPress={closeHelpModal} hitSlop={12} style={styles.helpCloseButton}>
+                <Feather name="x" size={20} color={isDarkMode ? '#cbd5e1' : '#475569'} />
+              </Pressable>
+            </View>
+
+            <Text style={[styles.helpModalText, { color: isDarkMode ? '#cbd5e1' : '#475569' }]}>
+              Type multiple tasks in one go by separating them with a full stop.
+            </Text>
+            <Text style={[styles.helpModalExample, { color: isDarkMode ? '#f9fafb' : '#0f172a' }]}>
+              Call mom. Buy milk. Send email.
+            </Text>
+            <Text style={[styles.helpModalSubtext, { color: isDarkMode ? '#94a3b8' : '#64748b' }]}>
+              When you submit, each sentence gets added as its own task.
+            </Text>
+
+            <Pressable
+              onPress={closeHelpModal}
+              style={[
+                styles.helpModalPrimaryButton,
+                { backgroundColor: isDarkMode ? '#2563eb' : '#1d4ed8' },
+              ]}
+            >
+              <Text style={styles.helpModalPrimaryButtonText}>Got it</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -627,6 +696,74 @@ const styles = StyleSheet.create({
   // },
   addBtnText: { color: 'white', fontSize: 16, fontWeight: '600' },
   link: { color: '#2563eb', fontSize: 16 },
+  helpButton: {
+    padding: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  helpModalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+  },
+  helpModalCard: {
+    width: '100%',
+    borderRadius: 22,
+    padding: 22,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.22,
+    shadowRadius: 24,
+    elevation: 10,
+  },
+  helpModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 14,
+  },
+  helpModalTitle: {
+    flex: 1,
+    fontSize: 21,
+    fontWeight: '700',
+    fontFamily: 'Source Serif Pro',
+  },
+  helpCloseButton: {
+    padding: 2,
+  },
+  helpModalText: {
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 14,
+  },
+  helpModalExample: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: '600',
+    fontFamily: 'Space Mono',
+    marginBottom: 12,
+  },
+  helpModalSubtext: {
+    fontSize: 14,
+    lineHeight: 21,
+    marginBottom: 20,
+  },
+  helpModalPrimaryButton: {
+    alignSelf: 'flex-end',
+    minWidth: 96,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  helpModalPrimaryButtonText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
   addTaskIcon: {
     width: 40, // Make it bigger than checkbox (20px)
     height: 40, // Make it bigger than checkbox (20px)

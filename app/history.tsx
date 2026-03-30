@@ -391,6 +391,12 @@ function TipsDropdown() {
       {isOpen && (
         <View style={[styles.tipsBody, !isDarkMode && styles.lightCard]}>
           <View style={styles.tipRow}>
+            <Feather name="help-circle" size={16} color={isDarkMode ? '#93c5fd' : '#2563eb'} />
+            <Text style={[styles.tipText, !isDarkMode && styles.lightSubText]}>
+              In Quick Add, separate tasks with a full stop to add multiple tasks in one go.
+            </Text>
+          </View>
+          <View style={styles.tipRow}>
             <Feather name="target" size={16} color="#00FFFF" />
             <Text style={[styles.tipText, !isDarkMode && styles.lightSubText]}>
               Long press a task on the home screen to open Focus Mode.

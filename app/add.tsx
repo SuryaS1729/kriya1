@@ -80,6 +80,13 @@ function getRemainingCount(tasks: Task[]) {
   return tasks.filter((task) => !task.completed).length;
 }
 
+function splitInputIntoTasks(input: string) {
+  return input
+    .split('.')
+    .map((task) => task.trim())
+    .filter(Boolean);
+}
+
 export default function Add() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ dayKey?: string | string[] }>();
@@ -201,9 +208,10 @@ export default function Add() {
   const addAndStay=()=> {
     mediumImpactHaptic(); // More reliable haptic
 
-    const t = text.trim();
-    if (!t) return;
-    addTaskForDay(t, activeDayKey);
+    const tasks = splitInputIntoTasks(text);
+    if (tasks.length === 0) return;
+
+    tasks.forEach((task) => addTaskForDay(task, activeDayKey));
     if (!isActiveToday) {
       setDayTasks(getTasksForDay(activeDayKey));
     }
@@ -213,14 +221,14 @@ export default function Add() {
     }, 0);
   }
   function addAndStayOrGoHome() {
-  const t = text.trim();
-  if (!t) {
+  const tasks = splitInputIntoTasks(text);
+  if (tasks.length === 0) {
     // If empty, go back to homescreen
     doneAndClose();
     return;
   }
   // If not empty, add task and stay
-  addTaskForDay(t, activeDayKey);
+  tasks.forEach((task) => addTaskForDay(task, activeDayKey));
   if (!isActiveToday) {
     setDayTasks(getTasksForDay(activeDayKey));
   }
@@ -340,7 +348,6 @@ export default function Add() {
         <TopBar
           title="Quick Add"
           variant="close"
-          right={<Pressable onPress={doneAndClose}><Text style={[styles.link, { color: isDarkMode ? '#60a5fa' : '#2563eb' }]}></Text></Pressable>}
           isDarkMode={isDarkMode}
         />
 

@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   description: {
-    fontSize: 18,
+    fontSize: 16,
     textAlign: 'center',
     lineHeight: 26,
 fontFamily:"Source Serif Pro"

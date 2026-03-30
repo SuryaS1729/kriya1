@@ -100,7 +100,7 @@ export default function WelcomeScreen({ theme, onBegin }: WelcomeScreenProps) {
         <Animated.View style={[styles.titleContainer, animatedTitleStyle]}>
           <Text style={[styles.title, { color: theme.text }]}>kriya</Text>
           <Text style={[styles.tagline, { color: theme.textSecondary }]}>
-            ancient wisdom, modern rhythm
+              ancient wisdom, modern rhythm
           </Text>
         </Animated.View>
 
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   tagline: {
     fontSize: 12,
     textAlign: 'center',
-    letterSpacing: 1.5,
+    letterSpacing: 0.8,
     fontWeight: '400',
     marginTop: 10,
     fontFamily: 'Source Serif Pro',
@@ -230,6 +230,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 40,
     paddingVertical: 40,
+
   },
   arrowContainer: {
     alignItems: 'center',
@@ -242,17 +243,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 32,
     paddingVertical: 16,
-    borderRadius: 25,
-    borderWidth: 1.5,
+    borderRadius: 29,
+    borderWidth: 1.25,
     marginTop: 16,
-    marginBottom: 20,
+    marginBottom: 34,
     overflow: 'hidden',
     position: 'relative',
     shadowColor: '#00fff783',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 7,
-    elevation: 5,
+    elevation: 6,
     transform: [{ translateY: -2 }],
 
   },

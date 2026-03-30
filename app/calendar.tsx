@@ -33,6 +33,7 @@ import {
   type Task,
 } from '../lib/tasks';
 import { buttonPressHaptic, errorHaptic, selectionHaptic, taskCompleteHaptic } from '../lib/haptics';
+import { StatusBar } from 'expo-status-bar';
 
 const EMPTY_TASKS: Task[] = [];
 
@@ -795,6 +796,8 @@ export default function CalendarScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+      <StatusBar hidden= {true} />
+      
       <LinearGradient
         colors={isDarkMode ? ['#031d31e7', '#000000ff'] : ['#ffffffff', '#f0f2f8ff']}
         style={StyleSheet.absoluteFill}

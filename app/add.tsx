@@ -38,6 +38,7 @@ import { mediumImpactHaptic, selectionHaptic, errorHaptic } from '../lib/haptics
 import { PressableScale } from 'pressto';
 
 
+
 // Create animated Feather component
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);

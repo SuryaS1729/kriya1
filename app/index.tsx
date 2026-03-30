@@ -142,10 +142,174 @@ const TaskRow = React.memo(({
 });
 TaskRow.displayName = 'TaskRow';
 
+const ShlokaCard = React.memo(function ShlokaCard({ topInset }: { topInset: number }) {
+  const ready = useKriya(s => s.ready);
+  useKriya(s => s.tasksToday);
+  const getShloka = useKriya(s => s.currentShloka);
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  const [showTranslation, setShowTranslation] = useState(false);
+  const fade = useSharedValue(0);
+  const toggleScale = useSharedValue(1);
+
+  const { index: shlokaIndex, data: shloka } = ready ? getShloka() : { index: 0, data: null as any };
+
+  const openShlokaDetail = useCallback(() => {
+    if (!Number.isFinite(shlokaIndex) || shlokaIndex < 0) return;
+    router.push({
+      pathname: '/shloka/[id]',
+      params: { id: String(shlokaIndex) }
+    });
+  }, [shlokaIndex]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!ready) return;
+      fade.value = 0;
+      fade.value = withSpring(1);
+    }, [ready, fade])
+  );
+
+  useEffect(() => {
+    if (!ready || shlokaIndex < 0) return;
+    fade.value = 0;
+    fade.value = withSpring(1);
+  }, [ready, shlokaIndex, fade, showTranslation]);
+
+  React.useEffect(() => {
+    return () => {
+      fade.value = 0;
+    };
+  }, [fade]);
+
+  const fadeStyle = useAnimatedStyle(() => ({
+    opacity: fade.value,
+  }));
+
+  const toggleButtonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: toggleScale.value }],
+  }));
+
+  const handleTogglePress = useCallback(() => {
+    selectionHaptic();
+    toggleScale.value = withSpring(0.90, {
+      stiffness: 800,
+      damping: 12,
+      mass: 0.2,
+    });
+
+    setTimeout(() => {
+      toggleScale.value = withSpring(1, {
+        stiffness: 700,
+        damping: 18,
+        mass: 0.3,
+      });
+    }, 50);
+
+    setShowTranslation((value) => !value);
+  }, [toggleScale]);
+
+  if (!shloka) {
+    return (
+      <View style={[styles.topHalf, { paddingTop: topInset }]}>
+        <View style={[styles.card, { height: 240, opacity: 0.5 }]}>
+          <View style={[styles.shlokaContentContainer, { backgroundColor: isDarkMode ? '#374151' : '#e5e7eb', borderRadius: 16 }]} />
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.topHalf, { paddingTop: topInset }]}>
+      <View style={styles.card}>
+        <View style={styles.headerSection}>
+          <Pressable
+            onPress={() => {
+              buttonPressHaptic();
+              openShlokaDetail();
+            }}
+          >
+            <Text style={[styles.meta, { color: isDarkMode ? '#eef1f4ff' : '#545454' }]}>
+              Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
+            </Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.shlokaContentContainer}>
+          <Animated.View style={[fadeStyle, styles.contentSection]}>
+            {showTranslation ? (
+              <ScrollView
+                style={styles.scrollContainer}
+                contentContainerStyle={styles.scrollContentEnglish}
+                showsVerticalScrollIndicator={true}
+                bounces={true}
+              >
+                <Text
+                  style={[
+                    styles.en,
+                    { color: isDarkMode ? '#d1d5db' : '#434343ff' }
+                  ]}
+                >
+                  {shloka.translation_2 || shloka.description || 'No translation available'}
+                </Text>
+              </ScrollView>
+            ) : (
+              <ScrollView
+                style={styles.scrollContainer}
+                contentContainerStyle={styles.scrollContentSanskrit}
+                showsVerticalScrollIndicator={true}
+                bounces={true}
+              >
+                <Text
+                  style={[styles.sa, { color: isDarkMode ? '#eaecf1ff' : '#565657ff' }]}
+                >
+                  {shloka.text}
+                </Text>
+              </ScrollView>
+            )}
+          </Animated.View>
+        </View>
+      </View>
+
+      <View style={styles.toggleButtonRow}>
+        <View style={styles.leftSpacer} />
+
+        <TouchableOpacity onPress={handleTogglePress} activeOpacity={1}>
+          <Animated.View style={[
+            styles.toggleButton,
+            { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
+            toggleButtonStyle
+          ]}>
+            <Text style={[
+              styles.toggleText,
+              { color: isDarkMode ? '#f9fafb' : '#000000ff' }
+            ]}>
+              {showTranslation ? 'View in Sanskrit' : 'View in English'}
+            </Text>
+          </Animated.View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            buttonPressHaptic();
+            openShlokaDetail();
+          }}
+          activeOpacity={0.7}
+        >
+          <View style={[
+            styles.descButton,
+            { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
+          ]}>
+            <Feather name="book-open" size={16} color={isDarkMode ? "#f9fafb" : "#000000ff"} />
+          </View>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+});
+
 export default function Home() {
   const ready     = useKriya(s => s.ready);
   const tasks     = useKriya(s => s.tasksToday);
-  const getShloka = useKriya(s => s.currentShloka);
   const toggle    = useKriya(s => s.toggleTask);
   const remove    = useKriya(s => s.removeTask);
   const getTasksForDay = useKriya(s => s.getTasksForDay); 
@@ -172,12 +336,6 @@ export default function Home() {
   const [delayedCompletedTaskIds, setDelayedCompletedTaskIds] = useState<number[]>([]);
   const [delayedYesterdayCompletedTaskIds, setDelayedYesterdayCompletedTaskIds] = useState<number[]>([]);
 
-  // Fade animation for shloka card
-  const fade = useSharedValue(0);
-
-   // Add scale animation for toggle button
-  const toggleScale = useSharedValue(1);
-
   const loadYesterdayTasks = useCallback(() => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
@@ -202,66 +360,14 @@ export default function Home() {
   useFocusEffect(
     React.useCallback(() => {
       if (ready) {
-
         refresh();
         loadYesterdayTasks();
         if (showAllTasks) {
           loadAllTasks();
         }
-                // console.log('🧹 Home screen focused - refreshing state');
-
-
-        fade.value = 0;
-        fade.value = withSpring(1);
       }
-    }, [ready, refresh, fade, loadYesterdayTasks, showAllTasks, loadAllTasks])
+    }, [ready, refresh, loadYesterdayTasks, showAllTasks, loadAllTasks])
   );
-
-  // Only compute shloka after store is ready
-  const { index: shlokaIndex, data: shloka } = ready ? getShloka() : { index: 0, data: null as any };
-  const openShlokaDetail = () => {
-    if (!Number.isFinite(shlokaIndex) || shlokaIndex < 0) return;
-    router.push({
-      pathname: '/shloka/[id]',
-      params: { id: String(shlokaIndex) }
-    });
-  };
-
-  // State for toggling between Sanskrit and English
-  const [showTranslation, setShowTranslation] = useState(false);
-  useEffect(() => {
-    if (!ready || shlokaIndex < 0) return;
-    fade.value = 0;
-    fade.value = withSpring(1);
-  }, [ready, shlokaIndex, fade, showTranslation]);
-
-  const fadeStyle = useAnimatedStyle(() => ({
-    opacity: fade.value,
-  }));
-
-const handleTogglePress = () => {
-    selectionHaptic();
-  toggleScale.value = withSpring(0.90, {
-    stiffness: 800,
-    damping: 12,
-    mass: 0.2,
-  });
-  
-  setTimeout(() => {
-    toggleScale.value = withSpring(1, {
-      stiffness: 700,
-      damping: 18,
-      mass: 0.3,
-    });
-  }, 50);
-  
-  setShowTranslation(!showTranslation);
-};
-
-  // Add animated style for toggle button
-  const toggleButtonStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: toggleScale.value }],
-  }));
 
   // Incomplete tasks first, completed tasks after, preserving entry order in each bucket.
   const sortedTasks = useMemo(() => {
@@ -428,14 +534,6 @@ console.log('🔍 Guided Tour Debug:', {
   ), [isDarkMode, onToggleAllTask, onRemoveAllTask, onFocus]);
 
   const keyExtractor = useCallback((item: Task) => `task-${item.id}`, []);
-
-  // Clear animation states when component unmounts
-  React.useEffect(() => {
-    return () => {
-      // Cleanup when component unmounts
-      fade.value = 0;
-    };
-  }, [fade]);
 
   // Handle onboarding redirect - only once when ready
   useEffect(() => {
@@ -616,7 +714,7 @@ console.log('🔍 Guided Tour Debug:', {
   }
 
   // Minimal skeleton while DB/store warm up
-  if (!ready || !shloka) {
+  if (!ready) {
     return (
       <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <StatusBar style={isDarkMode ? "light" : "auto"} />
@@ -641,99 +739,7 @@ console.log('🔍 Guided Tour Debug:', {
             {/* <StatusBar hidden={true} /> */}
       
       
-   <View style={[styles.topHalf, { paddingTop: insets.top }]}>
-  {/* Shloka Card */}
-  <View style={styles.card}>
-    <View style={styles.headerSection}>
-       <Pressable 
-      onPress={() => {
-        buttonPressHaptic(); 
-        openShlokaDetail();
-      }}
-    >
-      <Text style={[styles.meta, { color: isDarkMode ? '#eef1f4ff' : '#545454' }]}>
-        Adhyaya {shloka.chapter_number}, Shloka {shloka.verse_number}
-      </Text>
-    </Pressable>
-    </View>
-
-    {/* <Link
-      href={{ pathname: '/shloka/[id]', params: { id: String(shlokaIndex) } }}
-      asChild
-    > */}
-      <View style={styles.shlokaContentContainer}
-      >
-        <Animated.View style={[fadeStyle, styles.contentSection]}>
-          {showTranslation ? (
-            <ScrollView
-              style={styles.scrollContainer}
-              contentContainerStyle={styles.scrollContentEnglish}
-              showsVerticalScrollIndicator={true}
-              bounces={true}
-            >
-              <Text 
-                style={[
-                  styles.en, 
-                  { color: isDarkMode ? '#d1d5db' : '#434343ff' }
-                ]}
-              >
-                {shloka.translation_2 || shloka.description || 'No translation available'}
-              </Text>
-            </ScrollView>
-          ) : (
-            <ScrollView
-              style={styles.scrollContainer}
-              contentContainerStyle={styles.scrollContentSanskrit}
-              showsVerticalScrollIndicator={true}
-              bounces={true}
-            >
-              <Text 
-                style={[styles.sa, { color: isDarkMode ? '#eaecf1ff' : '#565657ff' }]}
-              >
-                {shloka.text}
-              </Text>
-            </ScrollView>
-          )}
-        </Animated.View>
-      </View>
-    {/* </Link> */}
-  </View>
-  
-  {/* Fixed Toggle Button - moved outside the card */}
-<View style={styles.toggleButtonRow}>
-  {/* Invisible spacer to push toggle button to center */}
-  <View style={styles.leftSpacer} />
-
-  <TouchableOpacity onPress={handleTogglePress} activeOpacity={1}>
-    <Animated.View style={[
-      styles.toggleButton,
-      { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
-      toggleButtonStyle
-    ]}>
-      <Text style={[
-        styles.toggleText,
-        { color: isDarkMode ? '#f9fafb' : '#000000ff' }
-      ]}>
-        {showTranslation ? 'View in Sanskrit' : 'View in English'}
-      </Text>
-    </Animated.View>
-  </TouchableOpacity>
-
-  <TouchableOpacity onPress={() => {
-     buttonPressHaptic();
-    openShlokaDetail();
-  }}
-  activeOpacity={0.7}>
-    <View style={[
-      styles.descButton,
-      { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
-    ]}>
-      <Feather name="book-open" size={16} color={isDarkMode ? "#f9fafb" : "#000000ff"} />
-    </View>
-  </TouchableOpacity>
-
-</View>
-</View>
+      <ShlokaCard topInset={insets.top} />
 
       {/* Tasks Section */}
       <View style={[

@@ -18,7 +18,7 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useKriya } from '../lib/store';
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../lib/haptics';
-import ViewShot, { captureRef, type ViewShotRef } from 'react-native-view-shot';
+import { CaptureView, type CaptureViewRef } from 'react-native-capture-view';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { showAppToast } from '../lib/appToast';
@@ -78,6 +78,8 @@ const formatRgba = (
   alpha: number,
 ) => `rgba(${red}, ${green}, ${blue}, ${clamp(alpha, SLIDER_MIN, SLIDER_MAX).toFixed(2)})`;
 
+const asFileUri = (uri: string) => (uri.startsWith('file://') ? uri : `file://${uri}`);
+
 type ShareCardProps = {
   previewWidth: number;
   previewHeight: number;
@@ -85,6 +87,7 @@ type ShareCardProps = {
   currentBackground: ReturnType<typeof getShareBackground>;
   currentBackgroundSource: ReturnType<typeof getShareBackgroundImageSource> | null;
   backgroundOpacity: number;
+  onBackgroundLoad?: () => void;
   onBackgroundError?: (error: unknown) => void;
   resolvedTextBoxBg: string;
   chapter?: string;
@@ -106,6 +109,7 @@ const ShareCard = memo(function ShareCard({
   currentBackground,
   currentBackgroundSource,
   backgroundOpacity,
+  onBackgroundLoad,
   onBackgroundError,
   resolvedTextBoxBg,
   chapter,
@@ -121,6 +125,7 @@ const ShareCard = memo(function ShareCard({
             source={currentBackgroundSource}
             style={[styles.backgroundImage, { opacity: backgroundOpacity }]}
             resizeMode="cover"
+            onLoad={onBackgroundLoad}
             onError={(event) => onBackgroundError?.(event.nativeEvent.error)}
           />
           <LinearGradient
@@ -261,26 +266,9 @@ export default function Share2() {
   const [backgroundOpacity, setBackgroundOpacity] = useState<number>(
     SHARE_BACKGROUNDS[0].defaultBgOpacity,
   );
+  const [isBackgroundReady, setIsBackgroundReady] = useState(true);
   
-  const viewShotRef = useRef<ViewShotRef>(null);
-  const captureTargetRef = useRef<View>(null);
-
-  useEffect(() => {
-    console.log('[Share2] mounted, refs attached:', {
-      shot: viewShotRef.current != null,
-      target: captureTargetRef.current != null,
-    });
-    const t = setTimeout(() => {
-      console.log('[Share2] after 1000ms, refs:', {
-        shot: viewShotRef.current != null,
-        target: captureTargetRef.current != null,
-      });
-    }, 1000);
-    return () => {
-      clearTimeout(t);
-      console.log('[Share2] unmounted');
-    };
-  }, []);
+  const captureViewRef = useRef<CaptureViewRef>(null);
 
   const currentFormat = FORMATS.find(f => f.id === selectedFormat)!;
   const currentBackground = getShareBackground(selectedBackground);
@@ -310,7 +298,8 @@ export default function Share2() {
   useEffect(() => {
     setTextboxOpacity(parseRgba(currentBackground.textBoxBg).alpha);
     setBackgroundOpacity(currentBackground.defaultBgOpacity);
-  }, [currentBackground]);
+    setIsBackgroundReady(currentBackground.type !== 'image' || currentBackgroundSource === null);
+  }, [currentBackground, currentBackgroundSource]);
 
   const updateTextboxOpacity = (nextOpacity: number) => {
     setTextboxOpacity(Math.round(clamp(nextOpacity, SLIDER_MIN, SLIDER_MAX) * 100) / 100);
@@ -337,6 +326,7 @@ export default function Share2() {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, {
           mimeType: 'image/jpeg',
+          UTI: 'public.jpeg',
           dialogTitle: 'Share Shloka',
         });
         taskCompleteHaptic();
@@ -370,8 +360,8 @@ export default function Share2() {
     buttonPressHaptic();
     
     try {
-      console.log('[Save] Requesting permissions...');
-      const { status } = await MediaLibrary.requestPermissionsAsync();
+      // This screen only writes a new image, so avoid requesting read access.
+      const { status } = await MediaLibrary.requestPermissionsAsync(true);
       if (status !== 'granted') {
         showAppToast({
           type: 'error',
@@ -384,12 +374,8 @@ export default function Share2() {
         return;
       }
       
-      console.log('[Save] Permission granted, capturing...');
       const uri = await captureCardUri();
-      console.log('[Save] Captured URI:', uri);
-      
-      await MediaLibrary.saveToLibraryAsync(uri);
-      console.log('[Save] Saved successfully');
+      await MediaLibrary.Asset.create(uri);
       
       taskCompleteHaptic();
       showAppToast({
@@ -416,56 +402,28 @@ export default function Share2() {
   };
 
   const captureCardUri = async (): Promise<string> => {
-    const options = {
-      format: 'jpg' as const,
+    if (!isBackgroundReady) {
+      throw new Error('The selected background image has not finished loading.');
+    }
+
+    // CaptureView does not wait for <Image> loading. `isBackgroundReady` is
+    // set by Image#onLoad, then two frames ensure the image is painted.
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+    const captureView = captureViewRef.current;
+    if (!captureView) {
+      throw new Error('The share card is not ready to capture.');
+    }
+    const result = await captureView.capture({
+      format: 'jpg',
       quality: 1,
-      width: currentFormat.width,
-      height: currentFormat.height,
-      result: 'tmpfile' as const,
-    };
-    const captureTimeoutMs = 15000;
-
-    const withTimeout = async <T,>(promise: Promise<T>, label: string): Promise<T> => {
-      let timeoutId: ReturnType<typeof setTimeout>;
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        timeoutId = setTimeout(() => {
-          reject(new Error(`${label} timed out after ${captureTimeoutMs}ms`));
-        }, captureTimeoutMs);
-      });
-      try {
-        return await Promise.race([promise, timeoutPromise]);
-      } finally {
-        clearTimeout(timeoutId!);
-      }
-    };
-
-    // This is the capture pattern used by the SDK 54 implementation. The
-    // nested, non-collapsible view gives Android a concrete native target.
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-
-    const captureTarget = captureTargetRef.current;
-    const fallbackTarget = viewShotRef.current;
-    console.log('[Capture] ref state at capture:', {
-      target: captureTarget != null,
-      targetType: typeof captureTarget,
-      fallback: fallbackTarget != null,
-      fallbackType: typeof fallbackTarget,
+      output: 'tmpfile',
     });
-
-    if (captureTarget) {
-      try {
-        return await withTimeout(captureRef(captureTarget, options), 'captureRef(card)');
-      } catch (error) {
-        console.warn('[Capture] Card target failed; trying ViewShot fallback:', error);
-      }
+    if (!result.uri) {
+      throw new Error('The share card capture did not return a file URI.');
     }
-
-    if (fallbackTarget) {
-      return withTimeout(captureRef(fallbackTarget, options), 'captureRef(ViewShot)');
-    }
-
-    throw new Error('Capture target is unavailable.');
+    return asFileUri(result.uri);
   };
   
   return (
@@ -498,33 +456,23 @@ export default function Share2() {
           contentContainerStyle={styles.previewContainer}
           showsVerticalScrollIndicator={false}
         >
-          <ViewShot
-            ref={viewShotRef}
-            options={{
-              format: 'jpg',
-              quality: 1,
-              width: currentFormat.width,
-              height: currentFormat.height,
-              result: 'tmpfile',
-            }}
-          >
-            <View ref={captureTargetRef} collapsable={false}>
-              <ShareCard
-                previewWidth={previewWidth}
-                previewHeight={previewHeight}
-                selectedFormat={selectedFormat}
-                currentBackground={currentBackground}
-                currentBackgroundSource={currentBackgroundSource}
-                backgroundOpacity={backgroundOpacity}
-                resolvedTextBoxBg={resolvedTextBoxBg}
-                chapter={shareChapter}
-                verse={shareVerse}
-                text={shareText}
-                translation={shareTranslation}
-                onBackgroundError={handleBackgroundError}
-              />
-            </View>
-          </ViewShot>
+          <CaptureView ref={captureViewRef}>
+            <ShareCard
+              previewWidth={previewWidth}
+              previewHeight={previewHeight}
+              selectedFormat={selectedFormat}
+              currentBackground={currentBackground}
+              currentBackgroundSource={currentBackgroundSource}
+              backgroundOpacity={backgroundOpacity}
+              resolvedTextBoxBg={resolvedTextBoxBg}
+              chapter={shareChapter}
+              verse={shareVerse}
+              text={shareText}
+              translation={shareTranslation}
+              onBackgroundLoad={() => setIsBackgroundReady(true)}
+              onBackgroundError={handleBackgroundError}
+            />
+          </CaptureView>
         </ScrollView>
         
         {/* Bottom Controls Panel */}
@@ -569,6 +517,7 @@ export default function Share2() {
                 key={bg.id}
                 onPress={() => {
                   selectionHaptic();
+                  setIsBackgroundReady(bg.type !== 'image' || failedBackgroundIds.has(bg.id));
                   setSelectedBackground(bg.id);
                 }}
                 style={[

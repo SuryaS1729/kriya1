@@ -192,7 +192,9 @@
       ],
       "expo-router",
       "expo-sqlite",
-      "expo-video"
+      "expo-video",
+      "expo-image",
+      "expo-sharing"
     ],
     "assetBundlePatterns": [
       "**/*"
@@ -200,7 +202,7 @@
     "android": {
       "allowBackup": false,
       "package": "com.surya7314.kriya",
-      "edgeToEdgeEnabled": true,
+
       "softwareKeyboardLayoutMode": "resize"
     },
     "ios": {

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { config } from './config';
-import { View, ViewProps } from 'react-native';
+import { Appearance, View, ViewProps } from 'react-native';
 import { OverlayProvider } from '@gluestack-ui/core/overlay/creator';
 import { ToastProvider } from '@gluestack-ui/core/toast/creator';
 import { useColorScheme } from 'nativewind';
@@ -18,7 +18,13 @@ export function GluestackUIProvider({
   const { colorScheme, setColorScheme } = useColorScheme();
 
   useEffect(() => {
-    setColorScheme(mode);
+    // NativeWind currently forwards `system` as null to Appearance.setColorScheme.
+    // React Native 0.83's Android module requires the string "unspecified".
+    if (mode === 'system') {
+      Appearance.setColorScheme('unspecified');
+    } else {
+      setColorScheme(mode);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 

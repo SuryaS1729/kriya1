@@ -33,7 +33,7 @@ import Animated, {
   LinearTransition,
   FadeInDown
 } from 'react-native-reanimated';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { mediumImpactHaptic, selectionHaptic, errorHaptic } from '../lib/haptics';
 import { PressableScale } from 'pressto';

@@ -97,7 +97,7 @@ export const SHARE_BACKGROUNDS = [
       translationColor: '#f5f5f5',
       refColor: '#ffffff',
       brandingColor: '#ffffff',
-      defaultBgOpacity: 0.6,
+      defaultBgOpacity: 1,
       imageUrl: buildR2Url(`backgrounds/${id}.jpeg`),
     }),
   ),

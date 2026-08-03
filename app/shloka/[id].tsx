@@ -387,10 +387,6 @@ const handleBookPress = () => {
       pathname: '/share2',
       params: {
         id: String(currentIndex),
-        chapter: String(row.chapter_number),
-        verse: String(row.verse_number),
-        text: row.text,
-        translation: row.translation_2 ?? row.description ?? '',
       },
     });
   };

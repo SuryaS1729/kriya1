@@ -1,0 +1,11 @@
+# - Prefers concise, directive bug reports that include the exact error message and stack trace rather than prose descriptions. Confidence: 0.85
+- Prefers concise, directive bug reports that include the exact error message and stack trace rather than prose descriptions. Confidence: 0.85
+- Reports bugs with the symptom first ("X is not working"), then the error/log, then the file/component reference — i.e., problem → evidence → location. Confidence: 0.8
+- Frameworks/tools in stack: Expo SDK 56, React Native 0.85, React 19, expo-router (app/ directory), nativewind (css-interop), react-native-view-shot, React Compiler enabled. Confidence: 0.95
+- Uses Android as primary development target (adb available, debug build installed on device). Confidence: 0.9
+- Project uses git for version control; uses `git diff` to compare changes during SDK migrations. Confidence: 0.9
+- Prefers end-to-end reproduction on a real device (via adb + dev-client + deep link) rather than theoretical analysis or just static reading when debugging runtime issues. Confidence: 0.85
+- Uses Metro dev server / `expo start --dev-client` for live debugging. Confidence: 0.85
+- Is comfortable with low-level debugging (inspecting node_modules, reading compiled bundle output, running babel transforms locally to inspect compiler output). Confidence: 0.9
+- Deep link scheme for the app is "acme". Confidence: 0.7
+- App package id: com.surya7314.kriya. Confidence: 0.7

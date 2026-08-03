@@ -194,7 +194,8 @@
       "expo-sqlite",
       "expo-video",
       "expo-image",
-      "expo-sharing"
+      "expo-sharing",
+      "expo-status-bar"
     ],
     "assetBundlePatterns": [
       "**/*"
@@ -202,7 +203,6 @@
     "android": {
       "allowBackup": false,
       "package": "com.surya7314.kriya",
-
       "softwareKeyboardLayoutMode": "resize"
     },
     "ios": {

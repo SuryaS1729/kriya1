@@ -18,7 +18,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import { taskCompleteHaptic, selectionHaptic, buttonPressHaptic, errorHaptic } from '../lib/haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import { Spinner } from '@/components/ui/spinner';
 import * as Notifications from 'expo-notifications';
 import { GuidedTour } from '../components/GuidedTour/GuidedTour';

@@ -18,10 +18,11 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useKriya } from '../lib/store';
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../lib/haptics';
-import ViewShot, { captureRef } from 'react-native-view-shot';
+import ViewShot, { captureRef, type ViewShotRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { showAppToast } from '../lib/appToast';
+import { getShlokaAt, type ShlokaRow } from '../lib/shloka';
 import {
   Slider,
   SliderTrack,
@@ -84,6 +85,7 @@ type ShareCardProps = {
   currentBackground: ReturnType<typeof getShareBackground>;
   currentBackgroundSource: ReturnType<typeof getShareBackgroundImageSource> | null;
   backgroundOpacity: number;
+  onBackgroundError?: (error: unknown) => void;
   resolvedTextBoxBg: string;
   chapter?: string;
   verse?: string;
@@ -104,6 +106,7 @@ const ShareCard = memo(function ShareCard({
   currentBackground,
   currentBackgroundSource,
   backgroundOpacity,
+  onBackgroundError,
   resolvedTextBoxBg,
   chapter,
   verse,
@@ -112,24 +115,25 @@ const ShareCard = memo(function ShareCard({
 }: ShareCardProps) {
   return (
     <View style={[styles.cardContainer, { width: previewWidth, height: previewHeight }]}>
-      {currentBackground.type === 'image' ? (
-        <>
+      {currentBackground.type === 'image' && currentBackgroundSource ? (
+        <View style={styles.backgroundLayer}>
+          <Image
+            source={currentBackgroundSource}
+            style={[styles.backgroundImage, { opacity: backgroundOpacity }]}
+            resizeMode="cover"
+            onError={(event) => onBackgroundError?.(event.nativeEvent.error)}
+          />
           <LinearGradient
-            colors={currentBackground.colors as unknown as [string, string, ...string[]]}
-            style={styles.cardBackground}
+            colors={['rgba(15, 12, 41, 0.08)', 'rgba(22, 33, 62, 0.08)']}
+            style={styles.backgroundTint}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           />
-          <Image
-            source={currentBackgroundSource!}
-            style={[styles.cardBackground, { opacity: backgroundOpacity }]}
-            resizeMode="cover"
-          />
-        </>
+        </View>
       ) : (
         <LinearGradient
           colors={currentBackground.colors as unknown as [string, string, ...string[]]}
-          style={[styles.cardBackground, { opacity: backgroundOpacity }]}
+          style={styles.backgroundLayer}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         />
@@ -204,14 +208,49 @@ const ShareCard = memo(function ShareCard({
 
 export default function Share2() {
   const params = useLocalSearchParams<{
-    id?: string;
-    chapter?: string;
-    verse?: string;
-    text?: string;
-    translation?: string;
+    id?: string | string[];
+    chapter?: string | string[];
+    verse?: string | string[];
+    text?: string | string[];
+    translation?: string | string[];
   }>();
   
   const isDarkMode = useKriya(s => s.isDarkMode);
+  const isReady = useKriya(s => s.ready);
+  const firstParam = (value: string | string[] | undefined) =>
+    Array.isArray(value) ? value[0] : value;
+  const routeId = firstParam(params.id);
+  const routeChapter = firstParam(params.chapter);
+  const routeVerse = firstParam(params.verse);
+  const routeText = firstParam(params.text);
+  const routeTranslation = firstParam(params.translation);
+  const [loadedShloka, setLoadedShloka] = useState<ShlokaRow | null>(null);
+  const [failedBackgroundIds, setFailedBackgroundIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+
+  useEffect(() => {
+    if (!isReady) return;
+    const index = Number(routeId);
+    if (!Number.isInteger(index) || index < 0) return;
+
+    try {
+      setLoadedShloka(getShlokaAt(index));
+    } catch (error) {
+      console.warn('[Share] Could not load shloka from local database:', error);
+    }
+  }, [isReady, routeId]);
+
+  // The database row is the source of truth. The route content values are
+  // retained only so older/deep links that included them still render.
+  const shareChapter = loadedShloka?.chapter_number?.toString() ?? routeChapter;
+  const shareVerse = loadedShloka?.verse_number?.toString() ?? routeVerse;
+  const shareText = loadedShloka?.text ?? routeText;
+  const shareTranslation =
+    loadedShloka?.translation_2
+    ?? loadedShloka?.description
+    ?? routeTranslation
+    ?? '';
   const [selectedFormat, setSelectedFormat] = useState<FormatId>('story');
   const [selectedBackground, setSelectedBackground] = useState<ShareBackgroundId>('ocean');
   const [isSharing, setIsSharing] = useState(false);
@@ -223,19 +262,50 @@ export default function Share2() {
     SHARE_BACKGROUNDS[0].defaultBgOpacity,
   );
   
-  const viewShotRef = useRef<ViewShot>(null);
+  const viewShotRef = useRef<ViewShotRef>(null);
   const captureTargetRef = useRef<View>(null);
-  
+
+  useEffect(() => {
+    console.log('[Share2] mounted, refs attached:', {
+      shot: viewShotRef.current != null,
+      target: captureTargetRef.current != null,
+    });
+    const t = setTimeout(() => {
+      console.log('[Share2] after 1000ms, refs:', {
+        shot: viewShotRef.current != null,
+        target: captureTargetRef.current != null,
+      });
+    }, 1000);
+    return () => {
+      clearTimeout(t);
+      console.log('[Share2] unmounted');
+    };
+  }, []);
+
   const currentFormat = FORMATS.find(f => f.id === selectedFormat)!;
   const currentBackground = getShareBackground(selectedBackground);
   const currentTextBoxColor = parseRgba(currentBackground.textBoxBg);
   const resolvedTextBoxBg = formatRgba(currentTextBoxColor, textboxOpacity);
   const currentBackgroundSource = useMemo(
-    () => (currentBackground.type === 'image'
+    () => (currentBackground.type === 'image' && !failedBackgroundIds.has(currentBackground.id)
       ? getShareBackgroundImageSource(currentBackground)
       : null),
-    [currentBackground],
+    [currentBackground, failedBackgroundIds],
   );
+
+  const handleBackgroundError = (error: unknown) => {
+    if (currentBackground.type !== 'image') return;
+    console.warn('[Share] Background image failed:', {
+      backgroundId: currentBackground.id,
+      url: currentBackground.imageUrl,
+      error,
+    });
+    setFailedBackgroundIds((previous) => {
+      const next = new Set(previous);
+      next.add(currentBackground.id);
+      return next;
+    });
+  };
 
   useEffect(() => {
     setTextboxOpacity(parseRgba(currentBackground.textBoxBg).alpha);
@@ -258,8 +328,6 @@ export default function Share2() {
   
   // Get background image based on selected background
   const handleShare = async () => {
-    if (!viewShotRef.current?.capture) return;
-    
     setIsSharing(true);
     buttonPressHaptic();
     
@@ -272,17 +340,32 @@ export default function Share2() {
           dialogTitle: 'Share Shloka',
         });
         taskCompleteHaptic();
+      } else {
+        showAppToast({
+          type: 'error',
+          text1: 'Sharing is unavailable',
+          text2: 'Please save the card and share it from your gallery.',
+          duration: 2200,
+          position: 'top',
+          topOffset: 64,
+        });
       }
     } catch (error) {
       console.error('Share failed:', error);
+      showAppToast({
+        type: 'error',
+        text1: 'Share failed',
+        text2: 'Please try again.',
+        duration: 1800,
+        position: 'top',
+        topOffset: 64,
+      });
     } finally {
       setIsSharing(false);
     }
   };
   
   const handleSave = async () => {
-    if (!viewShotRef.current?.capture) return;
-    
     setIsSaving(true);
     buttonPressHaptic();
     
@@ -332,7 +415,7 @@ export default function Share2() {
     }
   };
 
-  const captureCardUri = async () => {
+  const captureCardUri = async (): Promise<string> => {
     const options = {
       format: 'jpg' as const,
       quality: 1,
@@ -356,27 +439,33 @@ export default function Share2() {
       }
     };
 
-    // Let the UI settle before taking snapshot, especially after button press/layout updates.
-    await new Promise(resolve => requestAnimationFrame(() => resolve(null)));
-    await new Promise(resolve => setTimeout(resolve, 60));
+    // This is the capture pattern used by the SDK 54 implementation. The
+    // nested, non-collapsible view gives Android a concrete native target.
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
-    const primaryTarget = captureTargetRef.current;
+    const captureTarget = captureTargetRef.current;
     const fallbackTarget = viewShotRef.current;
+    console.log('[Capture] ref state at capture:', {
+      target: captureTarget != null,
+      targetType: typeof captureTarget,
+      fallback: fallbackTarget != null,
+      fallbackType: typeof fallbackTarget,
+    });
 
-    if (!primaryTarget && !fallbackTarget) {
-      throw new Error('Capture view is not ready yet');
-    }
-
-    try {
-      if (primaryTarget) {
-        return await withTimeout(captureRef(primaryTarget, options), 'captureRef(primary)');
+    if (captureTarget) {
+      try {
+        return await withTimeout(captureRef(captureTarget, options), 'captureRef(card)');
+      } catch (error) {
+        console.warn('[Capture] Card target failed; trying ViewShot fallback:', error);
       }
-      return await withTimeout(captureRef(fallbackTarget!, options), 'captureRef(fallback)');
-    } catch (firstError) {
-      console.warn('[Capture] Primary capture failed, trying fallback target:', firstError);
-      if (!fallbackTarget || fallbackTarget === primaryTarget) throw firstError;
-      return withTimeout(captureRef(fallbackTarget, options), 'captureRef(fallback)');
     }
+
+    if (fallbackTarget) {
+      return withTimeout(captureRef(fallbackTarget, options), 'captureRef(ViewShot)');
+    }
+
+    throw new Error('Capture target is unavailable.');
   };
   
   return (
@@ -409,13 +498,14 @@ export default function Share2() {
           contentContainerStyle={styles.previewContainer}
           showsVerticalScrollIndicator={false}
         >
-          <ViewShot 
-            ref={viewShotRef} 
-            options={{ 
-              format: 'jpg', 
+          <ViewShot
+            ref={viewShotRef}
+            options={{
+              format: 'jpg',
               quality: 1,
               width: currentFormat.width,
               height: currentFormat.height,
+              result: 'tmpfile',
             }}
           >
             <View ref={captureTargetRef} collapsable={false}>
@@ -427,10 +517,11 @@ export default function Share2() {
                 currentBackgroundSource={currentBackgroundSource}
                 backgroundOpacity={backgroundOpacity}
                 resolvedTextBoxBg={resolvedTextBoxBg}
-                chapter={params.chapter}
-                verse={params.verse}
-                text={params.text}
-                translation={params.translation}
+                chapter={shareChapter}
+                verse={shareVerse}
+                text={shareText}
+                translation={shareTranslation}
+                onBackgroundError={handleBackgroundError}
               />
             </View>
           </ViewShot>
@@ -493,11 +584,25 @@ export default function Share2() {
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
                     />
-                    <Image
-                      source={getShareBackgroundImageSource(bg)}
-                      style={styles.backgroundSwatchImage}
-                      resizeMode="cover"
-                    />
+                    {!failedBackgroundIds.has(bg.id) && (
+                      <Image
+                        source={getShareBackgroundImageSource(bg)}
+                        style={styles.backgroundSwatchImage}
+                        resizeMode="cover"
+                        onError={(event) => {
+                          console.warn('[Share] Background swatch failed:', {
+                            backgroundId: bg.id,
+                            url: bg.imageUrl,
+                            error: event.nativeEvent.error,
+                          });
+                          setFailedBackgroundIds((previous) => {
+                            const next = new Set(previous);
+                            next.add(bg.id);
+                            return next;
+                          });
+                        }}
+                      />
+                    )}
                   </View>
                 ) : (
                   <LinearGradient
@@ -593,7 +698,9 @@ export default function Share2() {
               style={[
                 styles.actionButton,
                 styles.saveButton,
-                { backgroundColor: isDarkMode ? '#293a3d' : '#e5e7eb' }
+                {
+                  backgroundColor: isDarkMode ? '#293a3d' : '#e5e7eb',
+                }
               ]}
             >
               {isSaving ? (
@@ -614,7 +721,9 @@ export default function Share2() {
               style={[
                 styles.actionButton,
                 styles.shareButton,
-                { backgroundColor: isDarkMode ? '#013540' : '#2563eb' }
+                {
+                  backgroundColor: isDarkMode ? '#013540' : '#2563eb',
+                }
               ]}
             >
               {isSharing ? (
@@ -680,14 +789,27 @@ marginTop: 10,
     paddingVertical: 20,
   },
   cardContainer: {
-
+    backgroundColor: '#10121f',
     overflow: 'hidden',
     position: 'relative',
   },
-  cardBackground: {
-    ...StyleSheet.absoluteFillObject,
+  backgroundLayer: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
+  backgroundImage: {
     width: '100%',
     height: '100%',
+  },
+  backgroundTint: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
   },
   cardOverlay: {
     flex: 1,
@@ -703,9 +825,8 @@ marginTop: 10,
   },
   sanskritText: {
     fontFamily: 'Kalam',
-    fontSize: 13,
-    lineHeight: 12,
-    fontWeight: '400',
+    fontSize: 15,
+    lineHeight: 24,
     marginTop: 12,
     paddingTop: 12,
     marginBottom: 12,
@@ -713,7 +834,6 @@ marginTop: 10,
   },
   translationText: {
     fontFamily: 'Dancing Script',
-    fontWeight: '600',
     fontSize: 12,
     lineHeight: 20,
     textAlign: 'center',
@@ -823,11 +943,16 @@ marginTop: 10,
     borderWidth: 3,
   },
   backgroundSwatchImage: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
   },
   backgroundSwatchImageContainer: {
     width: '100%',
     height: '100%',
+    position: 'relative',
   },
   backgroundSwatchGradient: {
     width: '100%',

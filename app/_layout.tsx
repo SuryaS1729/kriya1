@@ -126,6 +126,29 @@ export default function Root() {
 
     db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_day_key ON tasks(day_key)`);
     db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_completed_at ON tasks(completed_at)`);
+
+    // Keep verse citations out of the Sanskrit text used by text-to-speech.
+    // This is intentionally idempotent so existing installed databases are
+    // updated even though the bundled asset is only copied on first launch.
+    const shlokas = db.getAllSync(
+      `SELECT id, chapter_number, verse_number, text FROM shlokas`
+    ) as { id: number; chapter_number: number; verse_number: number; text: string }[];
+    for (const shloka of shlokas) {
+      const suffix = `${shloka.chapter_number}.${shloka.verse_number}`;
+      const text = shloka.text || '';
+      const trailingWhitespace = text.match(/\s*$/)?.[0] ?? '';
+      const core = text.slice(0, text.length - trailingWhitespace.length);
+      let cleanedCore = core;
+      if (core.endsWith(`${suffix}।।`)) {
+        cleanedCore = core.slice(0, -(`${suffix}।।`.length));
+      } else if (core.endsWith(`${suffix}।`)) {
+        cleanedCore = core.slice(0, -(`${suffix}।`.length));
+      }
+      const cleaned = cleanedCore + trailingWhitespace;
+      if (cleaned !== text) {
+        db.runSync(`UPDATE shlokas SET text = ? WHERE id = ?`, [cleaned, shloka.id]);
+      }
+    }
   }
 
   return (

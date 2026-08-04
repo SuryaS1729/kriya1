@@ -45,8 +45,12 @@ export interface Bookmark {
   createdAt: string;
 }
 
+export type ContentLanguage = 'en' | 'te';
+
 interface KriyaState {
   ready: boolean;
+  language: ContentLanguage;
+  setLanguage: (language: ContentLanguage) => void;
   tasksToday: Task[];
    hasCompletedTour: boolean;
   setTourCompleted: (completed: boolean) => void;
@@ -198,6 +202,8 @@ export const useKriya = create<KriyaState>()(
   persist(
     (set, get) => ({
       ready: false,
+      language: 'en',
+      setLanguage: (language) => set({ language }),
       tasksToday: [],
       isDarkMode: true,
       bookmarks: [],
@@ -486,6 +492,7 @@ export const useKriya = create<KriyaState>()(
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         isDarkMode: state.isDarkMode,
+        language: state.language,
         bookmarks: state.bookmarks,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
         focusSessions: state.focusSessions,

@@ -23,6 +23,9 @@ import { Spinner } from '@/components/ui/spinner';
 import * as Notifications from 'expo-notifications';
 import { GuidedTour } from '../components/GuidedTour/GuidedTour';
 import { PressableScale } from 'pressto';
+import {
+  getTranslationForLanguage,
+} from '../lib/shloka';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 const ALL_TASK_REORDER_DELAY_MS = 320;
@@ -147,6 +150,7 @@ const ShlokaCard = React.memo(function ShlokaCard({ topInset }: { topInset: numb
   useKriya(s => s.tasksToday);
   const getShloka = useKriya(s => s.currentShloka);
   const isDarkMode = useKriya(s => s.isDarkMode);
+  const language = useKriya(s => s.language);
   const [showTranslation, setShowTranslation] = useState(false);
   const fade = useSharedValue(0);
   const toggleScale = useSharedValue(1);
@@ -218,6 +222,8 @@ const ShlokaCard = React.memo(function ShlokaCard({ topInset }: { topInset: numb
     );
   }
 
+  const cardTranslation = getTranslationForLanguage(shloka, language) || 'No translation available';
+
   return (
     <View style={[styles.topHalf, { paddingTop: topInset }]}>
       <View style={styles.card}>
@@ -249,7 +255,7 @@ const ShlokaCard = React.memo(function ShlokaCard({ topInset }: { topInset: numb
                     { color: isDarkMode ? '#d1d5db' : '#434343ff' }
                   ]}
                 >
-                  {shloka.translation_2 || shloka.description || 'No translation available'}
+                  {cardTranslation}
                 </Text>
               </ScrollView>
             ) : (
@@ -283,7 +289,7 @@ const ShlokaCard = React.memo(function ShlokaCard({ topInset }: { topInset: numb
               styles.toggleText,
               { color: isDarkMode ? '#f9fafb' : '#000000ff' }
             ]}>
-              {showTranslation ? 'View in Sanskrit' : 'View in English'}
+              {showTranslation ? 'View in Sanskrit' : language === 'te' ? 'View in Telugu' : 'View in English'}
             </Text>
           </Animated.View>
         </TouchableOpacity>
@@ -314,6 +320,8 @@ export default function Home() {
   const remove    = useKriya(s => s.removeTask);
   const getTasksForDay = useKriya(s => s.getTasksForDay); 
   const isDarkMode = useKriya(s => s.isDarkMode);
+  const language = useKriya(s => s.language);
+  const setLanguage = useKriya(s => s.setLanguage);
   const hasCompletedOnboarding = useKriya(s => s.hasCompletedOnboarding);
   const refresh   = useKriya(s => s.refresh);
   const insets    = useSafeAreaInsets();
@@ -759,6 +767,18 @@ console.log('🔍 Guided Tour Debug:', {
             />
           </PressableScale>
           <View style={styles.headerButtons}>
+            <Pressable
+              onPress={() => {
+                selectionHaptic();
+                setLanguage(language === 'en' ? 'te' : 'en');
+              }}
+              hitSlop={8}
+              style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0', minWidth: 44, paddingHorizontal: 8 }]}
+            >
+              <Text style={{ fontSize: 13, fontWeight: '700', color: isDarkMode ? '#9db5daff' : '#7493d7ff' }}>
+                {language === 'en' ? 'EN' : 'తె'}
+              </Text>
+            </Pressable>
             <Link href="/calendar" asChild>
               <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
                 <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>

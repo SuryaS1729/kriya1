@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SQLiteProvider } from 'expo-sqlite';
+import { Asset } from 'expo-asset';
+import * as FileSystem from 'expo-file-system/legacy';
 import { ensureDatabasePresent } from '../lib/preloadDb';
 import { setDbReady } from '../lib/dbReady';
 import { useKriya } from '../lib/store';
@@ -105,6 +107,70 @@ export default function Root() {
       );
     `);
     db.execSync(`DROP TABLE IF EXISTS goals`);
+
+    // English source content lives in `shlokas`. Localized content is kept in
+    // separate tables so additional languages never overwrite that source.
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS telugu_translations(
+        shloka_id INTEGER PRIMARY KEY,
+        chapter_number INTEGER NOT NULL,
+        verse_number INTEGER NOT NULL,
+        translation TEXT NOT NULL,
+        source_hash TEXT NOT NULL,
+        sarvam_request_id TEXT,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY (shloka_id) REFERENCES shlokas(id)
+      );
+    `);
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS telugu_commentaries(
+        shloka_id INTEGER PRIMARY KEY,
+        chapter_number INTEGER NOT NULL,
+        verse_number INTEGER NOT NULL,
+        commentary TEXT NOT NULL,
+        source_hash TEXT NOT NULL,
+        sarvam_request_id TEXT,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY (shloka_id) REFERENCES shlokas(id)
+      );
+    `);
+
+    // Backfill localized content into databases that predate it. The bundled
+    // asset is only copied on first launch, so older installs have the tables
+    // but zero Telugu rows. Copy them from the bundled asset when empty.
+    const translationsCount = (
+      db.getFirstSync(`SELECT COUNT(*) AS c FROM telugu_translations`) as { c: number } | null
+    )?.c ?? 0;
+    if (translationsCount === 0) {
+      try {
+        const asset = Asset.fromModule(DB_ASSET);
+        await asset.downloadAsync(); // ensures asset.localUri is set
+        if (asset.localUri) {
+          const tempCopy = `${FileSystem.cacheDirectory}telugu_backfill_${Date.now()}.db`;
+          await FileSystem.copyAsync({ from: asset.localUri, to: tempCopy });
+          db.execSync(`ATTACH DATABASE '${tempCopy}' AS asset_db`);
+          db.execSync(`
+            INSERT OR IGNORE INTO telugu_translations(
+              shloka_id, chapter_number, verse_number, translation, source_hash, sarvam_request_id, updated_at
+            )
+            SELECT shloka_id, chapter_number, verse_number, translation, source_hash, sarvam_request_id, updated_at
+            FROM asset_db.telugu_translations
+          `);
+          db.execSync(`
+            INSERT OR IGNORE INTO telugu_commentaries(
+              shloka_id, chapter_number, verse_number, commentary, source_hash, sarvam_request_id, updated_at
+            )
+            SELECT shloka_id, chapter_number, verse_number, commentary, source_hash, sarvam_request_id, updated_at
+            FROM asset_db.telugu_commentaries
+          `);
+          db.execSync(`DETACH DATABASE asset_db`);
+          await FileSystem.deleteAsync(tempCopy, { idempotent: true }).catch(() => {});
+        }
+      } catch (error) {
+        // Non-fatal: Telugu content simply stays unavailable for this session.
+        // console.warn('Telugu backfill failed:', error);
+      }
+    }
 
     const cols = (db.getAllSync(`PRAGMA table_info(tasks)`) as unknown as { name: string }[]) || [];
     const has = (n: string) => cols.some(c => c.name === n);

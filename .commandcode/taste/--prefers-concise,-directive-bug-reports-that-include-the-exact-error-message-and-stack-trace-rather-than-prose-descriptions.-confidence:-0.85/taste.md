@@ -1,6 +1,6 @@
 # - Prefers concise, directive bug reports that include the exact error message and stack trace rather than prose descriptions. Confidence: 0.85
 - Prefers concise, directive bug reports that include the exact error message and stack trace rather than prose descriptions. Confidence: 0.85
-- Reports bugs with the symptom first ("X is not working"), then the error/log, then the file/component reference — i.e., problem → evidence → location. Confidence: 0.8
+- Reports bugs with the symptom first ("X is not working"), then the error/log, then the file/component reference — i.e., problem → evidence → location. Confidence: 0.85
 - Frameworks/tools in stack: Expo SDK 56, React Native 0.85, React 19, expo-router (app/ directory), nativewind (css-interop), react-native-view-shot, React Compiler enabled. Confidence: 0.95
 - Uses Android as primary development target (adb available, debug build installed on device). Confidence: 0.9
 - Project uses git for version control; uses `git diff` to compare changes during SDK migrations. Confidence: 0.9
@@ -9,3 +9,9 @@
 - Is comfortable with low-level debugging (inspecting node_modules, reading compiled bundle output, running babel transforms locally to inspect compiler output). Confidence: 0.9
 - Deep link scheme for the app is "acme". Confidence: 0.7
 - App package id: com.surya7314.kriya. Confidence: 0.7
+- Prefers an audit/investigate-first workflow: fully diagnose and identify exact issues (e.g., which specific rows are missing) before making any modifications or regenerating data. Confidence: 0.85
+- Writes detailed, structured handoff/task documents with explicit sections (Project, Current Status, Next Task, Constraints, Expected Deliverable) rather than free-form instructions. Confidence: 0.8
+- Requires scripts to be idempotent and safely resumable if interrupted. Confidence: 0.85
+- Prefers conservative, non-destructive changes: do not alter database schema unless necessary, never delete existing data. Confidence: 0.85
+- Expects graceful fallback when localized or translated content is unavailable rather than crashing or showing blank screens. Confidence: 0.75
+- Project (Kriya) uses a SQLite database at assets/db/gita.db storing Bhagavad Gita verses and commentaries; uses Sarvam AI API (SARVAM_API_KEY env var) for Telugu translation via scripts/translate-telugu.mjs. Confidence: 0.85

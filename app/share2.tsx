@@ -22,7 +22,7 @@ import { CaptureView, type CaptureViewRef } from 'react-native-capture-view';
 import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { showAppToast } from '../lib/appToast';
-import { getShlokaAt, type ShlokaRow } from '../lib/shloka';
+import { getShlokaAt, getTranslationForLanguage, type ShlokaRow } from '../lib/shloka';
 import {
   Slider,
   SliderTrack,
@@ -222,6 +222,7 @@ export default function Share2() {
   
   const isDarkMode = useKriya(s => s.isDarkMode);
   const isReady = useKriya(s => s.ready);
+  const language = useKriya(s => s.language);
   const firstParam = (value: string | string[] | undefined) =>
     Array.isArray(value) ? value[0] : value;
   const routeId = firstParam(params.id);
@@ -252,8 +253,9 @@ export default function Share2() {
   const shareVerse = loadedShloka?.verse_number?.toString() ?? routeVerse;
   const shareText = loadedShloka?.text ?? routeText;
   const shareTranslation =
-    loadedShloka?.translation_2
-    ?? loadedShloka?.description
+    (loadedShloka
+      ? getTranslationForLanguage(loadedShloka, language)
+      : null)
     ?? routeTranslation
     ?? '';
   const [selectedFormat, setSelectedFormat] = useState<FormatId>('story');

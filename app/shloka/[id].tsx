@@ -16,6 +16,8 @@ import {
   getShlokaAt,
   getTotalShlokas,
   getPrevNextIndices,
+  getTranslationForLanguage,
+  getCommentaryForLanguage,
   type ShlokaRow,
 } from '../../lib/shloka';
 
@@ -41,6 +43,8 @@ export default function ShlokaDetail() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const isDarkMode = useKriya(s => s.isDarkMode);
+  const language = useKriya(s => s.language);
+  const setLanguage = useKriya(s => s.setLanguage);
 
   // Treat URL param as *index* (0-based)
   const initialIndex = useMemo(() => {
@@ -340,16 +344,18 @@ const handleBookPress = () => {
     setTtsPlaying(true);
 
     try {
-      // Build merged English text: "Translation. {text} ... Commentary. {text}"
-      const translation = row.translation_2 ?? row.description ?? '';
-      let englishText = '';
-      if (translation) englishText += `Translation. ${translation}`;
-      if (row.commentary) englishText += ` ... Commentary. ${row.commentary}`;
+      // Build the spoken text from the selected language:
+      // "Translation. {text} ... Commentary. {text}"
+      const translation = getTranslationForLanguage(row, language) ?? '';
+      let speakText = '';
+      if (translation) speakText += `Translation. ${translation}`;
+      const commentary = getCommentaryForLanguage(row, language);
+      if (commentary) speakText += ` ... Commentary. ${commentary}`;
 
       // Fetch both audio files in parallel from cache/R2 recordings
-      const [shlokaAudio, englishAudio] = await Promise.all([
+      const [shlokaAudio, spokenAudio] = await Promise.all([
         textToSpeech(row.text, 'hi-IN', row.chapter_number, row.verse_number),
-        englishText ? textToSpeech(englishText, 'en-IN', row.chapter_number, row.verse_number) : Promise.resolve(null),
+        speakText ? textToSpeech(speakText, 'en-IN', row.chapter_number, row.verse_number) : Promise.resolve(null),
       ]);
 
       if (ttsAbortRef.current || !shlokaAudio) {
@@ -366,9 +372,9 @@ const handleBookPress = () => {
         return;
       }
 
-      // Then play English (translation + commentary)
-      if (englishAudio) {
-        await playAudio(englishAudio);
+      // Then play the translation (and commentary) audio
+      if (spokenAudio) {
+        await playAudio(spokenAudio);
       }
 
       taskCompleteHaptic();
@@ -427,6 +433,23 @@ return (
       
       {/* Action Buttons */}
       <View style={styles.headerActions}>
+        {/* Language Toggle */}
+        <Pressable
+          onPress={() => {
+            selectionHaptic();
+            setLanguage(language === 'en' ? 'te' : 'en');
+          }}
+          hitSlop={16}
+          style={[
+            styles.circularButton,
+            { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)' }
+          ]}
+        >
+          <Text style={{ fontSize: 12, fontWeight: '700', color: isDarkMode ? '#d1d5db' : '#18464aff' }}>
+            {language === 'en' ? 'EN' : 'తె'}
+          </Text>
+        </Pressable>
+
         {/* Bookmark Button */}
         <Pressable 
           onPress={toggleBookmark} 
@@ -543,16 +566,16 @@ return (
             Translation :
           </Text>
           <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable={true}>
-            {row!.translation_2 ?? row!.description ?? '—'}
+            {getTranslationForLanguage(row!, language) ?? '—'}
           </Text>
 
-          {row!.commentary ? (
+          {getCommentaryForLanguage(row!, language) ? (
             <>
               <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
                 Commentary :
               </Text>
               <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable>
-                {row!.commentary}
+                {getCommentaryForLanguage(row!, language)}
               </Text>
             </>
           ) : null}

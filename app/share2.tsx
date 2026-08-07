@@ -33,6 +33,9 @@ import {
   SHARE_BACKGROUNDS,
   getShareBackground,
   getShareBackgroundImageSource,
+  getShareBackgrounds,
+  loadRemoteBackgrounds,
+  type ShareBackground,
   type ShareBackgroundId,
 } from '../lib/shareBackgrounds';
 
@@ -234,6 +237,21 @@ export default function Share2() {
   const [failedBackgroundIds, setFailedBackgroundIds] = useState<Set<string>>(
     () => new Set(),
   );
+  // Remote backgrounds from R2 index.json; starts as the static set and is
+  // replaced with whatever R2 lists once the fetch resolves.
+  const [remoteBackgrounds, setRemoteBackgrounds] = useState<ShareBackground[]>(() =>
+    getShareBackgrounds(),
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    loadRemoteBackgrounds().then((backgrounds) => {
+      if (!cancelled) setRemoteBackgrounds(backgrounds);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!isReady) return;
@@ -362,8 +380,9 @@ export default function Share2() {
     buttonPressHaptic();
     
     try {
-      // This screen only writes a new image, so avoid requesting read access.
-      const { status } = await MediaLibrary.requestPermissionsAsync(true);
+      // Android 13+ only offers READ_MEDIA_*; a write-only request resolves to
+      // an empty (never "granted") result there, so ask for read access too.
+      const { status } = await MediaLibrary.requestPermissionsAsync(false);
       if (status !== 'granted') {
         showAppToast({
           type: 'error',
@@ -514,7 +533,7 @@ export default function Share2() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.backgroundSelector}
           >
-            {SHARE_BACKGROUNDS.map((bg) => (
+            {remoteBackgrounds.map((bg) => (
               <Pressable
                 key={bg.id}
                 onPress={() => {

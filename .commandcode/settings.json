@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(cat:*)",
+      "Shell(node -e console.log(require('./node_modules/react-native/package.json').version))",
+      "Shell(adb:*)",
+      "Shell(grep:*)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}

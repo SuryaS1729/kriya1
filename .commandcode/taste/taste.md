@@ -1,9 +1,9 @@
 - Prefers concise, directive bug reports that include the exact error message and stack trace rather than prose descriptions. Confidence: 0.85
-- Reports bugs with the symptom first ("X is not working"), then the error/log, then the file/component reference — i.e., problem → evidence → location. Confidence: 0.85
+- Reports bugs with the symptom first ("X is not working"), then the error/log, then the file/component reference — i.e., problem → evidence → location. Confidence: 0.9
 - Frameworks/tools in stack: Expo SDK 56, React Native 0.85, React 19, expo-router (app/ directory), nativewind (css-interop), react-native-view-shot, React Compiler enabled. Confidence: 0.95
 - Uses Android as primary development target (adb available, debug build installed on device). Confidence: 0.9
 - Project uses git for version control; uses `git diff` to compare changes during SDK migrations. Confidence: 0.9
-- Prefers end-to-end reproduction on a real device (via adb + dev-client + deep link) rather than theoretical analysis or just static reading when debugging runtime issues. Confidence: 0.85
+- Prefers end-to-end reproduction on a real device (via adb + dev-client + deep link) rather than theoretical analysis or just static reading when debugging runtime issues. Confidence: 0.9
 - Uses Metro dev server / `expo start --dev-client` for live debugging. Confidence: 0.85
 - Is comfortable with low-level debugging (inspecting node_modules, reading compiled bundle output, running babel transforms locally to inspect compiler output). Confidence: 0.9
 - Deep link scheme for the app is "acme". Confidence: 0.7
@@ -14,3 +14,7 @@
 - Prefers conservative, non-destructive changes: do not alter database schema unless necessary, never delete existing data. Confidence: 0.85
 - Expects graceful fallback when localized or translated content is unavailable rather than crashing or showing blank screens. Confidence: 0.75
 - Project (Kriya) uses a SQLite database at assets/db/gita.db storing Bhagavad Gita verses and commentaries; uses Sarvam AI API (SARVAM_API_KEY env var) for Telugu translation via scripts/translate-telugu.mjs. Confidence: 0.85
+- Prefers data-driven, runtime-discovered content over hardcoded lists: new assets (e.g., share backgrounds) uploaded to the R2 store should be picked up by the frontend automatically, without requiring code changes. Confidence: 0.9
+- Kriya share-backgrounds workflow (explicitly preferred): adding a background means uploading <id>.jpeg to the R2 backgrounds/ folder AND adding {"id": "<id>"} to backgrounds/index.json — the app discovers backgrounds at runtime from index.json, so no server or code changes are needed. Confidence: 0.9
+- Prefers no-server solutions: for remote content discovery, favors static files in R2 (e.g., a metadata index.json fetched at runtime) over building a backend/list endpoint. Confidence: 0.7
+- Gets impatient with long-running investigations; wants the agent to stop mid-process and summarize findings/status rather than continue digging ("stop the process, you are taking tooo long"). Prefers time-boxed debugging with quick progress check-ins. Confidence: 0.85

@@ -49,14 +49,14 @@ const Checkbox = ({ completed, isDarkMode }: { completed: boolean, isDarkMode: b
       backgroundColor: interpolateColor(
         progress.value,
         [0, 1],
-        isDarkMode 
+        isDarkMode
           ? ['#1f2937', '#65a25cff']
           : ['white', '#98d590ff']
       ),
       borderColor: interpolateColor(
         progress.value,
         [0, 1],
-        isDarkMode 
+        isDarkMode
           ? ['#4b5563', '#65a25cff']
           : ['#e2e8f0', '#AADBA3']
       ),
@@ -66,7 +66,7 @@ const Checkbox = ({ completed, isDarkMode }: { completed: boolean, isDarkMode: b
   const checkmarkStyle = useAnimatedStyle(() => {
     return {
       opacity: interpolate(progress.value, [0, 0.6, 1], [0, 0, 1]), // Slower fade in
-      transform: [{ 
+      transform: [{
         scale: interpolate(progress.value, [0, 0.6, 0.8, 1], [0, 0, 1.2, 1]) // More bounce
       }],
     };
@@ -80,7 +80,7 @@ const Checkbox = ({ completed, isDarkMode }: { completed: boolean, isDarkMode: b
           size={14}
           color={isDarkMode ? "#17481bff" : "#ffffff"}
           style={checkmarkStyle}
-          
+
         />
       )}
     </Animated.View>
@@ -318,7 +318,7 @@ export default function Home() {
   const tasks     = useKriya(s => s.tasksToday);
   const toggle    = useKriya(s => s.toggleTask);
   const remove    = useKriya(s => s.removeTask);
-  const getTasksForDay = useKriya(s => s.getTasksForDay); 
+  const getTasksForDay = useKriya(s => s.getTasksForDay);
   const isDarkMode = useKriya(s => s.isDarkMode);
   const language = useKriya(s => s.language);
   const setLanguage = useKriya(s => s.setLanguage);
@@ -491,9 +491,9 @@ export default function Home() {
     buttonPressHaptic(); // Light haptic for navigation
     router.push({
       pathname: '/focus',
-      params: { 
-        id: String(task.id), 
-        title: task.title,   
+      params: {
+        id: String(task.id),
+        title: task.title,
       },
     });
   }, []);
@@ -512,31 +512,31 @@ console.log('🔍 Guided Tour Debug:', {
   });
 
   const renderItem = useCallback(({ item }: { item: Task }) => (
-    <Animated.View  
+    <Animated.View
       entering={FadeIn.duration(90)}
       layout={LinearTransition.duration(100)}
     >
-      <TaskRow 
-        item={item} 
-        isDarkMode={isDarkMode} 
-        onToggle={onToggle} 
+      <TaskRow
+        item={item}
+        isDarkMode={isDarkMode}
+        onToggle={onToggle}
         onRemove={onRemove}
-        onFocus={onFocus} 
+        onFocus={onFocus}
       />
     </Animated.View>
   ), [isDarkMode, onToggle, onRemove, onFocus]);
 
   const renderAllTaskItem = useCallback(({ item }: { item: Task }) => (
-    <Animated.View  
+    <Animated.View
       entering={FadeIn.duration(90)}
       layout={LinearTransition.duration(100)}
     >
-      <TaskRow 
-        item={item} 
-        isDarkMode={isDarkMode} 
-        onToggle={onToggleAllTask} 
+      <TaskRow
+        item={item}
+        isDarkMode={isDarkMode}
+        onToggle={onToggleAllTask}
         onRemove={onRemoveAllTask}
-        onFocus={onFocus} 
+        onFocus={onFocus}
       />
     </Animated.View>
   ), [isDarkMode, onToggleAllTask, onRemoveAllTask, onFocus]);
@@ -548,7 +548,7 @@ console.log('🔍 Guided Tour Debug:', {
     if (ready && !navigationRef.current) {
       navigationRef.current = true;
       // console.log('🔍 Checking onboarding status:', hasCompletedOnboarding);
-      
+
       if (!hasCompletedOnboarding) {
         // console.log('🔍 Redirecting to onboarding...');
         router.replace('/onboarding');
@@ -687,7 +687,7 @@ console.log('🔍 Guided Tour Debug:', {
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       // console.log('📱 Notification response:', response);
       const data = response.notification.request.content.data;
-      
+
       if (data?.type === 'task_reminder') {
         // Navigate to add task screen
         router.push('/add');
@@ -740,13 +740,13 @@ console.log('🔍 Guided Tour Debug:', {
 
   const mainContent = (
     <LinearGradient
-      colors={isDarkMode ? ['#2e455fff', '#000000ff'] : ['#ffffffd2', '#8ba0d3ff']}
+      colors={isDarkMode ? ['#2e455fff', '#000000ff'] : ['#ffffffd2', '#ced7ec']}
       style={[styles.container]}
     >
       <StatusBar style={isDarkMode ? "light" : "dark"} />
             {/* <StatusBar hidden={true} /> */}
-      
-      
+
+
       <ShlokaCard topInset={insets.top} />
 
       {/* Tasks Section */}
@@ -759,11 +759,11 @@ console.log('🔍 Guided Tour Debug:', {
             <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#5a6173ff' }]}>
               {showAllTasks ? 'All Tasks' : "Today's Tasks"}
             </Text>
-            <Feather 
-              name="code" 
-              size={18} 
-              color={showAllTasks ? (isDarkMode ? '#9ca3af' : '#4a7fd4ff') : (isDarkMode ? '#9ca3af' : '#94a3b8')} 
-              style={{ marginLeft: 6, transform: [{ rotate: '90deg' }] }} 
+            <Feather
+              name="code"
+              size={18}
+              color={showAllTasks ? (isDarkMode ? '#9ca3af' : '#4a7fd4ff') : (isDarkMode ? '#9ca3af' : '#94a3b8')}
+              style={{ marginLeft: 6, transform: [{ rotate: '90deg' }] }}
             />
           </PressableScale>
           <View style={styles.headerButtons}>
@@ -795,7 +795,7 @@ console.log('🔍 Guided Tour Debug:', {
             </Link>
           </View>
         </View>
-        
+
         <FlatList
           data={showAllTasks ? sortedAllTasks : sortedTasks}
           renderItem={showAllTasks ? renderAllTaskItem : renderItem}
@@ -826,11 +826,11 @@ console.log('🔍 Guided Tour Debug:', {
 </Text>
                 </View>
               </Pressable>
-              
+
             </View>
           )}
         />
-        
+
         <Link href="/add" asChild>
           <TouchableOpacity onPress={() => buttonPressHaptic()} activeOpacity={0.7}>
             <View style={[styles.addTaskButton, {backgroundColor: isDarkMode ? '#1b293d91' : '#f9fafb'}]}>
@@ -849,8 +849,8 @@ console.log('🔍 Guided Tour Debug:', {
 
  if (shouldShowGuidedTour) {
     return (
-      <GuidedTour 
-      onComplete={handleTourComplete}       
+      <GuidedTour
+      onComplete={handleTourComplete}
       hasUserTasks={tasks.length > 0}
 >
         {mainContent}
@@ -863,7 +863,7 @@ console.log('🔍 Guided Tour Debug:', {
 }
 
 const styles = StyleSheet.create({
-  container: { 
+  container: {
     flex: 1,
   },
   topHalf: {
@@ -875,14 +875,14 @@ const styles = StyleSheet.create({
 
   card: {
     alignItems: 'center',
-    justifyContent: 'flex-start', 
+    justifyContent: 'flex-start',
     flex: 1,
     borderRadius: 16,
     paddingTop: 20,
     paddingHorizontal: 5,
-    marginBottom: 8, 
+    marginBottom: 8,
   },
-  
+
 
   toggleButtonContainer: {
     alignItems: 'center',
@@ -903,7 +903,7 @@ const styles = StyleSheet.create({
 
 
   },
-  meta: { 
+  meta: {
     fontFamily:"Alegreya",
     fontSize: 23,
     fontStyle: 'normal',
@@ -916,11 +916,11 @@ const styles = StyleSheet.create({
   justifyContent: 'center',
   paddingBottom: 16,
   paddingHorizontal: 20,
-  position: 'relative', 
+  position: 'relative',
 },
 
 leftSpacer: {
-  width: 32, 
+  width: 32,
 
 },
 
@@ -940,9 +940,9 @@ descButton: {
   overflow: 'hidden',
   marginLeft: 8,
 },
-  
+
   shlokaContentContainer: {
-    flex: 1, 
+    flex: 1,
     width: '100%',
     paddingHorizontal: 8,
   },
@@ -950,13 +950,13 @@ descButton: {
   scrollContainer: {
     flex: 1,
   },
-  
+
  scrollContentEnglish: {
   paddingVertical: 20,
   paddingHorizontal: 10,
-  minHeight: '100%', 
+  minHeight: '100%',
   justifyContent: 'center',
-  alignItems: 'center', 
+  alignItems: 'center',
 },
 
 scrollContentSanskrit: {
@@ -981,7 +981,7 @@ scrollContentSanskrit: {
     justifyContent: 'center',
     alignItems: 'center',
   },
- sa: { 
+ sa: {
     fontSize: 23,
     color: '#565657ff',
     textAlign: 'center',
@@ -989,19 +989,19 @@ scrollContentSanskrit: {
     fontWeight: "300",
     fontStyle: "normal",
     paddingTop: 10,
-    lineHeight: 26, 
+    lineHeight: 26,
   },
-  
-  en: { 
+
+  en: {
     fontSize: 20,
     color: '#434343ff',
     textAlign: 'center',
     fontFamily: "Source Serif Pro",
     fontWeight: "400",
     fontStyle: "italic",
-    lineHeight: 28, 
+    lineHeight: 28,
   },
-  
+
   tasksContainer: {
     flex: 1.47,
     backgroundColor: 'white',
@@ -1029,8 +1029,8 @@ scrollContentSanskrit: {
 
 
   },
-  h1: { 
-    fontSize: 17, 
+  h1: {
+    fontSize: 17,
     fontWeight: '500',
     color: '#848fa9ff',
 marginLeft:10
@@ -1047,9 +1047,9 @@ marginLeft:10
     borderBottomWidth: 0.3,
     borderBottomColor: '#f1f5f9',
   },
-  title: { 
-    flex: 1, 
-    fontSize: 19, 
+  title: {
+    flex: 1,
+    fontSize: 19,
     color: '#000000ff',
     marginLeft: 12,
     fontFamily:"Source Serif Pro",
@@ -1076,17 +1076,17 @@ marginLeft:10
     justifyContent: 'center',
     alignItems: 'center',
   },
-  checkboxOn: { 
-    backgroundColor: '#AADBA3', 
+  checkboxOn: {
+    backgroundColor: '#AADBA3',
     borderColor: '#AADBA3',
   },
-  checkboxOff: { 
+  checkboxOff: {
     borderColor: '#e2e8f0',
     backgroundColor: 'white',
   },
-  done: { 
-    color: '#94a3b8', 
-    textDecorationLine: 'line-through' 
+  done: {
+    color: '#94a3b8',
+    textDecorationLine: 'line-through'
   },
   addTaskButton: {
     flexDirection: 'row',

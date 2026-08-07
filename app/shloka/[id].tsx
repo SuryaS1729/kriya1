@@ -172,7 +172,7 @@ const handleBookPress = () => {
 
   const addBookmark = useKriya(s => s.addBookmark);
   const removeBookmark = useKriya(s => s.removeBookmark);
-  
+
   // Use a more reactive approach - directly access the bookmarks array
   const bookmarks = useKriya(s => s.bookmarks || []);
   const bookmarked = currentIndex !== null ? bookmarks.some(b => b.shlokaIndex === currentIndex) : false;
@@ -190,21 +190,21 @@ const handleBookPress = () => {
     if (currentIndex === null) return;
     const rowForBookmark = row ?? getShlokaAt(currentIndex);
     if (!rowForBookmark) return;
-    
+
     // Enhanced haptic feedback based on action
     if (bookmarked) {
       selectionHaptic(); // Light haptic for removing bookmark
     } else {
       taskCompleteHaptic(); // Success haptic for adding bookmark
     }
-    
+
     // Snappier animation sequence - no rotation
     // Simple bounce animation
     bookmarkScale.value = withSequence(
       withTiming(1.2, { duration: 100 }),
       withTiming(1, { duration: 100 })
     );
-    
+
     // Update state and show appropriate toast
     if (bookmarked) {
       removeBookmark(currentIndex);
@@ -245,7 +245,7 @@ const handleBookPress = () => {
     bookmarkLongPressRef.current = true;
     // Stronger haptic feedback for long press
     buttonPressHaptic(); // Medium haptic for navigation to bookmarks
-    
+
     // Navigate to bookmarks page
     router.push('/bookmarks');
   };
@@ -404,24 +404,24 @@ return (
   <SafeAreaView style={{ flex: 1 }} edges={['right', 'bottom', 'left']}>
     <StatusBar hidden={true} />
 
-    <LinearGradient 
-      colors={isDarkMode ? ['#344c67ff', '#000000ff'] : ['#ffffffff', '#9FABC8']} 
-      style={StyleSheet.absoluteFill} 
+    <LinearGradient
+      colors={isDarkMode ? ['#344c67ff', '#000000ff'] : ['#ffffffff', '#ffffffff']}
+      style={StyleSheet.absoluteFill}
     />
 
     {/* Sticky Header */}
     <View style={[
-      styles.stickyHeader, 
-      { 
+      styles.stickyHeader,
+      {
         paddingTop: insets.top + 12,
       }
     ]}>
       {/* Close Button */}
-      <Pressable 
+      <Pressable
         onPress={() => {
           buttonPressHaptic(); // Add haptic for close button
           router.back();
-        }} 
+        }}
         hitSlop={16}
         style={[
           styles.circularButton,
@@ -430,7 +430,7 @@ return (
       >
         <Text style={[styles.closeIcon, { color: isDarkMode ? '#d1d5db' : '#18464aff' }]}>✕</Text>
       </Pressable>
-      
+
       {/* Action Buttons */}
       <View style={styles.headerActions}>
         {/* Language Toggle */}
@@ -451,31 +451,31 @@ return (
         </Pressable>
 
         {/* Bookmark Button */}
-        <Pressable 
-          onPress={toggleBookmark} 
+        <Pressable
+          onPress={toggleBookmark}
           onLongPress={handleLongPressBookmark}
-          hitSlop={16} 
+          hitSlop={16}
           style={[
             styles.circularButton,
             { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)'  }
           ]}
         >
           <Animated.View style={animatedBookmarkStyle}>
-            <MaterialIcons 
-              name={bookmarked ? "bookmark" : "bookmark-border"} 
-              size={20} 
-              color={bookmarked 
-                ? (isDarkMode ? '#fbbf24' : '#ff7700ff') 
+            <MaterialIcons
+              name={bookmarked ? "bookmark" : "bookmark-border"}
+              size={20}
+              color={bookmarked
+                ? (isDarkMode ? '#fbbf24' : '#ff7700ff')
                 : (isDarkMode ? '#d1d5db' : '#18464aff')
-              } 
+              }
             />
           </Animated.View>
         </Pressable>
 
         {/* Play TTS Button */}
-        <Pressable 
-          onPress={handlePlayPress} 
-          hitSlop={16} 
+        <Pressable
+          onPress={handlePlayPress}
+          hitSlop={16}
           style={[
             styles.circularButton,
             { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)' }
@@ -484,21 +484,21 @@ return (
           {ttsLoading ? (
             <ActivityIndicator size="small" color={isDarkMode ? '#ffffffff' : '#18464aff'} />
           ) : (
-            <FontAwesome5 
-              name={ttsPlaying ? 'stop' : 'play'} 
-              size={14} 
-              color={ttsPlaying 
-                ? (isDarkMode ? '#f87171' : '#dc2626') 
+            <FontAwesome5
+              name={ttsPlaying ? 'stop' : 'play'}
+              size={14}
+              color={ttsPlaying
+                ? (isDarkMode ? '#f87171' : '#dc2626')
                 : (isDarkMode ? '#ffffffff' : '#18464aff')
-              } 
+              }
             />
           )}
         </Pressable>
-        
+
         {/* Share Button */}
-        <Pressable 
-          onPress={handleSharePress} 
-          hitSlop={16} 
+        <Pressable
+          onPress={handleSharePress}
+          hitSlop={16}
           style={[
             styles.circularButton,
             { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)'  }
@@ -510,8 +510,8 @@ return (
         {/* Tooltip - positioned relative to header */}
         {showTooltip && (
           <View style={[
-            styles.tooltip, 
-            { 
+            styles.tooltip,
+            {
               backgroundColor: isDarkMode ? '#1f2937' : '#f3f4f6',
               top: 45, // Position below the sticky header
             }
@@ -590,8 +590,8 @@ return (
           styles.pillWrap,
           {
             bottom: insets.bottom + 20,
-            backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(148, 168, 193, 0.81)',
-            borderColor: isDarkMode ? 'rgba(71, 85, 105, 0.6)' : 'rgba(255, 255, 255, 0.43)',
+            backgroundColor: isDarkMode ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255)',
+            borderColor: isDarkMode ? 'rgba(71, 85, 105, 0.6)' : '#18464aff',
           },
         ]}
       >
@@ -602,16 +602,16 @@ return (
           style={[styles.pillBtn, prevIndex == null && styles.disabled]}
           android_ripple={{ color: '#cccccc18', radius: 18 }}
         >
-          <AntDesign 
-            style={[styles.pillIcon, { color: prevIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 
-            name="arrow-left" 
-            size={32} 
+          <AntDesign
+            style={[styles.pillIcon, { color: prevIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]}
+            name="arrow-left"
+            size={32}
           />
         </Pressable>
 
-        <Pressable 
-        onPress={handleBookPress} 
-        hitSlop={12} 
+        <Pressable
+        onPress={handleBookPress}
+        hitSlop={12}
         style={styles.pillBtn}
         android_ripple={{ color: '#cccccc18', radius: 24 }}>
           <FontAwesome5 name="book" size={20} color={isDarkMode ? '#f9fafb' : '#18464aff'} />
@@ -624,10 +624,10 @@ return (
           style={[styles.pillBtn, nextIndex == null && styles.disabled]}
           android_ripple={{ color: '#cccccc18', radius: 18 }}
         >
-          <AntDesign 
-            style={[styles.pillIcon, { color: nextIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]} 
-            name="arrow-right" 
-            size={32} 
+          <AntDesign
+            style={[styles.pillIcon, { color: nextIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]}
+            name="arrow-right"
+            size={32}
           />
         </Pressable>
       </View>
@@ -639,7 +639,7 @@ return (
 // ...existing styles remain the same...
 const styles = StyleSheet.create({
   headerIcon: { fontSize: 22, fontWeight: '700' },
-  headerTitle: { 
+  headerTitle: {
     fontFamily:"Source Serif Pro",
     fontSize: 23,
     fontStyle: 'normal',
@@ -656,18 +656,18 @@ const styles = StyleSheet.create({
     paddingVertical:10,
     marginVertical:10
   },
-  sa: { 
-    fontSize: 20, 
+  sa: {
+    fontSize: 20,
     lineHeight: 20,
     fontFamily:"Kalam",
     fontWeight:"400",
-    fontStyle:"normal", 
-    paddingTop:6, 
-    textAlign:'center', 
+    fontStyle:"normal",
+    paddingTop:6,
+    textAlign:'center',
     marginBottom:10
   },
-  en: { 
-    fontSize: 19, 
+  en: {
+    fontSize: 19,
     lineHeight: 26,
     fontFamily:"Alegreya",
     fontWeight:"400",
@@ -727,7 +727,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     backgroundColor: "transparent",
   },
-  
+
   circularButton: {
     width: 36,
     height: 36,
@@ -735,10 +735,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  
-  closeIcon: { 
-    fontSize: 16, 
-    fontWeight: '700' 
+
+  closeIcon: {
+    fontSize: 16,
+    fontWeight: '700'
   },
 
 });

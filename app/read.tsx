@@ -60,7 +60,7 @@ export default function Read() {
     >
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <StatusBar style={isDarkMode ? "light" : "dark"} />
-        
+
         <Text style={[styles.title, { color: isDarkMode ? '#f9fafb' : '#000000' }]}>
           Bhagavad Gita
         </Text>
@@ -108,7 +108,7 @@ export default function Read() {
                   href={{ pathname: '/shloka/[id]', params: { id: String(idx) } }}
                   replace asChild
                 >
-                  <Pressable 
+                  <Pressable
                     style={[
                       styles.resultRow,
                       { backgroundColor: isDarkMode ? '#1f2937' : 'white' }
@@ -210,8 +210,8 @@ export default function Read() {
                       replace
                       asChild
                     >
-                      <Pressable 
-                        style={styles.vRow} 
+                      <Pressable
+                        style={styles.vRow}
                         android_ripple={{ color: '#cccccc18'}}
                         onPress={() => buttonPressHaptic()} // Add haptic for verse tap
                       >
@@ -251,21 +251,21 @@ export default function Read() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   safeArea: { flex: 1, paddingHorizontal: 16 },
-  title: { 
-    fontSize: 22, 
-    fontWeight: '600', 
-    marginTop: 12, 
+  title: {
+    fontSize: 22,
+    fontWeight: '600',
+    marginTop: 12,
     marginBottom: 8,
     fontFamily: "Space Mono",
     fontStyle:'italic'
   },
   search: {
-    borderWidth: 1, 
-    borderColor: '#e5e7eb', 
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
     borderRadius: 10,
-    paddingHorizontal: 12, 
-    paddingVertical: 10, 
-    marginBottom: 10, 
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 10,
     fontSize: 16,
   },
   langToggle: {
@@ -280,16 +280,16 @@ const styles = StyleSheet.create({
   left: { flex: 1, maxWidth: 96 },
   right: { flex: 1 },
   chRow: {
-    flexDirection: 'row', 
-    alignItems: 'center', 
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 8, 
+    paddingVertical: 8,
     paddingHorizontal: 10,
-    marginVertical:4, 
+    marginVertical:4,
     borderRadius: 10,
   },
-  chText: { 
-    fontSize: 18, 
+  chText: {
+    fontSize: 18,
     fontWeight: '600',
     fontFamily: "SourceSerifPro",
   },
@@ -298,38 +298,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffffff',
     marginHorizontal: 12,
   },
-  chMeta: { 
+  chMeta: {
     fontSize: 12,
     fontFamily: "Alegreya",
   },
-  vRow: { 
-    flexDirection: 'row', 
-    gap: 10, 
-    alignItems: 'center', 
-    paddingVertical: 10, 
-    paddingHorizontal: 8 
+  vRow: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 8
   },
-  vNum: { 
-    width: 24, 
-    textAlign: 'center', 
+  vNum: {
+    width: 24,
+    textAlign: 'center',
     fontWeight: '700',
     fontFamily: "SourceSerifPro",
   },
-  vText: { 
+  vText: {
     flex: 1,
   },
-  resultRow: { 
+  resultRow: {
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 8,
     marginBottom: 8,
   },
-  resultMeta: { 
+  resultMeta: {
     fontSize: 12,
     fontFamily: "Source Serif Pro",
     fontWeight: '600',
   },
-  resultText: { 
+  resultText: {
     fontSize: 16,
     fontFamily: "Alegreya",
     marginTop: 4,

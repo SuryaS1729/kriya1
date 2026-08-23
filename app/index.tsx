@@ -224,6 +224,9 @@ const ShlokaCard = React.memo(function ShlokaCard({ topInset }: { topInset: numb
 
   const cardTranslation = getTranslationForLanguage(shloka, language) || 'No translation available';
 
+  // TELUGU DISABLED: flag for Telugu typography left unused while Telugu features are paused.
+  // const isTeluguText = language === 'te';
+
   return (
     <View style={[styles.topHalf, { paddingTop: topInset }]}>
       <View style={styles.card}>
@@ -252,6 +255,7 @@ const ShlokaCard = React.memo(function ShlokaCard({ topInset }: { topInset: numb
                 <Text
                   style={[
                     styles.en,
+                    // TELUGU DISABLED: isTeluguText && styles.enTelugu,
                     { color: isDarkMode ? '#d1d5db' : '#434343ff' }
                   ]}
                 >
@@ -289,7 +293,7 @@ const ShlokaCard = React.memo(function ShlokaCard({ topInset }: { topInset: numb
               styles.toggleText,
               { color: isDarkMode ? '#f9fafb' : '#000000ff' }
             ]}>
-              {showTranslation ? 'View in Sanskrit' : language === 'te' ? 'View in Telugu' : 'View in English'}
+              {showTranslation ? 'View in Sanskrit' : 'View in English'}
             </Text>
           </Animated.View>
         </TouchableOpacity>
@@ -767,6 +771,7 @@ console.log('🔍 Guided Tour Debug:', {
             />
           </PressableScale>
           <View style={styles.headerButtons}>
+            {/* TELUGU DISABLED: language toggle hidden while Telugu features are paused.
             <Pressable
               onPress={() => {
                 selectionHaptic();
@@ -778,7 +783,7 @@ console.log('🔍 Guided Tour Debug:', {
               <Text style={{ fontSize: 13, fontWeight: '700', color: isDarkMode ? '#9db5daff' : '#7493d7ff' }}>
                 {language === 'en' ? 'EN' : 'తె'}
               </Text>
-            </Pressable>
+            </Pressable>*/}
             <Link href="/calendar" asChild>
               <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
                 <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
@@ -1000,6 +1005,14 @@ scrollContentSanskrit: {
     fontWeight: "400",
     fontStyle: "italic",
     lineHeight: 28,
+  },
+
+  enTelugu: {
+    fontFamily: "NTR",
+    fontWeight: "400",
+    fontStyle: "normal",
+    fontSize: 24,
+    lineHeight: 36,
   },
 
   tasksContainer: {

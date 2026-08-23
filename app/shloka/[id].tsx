@@ -433,7 +433,7 @@ return (
 
       {/* Action Buttons */}
       <View style={styles.headerActions}>
-        {/* Language Toggle */}
+        {/* TELUGU DISABLED: language toggle hidden while Telugu features are paused.
         <Pressable
           onPress={() => {
             selectionHaptic();
@@ -449,7 +449,7 @@ return (
             {language === 'en' ? 'EN' : 'తె'}
           </Text>
         </Pressable>
-
+        */}
         {/* Bookmark Button */}
         <Pressable
           onPress={toggleBookmark}
@@ -565,7 +565,7 @@ return (
           <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
             Translation :
           </Text>
-          <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable={true}>
+          <Text style={[styles.en, /* TELUGU DISABLED: language === 'te' && styles.te */ { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable={true}>
             {getTranslationForLanguage(row!, language) ?? '—'}
           </Text>
 
@@ -574,7 +574,7 @@ return (
               <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
                 Commentary :
               </Text>
-              <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable>
+              <Text style={[styles.en, /* TELUGU DISABLED: language === 'te' && styles.te */ { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable>
                 {getCommentaryForLanguage(row!, language)}
               </Text>
             </>
@@ -672,6 +672,13 @@ const styles = StyleSheet.create({
     fontFamily:"Alegreya",
     fontWeight:"400",
     fontStyle:"normal"
+  },
+  te: {
+    fontFamily: "NTR",
+    fontSize: 22,
+    lineHeight: 34,
+    fontWeight: "400",
+    fontStyle: "normal"
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   pillWrap: {

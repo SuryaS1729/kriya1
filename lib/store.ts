@@ -490,6 +490,11 @@ export const useKriya = create<KriyaState>()(
     {
       name: 'kriya-storage',
       storage: createJSONStorage(() => AsyncStorage),
+      // TELUGU DISABLED: force English on every load so a persisted 'te' state
+      // cannot re-enable Telugu features while they are paused.
+      onRehydrateStorage: () => (state) => {
+        if (state) state.language = 'en';
+      },
       partialize: (state) => ({
         isDarkMode: state.isDarkMode,
         language: state.language,

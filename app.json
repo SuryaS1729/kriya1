@@ -150,11 +150,22 @@
                     "style": "italic"
                   }
                 ]
+              },
+              {
+                "fontFamily": "NTR",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/NTR-Regular.ttf",
+                    "weight": 400,
+                    "style": "normal"
+                  }
+                ]
               }
             ]
           },
           "ios": {
             "fonts": [
+              "./assets/fonts/NTR-Regular.ttf",
               "./assets/fonts/Alegreya-Regular.otf",
               "./assets/fonts/SourceSerifPro-It.otf",
               "./assets/fonts/SourceSerifPro-Light.otf",

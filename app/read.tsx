@@ -17,9 +17,10 @@ import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 // Add haptics import
 import { buttonPressHaptic, selectionHaptic } from '../lib/haptics';
-import {
-  getTeluguTranslation,
-} from '../lib/shloka';
+// TELUGU DISABLED: getTeluguTranslation import no longer used while Telugu features are paused.
+// import {
+//   getTeluguTranslation,
+// } from '../lib/shloka';
 
 export default function Read() {
   const chapters = useMemo(() => getChapterCounts(), []);
@@ -28,18 +29,14 @@ export default function Read() {
   const [chapter, setChapter] = useState<number>(initialChapter);
   const [query, setQuery] = useState('');
 
-  const isDarkMode = useKriya(s => s.isDarkMode);
-  const language = useKriya(s => s.language);
-  const setLanguage = useKriya(s => s.setLanguage);
+  // TELUGU DISABLED: language selector hidden while Telugu features are paused.
+  // const language = useKriya(s => s.language);
+  // const setLanguage = useKriya(s => s.setLanguage);
 
   // Best available translation for a verse in the selected language.
   const textFor = (item: { chapter_number: number; verse_number: number; translation_2: string | null; description: string | null; text: string }) =>
-    language === 'te'
-      ? (getTeluguTranslation(item.chapter_number, item.verse_number)
-        ?? item.translation_2
-        ?? item.description
-        ?? item.text)
-      : (item.translation_2 ?? item.description ?? item.text);
+    // TELUGU DISABLED: Telugu DB lookup skipped; always show English content.
+    (item.translation_2 ?? item.description ?? item.text);
 
   const verses = useMemo(() => getVersesForChapter(chapter), [chapter]);
   const results = useMemo(
@@ -65,6 +62,7 @@ export default function Read() {
           Bhagavad Gita
         </Text>
 
+        {/* TELUGU DISABLED: language toggle hidden while Telugu features are paused.
         <Pressable
           onPress={() => {
             selectionHaptic();
@@ -73,11 +71,11 @@ export default function Read() {
           hitSlop={8}
           style={[styles.langToggle, { backgroundColor: isDarkMode ? '#1f2937' : 'white', borderColor: isDarkMode ? '#374151' : '#e5e7eb' }]}
         >
-          <Text style={{ fontSize: 13, fontWeight: '700', color: isDarkMode ? '#f9fafb' : '#000000' }}>
+          <Text style={{ fontSize: 13, fontWeight: '700', fontFamily: language === 'te' ? 'NTR' : undefined, color: isDarkMode ? '#f9fafb' : '#000000' }}>
             {language === 'en' ? 'English' : 'తెలుగు'}
           </Text>
         </Pressable>
-
+        */}
         <TextInput
           placeholder="Search shlokas . . ."
           value={query}
@@ -124,6 +122,7 @@ export default function Read() {
                     </Text>
                     <Text style={[
                       styles.resultText,
+                      // TELUGU DISABLED: language === 'te' && styles.teluguText,
                       { color: isDarkMode ? '#e5e7eb' : '#0f172a' }
                     ]} numberOfLines={2}>
                       {textFor(item)}
@@ -224,6 +223,7 @@ export default function Read() {
                         </Text>
                         <Text style={[
                           styles.vText,
+                          // TELUGU DISABLED: language === 'te' && styles.teluguText,
                           { color: isDarkMode ? '#d1d5db' : '#334155' }
                         ]} numberOfLines={2}>
                           {textFor(item)}
@@ -333,6 +333,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Alegreya",
     marginTop: 4,
+  },
+  teluguText: {
+    fontFamily: "NTR",
+    fontSize: 18,
+    lineHeight: 26,
   },
   sep: { height: 1 },
 });

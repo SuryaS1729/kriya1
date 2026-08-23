@@ -97,6 +97,7 @@ type ShareCardProps = {
   verse?: string;
   text?: string;
   translation?: string;
+  isTelugu: boolean;
 };
 
 const getOverlayJustify = (textBoxPosition: string) => {
@@ -119,6 +120,7 @@ const ShareCard = memo(function ShareCard({
   verse,
   text,
   translation,
+  isTelugu,
 }: ShareCardProps) {
   return (
     <View style={[styles.cardContainer, { width: previewWidth, height: previewHeight }]}>
@@ -166,6 +168,7 @@ const ShareCard = memo(function ShareCard({
           <Text
             style={[
               styles.translationText,
+              isTelugu && styles.translationTextTelugu,
               { color: currentBackground.translationColor },
             ]}
           >
@@ -272,7 +275,8 @@ export default function Share2() {
   const shareText = loadedShloka?.text ?? routeText;
   const shareTranslation =
     (loadedShloka
-      ? getTranslationForLanguage(loadedShloka, language)
+      // TELUGU DISABLED: always render English share cards while Telugu features are paused.
+      ? getTranslationForLanguage(loadedShloka, 'en')
       : null)
     ?? routeTranslation
     ?? '';
@@ -490,6 +494,7 @@ export default function Share2() {
               verse={shareVerse}
               text={shareText}
               translation={shareTranslation}
+              isTelugu={false /* TELUGU DISABLED: was language === 'te' */}
               onBackgroundLoad={() => setIsBackgroundReady(true)}
               onBackgroundError={handleBackgroundError}
             />
@@ -810,6 +815,12 @@ marginTop: 10,
     marginTop: 8,
 
 
+  },
+  translationTextTelugu: {
+    fontFamily: 'NTR',
+    fontSize: 13,
+    lineHeight: 20,
+    marginTop: 8,
   },
   referenceBottom: {
     fontFamily: 'Cedarville Cursive',

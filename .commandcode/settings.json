@@ -4,7 +4,19 @@
       "Shell(cat:*)",
       "Shell(node -e console.log(require('./node_modules/react-native/package.json').version))",
       "Shell(adb:*)",
-      "Shell(grep:*)"
+      "Shell(grep:*)",
+      "Shell(npx tsc --noEmit 2 >& 1)",
+      "Shell(git stash list >/dev/null 2>&1; git status --short | grep -vE \"\\.commandcode\" ; echo \"---\"; git diff --stat -- . ':(exclude).commandcode')",
+      "Shell(npx tsc --noEmit -p tsconfig.json)",
+      "Shell(node -e \" const fs = require('fs'); const html = fs.readFileSync('GradleProblemsReport.html', 'utf8'); const m = html.match(/\\/\\/ begin-report-data\\n([\\s\\S]*?)\\n\\/\\/ end-report-data/); if (!m) { console.log('no data found'); process.exit(1); } const data = JSON.parse(m[1]); const diags = data.diagnostics; console.log('total diagnostics:', diags.length); const bySev = {}; const byText = {}; for (const d of diags) { const sev = d.severity; bySev[sev] = (bySev[sev] || 0) + 1; const txt = d.problem.text; byText[txt] = (byText[txt] || 0) + 1; } console.log('by severity:', bySev); console.log('---'); for (const [t, n] of Object.entries(byText)) console.log(n + 'x', t); console.log('---'); // show a couple full entries to see locations/details for (const d of diags.slice(0, 3)) { console.log(JSON.stringify(d, null, 2)); console.log('===='); } \")",
+      "Shell(node -e \" const fs = require('fs'); const html = fs.readFileSync('GradleProblemsReport.html', 'utf8'); const start = html.indexOf('// begin-report-data'); const end = html.indexOf('// end-report-data'); console.log('start idx:', start, 'end idx:', end); const segment = html.slice(start, end); // The JSON may have leading newline const firstBrace = segment.indexOf('{'); const json = segment.slice(firstBrace); const data = JSON.parse(json); const diags = data.diagnostics; console.log('total:', diags.length); const counts = {}; for (const d of diags) { const key = d.problem.text; counts[key] = (counts[key] || 0) + 1; } for (const [k, n] of Object.entries(counts)) console.log(n + 'x', k); console.log('--- severities:', JSON.stringify(diags.map(d=>d.severity))); \")",
+      "Shell(ninja:*)",
+      "Shell(npx expo export --platform android --dev --no-minify 2 >& 1)",
+      "Shell(ls node_modules/react-native-effects/lib/module/ 2>/dev/null; echo \"=== index ===\"; cat node_modules/react-native-effects/lib/module/index.js 2>/dev/null; echo \"=== src index ===\"; cat node_modules/react-native-effects/src/index.tsx 2>/dev/null | head -40)",
+      "Shell(npm:*)",
+      "Shell(rm:*)",
+      "Shell(git:*)",
+      "Shell(cd /Users/saaketsurya/Desktop/kriya1 && echo \"=== source refs ===\" && grep -rn \"react-native-effects\\|react-native-webgpu\\|effects-test\\|expo-build-properties\" app/ lib/ components/ 2>/dev/null; echo \"=== node_modules ===\" && ls node_modules/react-native-effects node_modules/react-native-webgpu node_modules/expo-build-properties 2>&1 | head -3; echo \"=== package-lock check ===\" && grep -c \"react-native-effects\\|react-native-webgpu\" package-lock.json 2>/dev/null)"
     ],
     "deny": [],
     "defaultMode": "default"

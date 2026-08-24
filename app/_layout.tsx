@@ -11,9 +11,6 @@ import { setDb } from '../lib/db';
 import * as NavigationBar from 'expo-navigation-bar';
 import { Platform } from 'react-native';
 import AppToastHost from '../components/AppToastHost';
-
-import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
-import '@/global.css';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const DB_NAME = 'gita.db';
@@ -219,7 +216,6 @@ export default function Root() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-    <GluestackUIProvider mode="system">
       <SafeAreaProvider>
       <SQLiteProvider databaseName={DB_NAME} onInit={onInit}>
         <Stack screenOptions={{ headerShown: false }}>
@@ -237,7 +233,6 @@ export default function Root() {
       </SQLiteProvider>
       <AppToastHost />
     </SafeAreaProvider>
-    </GluestackUIProvider>
     </GestureHandlerRootView>
   );
 }

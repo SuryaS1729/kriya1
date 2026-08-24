@@ -1,7 +1,7 @@
 // app/index.tsx
 import { Link, router } from 'expo-router';
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import { FlatList, StyleSheet, Text, View, Pressable, ScrollView, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View, Pressable, ScrollView, TouchableOpacity } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -19,7 +19,6 @@ import { Feather } from '@expo/vector-icons';
 import { taskCompleteHaptic, selectionHaptic, buttonPressHaptic, errorHaptic } from '../lib/haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
-import { Spinner } from '@/components/ui/spinner';
 import * as Notifications from 'expo-notifications';
 import { GuidedTour } from '../components/GuidedTour/GuidedTour';
 import { PressableScale } from 'pressto';
@@ -714,7 +713,7 @@ console.log('🔍 Guided Tour Debug:', {
     return (
       <View style={{ flex: 1, justifyContent: 'space-evenly', alignItems: 'center', backgroundColor: isDarkMode ? '#000' : '#fff' }}>
         <View></View>
-        <Spinner size="large" color={isDarkMode ? '#fff' : '#000'} />
+        <ActivityIndicator size="large" color={isDarkMode ? '#fff' : '#000'} />
         <Text style={{ fontSize: 20, fontFamily:"Instrument Serif", fontStyle:"italic", color: isDarkMode ? '#fff' : '#000' }}>loading...</Text>
       </View>
     );

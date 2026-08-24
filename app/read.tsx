@@ -23,6 +23,7 @@ import { buttonPressHaptic, selectionHaptic } from '../lib/haptics';
 // } from '../lib/shloka';
 
 export default function Read() {
+  const isDarkMode = useKriya(s => s.isDarkMode);
   const chapters = useMemo(() => getChapterCounts(), []);
   const initialChapter = chapters.length ? chapters[0].chapter : 1;
 
@@ -34,7 +35,7 @@ export default function Read() {
   // const setLanguage = useKriya(s => s.setLanguage);
 
   // Best available translation for a verse in the selected language.
-  const textFor = (item: { chapter_number: number; verse_number: number; translation_2: string | null; description: string | null; text: string }) =>
+  const textFor = (item: { translation_2: string | null; description: string | null; text: string }) =>
     // TELUGU DISABLED: Telugu DB lookup skipped; always show English content.
     (item.translation_2 ?? item.description ?? item.text);
 

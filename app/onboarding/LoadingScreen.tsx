@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, ActivityIndicator, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
 
-import { Spinner } from '@/components/ui/spinner';
 import {
   Theme,
   GITA_IMAGE_URL,
@@ -106,7 +105,7 @@ export default function LoadingScreen({ theme }: LoadingScreenProps) {
       </Animated.Text>
 
       <View style={styles.spinnerWrapper}>
-        <Spinner size="small" color={theme.spinnerColor} />
+        <ActivityIndicator size="small" color={theme.spinnerColor} />
       </View>
     </Animated.View>
   );

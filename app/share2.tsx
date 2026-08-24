@@ -23,12 +23,7 @@ import * as Sharing from 'expo-sharing';
 import * as MediaLibrary from 'expo-media-library';
 import { showAppToast } from '../lib/appToast';
 import { getShlokaAt, getTranslationForLanguage, type ShlokaRow } from '../lib/shloka';
-import {
-  Slider,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
-} from '@/components/ui/slider';
+import Slider from '@react-native-community/slider';
 import {
   SHARE_BACKGROUNDS,
   getShareBackground,
@@ -599,32 +594,16 @@ export default function Share2() {
             </View>
             <View style={styles.opacityControlRow}>
               <Slider
+                style={{ width: '100%' }}
                 value={Math.round(backgroundOpacity * 100)}
-                minValue={0}
-                maxValue={100}
+                minimumValue={0}
+                maximumValue={100}
                 step={1}
-                size="md"
-                orientation="horizontal"
-                isDisabled={false}
-                isReversed={false}
-                onChange={(value) => {
-                  if (typeof value === 'number') {
-                    updateBackgroundOpacity(value / 100);
-                  }
-                }}
-                className="w-full"
-              >
-                <SliderTrack
-                  className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}
-                >
-                  <SliderFilledTrack
-                    className={isDarkMode ? 'bg-teal-700' : 'bg-blue-600'}
-                  />
-                </SliderTrack>
-                <SliderThumb
-                  className={isDarkMode ? 'bg-white border border-gray-900' : 'bg-slate-50 border border-slate-300'}
-                />
-              </Slider>
+                minimumTrackTintColor={isDarkMode ? '#0f766e' : '#2563eb'}
+                maximumTrackTintColor={isDarkMode ? '#374151' : '#e5e7eb'}
+                thumbTintColor={isDarkMode ? '#ffffff' : '#f8fafc'}
+                onValueChange={(value) => updateBackgroundOpacity(value / 100)}
+              />
             </View>
           </View>
 
@@ -636,32 +615,16 @@ export default function Share2() {
             </View>
             <View style={styles.opacityControlRow}>
               <Slider
+                style={{ width: '100%' }}
                 value={Math.round(textboxOpacity * 100)}
-                minValue={0}
-                maxValue={100}
+                minimumValue={0}
+                maximumValue={100}
                 step={1}
-                size="md"
-                orientation="horizontal"
-                isDisabled={false}
-                isReversed={false}
-                onChange={(value) => {
-                  if (typeof value === 'number') {
-                    updateTextboxOpacity(value / 100);
-                  }
-                }}
-                className="w-full"
-              >
-                <SliderTrack
-                  className={isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}
-                >
-                  <SliderFilledTrack
-                    className={isDarkMode ? 'bg-teal-700' : 'bg-blue-600'}
-                  />
-                </SliderTrack>
-                <SliderThumb
-                  className={isDarkMode ? 'bg-white border border-gray-900' : 'bg-slate-50 border border-slate-300'}
-                />
-              </Slider>
+                minimumTrackTintColor={isDarkMode ? '#0f766e' : '#2563eb'}
+                maximumTrackTintColor={isDarkMode ? '#374151' : '#e5e7eb'}
+                thumbTintColor={isDarkMode ? '#ffffff' : '#f8fafc'}
+                onValueChange={(value) => updateTextboxOpacity(value / 100)}
+              />
             </View>
           </View>
 

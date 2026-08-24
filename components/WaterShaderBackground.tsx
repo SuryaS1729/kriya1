@@ -192,7 +192,7 @@ export default function WaterShaderBackground({
 
 const styles = StyleSheet.create({
   wrapper: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   canvas: {
     flex: 1,

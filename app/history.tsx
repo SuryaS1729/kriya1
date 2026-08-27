@@ -279,7 +279,7 @@ function NotificationSettings() {
                   value={selectedTime}
                   mode="time"
                   display="spinner"
-                  onChange={handleTimeChange}
+                  onValueChange={handleTimeChange}
                   style={styles.nativeTimePicker}
                   textColor={isDarkMode ? '#fff' : '#000'}
                   themeVariant={isDarkMode ? 'dark' : 'light'}
@@ -303,7 +303,7 @@ function NotificationSettings() {
             value={selectedTime}
             mode="time"
             display="default"
-            onChange={handleTimeChange}
+            onValueChange={handleTimeChange}
             is24Hour={false}
           />
         )

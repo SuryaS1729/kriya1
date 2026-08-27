@@ -68,6 +68,16 @@ export function getTasksForDay(dayKey: number): Task[] {
   }
 }
 
+export function getCompletedTaskCount(): number {
+  try {
+    const db = getDb();
+    const row = db.getFirstSync<{ c: number }>('SELECT COUNT(*) as c FROM tasks WHERE completed = 1');
+    return row?.c ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
 export function getDistinctPastDays(limit = 30): { day_key: number; count: number }[] {
   try {
     const db = getDb();

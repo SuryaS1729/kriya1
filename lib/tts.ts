@@ -18,7 +18,7 @@ async function ensureCacheDir() {
 }
 
 function getCacheKey(language: TTSLanguage, chapter: number, verse: number): string {
-  return `${CACHE_DIR}${language}_${chapter}_${verse}.wav`;
+  return `${CACHE_DIR}${language}_${chapter}_${verse}.m4a`;
 }
 
 async function getFromDeviceCache(cacheKey: string): Promise<string | null> {
@@ -54,7 +54,7 @@ async function fetchFromR2(
   chapter: number,
   verse: number
 ): Promise<string | null> {
-  const url = `${PUBLIC_ASSET_BASE_URL}/${language}/${chapter}_${verse}.wav`;
+  const url = `${PUBLIC_ASSET_BASE_URL}/${language}-m4a/${chapter}_${verse}.m4a`;
 
   try {
     const response = await fetch(url);

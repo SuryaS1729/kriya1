@@ -286,7 +286,7 @@ const handleBookPress = () => {
 
   const playAudio = async (base64Audio: string): Promise<boolean> => {
     const sessionId = ++playbackSessionRef.current;
-    const tempFile = `${FileSystem.cacheDirectory}tts_audio_${Date.now()}.wav`;
+    const tempFile = `${FileSystem.cacheDirectory}tts_audio_${Date.now()}.m4a`;
 
     try {
       // Write base64 to temp file

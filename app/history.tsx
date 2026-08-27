@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View, Pressable, ScrollView, Alert, Modal, Platform, Linking, TouchableOpacity, Image } from 'react-native';
+import { memo, useEffect, useMemo, useState } from 'react';
+import { StyleSheet, Text, View, Pressable, ScrollView, Alert, Modal, Platform, Linking, TouchableOpacity } from 'react-native';
 import { useKriya } from '../lib/store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Feather from "@react-native-vector-icons/feather/static";
-import Animated from 'react-native-reanimated';
+import { Image } from 'expo-image';
 import BlurBackground from '@/components/BlurBackground';
 import { LinearGradient } from 'expo-linear-gradient';
 // import * as Haptics from 'expo-haptics';
@@ -25,6 +25,9 @@ function WeeklySummary() {
   const getFocusSessionsForDay = useKriya(s => s.getFocusSessionsForDay);
   const isDarkMode = useKriya(s => s.isDarkMode);
   
+  const tasksToday = useKriya(s => s.tasksToday);
+  const focusSessions = useKriya(s => s.focusSessions);
+
   const weeklyStats = useMemo(() => {
     const today = new Date();
     const currentWeekStart = new Date(today);
@@ -41,15 +44,15 @@ function WeeklySummary() {
       const dayKey = getDateKey(day);
       
       const tasks = getForDay(dayKey);
-      const focusSessions = getFocusSessionsForDay ? getFocusSessionsForDay(dayKey) : 0;
+      const focusSessionsForDay = getFocusSessionsForDay ? getFocusSessionsForDay(dayKey) : 0;
       
-      if (tasks.length > 0 || focusSessions > 0) {
+      if (tasks.length > 0 || focusSessionsForDay > 0) {
         activeDays++;
       }
       
       totalTasks += tasks.length;
       completedTasks += tasks.filter(t => t.completed).length;
-      totalFocusSessions += focusSessions;
+      totalFocusSessions += focusSessionsForDay;
     }
     
     return {
@@ -60,7 +63,9 @@ function WeeklySummary() {
       completionRate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
       focusTime: totalFocusSessions * 25 // 25 minutes per session
     };
-  }, [getForDay, getFocusSessionsForDay]);
+    // getTasksForDay returns a fresh array on each store get, so subscribing
+    // to tasksToday/focusSessions gives the memo real change signals.
+  }, [getForDay, getFocusSessionsForDay, tasksToday, focusSessions]);
 
   return (
     <View style={styles.summarySection}>
@@ -417,10 +422,10 @@ function TipsDropdown() {
 
 
 // Gita Progress Component
-function GitaProgress() {
+const GitaProgress = memo(function GitaProgress() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const getTotalCompletedTasks = useKriya(s => s.getTotalCompletedTasks);
-  
+
   // Assuming 700 total shlokas in Bhagavad Gita
   const totalShlokas = 701;
   const completedTasks = getTotalCompletedTasks ? getTotalCompletedTasks() : 0;
@@ -523,11 +528,11 @@ function GitaProgress() {
       )} */}
     </View>
   );
-}
+});
 
 
 // Add this new component after GitaProgress function
-function ScripturesProgress() {
+const ScripturesProgress = memo(function ScripturesProgress() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const getTotalCompletedTasks = useKriya(s => s.getTotalCompletedTasks);
   
@@ -645,7 +650,7 @@ function ScripturesProgress() {
    <Image
                   source={isDarkMode ? scripture.darkImage : scripture.lightImage}
                   style={styles.scriptureImageStyle}
-                  resizeMode="cover"
+                  contentFit="cover"
                 />
     
     {/* Lock Overlay */}
@@ -733,7 +738,7 @@ function ScripturesProgress() {
       </View>
     </View>
   );
-}
+});
 
 function Footer() {
   const isDarkMode = useKriya(s => s.isDarkMode);
@@ -848,9 +853,7 @@ export default function History() {
     <View style={[styles.container, !isDarkMode && styles.lightContainer]}>
       <StatusBar hidden= {true} />
       {/* BlurBackground */}
-      <Animated.View style={[StyleSheet.absoluteFill]}>
-        <BlurBackground />
-      </Animated.View>
+      <BlurBackground />
 
       {/* Linear Gradient Overlay with reduced opacity */}
       <LinearGradient

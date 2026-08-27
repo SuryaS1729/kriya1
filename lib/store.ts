@@ -8,6 +8,7 @@ import { Platform } from 'react-native';
 import {
   getTasksForDay,
   getDistinctPastDays,
+  getCompletedTaskCount,
   insertTask,
   insertTaskForDay,
   setTaskCompleted,
@@ -103,6 +104,8 @@ interface KriyaState {
 
   // Add this new function
   getTotalCompletedTasks: () => number;
+  // Cache for getTotalCompletedTasks; null = needs recompute
+  _totalCompletedCache: number | null;
 
   // Notification properties
   notificationsEnabled: boolean;
@@ -209,6 +212,7 @@ export const useKriya = create<KriyaState>()(
       bookmarks: [],
       hasCompletedOnboarding: false,
       focusSessions: {},
+      _totalCompletedCache: null,
       hasCompletedTour: false,
         hasSeenGuidedTour: false,
         setHasSeenGuidedTour: (seen: boolean) => {
@@ -260,7 +264,7 @@ export const useKriya = create<KriyaState>()(
 
       refresh: () => {
         try {
-          set({ tasksToday: getTasksForDay(get().todayKey()) });
+          set({ tasksToday: getTasksForDay(get().todayKey()), _totalCompletedCache: null });
         } catch (e) {
           // console.warn('Refresh failed:', e);
         }
@@ -269,29 +273,29 @@ export const useKriya = create<KriyaState>()(
       clearCache: () => {
         // console.log('🧹 Clearing in-memory cache');
         // Clear tasks array to force fresh load
-        set({ tasksToday: [] });
+        set({ tasksToday: [], _totalCompletedCache: null });
       },
 
       hardRefresh: () => {
         // console.log('🧹 Hard refresh - clearing cache and reloading');
         try {
           // Clear cache first
-          set({ tasksToday: [] });
+          set({ tasksToday: [], _totalCompletedCache: null });
           
           // Force garbage collection of old references
           const todayKey = get().todayKey();
           const freshTasks = getTasksForDay(todayKey);
           
-          set({ tasksToday: freshTasks });
+          set({ tasksToday: freshTasks, _totalCompletedCache: null });
         } catch (e) {
           // console.warn('Hard refresh failed:', e);
-          set({ tasksToday: [] });
+          set({ tasksToday: [], _totalCompletedCache: null });
         }
       },
 
       addTask: (title) => {
         insertTask(title);
-        set({ tasksToday: getTasksForDay(get().todayKey()) });
+        set({ tasksToday: getTasksForDay(get().todayKey()), _totalCompletedCache: null });
       },
 
       addTaskForDay: (title, dayKey) => {
@@ -299,6 +303,7 @@ export const useKriya = create<KriyaState>()(
         if (dayKey === get().todayKey()) {
           set({ tasksToday: getTasksForDay(get().todayKey()) });
         }
+        set({ _totalCompletedCache: null });
       },
 
       toggleTask: (id) => {
@@ -312,12 +317,16 @@ export const useKriya = create<KriyaState>()(
               ? { ...x, completed: next, completed_at: next ? Date.now() : null }
               : x
           ),
+          _totalCompletedCache: null,
         }));
       },
 
       removeTask: (id) => {
         dbRemoveTask(id);
-        set(state => ({ tasksToday: state.tasksToday.filter(x => x.id !== id) }));
+        set(state => ({
+          tasksToday: state.tasksToday.filter(x => x.id !== id),
+          _totalCompletedCache: null,
+        }));
       },
 
       currentShloka: () => {
@@ -412,24 +421,16 @@ export const useKriya = create<KriyaState>()(
         if (!isDbReady()) {
           return 0;
         }
-        
+
+        const cached = get()._totalCompletedCache;
+        if (cached !== null) {
+          return cached;
+        }
+
         try {
-          let totalCompleted = 0;
-          
-          // Get all history days (we'll use a large limit to get all days)
-          const historyDays = get().listHistoryDays(1000); // Get up to 1000 days of history
-          
-          // Add today's key if it's not in history yet
-          const todayKey = get().todayKey();
-          const allDayKeys = new Set([todayKey, ...historyDays.map(day => day.day_key)]);
-          
-          // Count completed tasks for each day
-          Array.from(allDayKeys).forEach(dayKey => {
-            const tasks = get().getTasksForDay(dayKey);
-            totalCompleted += tasks.filter(task => task.completed).length;
-          });
-          
-          return totalCompleted;
+          const total = getCompletedTaskCount();
+          set({ _totalCompletedCache: total });
+          return total;
         } catch (e) {
           // console.warn('getTotalCompletedTasks failed:', e);
           return 0;

@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useKriya } from '../lib/store';
 import { setTaskCompleted, removeTask as removeTaskDb, getAllTasks, type Task } from '../lib/tasks';
 import { StatusBar } from 'expo-status-bar';
-import Lucide from "@react-native-vector-icons/lucide/static";
+import Feather from "@react-native-vector-icons/feather/static";
 import { taskCompleteHaptic, selectionHaptic, buttonPressHaptic, errorHaptic } from '../lib/haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
@@ -26,7 +26,7 @@ import {
   getTranslationForLanguage,
 } from '../lib/shloka';
 
-const AnimatedLucide = Animated.createAnimatedComponent(Lucide);
+const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 const ALL_TASK_REORDER_DELAY_MS = 320;
 
 // Update the Checkbox component for better timing
@@ -74,7 +74,7 @@ const Checkbox = ({ completed, isDarkMode }: { completed: boolean, isDarkMode: b
   return (
     <Animated.View style={[styles.checkbox, animatedStyle]}>
       {completed && (
-        <AnimatedLucide
+        <AnimatedFeather
           name="check"
           size={14}
           color={isDarkMode ? "#17481bff" : "#ffffff"}
@@ -308,7 +308,7 @@ const ShlokaCard = React.memo(function ShlokaCard({ topInset }: { topInset: numb
             styles.descButton,
             { backgroundColor: isDarkMode ? '#4b556365' : '#ffffffff' },
           ]}>
-            <Lucide name="book-open" size={16} color={isDarkMode ? "#f9fafb" : "#000000ff"} />
+            <Feather name="book-open" size={16} color={isDarkMode ? "#f9fafb" : "#000000ff"} />
           </View>
         </TouchableOpacity>
       </View>
@@ -762,7 +762,7 @@ console.log('🔍 Guided Tour Debug:', {
             <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#5a6173ff' }]}>
               {showAllTasks ? 'All Tasks' : "Today's Tasks"}
             </Text>
-            <Lucide
+            <Feather
               name="code"
               size={18}
               color={showAllTasks ? (isDarkMode ? '#9ca3af' : '#4a7fd4ff') : (isDarkMode ? '#9ca3af' : '#94a3b8')}
@@ -786,14 +786,14 @@ console.log('🔍 Guided Tour Debug:', {
             <Link href="/calendar" asChild>
               <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
                 <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
-                  <Lucide name='calendar' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
+                  <Feather name='calendar' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
                 </View>
               </TouchableOpacity>
             </Link>
             <Link href="/history" asChild>
               <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
                 <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
-                  <Lucide name='user' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
+                  <Feather name='user' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
                 </View>
               </TouchableOpacity>
             </Link>
@@ -813,7 +813,7 @@ console.log('🔍 Guided Tour Debug:', {
                 router.push('/add');
               }}>
                 <View style={styles.emptyState}>
-                  <Lucide name="sun" size={48} color={isDarkMode ? "#8a93a4ff" : "#cbd5e1"} />
+                  <Feather name="sun" size={48} color={isDarkMode ? "#8a93a4ff" : "#cbd5e1"} />
                   <Text style={[
                     styles.emptyStateTitle,
                     { color: isDarkMode ? '#9ca3af' : '#64748b' }
@@ -839,7 +839,7 @@ console.log('🔍 Guided Tour Debug:', {
           <TouchableOpacity onPress={() => buttonPressHaptic()} activeOpacity={0.7}>
             <View style={[styles.addTaskButton, {backgroundColor: isDarkMode ? '#1b293d91' : '#f9fafb'}]}>
             <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#081623ff' : '#E6E6E6' }]}>
-              <Lucide name="plus" size={20} color={isDarkMode ? "#ffffffff" : "#606060"} />
+              <Feather name="plus" size={20} color={isDarkMode ? "#ffffffff" : "#606060"} />
             </View>
             <Text style={[styles.addTaskText, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
               Add a task . . .

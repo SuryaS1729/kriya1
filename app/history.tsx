@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Pressable, ScrollView, Alert, Modal, Platform, 
 import { useKriya } from '../lib/store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import Lucide from "@react-native-vector-icons/lucide/static";
+import Feather from "@react-native-vector-icons/feather/static";
 import Animated from 'react-native-reanimated';
 import BlurBackground from '@/components/BlurBackground';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -67,25 +67,25 @@ function WeeklySummary() {
       <Text style={[styles.summaryTitle, !isDarkMode && styles.lightText]}>This Week</Text>
       <View style={styles.summaryGrid}>
         <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
-          <Lucide name="calendar" size={24} color="#8ba5e1" />
+          <Feather name="calendar" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.activeDays}</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Active Days</Text>
         </View>
         
         <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
-          <Lucide name="check-circle" size={24} color="#8ba5e1" />
+          <Feather name="check-circle" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.completedTasks}</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Tasks Done</Text>
         </View>
         
         <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
-          <Lucide name="target" size={24} color="#8ba5e1" />
+          <Feather name="target" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.totalFocusSessions}</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Focus Sessions</Text>
         </View>
         
         <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
-          <Lucide name="clock" size={24} color="#8ba5e1" />
+          <Feather name="clock" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.focusTime}m</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Focus Time</Text>
         </View>
@@ -253,7 +253,7 @@ function NotificationSettings() {
               <Text style={[styles.timeDisplayText, !isDarkMode && styles.lightText]}>
                 {getDisplayTime()}
               </Text>
-              <Lucide name="chevron-right" size={16} color={isDarkMode ? '#9ca3af' : '#64748b'} />
+              <Feather name="chevron-right" size={16} color={isDarkMode ? '#9ca3af' : '#64748b'} />
             </View>
           </Pressable>
         )}
@@ -328,7 +328,7 @@ function QuickActions() {
           }}
           android_ripple={{ color: '#cccccc18' }}
         >
-          <Lucide name="plus-circle" size={24} color="#35E21B" />
+          <Feather name="plus-circle" size={24} color="#35E21B" />
           <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Add Tasks</Text>
         </Pressable>
         
@@ -341,7 +341,7 @@ function QuickActions() {
           android_ripple={{ color: '#cccccc18' }}
 
         >
-          <Lucide name="target" size={24} color="#00FFFF" />
+          <Feather name="target" size={24} color="#00FFFF" />
           <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Focus Session</Text>
         </Pressable>
         
@@ -353,7 +353,7 @@ function QuickActions() {
           }}
           android_ripple={{ color: '#cccccc18' }}
         >
-          <Lucide name="bookmark" size={24} color="#fbbf24" />
+          <Feather name="bookmark" size={24} color="#fbbf24" />
           <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Bookmarks</Text>
         </Pressable>
       </View>
@@ -376,12 +376,12 @@ function TipsDropdown() {
         android_ripple={{ color: '#cccccc18' }}
       >
         <View style={styles.tipsHeaderContent}>
-          <Lucide name="info" size={20} color={isDarkMode ? '#cbd5e1' : '#475569'} />
+          <Feather name="info" size={20} color={isDarkMode ? '#cbd5e1' : '#475569'} />
           <Text style={[styles.actionsTitle, styles.tipsTitle, !isDarkMode && styles.lightText]}>
             Tips
           </Text>
         </View>
-        <Lucide
+        <Feather
           name={isOpen ? 'chevron-up' : 'chevron-down'}
           size={20}
           color={isDarkMode ? '#cbd5e1' : '#475569'}
@@ -391,19 +391,19 @@ function TipsDropdown() {
       {isOpen && (
         <View style={[styles.tipsBody, !isDarkMode && styles.lightCard]}>
           <View style={styles.tipRow}>
-            <Lucide name="help-circle" size={16} color={isDarkMode ? '#93c5fd' : '#2563eb'} />
+            <Feather name="help-circle" size={16} color={isDarkMode ? '#93c5fd' : '#2563eb'} />
             <Text style={[styles.tipText, !isDarkMode && styles.lightSubText]}>
               In Quick Add, separate tasks with a full stop to add multiple tasks in one go.
             </Text>
           </View>
           <View style={styles.tipRow}>
-            <Lucide name="target" size={16} color="#00FFFF" />
+            <Feather name="target" size={16} color="#00FFFF" />
             <Text style={[styles.tipText, !isDarkMode && styles.lightSubText]}>
               Long press a task on the home screen to open Focus Mode.
             </Text>
           </View>
           <View style={styles.tipRow}>
-            <Lucide name="bookmark" size={16} color="#fbbf24" />
+            <Feather name="bookmark" size={16} color="#fbbf24" />
             <Text style={[styles.tipText, !isDarkMode && styles.lightSubText]}>
               Long press the bookmark icon to view your bookmarks.
             </Text>
@@ -518,7 +518,7 @@ function GitaProgress() {
           <Text style={[styles.gitaActionText, !isDarkMode && styles.lightText]}>
             📖 Read Current Shloka
           </Text>
-          <Lucide name="chevron-right" size={16} color={isDarkMode ? "#fff" : "#000"} />
+          <Feather name="chevron-right" size={16} color={isDarkMode ? "#fff" : "#000"} />
         </Pressable>
       )} */}
     </View>
@@ -651,7 +651,7 @@ function ScripturesProgress() {
     {/* Lock Overlay */}
     {/* {!scripture.isUnlocked && (
       <View style={styles.lockOverlay}>
-        <Lucide name="lock" size={24} color="#fff" />
+        <Feather name="lock" size={24} color="#fff" />
       </View>
     )} */}
   </View>
@@ -706,7 +706,7 @@ function ScripturesProgress() {
                 </View>
               ) : (
                 <View style={styles.unlockRequirement}>
-                  <Lucide name="info" size={12} color="#888" />
+                  <Feather name="info" size={12} color="#888" />
                   <Text style={[styles.unlockText, !isDarkMode && styles.lightSubText]}>
                     {scripture.unlockRequirement}
                   </Text>
@@ -716,7 +716,7 @@ function ScripturesProgress() {
               {/* Action Button */}
               {scripture.isUnlocked && (
                 <View style={styles.scriptureAction}>
-                  <Lucide name="book-open" size={16} color="#4a90e2" />
+                  <Feather name="book-open" size={16} color="#4a90e2" />
                   <Text style={styles.scriptureActionText}>Continue Reading</Text>
                 </View>
               )}
@@ -752,7 +752,7 @@ function Footer() {
         <Text style={[styles.footerAppName, !isDarkMode && styles.lightText]}>kriya</Text>
 
         <View style={styles.footerTagline}>
-          <Text style={[styles.footerMadeIn, !isDarkMode && styles.lightSubText]}>Crafted with  {<Lucide name="heart" size={15} color="#ff0044ff" />}  in Bharāt</Text>
+          <Text style={[styles.footerMadeIn, !isDarkMode && styles.lightSubText]}>Crafted with  {<Feather name="heart" size={15} color="#ff0044ff" />}  in Bharāt</Text>
           <Text style={[styles.footerInspiration, !isDarkMode && styles.lightSubText]}>
             Inspired by the timeless wisdom of the Bhagavad Gita
           </Text>
@@ -765,7 +765,7 @@ function Footer() {
           onPress={() => openLink('https://forms.gle/iLQH7vjNZuY27Du17')} // Replace with your Google Form link
           android_ripple={{ color: '#cccccc18'}}
         >
-          <Lucide name="message-square" size={20} color={isDarkMode ? "#fff" : "#000"} />
+          <Feather name="message-square" size={20} color={isDarkMode ? "#fff" : "#000"} />
           <Text style={[styles.feedbackButtonText, !isDarkMode && styles.lightText]}>
             Share Feedback
           </Text>
@@ -780,27 +780,27 @@ function Footer() {
             onPress={() => openLink('https://twitter.com/SuryaS_1729')}
             android_ripple={{ color: '#cccccc18', radius: 22 }}
           >
-            <Lucide name="at-sign" size={18} color={isDarkMode ? "#1da1f2" : "#1da1f2"} />
+            <Feather name="twitter" size={18} color={isDarkMode ? "#1da1f2" : "#1da1f2"} />
           </Pressable> */}
           <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
             onPress={() => openLink('mailto:bitwisedharma@gmail.com')}
             android_ripple={{ color: '#cccccc18', radius: 22 }}
           >
-            <Lucide name="mail" size={18} color={isDarkMode ? "#ff6b6b" : "#ff6b6b"} />
+            <Feather name="mail" size={18} color={isDarkMode ? "#ff6b6b" : "#ff6b6b"} />
           </Pressable>
           <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
             onPress={() => openLink('https://github.com/SuryaS1729/kriya1')}
             android_ripple={{ color: '#cccccc18', radius: 22 }}
           >
-            <Lucide name="git-branch" size={18} color={isDarkMode ? "#fff" : "#000"} />
+            <Feather name="github" size={18} color={isDarkMode ? "#fff" : "#000"} />
           </Pressable>
           {/* <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
             onPress={() => openLink('https://instagram.com/thebitwisedharma')}
           >
-            <Lucide name="camera" size={18} color={isDarkMode ? "#e4405f" : "#e4405f"} />
+            <Feather name="instagram" size={18} color={isDarkMode ? "#e4405f" : "#e4405f"} />
           </Pressable> */}
         </View>
       </View>
@@ -868,7 +868,7 @@ export default function History() {
             buttonPressHaptic(); // Changed from direct Haptics call
                             router.back();
                           }}   hitSlop={16}>
-            <Lucide name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#000"} />
+            <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#000"} />
           </Pressable>
               <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>My Journey</Text>
           <TouchableOpacity 
@@ -878,7 +878,7 @@ export default function History() {
                           }}  
           hitSlop={16} 
           activeOpacity={0.7}>
-            <Lucide 
+            <Feather 
               name={isDarkMode ? "sun" : "moon"} 
               size={24} 
               color={isDarkMode ? "#fff" : "#000"} 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
-import Lucide from "@react-native-vector-icons/lucide/static";
+import Feather from "@react-native-vector-icons/feather/static";
 import { useMaskLayout } from './masks';
 
 interface CardProps {
@@ -25,7 +25,7 @@ export function ShlokaCard({ onNext, onSkip }: CardProps) {
           )}
           <TouchableOpacity onPress={onNext} style={styles.nextButton}>
             <Text style={styles.nextText}>Got it!</Text>
-            <Lucide name="arrow-right" size={16} color="white" />
+            <Feather name="arrow-right" size={16} color="white" />
           </TouchableOpacity>
         </View>
       </View>
@@ -50,7 +50,7 @@ export function AddTaskCard({ onNext, onSkip }: CardProps) {
           )}
           <TouchableOpacity onPress={onNext} style={styles.nextButton}>
             <Text style={styles.nextText}>Next</Text>
-            <Lucide name="arrow-right" size={16} color="white" />
+            <Feather name="arrow-right" size={16} color="white" />
           </TouchableOpacity>
         </View>
       </View>
@@ -75,7 +75,7 @@ export function ToggleTaskCard({ onNext, onSkip }: CardProps) {
           )}
           <TouchableOpacity onPress={onNext} style={styles.nextButton}>
             <Text style={styles.nextText}>Next</Text>
-            <Lucide name="arrow-right" size={16} color="white" />
+            <Feather name="arrow-right" size={16} color="white" />
           </TouchableOpacity>
         </View>
       </View>
@@ -100,7 +100,7 @@ export function FocusModeCard({ onNext, onSkip }: CardProps) {
           )}
           <TouchableOpacity onPress={onNext} style={styles.nextButton}>
             <Text style={styles.nextText}>Next</Text>
-            <Lucide name="arrow-right" size={16} color="white" />
+            <Feather name="arrow-right" size={16} color="white" />
           </TouchableOpacity>
         </View>
       </View>
@@ -125,7 +125,7 @@ export function BookCard({ onNext, onSkip }: CardProps) {
           )}
           <TouchableOpacity onPress={onNext} style={styles.nextButton}>
             <Text style={styles.nextText}>Finish</Text>
-            <Lucide name="check" size={16} color="white" />
+            <Feather name="check" size={16} color="white" />
           </TouchableOpacity>
         </View>
       </View>

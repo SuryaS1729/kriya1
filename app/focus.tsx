@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Lucide from "@react-native-vector-icons/lucide/static";
+import Feather from "@react-native-vector-icons/feather/static";
 // Remove this line: import * as Haptics from 'expo-haptics';
 // Add this instead:
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic, errorHaptic } from '../lib/haptics';
@@ -14,7 +14,7 @@ import BlurEdge from '../components/BlurEdge';
 import { StatusBar } from 'expo-status-bar';
 import { useKriya } from '../lib/store';
 
-const AnimatedLucide = Animated.createAnimatedComponent(Lucide);
+const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 
 export default function FocusMode() {
   const { title } = useLocalSearchParams();
@@ -337,7 +337,7 @@ export default function FocusMode() {
               {/* Play/Pause Button */}
               <Pressable onPress={toggleTimer}>
                 <Animated.View style={[styles.actionButton, animatedButtonStyle, animatedButtonBorderStyle]}>
-                  <AnimatedLucide
+                  <AnimatedFeather
                     name={isRunning ? 'pause' : 'play'}
                     size={24}
                     style={animatedIconStyle}
@@ -347,19 +347,19 @@ export default function FocusMode() {
               
               {/* Exit Button */}
               <Pressable onPress={handleExit} style={[styles.actionButton, dynamicStyles.secondaryButton]}>
-                <AnimatedLucide name="x" size={24} style={animatedIconStyle} />
+                <AnimatedFeather name="x" size={24} style={animatedIconStyle} />
               </Pressable>
             </>
           ) : (
             <>
               {/* New Session Button */}
               <Pressable onPress={resetTimer} style={[styles.actionButton, dynamicStyles.successButton]}>
-                <Lucide name="refresh-cw" size={24} color="#ffffff" />
+                <Feather name="refresh-cw" size={24} color="#ffffff" />
               </Pressable>
               
               {/* Done Button */}
               <Pressable onPress={handleExit} style={[styles.actionButton, dynamicStyles.secondaryButton]}>
-                <Lucide name="check" size={24} color="#ffffff" />
+                <Feather name="check" size={24} color="#ffffff" />
               </Pressable>
             </>
           )}

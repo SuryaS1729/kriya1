@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
-import Lucide from "@react-native-vector-icons/lucide/static";
+import Feather from "@react-native-vector-icons/feather/static";
 import DateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
@@ -47,7 +47,7 @@ export default function ReminderSlide({
 
   return (
     <View style={styles.container}>
-      <Lucide name="bell" size={60} color={theme.text} style={styles.icon} />
+      <Feather name="bell" size={60} color={theme.text} style={styles.icon} />
 
       <Text style={[styles.title, { color: theme.text }]}>{step.title}</Text>
 
@@ -99,7 +99,7 @@ export default function ReminderSlide({
               <Text style={[styles.androidTimeText, { color: theme.text }]}>
                 {getDisplayTime()}
               </Text>
-              <Lucide name="clock" size={20} color={theme.text} />
+              <Feather name="clock" size={20} color={theme.text} />
             </PressableScale>
 
             {showPicker && (
@@ -124,15 +124,15 @@ export default function ReminderSlide({
       </Text>
       <View style={styles.featurePills}>
         <View style={[styles.featurePill, { backgroundColor: theme.buttonBackgroundSecondary }]}> 
-          <Lucide name="crosshair" size={14} color={theme.text} />
+          <Feather name="target" size={14} color={theme.text} />
           <Text style={[styles.featurePillText, { color: theme.text }]}>Focus Mode</Text>
         </View>
         <View style={[styles.featurePill, { backgroundColor: theme.buttonBackgroundSecondary }]}>
-          <Lucide name="share-2" size={14} color={theme.text} />
+          <Feather name="share-2" size={14} color={theme.text} />
           <Text style={[styles.featurePillText, { color: theme.text }]}>Shareable Cards</Text>
         </View>
         <View style={[styles.featurePill, { backgroundColor: theme.buttonBackgroundSecondary }]}>
-          <Lucide name="calendar" size={14} color={theme.text} />
+          <Feather name="calendar" size={14} color={theme.text} />
           <Text style={[styles.featurePillText, { color: theme.text }]}>Calendar</Text>
         </View>
       </View>

@@ -1,4 +1,4 @@
-import Lucide from "@react-native-vector-icons/lucide/static";
+import AntDesign from "@react-native-vector-icons/ant-design/static";
 
 // ─── Animation Timings ──────────────────────────────────────────────
 export const FADE_DURATION = 600;
@@ -83,7 +83,7 @@ export type FeatureStep = {
   type: 'feature';
   title: string;
   description: string;
-  icon?: React.ComponentProps<typeof Lucide>['name'];
+  icon?: React.ComponentProps<typeof AntDesign>['name'];
   videoUrl?: string;
   showSarvamLogo?: boolean;
 };

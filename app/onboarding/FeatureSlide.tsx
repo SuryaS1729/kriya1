@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Lucide from "@react-native-vector-icons/lucide/static";
+import Feather from "@react-native-vector-icons/feather/static";
+import AntDesign from "@react-native-vector-icons/ant-design/static";
 import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
 
@@ -37,7 +38,7 @@ function ReadMoreButton({ isDark }: { isDark: boolean }) {
       styles.inlineDescButton,
       { backgroundColor: isDark ? '#4b556365' : '#ffffffff' },
     ]}>
-      <Lucide name="book-open" size={14} color={isDark ? '#f9fafb' : '#000000ff'} />
+      <Feather name="book-open" size={14} color={isDark ? '#f9fafb' : '#000000ff'} />
     </View>
   );
 }
@@ -111,7 +112,7 @@ export default function FeatureSlide({ step, theme, isActive }: FeatureSlideProp
             />
           </View>
         ) : step.icon ? (
-          <Lucide name={step.icon} size={60} color={theme.text} />
+          <AntDesign name={step.icon} size={60} color={theme.text} />
         ) : null}
       </View>
 

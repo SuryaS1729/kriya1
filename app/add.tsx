@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
-  InteractionManager,
   Modal,
   Platform,
   Pressable,
@@ -161,7 +160,8 @@ export default function Add() {
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
-      const interaction = InteractionManager.runAfterInteractions(() => {
+
+      const runFocus = () => {
         if (cancelled) return;
         requestAnimationFrame(() => {
           if (cancelled) return;
@@ -170,11 +170,24 @@ export default function Add() {
             if (!cancelled) focusInput();
           }, 120);
         });
-      });
+      };
+
+      // Defer until the frame is idle instead of the deprecated
+      // InteractionManager.runAfterInteractions.
+      let idleId: number | null = null;
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
+      if (typeof globalThis.requestIdleCallback === 'function') {
+        idleId = globalThis.requestIdleCallback(() => runFocus());
+      } else {
+        timeoutId = setTimeout(runFocus, 32);
+      }
 
       return () => {
         cancelled = true;
-        interaction.cancel();
+        if (idleId != null && typeof globalThis.cancelIdleCallback === 'function') {
+          globalThis.cancelIdleCallback(idleId);
+        }
+        if (timeoutId != null) clearTimeout(timeoutId);
       };
     }, [focusInput])
   );

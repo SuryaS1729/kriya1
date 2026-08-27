@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Feather } from '@expo/vector-icons';
+import Lucide from "@react-native-vector-icons/lucide/static";
 import { useFocusEffect } from 'expo-router';
 import {
   Calendar,
@@ -438,7 +438,7 @@ const CalendarChevronIcon = ({
 
   return (
     <Animated.View style={[styles.monthShiftIconWrap, iconAnimatedStyle]}>
-      <Feather
+      <Lucide
         name={direction === 'left' ? 'chevron-left' : 'chevron-right'}
         size={24}
         color={color}
@@ -731,7 +731,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
                     : { borderColor: isDarkMode ? '#6b7280' : '#cbd5e1' },
                 ]}
               >
-                {item.completed ? <Feather name="check" size={13} color="#ffffff" /> : null}
+                {item.completed ? <Lucide name="check" size={13} color="#ffffff" /> : null}
               </View>
             </Pressable>
 
@@ -749,7 +749,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
             </Text>
 
             <Pressable onPress={() => handleDeleteTask(item.id)} hitSlop={10}>
-              <Feather name="x" size={16} color={isDarkMode ? '#94a3b8' : '#64748b'} />
+              <Lucide name="x" size={16} color={isDarkMode ? '#94a3b8' : '#64748b'} />
             </Pressable>
           </View>
         )}
@@ -761,7 +761,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
         style={[styles.addTaskButton, { backgroundColor: isDarkMode ? '#1b293d91' : '#f9fafb' }]}
       >
         <View style={[styles.addTaskIcon, { backgroundColor: isDarkMode ? '#081623ff' : '#E6E6E6' }]}>
-          <Feather name="plus" size={20} color={isDarkMode ? '#ffffff' : '#606060'} />
+          <Lucide name="plus" size={20} color={isDarkMode ? '#ffffff' : '#606060'} />
         </View>
         <Text style={[styles.addTaskText, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
           Add a task for this date

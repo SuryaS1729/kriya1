@@ -11,8 +11,7 @@ import {
 } from 'react-native';
 import { useKriya, type Bookmark } from '../lib/store';
 import { StatusBar } from 'expo-status-bar';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import Lucide from "@react-native-vector-icons/lucide/static";
 
 export default function Bookmarks() {
   const insets = useSafeAreaInsets();
@@ -44,8 +43,8 @@ export default function Bookmarks() {
           hitSlop={8}
           style={styles.removeButton}
         >
-          <MaterialIcons 
-            name="bookmark-remove" 
+          <Lucide 
+            name="bookmark-x" 
             size={20} 
             color={isDarkMode ? '#ef4444' : '#dc2626'} 
           />
@@ -80,7 +79,7 @@ export default function Bookmarks() {
         {/* Header */}
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} hitSlop={16}>
-            <AntDesign 
+            <Lucide 
               name="arrow-left" 
               size={24} 
               color={isDarkMode ? '#d1d5db' : '#374151'} 
@@ -95,8 +94,8 @@ export default function Bookmarks() {
         {/* Content */}
         {sortedBookmarks.length === 0 ? (
           <View style={styles.emptyState}>
-            <MaterialIcons 
-              name="bookmark-border" 
+            <Lucide 
+              name="bookmark"
               size={64} 
               color={isDarkMode ? '#4b5563' : '#9ca3af'} 
             />

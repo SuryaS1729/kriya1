@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import Lucide from "@react-native-vector-icons/lucide/static";
 import DateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
@@ -47,7 +47,7 @@ export default function ReminderSlide({
 
   return (
     <View style={styles.container}>
-      <Feather name="bell" size={60} color={theme.text} style={styles.icon} />
+      <Lucide name="bell" size={60} color={theme.text} style={styles.icon} />
 
       <Text style={[styles.title, { color: theme.text }]}>{step.title}</Text>
 
@@ -99,7 +99,7 @@ export default function ReminderSlide({
               <Text style={[styles.androidTimeText, { color: theme.text }]}>
                 {getDisplayTime()}
               </Text>
-              <Feather name="clock" size={20} color={theme.text} />
+              <Lucide name="clock" size={20} color={theme.text} />
             </PressableScale>
 
             {showPicker && (
@@ -124,15 +124,15 @@ export default function ReminderSlide({
       </Text>
       <View style={styles.featurePills}>
         <View style={[styles.featurePill, { backgroundColor: theme.buttonBackgroundSecondary }]}> 
-          <Feather name="crosshair" size={14} color={theme.text} />
+          <Lucide name="crosshair" size={14} color={theme.text} />
           <Text style={[styles.featurePillText, { color: theme.text }]}>Focus Mode</Text>
         </View>
         <View style={[styles.featurePill, { backgroundColor: theme.buttonBackgroundSecondary }]}>
-          <Feather name="share-2" size={14} color={theme.text} />
+          <Lucide name="share-2" size={14} color={theme.text} />
           <Text style={[styles.featurePillText, { color: theme.text }]}>Shareable Cards</Text>
         </View>
         <View style={[styles.featurePill, { backgroundColor: theme.buttonBackgroundSecondary }]}>
-          <Feather name="calendar" size={14} color={theme.text} />
+          <Lucide name="calendar" size={14} color={theme.text} />
           <Text style={[styles.featurePillText, { color: theme.text }]}>Calendar</Text>
         </View>
       </View>

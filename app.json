@@ -206,7 +206,8 @@
       "expo-video",
       "expo-image",
       "expo-sharing",
-      "expo-status-bar"
+      "expo-status-bar",
+      "@react-native-vector-icons/lucide"
     ],
     "assetBundlePatterns": [
       "**/*"

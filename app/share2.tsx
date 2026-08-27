@@ -13,9 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import { Feather } from '@expo/vector-icons';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import Lucide from "@react-native-vector-icons/lucide/static";
 import { useKriya } from '../lib/store';
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../lib/haptics';
 import { CaptureView, type CaptureViewRef } from 'react-native-capture-view';
@@ -195,13 +193,13 @@ const ShareCard = memo(function ShareCard({
             >
               available on
             </Text>
-            <Ionicons
-              name="logo-google-playstore"
+            <Lucide
+              name="play-circle"
               size={8}
               color={currentBackground.brandingColor}
             />
-            <FontAwesome5
-              name="app-store-ios"
+            <Lucide
+              name="smartphone"
               size={8}
               color={currentBackground.brandingColor}
             />
@@ -463,7 +461,7 @@ export default function Share2() {
             }}
             hitSlop={16}
           >
-            <Feather name="x" size={24} color={isDarkMode ? "#fff" : "#000"} />
+            <Lucide name="x" size={24} color={isDarkMode ? "#fff" : "#000"} />
           </Pressable>
           <Text style={[styles.headerTitle, { color: isDarkMode ? '#fff' : '#000' }]}>
             Share Shloka
@@ -645,7 +643,7 @@ export default function Share2() {
                 <ActivityIndicator size="small" color={isDarkMode ? '#fff' : '#000'} />
               ) : (
                 <>
-                  <Feather name="download" size={20} color={isDarkMode ? '#fff' : '#000'} />
+                  <Lucide name="download" size={20} color={isDarkMode ? '#fff' : '#000'} />
                   <Text style={[styles.actionButtonText, { color: isDarkMode ? '#fff' : '#000' }]}>
                     Save
                   </Text>
@@ -668,7 +666,7 @@ export default function Share2() {
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <>
-                  <Feather name="share" size={20} color="#fff" />
+                  <Lucide name="share" size={20} color="#fff" />
                   <Text style={[styles.actionButtonText, { color: '#fff' }]}>
                     Share
                   </Text>

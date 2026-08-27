@@ -24,7 +24,7 @@ import {
   setTaskCompleted,
   type Task,
 } from '../lib/tasks';
-import { Feather } from '@expo/vector-icons';
+import Lucide from "@react-native-vector-icons/lucide/static";
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
@@ -40,8 +40,8 @@ import { PressableScale } from 'pressto';
 
 
 
-// Create animated Feather component
-const AnimatedFeather = Animated.createAnimatedComponent(Feather);
+// Create animated Lucide component
+const AnimatedLucide = Animated.createAnimatedComponent(Lucide);
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function normalizeDayKey(input?: string | string[]) {
@@ -323,7 +323,7 @@ export default function Add() {
             ]
       ]}>
         {item.completed && (
-          <Feather
+          <Lucide
             name="check"
             size={14}
           color={isDarkMode ? "#17481bff" : "#ffffff"}
@@ -362,7 +362,7 @@ export default function Add() {
           variant="close"
           right={(
             <Pressable onPress={openHelpModal} hitSlop={12} style={styles.helpButton}>
-              <Feather
+              <Lucide
                 name="help-circle"
                 size={18}
                 color={isDarkMode ? '#cbd5e1' : '#475569'}
@@ -391,7 +391,7 @@ export default function Add() {
             ItemSeparatorComponent={() => <View style={[styles.sep, { backgroundColor: isDarkMode ? '#1a2535ff' : '#f1f5f9' }]} />}
             ListEmptyComponent={() => (
               <View style={styles.emptyState}>
-                {/* <Feather name="sunrise" size={48} color={isDarkMode ? "#6b7280" : "#cbd5e1"} /> */}
+                {/* <Lucide name="sunrise" size={48} color={isDarkMode ? "#6b7280" : "#cbd5e1"} /> */}
                 <Text style={[
                   styles.emptyStateTitle,
                   { color: isDarkMode ? '#9ca3af' : '#64748b' }
@@ -433,7 +433,7 @@ export default function Add() {
                       : { backgroundColor: isDarkMode ? '#1f2937' : '#f1f5f9', borderColor: isDarkMode ? '#374151' : '#e2e8f0' },
                   ]}
                 >
-                  <Feather
+                  <Lucide
                     name="clock"
                     size={13}
                     color={isTomorrow
@@ -460,7 +460,7 @@ export default function Add() {
                       : { backgroundColor: isDarkMode ? '#1f2937' : '#f1f5f9', borderColor: isDarkMode ? '#374151' : '#e2e8f0' },
                   ]}
                 >
-                  <Feather
+                  <Lucide
                     name="calendar"
                     size={13}
                     color={isCustom
@@ -554,7 +554,7 @@ export default function Add() {
                 styles.addTaskIcon,
                 { backgroundColor: isDarkMode ? '#0a3a4bff' : '#ebebebff' }
               ]}>
-                <AnimatedFeather 
+                <AnimatedLucide 
                   name="arrow-right" 
                   size={25} 
                   color={isDarkMode ? '#ffffffff' : '#606060ff'} 
@@ -599,7 +599,7 @@ export default function Add() {
                 Quick Add shortcut
               </Text>
               <Pressable onPress={closeHelpModal} hitSlop={12} style={styles.helpCloseButton}>
-                <Feather name="x" size={20} color={isDarkMode ? '#cbd5e1' : '#475569'} />
+                <Lucide name="x" size={20} color={isDarkMode ? '#cbd5e1' : '#475569'} />
               </Pressable>
             </View>
 

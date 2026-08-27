@@ -29,9 +29,7 @@ import { useAudioPlayer } from 'expo-audio';
 import * as FileSystem from 'expo-file-system/legacy';
 import { showAppToast } from '../../lib/appToast';
 
-import AntDesign from '@expo/vector-icons/AntDesign';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Lucide from "@react-native-vector-icons/lucide/static";
 
 const PILL_W = 180;
 const SHLOKA_FADE_OUT_MS = 140;
@@ -461,8 +459,8 @@ return (
           ]}
         >
           <Animated.View style={animatedBookmarkStyle}>
-            <MaterialIcons
-              name={bookmarked ? "bookmark" : "bookmark-border"}
+            <Lucide
+              name={bookmarked ? "bookmark-check" : "bookmark"}
               size={20}
               color={bookmarked
                 ? (isDarkMode ? '#fbbf24' : '#ff7700ff')
@@ -484,8 +482,8 @@ return (
           {ttsLoading ? (
             <ActivityIndicator size="small" color={isDarkMode ? '#ffffffff' : '#18464aff'} />
           ) : (
-            <FontAwesome5
-              name={ttsPlaying ? 'stop' : 'play'}
+            <Lucide
+              name={ttsPlaying ? "square" : "play"}
               size={14}
               color={ttsPlaying
                 ? (isDarkMode ? '#f87171' : '#dc2626')
@@ -504,7 +502,7 @@ return (
             { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)'  }
           ]}
         >
-          <FontAwesome5 name="share" size={16} color={isDarkMode ? '#ffffffff' : '#18464aff'} />
+          <Lucide name="share" size={16} color={isDarkMode ? '#ffffffff' : '#18464aff'} />
         </Pressable>
 
         {/* Tooltip - positioned relative to header */}
@@ -602,7 +600,7 @@ return (
           style={[styles.pillBtn, prevIndex == null && styles.disabled]}
           android_ripple={{ color: '#cccccc18', radius: 18 }}
         >
-          <AntDesign
+          <Lucide
             style={[styles.pillIcon, { color: prevIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]}
             name="arrow-left"
             size={32}
@@ -614,7 +612,7 @@ return (
         hitSlop={12}
         style={styles.pillBtn}
         android_ripple={{ color: '#cccccc18', radius: 24 }}>
-          <FontAwesome5 name="book" size={20} color={isDarkMode ? '#f9fafb' : '#18464aff'} />
+          <Lucide name="book" size={20} color={isDarkMode ? '#f9fafb' : '#18464aff'} />
         </Pressable>
 
         <Pressable
@@ -624,7 +622,7 @@ return (
           style={[styles.pillBtn, nextIndex == null && styles.disabled]}
           android_ripple={{ color: '#cccccc18', radius: 18 }}
         >
-          <AntDesign
+          <Lucide
             style={[styles.pillIcon, { color: nextIndex == null ? (isDarkMode ? '#4b5563' : '#9ca3af') : (isDarkMode ? '#ffffffff' : '#18464aff') }]}
             name="arrow-right"
             size={32}

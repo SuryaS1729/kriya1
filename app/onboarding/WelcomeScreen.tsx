@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import Lucide from "@react-native-vector-icons/lucide/static";
 import { LinearGradient } from 'expo-linear-gradient';
 import { PressableScale } from 'pressto';
 import { EaseView } from 'react-native-ease';
@@ -137,7 +137,7 @@ export default function WelcomeScreen({ theme, onBegin }: WelcomeScreenProps) {
               loop: 'reverse',
             }}
           >
-            <Feather name="chevrons-down" size={30} color={theme.arrowColor} />
+            <Lucide name="chevrons-down" size={30} color={theme.arrowColor} />
           </EaseView>
 
           <PressableScale

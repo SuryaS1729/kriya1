@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import type { PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
 import { PressableScale } from 'pressto';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import Lucide from "@react-native-vector-icons/lucide/static";
 import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import Animated, {
   useSharedValue,
@@ -160,7 +160,7 @@ export default function OnboardingPager({
             rippleColor="transparent"
             style={styles.navSideButton}
           >
-            <AntDesign name="arrow-left" size={20} color={theme.textTertiary} />
+            <Lucide name="arrow-left" size={20} color={theme.textTertiary} />
           </PressableScale>
         ) : (
           <View style={styles.navSideButton} />
@@ -188,7 +188,7 @@ export default function OnboardingPager({
                 ? 'Finish'
                 : 'Next'}
           </Text>
-          <AntDesign name="arrow-right" size={20} color={theme.text} />
+          <Lucide name="arrow-right" size={20} color={theme.text} />
         </PressableScale>
 
         {/* Skip button */}

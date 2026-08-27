@@ -775,13 +775,13 @@ function Footer() {
       <View style={styles.footerSocials}>
         <Text style={[styles.footerSocialTitle, !isDarkMode && styles.lightSubText]}>Connect</Text>
         <View style={styles.socialButtons}>
-          <Pressable 
+          {/* <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
             onPress={() => openLink('https://twitter.com/SuryaS_1729')}
             android_ripple={{ color: '#cccccc18', radius: 22 }}
           >
             <Feather name="twitter" size={18} color={isDarkMode ? "#1da1f2" : "#1da1f2"} />
-          </Pressable>
+          </Pressable> */}
           <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
             onPress={() => openLink('mailto:bitwisedharma@gmail.com')}
@@ -796,9 +796,6 @@ function Footer() {
           >
             <Feather name="github" size={18} color={isDarkMode ? "#fff" : "#000"} />
           </Pressable>
-          
-          
-          
           {/* <Pressable 
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
             onPress={() => openLink('https://instagram.com/thebitwisedharma')}

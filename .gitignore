@@ -40,3 +40,6 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Command Code (local agent config)
+.commandcode/

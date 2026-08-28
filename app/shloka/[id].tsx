@@ -24,7 +24,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useKriya } from '../../lib/store';
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../../lib/haptics';
-import { textToSpeech } from '../../lib/tts';
+import { textToSpeech, shlokaRecitation } from '../../lib/tts';
 import { useAudioPlayer } from 'expo-audio';
 import * as FileSystem from 'expo-file-system/legacy';
 import { showAppToast } from '../../lib/appToast';
@@ -46,6 +46,7 @@ export default function ShlokaDetail() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const language = useKriya(s => s.language);
   const setLanguage = useKriya(s => s.setLanguage);
+  const recitationStyle = useKriya(s => s.recitationStyle);
 
   // Treat URL param as *index* (0-based)
   const initialIndex = useMemo(() => {
@@ -354,8 +355,9 @@ const handleBookPress = () => {
       if (commentary) speakText += ` ... Commentary. ${commentary}`;
 
       // Fetch both audio files in parallel from cache/R2 recordings
+      // The shloka recitation follows the user's chosen style (Hindi TTS or authentic Sanskrit)
       const [shlokaAudio, spokenAudio] = await Promise.all([
-        textToSpeech(row.text, 'hi-IN', row.chapter_number, row.verse_number),
+        shlokaRecitation(recitationStyle, row.chapter_number, row.verse_number),
         speakText ? textToSpeech(speakText, 'en-IN', row.chapter_number, row.verse_number) : Promise.resolve(null),
       ]);
 

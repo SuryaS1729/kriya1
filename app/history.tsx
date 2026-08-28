@@ -19,6 +19,70 @@ function getDateKey(date: Date) {
 }
 
 
+// Recitation Settings Component
+function RecitationSettings() {
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  const recitationStyle = useKriya(s => s.recitationStyle);
+  const setRecitationStyle = useKriya(s => s.setRecitationStyle);
+
+  const options: { id: 'hindi' | 'sanskrit'; title: string; description: string }[] = [
+    {
+      id: 'hindi',
+      title: 'Hindi Recitation',
+      description: 'Current TTS recitation of the shloka in Hindi',
+    },
+    {
+      id: 'sanskrit',
+      title: 'Authentic Sanskrit',
+      description: 'Traditional Sanskrit shloka recitation',
+    },
+  ];
+
+  const handleSelect = (id: 'hindi' | 'sanskrit') => {
+    selectionHaptic();
+    setRecitationStyle(id);
+  };
+
+  return (
+    <View style={[styles.section, !isDarkMode && styles.lightSection]}>
+      <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Recitation Settings</Text>
+
+      <View style={styles.notificationSettings}>
+        {options.map((option) => {
+          const isSelected = recitationStyle === option.id;
+          return (
+            <Pressable
+              key={option.id}
+              style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
+              onPress={() => handleSelect(option.id)}
+              android_ripple={{ color: '#cccccc18' }}
+            >
+              <View style={styles.settingInfo}>
+                <Text style={[styles.settingTitle, !isDarkMode && styles.lightText]}>
+                  {option.title}
+                </Text>
+                <Text style={[styles.settingDescription, !isDarkMode && styles.lightSubText]}>
+                  {option.description}
+                </Text>
+              </View>
+              <View style={[
+                styles.toggle,
+                isSelected && styles.toggleActive,
+                isSelected && !isDarkMode && styles.lightToggleActive
+              ]}>
+                <View style={[
+                  styles.toggleKnob,
+                  isSelected && styles.toggleKnobActive
+                ]} />
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 // Weekly Summary Component
 function WeeklySummary() {
   const getForDay = useKriya(s => s.getTasksForDay);
@@ -907,6 +971,9 @@ export default function History() {
           
            {/* ADD: Notification Settings - Add this here */}
           <NotificationSettings />
+
+          {/* Recitation Settings */}
+          <RecitationSettings />
 
                   <Footer />
 

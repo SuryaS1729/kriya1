@@ -49,12 +49,14 @@ async function saveToDeviceCache(cacheKey: string, base64Audio: string): Promise
 
 // --------------- R2 fetch ---------------
 
+export type RecitationStyle = 'hindi' | 'sanskrit';
+
 async function fetchFromR2(
-  language: TTSLanguage,
+  folder: string,
   chapter: number,
   verse: number
 ): Promise<string | null> {
-  const url = `${PUBLIC_ASSET_BASE_URL}/${language}-m4a/${chapter}_${verse}.m4a`;
+  const url = `${PUBLIC_ASSET_BASE_URL}/${folder}/${chapter}_${verse}.m4a`;
 
   try {
     const response = await fetch(url);
@@ -98,7 +100,7 @@ export async function textToSpeech(
     return cached;
   }
 
-  const r2Audio = await fetchFromR2(language, chapter, verse);
+  const r2Audio = await fetchFromR2(`${language}-m4a`, chapter, verse);
   if (r2Audio) {
     console.log(`[TTS] R2 hit: ${logName}`);
     await saveToDeviceCache(cacheKey, r2Audio);
@@ -106,5 +108,45 @@ export async function textToSpeech(
   }
 
   console.warn(`[TTS] Missing recording in R2: ${logName}`);
+  return null;
+}
+
+// --------------- Shloka recitation (Hindi TTS or authentic Sanskrit) ---------------
+
+const RECITATION_FOLDERS: Record<RecitationStyle, string> = {
+  hindi: 'hi-IN-m4a',
+  sanskrit: 'authentic_sanskrit_m4a',
+};
+
+function getRecitationCacheKey(style: RecitationStyle, chapter: number, verse: number): string {
+  return `${CACHE_DIR}recitation_${style}_${chapter}_${verse}.m4a`;
+}
+
+/**
+ * Load the shloka recitation audio (Hindi TTS or authentic Sanskrit
+ * recordings from R2), with device caching.
+ */
+export async function shlokaRecitation(
+  style: RecitationStyle,
+  chapter: number,
+  verse: number
+): Promise<string | null> {
+  const cacheKey = getRecitationCacheKey(style, chapter, verse);
+  const logName = `${style}/${chapter}_${verse}`;
+
+  const cached = await getFromDeviceCache(cacheKey);
+  if (cached) {
+    console.log(`[TTS] Device cache hit: ${logName}`);
+    return cached;
+  }
+
+  const r2Audio = await fetchFromR2(RECITATION_FOLDERS[style], chapter, verse);
+  if (r2Audio) {
+    console.log(`[TTS] R2 hit: ${logName}`);
+    await saveToDeviceCache(cacheKey, r2Audio);
+    return r2Audio;
+  }
+
+  console.warn(`[TTS] Missing recitation in R2: ${logName}`);
   return null;
 }

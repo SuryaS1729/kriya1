@@ -107,6 +107,10 @@ interface KriyaState {
   // Cache for getTotalCompletedTasks; null = needs recompute
   _totalCompletedCache: number | null;
 
+  // Recitation style: 'hindi' (current TTS recitation) or 'sanskrit' (authentic Sanskrit recordings)
+  recitationStyle: 'hindi' | 'sanskrit';
+  setRecitationStyle: (style: 'hindi' | 'sanskrit') => void;
+
   // Notification properties
   notificationsEnabled: boolean;
   reminderTime: { hour: number; minute: number };
@@ -224,6 +228,10 @@ export const useKriya = create<KriyaState>()(
       notificationsEnabled: true,
       reminderTime: { hour: 8, minute: 0 }, // 8:00 AM default
       notificationToken: null,
+
+      // Default recitation style: Hindi (the existing TTS recitation)
+      recitationStyle: 'hindi',
+      setRecitationStyle: (style: 'hindi' | 'sanskrit') => set({ recitationStyle: style }),
 
       init: () => {
         if (!isDbReady()) {
@@ -504,6 +512,7 @@ export const useKriya = create<KriyaState>()(
         focusSessions: state.focusSessions,
         notificationsEnabled: state.notificationsEnabled,
         reminderTime: state.reminderTime,
+        recitationStyle: state.recitationStyle,
                 hasSeenGuidedTour: state.hasSeenGuidedTour,
 
         // Don't persist notification token

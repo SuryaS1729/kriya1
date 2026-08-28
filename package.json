@@ -30,6 +30,7 @@
     "expo": "~57.0.17",
     "expo-asset": "~57.0.8",
     "expo-audio": "~57.0.4",
+    "expo-blob": "^57.0.1",
     "expo-constants": "~57.0.8",
     "expo-device": "~57.0.1",
     "expo-file-system": "~57.0.1",

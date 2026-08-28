@@ -2,6 +2,7 @@
 // Text-to-Speech backed by device cache + Cloudflare R2 recordings
 
 import * as FileSystem from 'expo-file-system/legacy';
+import { fromByteArray } from 'base64-js';
 import { PUBLIC_ASSET_BASE_URL } from './publicAssetBaseUrl';
 
 export type TTSLanguage = 'hi-IN' | 'en-IN';
@@ -62,18 +63,10 @@ async function fetchFromR2(
     const response = await fetch(url);
     if (!response.ok) return null;
 
-    const blob = await response.blob();
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const dataUrl = reader.result as string;
-        // Strip the data:audio/wav;base64, prefix
-        const base64 = dataUrl.split(',')[1] || '';
-        resolve(base64);
-      };
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(blob);
-    });
+    // Read the audio as bytes and base64-encode them directly, avoiding the
+    // slow `response.blob()` copy through React Native's blob store.
+    const buffer = await response.arrayBuffer();
+    return fromByteArray(new Uint8Array(buffer));
   } catch (err) {
     console.warn('[TTS] R2 fetch failed:', err);
     return null;

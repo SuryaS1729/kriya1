@@ -31,6 +31,13 @@
 - [Expo SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) for local persistence
 - [Reanimated](https://docs.swmansion.com/react-native-reanimated/) & [Skia](https://shopify.github.io/react-native-skia/) for fluid UI
 
+## 🎙️ Audio
+
+Shloka recitations and audio dictations are powered by:
+
+- [Sarvam AI](https://sarvam.ai) — **Bulbul v4** for voice synthesis
+- **Pratosh's Vagdhenu** for audio dictations
+
 ## 🚀 Getting Started
 
 ```sh

@@ -17,7 +17,8 @@
       "Shell(rm:*)",
       "Shell(git:*)",
       "Shell(cd /Users/saaketsurya/Desktop/kriya1 && echo \"=== source refs ===\" && grep -rn \"react-native-effects\\|react-native-webgpu\\|effects-test\\|expo-build-properties\" app/ lib/ components/ 2>/dev/null; echo \"=== node_modules ===\" && ls node_modules/react-native-effects node_modules/react-native-webgpu node_modules/expo-build-properties 2>&1 | head -3; echo \"=== package-lock check ===\" && grep -c \"react-native-effects\\|react-native-webgpu\" package-lock.json 2>/dev/null)",
-      "Shell(sqlite3:*)"
+      "Shell(sqlite3:*)",
+      "Shell(npx expo install expo-blob)"
     ],
     "deny": [],
     "defaultMode": "default"

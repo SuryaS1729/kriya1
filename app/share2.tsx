@@ -316,8 +316,8 @@ export default function Share2() {
   };
 
   useEffect(() => {
-    setTextboxOpacity(parseRgba(currentBackground.textBoxBg).alpha);
-    setBackgroundOpacity(currentBackground.defaultBgOpacity);
+    // Do NOT reset opacity sliders here — the user's background/text box
+    // opacity choices should persist across background selections.
     setIsBackgroundReady(currentBackground.type !== 'image' || currentBackgroundSource === null);
   }, [currentBackground, currentBackgroundSource]);
 

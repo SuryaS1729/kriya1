@@ -16,6 +16,14 @@ import { showAppToast } from '../lib/appToast';
 import { shlokaRecitation } from '../lib/tts';
 import { useAudioPlayer } from 'expo-audio';
 import * as FileSystem from 'expo-file-system/legacy';
+import {
+  TRANSLATION_LANGUAGE_LIST,
+  downloadTranslation,
+  removeTranslation,
+  isTranslationDownloaded,
+  invalidateTranslationCache,
+  type TranslationLanguageCode,
+} from '../lib/translationService';
 
 
 function getDateKey(date: Date) {
@@ -228,6 +236,160 @@ function RecitationSettings() {
                 ]} />
               </View>
             </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+// Translation Settings Component
+// Manages downloaded Indian-language translation files (R2 JSON, kept out of
+// SQLite). Download/remove is the only responsibility of this section.
+function TranslationSettings() {
+  const isDarkMode = useKriya(s => s.isDarkMode);
+  const translationLanguage = useKriya(s => s.translationLanguage);
+  const setTranslationLanguage = useKriya(s => s.setTranslationLanguage);
+  const downloadedTranslations = useKriya(s => s.downloadedTranslations);
+  const setDownloadedTranslations = useKriya(s => s.setDownloadedTranslations);
+
+  // Local state keyed by language code for download/remove in-flight spinners
+  const [busyLang, setBusyLang] = useState<TranslationLanguageCode | null>(null);
+  const [localDownloaded, setLocalDownloaded] = useState<Set<string>>(new Set());
+
+  // Sync the row "Downloaded" state with the persisted store list + actual
+  // files on disk (files may have been evicted by the OS between launches).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const actual: string[] = [];
+      for (const lang of TRANSLATION_LANGUAGE_LIST) {
+        if (await isTranslationDownloaded(lang.code)) actual.push(lang.code);
+      }
+      if (!cancelled) setLocalDownloaded(new Set(actual));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [downloadedTranslations]);
+
+  const handleDownload = async (code: TranslationLanguageCode) => {
+    if (busyLang) return;
+    buttonPressHaptic();
+    setBusyLang(code);
+    try {
+      await downloadTranslation(code);
+      invalidateTranslationCache(code);
+      const next = Array.from(new Set([...downloadedTranslations, code]));
+      setDownloadedTranslations(next);
+      setLocalDownloaded(prev => new Set(prev).add(code));
+      taskCompleteHaptic();
+      showAppToast({
+        type: 'success',
+        text1: `${TRANSLATION_LANGUAGE_LIST.find(l => l.code === code)?.name} Downloaded`,
+        text2: 'You can now read shlokas in this language.',
+        duration: 2500,
+        position: 'bottom',
+      });
+    } catch (err) {
+      console.warn('[TranslationSettings] Download failed:', err);
+      errorHaptic();
+      showAppToast({
+        type: 'error',
+        text1: 'Download Failed',
+        text2: 'Could not download this translation. Check your connection and try again.',
+        duration: 3000,
+        position: 'bottom',
+      });
+    } finally {
+      setBusyLang(null);
+    }
+  };
+
+  const handleRemove = async (code: TranslationLanguageCode) => {
+    if (busyLang) return;
+    selectionHaptic();
+    setBusyLang(code);
+    try {
+      await removeTranslation(code);
+      invalidateTranslationCache(code);
+      const next = downloadedTranslations.filter(l => l !== code);
+      setDownloadedTranslations(next);
+      setLocalDownloaded(prev => {
+        const s = new Set(prev);
+        s.delete(code);
+        return s;
+      });
+      // If the removed language was selected, fall back to English (SQLite)
+      if (translationLanguage === code) {
+        setTranslationLanguage('en');
+      }
+    } catch (err) {
+      console.warn('[TranslationSettings] Remove failed:', err);
+      errorHaptic();
+      showAppToast({
+        type: 'error',
+        text1: 'Remove Failed',
+        text2: 'Could not remove this translation. Please try again.',
+        duration: 3000,
+        position: 'bottom',
+      });
+    } finally {
+      setBusyLang(null);
+    }
+  };
+
+  return (
+    <View style={[styles.section, !isDarkMode && styles.lightSection]}>
+      <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Translations / Languages</Text>
+      <Text style={[styles.recitationHint, !isDarkMode && styles.lightSubText]}>
+        Download a language to read shlokas in it. You can remove it anytime.
+      </Text>
+
+      <View style={styles.notificationSettings}>
+        {TRANSLATION_LANGUAGE_LIST.map((lang) => {
+          const downloaded = localDownloaded.has(lang.code);
+          const busy = busyLang === lang.code;
+          return (
+            <View
+              key={lang.code}
+              style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
+            >
+              <View style={styles.settingInfo}>
+                <Text style={[styles.settingTitle, !isDarkMode && styles.lightText]}>
+                  {lang.name}
+                </Text>
+                <Text style={[styles.settingDescription, !isDarkMode && styles.lightSubText]}>
+                  {downloaded ? 'Downloaded ✓' : 'Not downloaded'}
+                </Text>
+              </View>
+
+              {busy ? (
+                <ActivityIndicator size="small" color={isDarkMode ? '#8ba5e1' : '#4a6a9a'} />
+              ) : downloaded ? (
+                <Pressable
+                  onPress={() => handleRemove(lang.code)}
+                  hitSlop={8}
+                  style={[styles.translationActionButton, !isDarkMode && styles.lightTranslationActionButton]}
+                >
+                  <Feather name="trash-2" size={14} color={isDarkMode ? '#f87171' : '#dc2626'} />
+                  <Text style={[styles.translationActionText, { color: isDarkMode ? '#f87171' : '#dc2626' }]}>
+                    Remove
+                  </Text>
+                </Pressable>
+              ) : (
+                <Pressable
+                  onPress={() => handleDownload(lang.code)}
+                  hitSlop={8}
+                  style={[styles.translationActionButton, !isDarkMode && styles.lightTranslationActionButton]}
+                >
+                  <Feather name="download" size={14} color={isDarkMode ? '#8ba5e1' : '#4a6a9a'} />
+                  <Text style={[styles.translationActionText, { color: isDarkMode ? '#8ba5e1' : '#4a6a9a' }]}>
+                    Download
+                  </Text>
+                </Pressable>
+              )}
+            </View>
           );
         })}
       </View>
@@ -1124,6 +1286,9 @@ export default function History() {
           {/* Recitation Settings */}
           <RecitationSettings />
 
+          {/* Translation Settings */}
+          <TranslationSettings />
+
                   <Footer />
 
         </ScrollView>
@@ -1263,6 +1428,25 @@ const styles = StyleSheet.create({
   },
   previewButtonTextActive: {
     color: '#fff',
+  },
+  translationActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 165, 225, 0.4)',
+    backgroundColor: 'rgba(139, 165, 225, 0.08)',
+  },
+  lightTranslationActionButton: {
+    borderColor: 'rgba(74, 106, 154, 0.3)',
+    backgroundColor: 'rgba(74, 106, 154, 0.06)',
+  },
+  translationActionText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   timeDisplay: {
     flexDirection: 'row',

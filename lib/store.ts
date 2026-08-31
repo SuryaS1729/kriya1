@@ -48,6 +48,9 @@ export interface Bookmark {
 
 export type ContentLanguage = 'en' | 'te';
 
+// Indian-language translations (downloaded as R2 JSON files, kept out of SQLite).
+export type TranslationDisplayLanguage = 'en' | 'gu' | 'hi' | 'or' | 'ta' | 'te';
+
 interface KriyaState {
   ready: boolean;
   language: ContentLanguage;
@@ -110,6 +113,12 @@ interface KriyaState {
   // Recitation style: 'hindi' (current TTS recitation) or 'sanskrit' (authentic Sanskrit recordings)
   recitationStyle: 'hindi' | 'sanskrit';
   setRecitationStyle: (style: 'hindi' | 'sanskrit') => void;
+
+  // Indian-language translation layer (R2 JSON, isolated from SQLite)
+  translationLanguage: TranslationDisplayLanguage;
+  setTranslationLanguage: (language: TranslationDisplayLanguage) => void;
+  downloadedTranslations: TranslationDisplayLanguage[];
+  setDownloadedTranslations: (languages: TranslationDisplayLanguage[]) => void;
 
   // Notification properties
   notificationsEnabled: boolean;
@@ -232,6 +241,12 @@ export const useKriya = create<KriyaState>()(
       // Default recitation style: Hindi (the existing TTS recitation)
       recitationStyle: 'hindi',
       setRecitationStyle: (style: 'hindi' | 'sanskrit') => set({ recitationStyle: style }),
+
+      // Indian-language translation layer defaults (English = SQLite content)
+      translationLanguage: 'en',
+      setTranslationLanguage: (translationLanguage) => set({ translationLanguage }),
+      downloadedTranslations: [],
+      setDownloadedTranslations: (downloadedTranslations) => set({ downloadedTranslations }),
 
       init: () => {
         if (!isDbReady()) {
@@ -503,6 +518,18 @@ export const useKriya = create<KriyaState>()(
       // cannot re-enable Telugu features while they are paused.
       onRehydrateStorage: () => (state) => {
         if (state) state.language = 'en';
+        // Guard the translation layer: only valid codes persist, and the
+        // selected language must always be one that is actually downloaded.
+        if (state) {
+          const valid: TranslationDisplayLanguage[] = ['en', 'gu', 'hi', 'or', 'ta', 'te'];
+          const downloaded = (state.downloadedTranslations ?? []).filter((l): l is TranslationDisplayLanguage =>
+            valid.includes(l)
+          );
+          state.downloadedTranslations = downloaded;
+          if (state.translationLanguage !== 'en' && !downloaded.includes(state.translationLanguage)) {
+            state.translationLanguage = 'en';
+          }
+        }
       },
       partialize: (state) => ({
         isDarkMode: state.isDarkMode,
@@ -513,6 +540,8 @@ export const useKriya = create<KriyaState>()(
         notificationsEnabled: state.notificationsEnabled,
         reminderTime: state.reminderTime,
         recitationStyle: state.recitationStyle,
+        translationLanguage: state.translationLanguage,
+        downloadedTranslations: state.downloadedTranslations,
                 hasSeenGuidedTour: state.hasSeenGuidedTour,
 
         // Don't persist notification token

@@ -10,6 +10,7 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, Easing, runOnJS } from 'react-native-reanimated';
 import {
@@ -28,6 +29,12 @@ import { textToSpeech, shlokaRecitation } from '../../lib/tts';
 import { useAudioPlayer } from 'expo-audio';
 import * as FileSystem from 'expo-file-system/legacy';
 import { showAppToast } from '../../lib/appToast';
+import {
+  TRANSLATION_LANGUAGE_LIST,
+  getTranslation,
+  getCommentary,
+  type ShlokaDisplayLanguage,
+} from '../../lib/translationService';
 
 import AntDesign from "@react-native-vector-icons/ant-design/static";
 import FontAwesome5 from "@react-native-vector-icons/fontawesome5/static";
@@ -45,6 +52,9 @@ export default function ShlokaDetail() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const language = useKriya(s => s.language);
   const recitationStyle = useKriya(s => s.recitationStyle);
+  const translationLanguage = useKriya(s => s.translationLanguage);
+  const setTranslationLanguage = useKriya(s => s.setTranslationLanguage);
+  const downloadedTranslations = useKriya(s => s.downloadedTranslations);
 
   // Treat URL param as *index* (0-based)
   const initialIndex = useMemo(() => {
@@ -57,6 +67,38 @@ export default function ShlokaDetail() {
   // route changes externally (prev/next or a deep link), the derived value
   // below picks it up on the next render, so no effect-sync is needed.
   const [row, setRow] = useState<ShlokaRow | null>(null);
+
+  // Indian-language translation (R2 JSON). Loaded only when a downloaded,
+  // non-English language is selected; never triggers a network request.
+  const [translationText, setTranslationText] = useState<string | null>(null);
+  const [commentaryText, setCommentaryText] = useState<string | null>(null);
+  const [translationLang, setTranslationLang] = useState<ShlokaDisplayLanguage>('en');
+
+  useEffect(() => {
+    let cancelled = false;
+    // Keep a translation loaded while browsing verses in the same language.
+    if (translationLanguage === 'en' || !row || !downloadedTranslations.includes(translationLanguage)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting the loaded translation is part of syncing with the selected language/file state; the effect is the single source that feeds the async read below.
+      setTranslationText(null);
+      setCommentaryText(null);
+      return;
+    }
+    (async () => {
+      const [t, c] = await Promise.all([
+        getTranslation(row.chapter_number, row.verse_number, translationLanguage),
+        getCommentary(row.chapter_number, row.verse_number, translationLanguage),
+      ]);
+      if (!cancelled) {
+        setTranslationText(t);
+        setCommentaryText(c);
+        setTranslationLang(translationLanguage);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [row, translationLanguage, downloadedTranslations]);
+
   const [total, setTotal] = useState<number>(() => {
     try {
       return getTotalShlokas();
@@ -416,6 +458,34 @@ const handleBookPress = () => {
     });
   };
 
+  // Language picker — opens a dropdown modal with all available languages.
+  const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
+
+  const openLanguagePicker = () => {
+    selectionHaptic();
+    setLanguagePickerOpen(true);
+  };
+
+  const closeLanguagePicker = () => {
+    setLanguagePickerOpen(false);
+  };
+
+  const selectLanguage = (code: ShlokaDisplayLanguage) => {
+    selectionHaptic();
+    if (code !== 'en' && !downloadedTranslations.includes(code)) {
+      showAppToast({
+        type: 'info',
+        text1: 'Not Downloaded',
+        text2: 'Download this language from My Journey → Translations / Languages.',
+        duration: 2500,
+        position: 'bottom',
+      });
+      return;
+    }
+    setTranslationLanguage(code);
+    closeLanguagePicker();
+  };
+
 const headerHeight = insets.top + 12 + 36 + 12; // safeArea + paddingTop + buttonHeight + paddingBottom
 
 // ...existing code...
@@ -452,23 +522,17 @@ return (
 
       {/* Action Buttons */}
       <View style={styles.headerActions}>
-        {/* TELUGU DISABLED: language toggle hidden while Telugu features are paused.
+        {/* Language selector — opens dropdown with English + downloaded Indian languages */}
         <Pressable
-          onPress={() => {
-            selectionHaptic();
-            setLanguage(language === 'en' ? 'te' : 'en');
-          }}
+          onPress={openLanguagePicker}
           hitSlop={16}
           style={[
             styles.circularButton,
             { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)' }
           ]}
         >
-          <Text style={{ fontSize: 12, fontWeight: '700', color: isDarkMode ? '#d1d5db' : '#18464aff' }}>
-            {language === 'en' ? 'EN' : 'తె'}
-          </Text>
+          <FontAwesome5 name="globe" size={16} iconStyle="solid" color={isDarkMode ? '#ffffffff' : '#18464aff'} />
         </Pressable>
-        */}
         {/* Bookmark Button */}
         <Pressable
           onPress={toggleBookmark}
@@ -585,20 +649,49 @@ return (
           <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
             Translation :
           </Text>
-          <Text style={[styles.en, /* TELUGU DISABLED: language === 'te' && styles.te */ { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable={true}>
-            {getTranslationForLanguage(row!, language) ?? '—'}
+          <Text
+            style={[
+              styles.en,
+              translationLang !== 'en' && styles.translationIndic,
+              { color: isDarkMode ? '#d1d5db' : '#545454' }
+            ]}
+            selectable={true}
+          >
+            {translationLang !== 'en'
+              ? (translationText ?? (translationLanguage !== 'en'
+                  ? 'Translation not downloaded'
+                  : getTranslationForLanguage(row!, language) ?? '—'))
+              : (getTranslationForLanguage(row!, language) ?? '—')}
           </Text>
 
-          {getCommentaryForLanguage(row!, language) ? (
-            <>
-              <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
-                Commentary :
-              </Text>
-              <Text style={[styles.en, /* TELUGU DISABLED: language === 'te' && styles.te */ { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable>
-                {getCommentaryForLanguage(row!, language)}
-              </Text>
-            </>
-          ) : null}
+          {translationLang !== 'en'
+            ? (commentaryText || getCommentaryForLanguage(row!, language)) ? (
+                <>
+                  <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
+                    Commentary :
+                  </Text>
+                  <Text
+                    style={[
+                      styles.en,
+                      styles.translationIndic,
+                      { color: isDarkMode ? '#d1d5db' : '#545454' }
+                    ]}
+                    selectable
+                  >
+                    {commentaryText ?? getCommentaryForLanguage(row!, language)}
+                  </Text>
+                </>
+              ) : null
+            : getCommentaryForLanguage(row!, language) ? (
+                <>
+                  <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
+                    Commentary :
+                  </Text>
+                  <Text style={[styles.en, { color: isDarkMode ? '#d1d5db' : '#545454' }]} selectable>
+                    {getCommentaryForLanguage(row!, language)}
+                  </Text>
+                </>
+              ) : null}
         </Animated.View>
       )}
     </ScrollView>
@@ -652,6 +745,61 @@ return (
         </Pressable>
       </View>
     )}
+
+    {/* Language picker dropdown */}
+    <Modal
+      visible={languagePickerOpen}
+      transparent
+      animationType="fade"
+      onRequestClose={closeLanguagePicker}
+    >
+      <Pressable style={styles.langModalBackdrop} onPress={closeLanguagePicker}>
+        {/* Stop backdrop presses from closing when the panel itself is tapped */}
+        <Pressable
+          style={[styles.langModalPanel, { backgroundColor: isDarkMode ? '#1f2937' : '#ffffff' }]}
+          onPress={() => {}}
+        >
+          <Text style={[styles.langModalTitle, { color: isDarkMode ? '#e5e7eb' : '#1f2937' }]}>
+            Translation Language
+          </Text>
+
+          {[
+            { code: 'en' as ShlokaDisplayLanguage, name: 'English' },
+            ...TRANSLATION_LANGUAGE_LIST.map(lang => ({
+              code: lang.code as ShlokaDisplayLanguage,
+              name: lang.name,
+            })),
+          ].map(option => {
+            const selected = translationLanguage === option.code;
+            const downloaded = option.code === 'en' || downloadedTranslations.includes(option.code);
+            return (
+              <Pressable
+                key={option.code}
+                style={({ pressed }) => [
+                  styles.langOption,
+                  { backgroundColor: isDarkMode ? 'rgba(52, 76, 103, 0.3)' : 'rgba(248, 250, 252, 0.8)' },
+                  selected && { borderColor: '#8ba5e1', borderWidth: 1 },
+                  pressed && { opacity: 0.7 },
+                ]}
+                onPress={() => selectLanguage(option.code)}
+                android_ripple={{ color: '#cccccc18' }}
+              >
+                <Text style={[styles.langOptionName, { color: isDarkMode ? '#e5e7eb' : '#1f2937' }]}>
+                  {option.name}
+                </Text>
+                {selected ? (
+                  <MaterialIcons name="check" size={18} color={isDarkMode ? '#8ba5e1' : '#4a6a9a'} />
+                ) : !downloaded ? (
+                  <Text style={[styles.langOptionHint, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
+                    Not downloaded
+                  </Text>
+                ) : null}
+              </Pressable>
+            );
+          })}
+        </Pressable>
+      </Pressable>
+    </Modal>
   </SafeAreaView>
 );
 }
@@ -697,6 +845,14 @@ const styles = StyleSheet.create({
     fontFamily: "NTR",
     fontSize: 22,
     lineHeight: 34,
+    fontWeight: "400",
+    fontStyle: "normal"
+  },
+  // Indian-language translation fallback (font mirrors styles.te; the system
+  // font renders scripts NTR does not cover, e.g. Devanagari/Gujarati/Tamil).
+  translationIndic: {
+    fontSize: 19,
+    lineHeight: 30,
     fontWeight: "400",
     fontStyle: "normal"
   },
@@ -766,6 +922,51 @@ const styles = StyleSheet.create({
   closeIcon: {
     fontSize: 16,
     fontWeight: '700'
+  },
+
+  // Language picker dropdown
+  langModalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    paddingHorizontal: 24,
+  },
+  langModalPanel: {
+    width: '100%',
+    maxWidth: 320,
+    borderRadius: 16,
+    padding: 20,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    gap: 8,
+  },
+  langModalTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  langOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  langOptionName: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  langOptionHint: {
+    fontSize: 12,
+    fontStyle: 'italic',
   },
 
 });

@@ -4,6 +4,7 @@ import { useKriya } from '../lib/store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Feather from "@react-native-vector-icons/feather/static";
+import FontAwesome5 from "@react-native-vector-icons/fontawesome5/static";
 import { Image } from 'expo-image';
 import BlurBackground from '@/components/BlurBackground';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -239,7 +240,7 @@ function WeeklySummary() {
   const getForDay = useKriya(s => s.getTasksForDay);
   const getFocusSessionsForDay = useKriya(s => s.getFocusSessionsForDay);
   const isDarkMode = useKriya(s => s.isDarkMode);
-  
+
   const tasksToday = useKriya(s => s.tasksToday);
   const focusSessions = useKriya(s => s.focusSessions);
 
@@ -247,29 +248,29 @@ function WeeklySummary() {
     const today = new Date();
     const currentWeekStart = new Date(today);
     currentWeekStart.setDate(today.getDate() - today.getDay());
-    
+
     let totalTasks = 0;
     let completedTasks = 0;
     let totalFocusSessions = 0;
     let activeDays = 0;
-    
+
     for (let i = 0; i < 7; i++) {
       const day = new Date(currentWeekStart);
       day.setDate(currentWeekStart.getDate() + i);
       const dayKey = getDateKey(day);
-      
+
       const tasks = getForDay(dayKey);
       const focusSessionsForDay = getFocusSessionsForDay ? getFocusSessionsForDay(dayKey) : 0;
-      
+
       if (tasks.length > 0 || focusSessionsForDay > 0) {
         activeDays++;
       }
-      
+
       totalTasks += tasks.length;
       completedTasks += tasks.filter(t => t.completed).length;
       totalFocusSessions += focusSessionsForDay;
     }
-    
+
     return {
       activeDays,
       completedTasks,
@@ -291,19 +292,19 @@ function WeeklySummary() {
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.activeDays}</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Active Days</Text>
         </View>
-        
+
         <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
           <Feather name="check-circle" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.completedTasks}</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Tasks Done</Text>
         </View>
-        
+
         <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
           <Feather name="target" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.totalFocusSessions}</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Focus Sessions</Text>
         </View>
-        
+
         <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
           <Feather name="clock" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.focusTime}m</Text>
@@ -325,7 +326,7 @@ function NotificationSettings() {
   const reminderTime = useKriya(s => s.reminderTime);
   const toggleNotifications = useKriya(s => s.toggleNotifications);
   const setReminderTime = useKriya(s => s.setReminderTime);
-  
+
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
 
@@ -341,26 +342,26 @@ function NotificationSettings() {
     if (Platform.OS === 'android') {
       setShowTimePicker(false);
     }
-    
+
     if (time) {
       setSelectedTime(time);
-      
+
       // Save the time immediately for both platforms
       const hours = time.getHours();
       const minutes = time.getMinutes();
-      
+
       try {
         await setReminderTime(hours, minutes);
-        
+
         // Format time for display in toast
-        const timeString = time.toLocaleTimeString([], { 
-          hour: '2-digit', 
+        const timeString = time.toLocaleTimeString([], {
+          hour: '2-digit',
           minute: '2-digit',
-          hour12: true 
+          hour12: true
         });
-        
+
         // console.log(`✅ Time updated to ${hours}:${minutes.toString().padStart(2, '0')}`);
-        
+
         showAppToast({
           type: 'success',
           text1: 'Reminder Time Set',
@@ -368,7 +369,7 @@ function NotificationSettings() {
           duration: 3000,
           position: 'bottom',
         });
-        
+
         taskCompleteHaptic(); // Changed from direct Haptics call
       } catch {
         showAppToast({
@@ -395,7 +396,7 @@ function NotificationSettings() {
     const currentTime = new Date();
     currentTime.setHours(reminderTime.hour, reminderTime.minute, 0, 0);
     setSelectedTime(currentTime);
-    
+
     buttonPressHaptic(); // Changed from direct Haptics call
     setShowTimePicker(true);
   };
@@ -425,10 +426,10 @@ function NotificationSettings() {
   return (
     <View style={[styles.section, !isDarkMode && styles.lightSection]}>
       <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Notification Settings</Text>
-      
+
       <View style={styles.notificationSettings}>
         {/* Toggle Notifications */}
-        <Pressable 
+        <Pressable
           style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
           onPress={handleToggleNotifications}
           android_ripple={{ color: '#cccccc18' }}
@@ -456,7 +457,7 @@ function NotificationSettings() {
 
         {/* Time Setting */}
         {notificationsEnabled && (
-          <Pressable 
+          <Pressable
             style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
             onPress={handleOpenTimePicker}
             android_ripple={{ color: '#cccccc18' }}
@@ -493,7 +494,7 @@ function NotificationSettings() {
               <Text style={[styles.timePickerTitle, !isDarkMode && styles.lightText]}>
                 Set Reminder Time
               </Text>
-              
+
               <View style={styles.nativeTimePickerContainer}>
                 <DateTimePicker
                   value={selectedTime}
@@ -507,7 +508,7 @@ function NotificationSettings() {
               </View>
 
               <View style={styles.nativeTimePickerActions}>
-                <Pressable 
+                <Pressable
                   onPress={() => setShowTimePicker(false)}
                   style={[styles.timePickerButton, styles.timePickerCancelButton]}
                 >
@@ -535,12 +536,12 @@ function NotificationSettings() {
 // Quick Actions Component
 function QuickActions() {
   const isDarkMode = useKriya(s => s.isDarkMode);
-  
+
   return (
     <View style={styles.actionsSection}>
       <Text style={[styles.actionsTitle, !isDarkMode && styles.lightText]}>Quick Actions</Text>
       <View style={styles.actionButtons}>
-        <Pressable 
+        <Pressable
           style={[styles.actionButton, !isDarkMode && styles.lightCard]}
             onPress={() => {
             buttonPressHaptic(); // Add haptic for add tasks
@@ -551,8 +552,8 @@ function QuickActions() {
           <Feather name="plus-circle" size={24} color="#35E21B" />
           <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Add Tasks</Text>
         </Pressable>
-        
-        <Pressable 
+
+        <Pressable
           style={[styles.actionButton, !isDarkMode && styles.lightCard]}
           onPress={() => {
             buttonPressHaptic(); // Add haptic for focus session
@@ -564,8 +565,8 @@ function QuickActions() {
           <Feather name="target" size={24} color="#00FFFF" />
           <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Focus Session</Text>
         </Pressable>
-        
-        <Pressable 
+
+        <Pressable
           style={[styles.actionButton, !isDarkMode && styles.lightCard]}
  onPress={() => {
             buttonPressHaptic(); // Add haptic for bookmarks
@@ -646,16 +647,16 @@ const GitaProgress = memo(function GitaProgress() {
   const completedTasks = getTotalCompletedTasks ? getTotalCompletedTasks() : 0;
   const unlockedShlokas = Math.min(completedTasks, totalShlokas);
   const progressPercentage = Math.round((unlockedShlokas / totalShlokas) * 100);
-  
+
   // Calculate which chapter and verse they're currently on
   const chaptersAndVerses = [
     47, 72, 43, 42, 29, 47, 30, 28, 34, 42, 55, 20, 35, 27, 20, 24, 28, 78
   ];
-  
+
   let currentChapter = 1;
   let currentVerse = 1;
   let remainingShlokas = unlockedShlokas;
-  
+
   for (let i = 0; i < chaptersAndVerses.length && remainingShlokas > 0; i++) {
     if (remainingShlokas >= chaptersAndVerses[i]) {
       remainingShlokas -= chaptersAndVerses[i];
@@ -667,12 +668,12 @@ const GitaProgress = memo(function GitaProgress() {
       break;
     }
   }
-  
+
   if (unlockedShlokas >= totalShlokas) {
     currentChapter = 18;
     currentVerse = 78;
   }
-  
+
   return (
     <View style={[styles.gitaProgressCard, !isDarkMode && styles.lightGitaSection]}>
       <View style={styles.gitaHeader}>
@@ -687,22 +688,22 @@ const GitaProgress = memo(function GitaProgress() {
           <Text style={[styles.gitaStatsLabel, !isDarkMode && styles.lightSubText]}>/ {totalShlokas}</Text>
         </View>
       </View>
-      
+
       <View style={[styles.progressContainer, !isDarkMode && styles.lightProgressContainer]}>
         <View style={[styles.progressBar, !isDarkMode && styles.lightProgressBar]}>
-          <View 
+          <View
             style={[
-              styles.progressFilled, 
+              styles.progressFilled,
               { width: `${progressPercentage}%` },
               !isDarkMode && styles.lightProgressFilled
-            ]} 
+            ]}
           />
         </View>
         <Text style={[styles.progressText, !isDarkMode && styles.lightSubText]}>
           {progressPercentage}% Complete
         </Text>
       </View>
-      
+
       <View style={styles.gitaMilestones}>
         <Text style={[styles.milestonesTitle, !isDarkMode && styles.lightSubText]}>Next Milestone</Text>
         <View style={styles.milestoneItem}>
@@ -714,17 +715,17 @@ const GitaProgress = memo(function GitaProgress() {
               Chapter {currentChapter === 18 && currentVerse === 78 ? '1 (Restart)' : currentChapter + (currentVerse === chaptersAndVerses[currentChapter - 1] ? 1 : 0)} Complete
             </Text>
             <Text style={[styles.milestoneDesc, !isDarkMode && styles.lightSubText]}>
-              {currentChapter === 18 && currentVerse === 78 
-                ? 'You\'ve completed the entire Gita! Start a new journey.' 
+              {currentChapter === 18 && currentVerse === 78
+                ? 'You\'ve completed the entire Gita! Start a new journey.'
                 : `${currentVerse === chaptersAndVerses[currentChapter - 1] ? chaptersAndVerses[currentChapter] - currentVerse : chaptersAndVerses[currentChapter - 1] - currentVerse + 1} more tasks to unlock`
               }
             </Text>
           </View>
         </View>
       </View>
-      
+
       {/* {unlockedShlokas > 0 && (
-        <Pressable 
+        <Pressable
           style={[styles.gitaActionButton, !isDarkMode && styles.lightGitaActionButton]}
           onPress={() => {
             // Navigate to gita reader or show current shloka
@@ -750,9 +751,9 @@ const GitaProgress = memo(function GitaProgress() {
 const ScripturesProgress = memo(function ScripturesProgress() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const getTotalCompletedTasks = useKriya(s => s.getTotalCompletedTasks);
-  
+
   const completedTasks = getTotalCompletedTasks ? getTotalCompletedTasks() : 0;
-  
+
    const scriptures = [
     {
       id: 'bhagavad-gita',
@@ -805,7 +806,7 @@ const ScripturesProgress = memo(function ScripturesProgress() {
       progress: 0,
       unlockRequirement: 'Complete Ashtavakra Gita',
     },
-     
+
   ];
 
   const handleScripturePress = (scripture: any) => {
@@ -836,8 +837,8 @@ const ScripturesProgress = memo(function ScripturesProgress() {
         </Text>
       </View>
 
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scripturesScrollContainer}
         style={styles.scripturesScroll}
@@ -851,8 +852,8 @@ const ScripturesProgress = memo(function ScripturesProgress() {
               !isDarkMode && styles.lightScriptureCard
             ]}
             onPress={() => handleScripturePress(scripture)}
-            android_ripple={{ 
-              color: scripture.isUnlocked ? '#cccccc18' : '#ff000018' 
+            android_ripple={{
+              color: scripture.isUnlocked ? '#cccccc18' : '#ff000018'
             }}
           >
             {/* Scripture Image */}
@@ -867,7 +868,7 @@ const ScripturesProgress = memo(function ScripturesProgress() {
                   style={styles.scriptureImageStyle}
                   contentFit="cover"
                 />
-    
+
     {/* Lock Overlay */}
     {/* {!scripture.isUnlocked && (
       <View style={styles.lockOverlay}>
@@ -886,7 +887,7 @@ const ScripturesProgress = memo(function ScripturesProgress() {
               ]}>
                 {scripture.title}
               </Text>
-              
+
               <Text style={[
                 styles.scriptureSubtitle,
                 !isDarkMode && styles.lightSubText,
@@ -914,13 +915,13 @@ const ScripturesProgress = memo(function ScripturesProgress() {
                       {Math.round((scripture.progress / scripture.totalVerses) * 100)}%
                     </Text>
                   </View>
-                  
+
                   <View style={[styles.scriptureProgressBar, !isDarkMode && styles.lightProgressBar]}>
-                    <View 
+                    <View
                       style={[
                         styles.scriptureProgressFilled,
                         { width: `${(scripture.progress / scripture.totalVerses) * 100}%` }
-                      ]} 
+                      ]}
                     />
                   </View>
                 </View>
@@ -957,14 +958,14 @@ const ScripturesProgress = memo(function ScripturesProgress() {
 
 function Footer() {
   const isDarkMode = useKriya(s => s.isDarkMode);
-  
+
   const openLink = (url: string) => {
         buttonPressHaptic(); // Add haptic for link opening
 
     Linking.openURL(url); // Opens the provided URL
     // console.log('Opening:', url);
   };
-  
+
   return (
     <View style={[styles.footerContainer, !isDarkMode && styles.lightFooterContainer]}>
       {/* App Branding */}
@@ -972,15 +973,49 @@ function Footer() {
         <Text style={[styles.footerAppName, !isDarkMode && styles.lightText]}>kriya</Text>
 
         <View style={styles.footerTagline}>
-          <Text style={[styles.footerMadeIn, !isDarkMode && styles.lightSubText]}>Crafted with  {<Feather name="heart" size={15} color="#ff0044ff" />}  in Bharāt</Text>
+          <Text style={[styles.footerMadeIn, !isDarkMode && styles.lightSubText]}>Crafted with  {<FontAwesome5 name="heart" size={12} iconStyle="solid" color="#FF6E26" />}  in Bharāt</Text>
           <Text style={[styles.footerInspiration, !isDarkMode && styles.lightSubText]}>
             Inspired by the timeless wisdom of the Bhagavad Gita
           </Text>
         </View>
       </View>
-       {/* Feedback Form Button */}
+       {/* Social Links */}
+      <View style={styles.footerSocials}>
+        <Text style={[styles.footerSocialTitle, !isDarkMode && styles.lightSubText]}>Connect</Text>
+        <View style={styles.socialButtons}>
+          {/* <Pressable
+            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
+            onPress={() => openLink('https://twitter.com/SuryaS_1729')}
+            android_ripple={{ color: '#cccccc18', radius: 22 }}
+          >
+            <Feather name="twitter" size={18} color={isDarkMode ? "#1da1f2" : "#1da1f2"} />
+          </Pressable> */}
+          <Pressable
+            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
+            onPress={() => openLink('mailto:bitwisedharma@gmail.com')}
+            android_ripple={{ color: '#cccccc18', radius: 22 }}
+          >
+            <Feather name="mail" size={18} color={isDarkMode ? "#ff6b6b" : "#ff6b6b"} />
+          </Pressable>
+          <Pressable
+            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
+            onPress={() => openLink('https://github.com/SuryaS1729/kriya1')}
+            android_ripple={{ color: '#cccccc18', radius: 22 }}
+          >
+            <Feather name="github" size={18} color={isDarkMode ? "#fff" : "#000"} />
+          </Pressable>
+          {/* <Pressable
+            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
+            onPress={() => openLink('https://instagram.com/thebitwisedharma')}
+          >
+            <Feather name="instagram" size={18} color={isDarkMode ? "#e4405f" : "#e4405f"} />
+          </Pressable> */}
+        </View>
+      </View>
+
+      {/* Feedback Form Button */}
       <View style={styles.feedbackSection}>
-        <Pressable 
+        <Pressable
           style={[styles.feedbackButton, !isDarkMode && styles.lightFeedbackButton]}
           onPress={() => openLink('https://forms.gle/iLQH7vjNZuY27Du17')} // Replace with your Google Form link
           android_ripple={{ color: '#cccccc18'}}
@@ -991,54 +1026,17 @@ function Footer() {
           </Text>
         </Pressable>
       </View>
-      {/* Social Links */}
-      <View style={styles.footerSocials}>
-        <Text style={[styles.footerSocialTitle, !isDarkMode && styles.lightSubText]}>Connect</Text>
-        <View style={styles.socialButtons}>
-          {/* <Pressable 
-            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
-            onPress={() => openLink('https://twitter.com/SuryaS_1729')}
-            android_ripple={{ color: '#cccccc18', radius: 22 }}
-          >
-            <Feather name="twitter" size={18} color={isDarkMode ? "#1da1f2" : "#1da1f2"} />
-          </Pressable> */}
-          <Pressable 
-            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
-            onPress={() => openLink('mailto:bitwisedharma@gmail.com')}
-            android_ripple={{ color: '#cccccc18', radius: 22 }}
-          >
-            <Feather name="mail" size={18} color={isDarkMode ? "#ff6b6b" : "#ff6b6b"} />
-          </Pressable>
-          <Pressable 
-            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
-            onPress={() => openLink('https://github.com/SuryaS1729/kriya1')}
-            android_ripple={{ color: '#cccccc18', radius: 22 }}
-          >
-            <Feather name="github" size={18} color={isDarkMode ? "#fff" : "#000"} />
-          </Pressable>
-          {/* <Pressable 
-            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
-            onPress={() => openLink('https://instagram.com/thebitwisedharma')}
-          >
-            <Feather name="instagram" size={18} color={isDarkMode ? "#e4405f" : "#e4405f"} />
-          </Pressable> */}
-        </View>
-      </View>
-      
+
       {/* App Info */}
       <View style={styles.footerInfo}>
         <Text style={[styles.footerVersion, !isDarkMode && styles.lightSubText]}>Version 2.0.0</Text>
         <View style={styles.footerLinks}>
-          <Pressable onPress={() => openLink('https://kriyaapp.com/privacy')}>
+          <Pressable onPress={() => openLink('https://kriya.bitwisedharma.com/privacy')}>
             <Text style={[styles.footerLink, !isDarkMode && styles.lightFooterLink]}>Privacy Policy</Text>
-          </Pressable>
-          <Text style={[styles.footerDivider, !isDarkMode && styles.lightSubText]}>•</Text>
-          <Pressable onPress={() => openLink('https://kriyaapp.com/terms')}>
-            <Text style={[styles.footerLink, !isDarkMode && styles.lightFooterLink]}>Terms of Service</Text>
           </Pressable>
         </View>
       </View>
-      
+
       {/* Quote */}
       <View style={styles.footerQuote}>
         <Text style={[styles.footerQuoteText, !isDarkMode && styles.lightSubText]}>
@@ -1048,7 +1046,7 @@ function Footer() {
           You have the right to perform actions, but never to the fruits of action
         </Text>
       </View>
-      
+
       {/* Copyright */}
       <View style={styles.footerCopyright}>
         <Text style={[styles.footerCopyrightText, !isDarkMode && styles.lightSubText]}>
@@ -1072,8 +1070,8 @@ export default function History() {
 
       {/* Linear Gradient Overlay with reduced opacity */}
       <LinearGradient
-        colors={isDarkMode 
-          ? ['rgba(52, 76, 103, 0.8)', 'rgba(0, 0, 0, 0.6)'] 
+        colors={isDarkMode
+          ? ['rgba(52, 76, 103, 0.8)', 'rgba(0, 0, 0, 0.6)']
           : ['rgba(255, 255, 255, 0.3)', 'rgba(139, 165, 225, 0.4)']
         }
         style={StyleSheet.absoluteFill}
@@ -1089,17 +1087,17 @@ export default function History() {
             <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#000"} />
           </Pressable>
               <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>My Journey</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
           onPress={() => {
               selectionHaptic(); // Changed from direct Haptics call
                             toggleDarkMode();
-                          }}  
-          hitSlop={16} 
+                          }}
+          hitSlop={16}
           activeOpacity={0.7}>
-            <Feather 
-              name={isDarkMode ? "sun" : "moon"} 
-              size={24} 
-              color={isDarkMode ? "#fff" : "#000"} 
+            <Feather
+              name={isDarkMode ? "sun" : "moon"}
+              size={24}
+              color={isDarkMode ? "#fff" : "#000"}
             />
           </TouchableOpacity>
         </View>
@@ -1107,19 +1105,19 @@ export default function History() {
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Gita Progress */}
           <GitaProgress />
- 
+
           {/* Weekly Summary */}
           <WeeklySummary />
-           
+
 
              {/* NEW: Scriptures Progress List */}
         <ScripturesProgress />
-     
+
           {/* Quick Actions */}
-          <QuickActions /> 
+          <QuickActions />
 
           <TipsDropdown />
-          
+
            {/* ADD: Notification Settings - Add this here */}
           <NotificationSettings />
 
@@ -1283,7 +1281,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
- 
+
   lightTimePickerModal: {
     backgroundColor: '#fff',
   },
@@ -1382,7 +1380,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-  
+
   // Quick Actions
   actionsSection: {
     marginBottom: 20,
@@ -1555,7 +1553,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1, 
+    borderWidth: 1,
 
   },
   milestoneIconText: {
@@ -1610,8 +1608,8 @@ const styles = StyleSheet.create({
   },
   footerAppName: {
     color: '#fff',
-    fontSize: 48,
-    marginBottom: 8, // Reduced margin to make room for company name
+    fontSize: 58,
+    marginBottom: 18, // Reduced margin to make room for company name
     fontFamily: 'Instrument Serif',
     fontStyle: 'italic',
     letterSpacing: 0,
@@ -1629,7 +1627,7 @@ const styles = StyleSheet.create({
   },
   footerMadeIn: {
     color: '#888',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
   },
   footerInspiration: {
@@ -1763,8 +1761,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(52, 76, 103, 0.5)',
     borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
+    padding: 18,
+    borderWidth: 0,
     borderColor: 'rgba(93, 123, 158, 0.4)',
     gap: 12,
   },
@@ -1774,7 +1772,7 @@ const styles = StyleSheet.create({
   },
   feedbackButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '600',
   },
 
@@ -1787,18 +1785,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(93, 123, 158, 0.3)',
   },
-  
+
   scripturesHeader: {
     marginBottom: 20,
   },
-  
+
   scripturesSectionTitle: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 4,
   },
-  
+
   scripturesSubtitle: {
     color: '#888',
     fontSize: 14,
@@ -1876,7 +1874,7 @@ lockOverlay: {
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
-    
+
   },
 
   scriptureSubtitle: {

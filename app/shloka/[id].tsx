@@ -29,7 +29,6 @@ import { useAudioPlayer } from 'expo-audio';
 import * as FileSystem from 'expo-file-system/legacy';
 import { showAppToast } from '../../lib/appToast';
 
-import Feather from "@react-native-vector-icons/feather/static";
 import AntDesign from "@react-native-vector-icons/ant-design/static";
 import FontAwesome5 from "@react-native-vector-icons/fontawesome5/static";
 import MaterialIcons from "@react-native-vector-icons/material-icons/static";
@@ -45,7 +44,6 @@ export default function ShlokaDetail() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const isDarkMode = useKriya(s => s.isDarkMode);
   const language = useKriya(s => s.language);
-  const setLanguage = useKriya(s => s.setLanguage);
   const recitationStyle = useKriya(s => s.recitationStyle);
 
   // Treat URL param as *index* (0-based)
@@ -55,27 +53,52 @@ export default function ShlokaDetail() {
     return Number.isFinite(n) && n >= 0 ? n : null;
   }, [params.id]);
 
-  const [currentIndex, setCurrentIndex] = useState<number | null>(initialIndex);
+  // The URL param is the source of truth for the current shloka. When the
+  // route changes externally (prev/next or a deep link), the derived value
+  // below picks it up on the next render, so no effect-sync is needed.
   const [row, setRow] = useState<ShlokaRow | null>(null);
-  const [total, setTotal] = useState<number>(0);
+  const [total, setTotal] = useState<number>(() => {
+    try {
+      return getTotalShlokas();
+    } catch {
+      return 0;
+    }
+  });
+  // DB may not be ready on first mount (store init happens after DB opens);
+  // refill the total once the store reports ready.
+  const isReady = useKriya(s => s.ready);
+  useEffect(() => {
+    if (!isReady || total > 0) return;
+    let nextTotal = 0;
+    try {
+      nextTotal = getTotalShlokas();
+    } catch {
+      // DB still unavailable — keep total at 0.
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- must run synchronously the moment the store reports the DB is ready; React bails out if the value is unchanged.
+    setTotal(nextTotal);
+  }, [isReady, total]);
+
   const hasLoadedOnce = useRef(false);
   const transitionIdRef = useRef(0);
   const pendingRowRef = useRef<ShlokaRow | null>(null);
   const bookmarkLongPressRef = useRef(false);
 
-  // sync if route changes externally
-  useEffect(() => {
-    if (initialIndex != null && initialIndex !== currentIndex) setCurrentIndex(initialIndex);
-  }, [initialIndex, currentIndex]);
+  // Clamp the route param when it falls outside the available shlokas.
+  const currentIndex = useMemo(() => {
+    if (initialIndex == null) return null;
+    if (total <= 0) return initialIndex;
+    return Math.min(initialIndex, total - 1);
+  }, [initialIndex, total]);
 
-  // load total (once)
+  // Keep the URL in sync when the index was clamped (or will be clamped) so
+  // that prev/next navigation and deep links always reference a valid shloka.
+  const clampedIndex = currentIndex != null && initialIndex != null && currentIndex !== initialIndex;
   useEffect(() => {
-    try {
-      setTotal(getTotalShlokas());
-    } catch {
-      setTotal(0);
+    if (clampedIndex && currentIndex != null) {
+      router.setParams({ id: String(currentIndex) });
     }
-  }, []);
+  }, [clampedIndex, currentIndex]);
 
   // Smooth verse transition on index change.
   const fade = useSharedValue(1);
@@ -84,7 +107,9 @@ export default function ShlokaDetail() {
   const commitRowAndFadeIn = useCallback((transitionId: number) => {
     if (transitionId !== transitionIdRef.current) return;
     setRow(pendingRowRef.current);
+    // eslint-disable-next-line react-hooks/immutability -- reanimated shared values are mutable handles; assigning .value is the documented API.
     fade.value = 0;
+    // eslint-disable-next-line react-hooks/immutability -- reanimated shared values are mutable handles; assigning .value is the documented API.
     contentTranslateY.value = SHLOKA_LIFT_PX;
     fade.value = withTiming(1, {
       duration: SHLOKA_FADE_IN_MS,
@@ -99,8 +124,11 @@ export default function ShlokaDetail() {
   useEffect(() => {
     if (currentIndex == null) {
       transitionIdRef.current += 1;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- this effect loads the row for the current shloka index and is the single source that feeds the fade transition; moving it into render is not possible because it mutates reanimated shared values.
       setRow(null);
+      // eslint-disable-next-line react-hooks/immutability -- reanimated shared values are mutable handles; assigning .value is the documented API.
       fade.value = 1;
+      // eslint-disable-next-line react-hooks/immutability -- reanimated shared values are mutable handles; assigning .value is the documented API.
       contentTranslateY.value = 0;
       return;
     }
@@ -130,16 +158,6 @@ export default function ShlokaDetail() {
     });
   }, [currentIndex, fade, contentTranslateY, commitRowAndFadeIn]);
 
-  // Guard route param against out-of-range values once total is known.
-  useEffect(() => {
-    if (currentIndex == null) return;
-    if (total <= 0) return;
-    if (currentIndex >= total) {
-      setCurrentIndex(total - 1);
-      router.setParams({ id: String(total - 1) });
-    }
-  }, [currentIndex, total]);
-
   const animatedFadeStyle = useAnimatedStyle(() => {
     return {
       opacity: fade.value,
@@ -153,14 +171,12 @@ export default function ShlokaDetail() {
 const goPrev = () => {
   if (prevIndex == null) return;
   selectionHaptic(); // Changed from direct Haptics call - light haptic for navigation
-  setCurrentIndex(prevIndex);
   router.setParams({ id: String(prevIndex) });
 };
 
 const goNext = () => {
   if (nextIndex == null) return;
   selectionHaptic(); // Changed from direct Haptics call - light haptic for navigation
-  setCurrentIndex(nextIndex);
   router.setParams({ id: String(nextIndex) });
 };
 

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@blazejkustra/react-native-onboarding": "^1.0.0",
+    "@expo/ui": "~57.0.14",
     "@legendapp/motion": "^2.5.3",
     "@marceloterreiro/flash-calendar": "^2.0.0",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -70,7 +71,7 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@types/react": "~19.2.10",
-    "eslint": "^9.0.0",
+    "eslint": "^9.39.5",
     "eslint-config-expo": "~57.0.2",
     "eslint-plugin-react-compiler": "^19.1.0-rc.2",
     "typescript": "~6.0.3",

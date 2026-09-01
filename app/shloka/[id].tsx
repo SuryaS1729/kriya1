@@ -10,8 +10,8 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
-  Modal,
 } from 'react-native';
+import { MenuView } from '@expo/ui/community/menu';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, Easing, runOnJS } from 'react-native-reanimated';
 import {
   getShlokaAt,
@@ -458,18 +458,8 @@ const handleBookPress = () => {
     });
   };
 
-  // Language picker — opens a dropdown modal with all available languages.
-  const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
-
-  const openLanguagePicker = () => {
-    selectionHaptic();
-    setLanguagePickerOpen(true);
-  };
-
-  const closeLanguagePicker = () => {
-    setLanguagePickerOpen(false);
-  };
-
+  // Language selection (native menu via Expo UI). Non-downloaded languages
+  // show a toast pointing at My Journey → Translations / Languages.
   const selectLanguage = (code: ShlokaDisplayLanguage) => {
     selectionHaptic();
     if (code !== 'en' && !downloadedTranslations.includes(code)) {
@@ -483,7 +473,6 @@ const handleBookPress = () => {
       return;
     }
     setTranslationLanguage(code);
-    closeLanguagePicker();
   };
 
 const headerHeight = insets.top + 12 + 36 + 12; // safeArea + paddingTop + buttonHeight + paddingBottom
@@ -522,17 +511,29 @@ return (
 
       {/* Action Buttons */}
       <View style={styles.headerActions}>
-        {/* Language selector — opens dropdown with English + downloaded Indian languages */}
-        <Pressable
-          onPress={openLanguagePicker}
-          hitSlop={16}
-          style={[
-            styles.circularButton,
-            { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)' }
+        {/* Language selector — native menu (Expo UI) with English + all Indian languages */}
+        <MenuView
+          title="Translation Language"
+          actions={[
+            { id: 'en', title: 'English', state: translationLanguage === 'en' ? 'on' : 'off' },
+            ...TRANSLATION_LANGUAGE_LIST.map(lang => ({
+              id: lang.code,
+              title: lang.name,
+              state: (translationLanguage === lang.code ? 'on' : 'off') as 'on' | 'off',
+            })),
           ]}
+          onPressAction={e => selectLanguage(e.nativeEvent.event as ShlokaDisplayLanguage)}
         >
-          <FontAwesome5 name="globe" size={16} iconStyle="solid" color={isDarkMode ? '#ffffffff' : '#18464aff'} />
-        </Pressable>
+          <View
+            hitSlop={16}
+            style={[
+              styles.circularButton,
+              { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)' }
+            ]}
+          >
+            <FontAwesome5 name="globe" size={16} iconStyle="solid" color={isDarkMode ? '#ffffffff' : '#18464aff'} />
+          </View>
+        </MenuView>
         {/* Bookmark Button */}
         <Pressable
           onPress={toggleBookmark}
@@ -745,61 +746,6 @@ return (
         </Pressable>
       </View>
     )}
-
-    {/* Language picker dropdown */}
-    <Modal
-      visible={languagePickerOpen}
-      transparent
-      animationType="fade"
-      onRequestClose={closeLanguagePicker}
-    >
-      <Pressable style={styles.langModalBackdrop} onPress={closeLanguagePicker}>
-        {/* Stop backdrop presses from closing when the panel itself is tapped */}
-        <Pressable
-          style={[styles.langModalPanel, { backgroundColor: isDarkMode ? '#1f2937' : '#ffffff' }]}
-          onPress={() => {}}
-        >
-          <Text style={[styles.langModalTitle, { color: isDarkMode ? '#e5e7eb' : '#1f2937' }]}>
-            Translation Language
-          </Text>
-
-          {[
-            { code: 'en' as ShlokaDisplayLanguage, name: 'English' },
-            ...TRANSLATION_LANGUAGE_LIST.map(lang => ({
-              code: lang.code as ShlokaDisplayLanguage,
-              name: lang.name,
-            })),
-          ].map(option => {
-            const selected = translationLanguage === option.code;
-            const downloaded = option.code === 'en' || downloadedTranslations.includes(option.code);
-            return (
-              <Pressable
-                key={option.code}
-                style={({ pressed }) => [
-                  styles.langOption,
-                  { backgroundColor: isDarkMode ? 'rgba(52, 76, 103, 0.3)' : 'rgba(248, 250, 252, 0.8)' },
-                  selected && { borderColor: '#8ba5e1', borderWidth: 1 },
-                  pressed && { opacity: 0.7 },
-                ]}
-                onPress={() => selectLanguage(option.code)}
-                android_ripple={{ color: '#cccccc18' }}
-              >
-                <Text style={[styles.langOptionName, { color: isDarkMode ? '#e5e7eb' : '#1f2937' }]}>
-                  {option.name}
-                </Text>
-                {selected ? (
-                  <MaterialIcons name="check" size={18} color={isDarkMode ? '#8ba5e1' : '#4a6a9a'} />
-                ) : !downloaded ? (
-                  <Text style={[styles.langOptionHint, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
-                    Not downloaded
-                  </Text>
-                ) : null}
-              </Pressable>
-            );
-          })}
-        </Pressable>
-      </Pressable>
-    </Modal>
   </SafeAreaView>
 );
 }
@@ -922,51 +868,6 @@ const styles = StyleSheet.create({
   closeIcon: {
     fontSize: 16,
     fontWeight: '700'
-  },
-
-  // Language picker dropdown
-  langModalBackdrop: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    paddingHorizontal: 24,
-  },
-  langModalPanel: {
-    width: '100%',
-    maxWidth: 320,
-    borderRadius: 16,
-    padding: 20,
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    gap: 8,
-  },
-  langModalTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  langOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  langOptionName: {
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  langOptionHint: {
-    fontSize: 12,
-    fontStyle: 'italic',
   },
 
 });

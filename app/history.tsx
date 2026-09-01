@@ -410,6 +410,7 @@ function WeeklySummary() {
     const today = new Date();
     const currentWeekStart = new Date(today);
     currentWeekStart.setDate(today.getDate() - today.getDay());
+    const todayKey = getDateKey(today);
 
     let totalTasks = 0;
     let completedTasks = 0;
@@ -421,8 +422,13 @@ function WeeklySummary() {
       day.setDate(currentWeekStart.getDate() + i);
       const dayKey = getDateKey(day);
 
-      const tasks = getForDay(dayKey);
-      const focusSessionsForDay = getFocusSessionsForDay ? getFocusSessionsForDay(dayKey) : 0;
+      // Today's data comes from the subscribed store values (change signals);
+      // other days are read through the store getters.
+      const isToday = dayKey === todayKey;
+      const tasks = isToday ? tasksToday : getForDay(dayKey);
+      const focusSessionsForDay = isToday
+        ? (focusSessions[dayKey] || 0)
+        : (getFocusSessionsForDay ? getFocusSessionsForDay(dayKey) : 0);
 
       if (tasks.length > 0 || focusSessionsForDay > 0) {
         activeDays++;
@@ -441,8 +447,6 @@ function WeeklySummary() {
       completionRate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
       focusTime: totalFocusSessions * 25 // 25 minutes per session
     };
-    // getTasksForDay returns a fresh array on each store get, so subscribing
-    // to tasksToday/focusSessions gives the memo real change signals.
   }, [getForDay, getFocusSessionsForDay, tasksToday, focusSessions]);
 
   return (
@@ -496,6 +500,7 @@ function NotificationSettings() {
   useEffect(() => {
     const newTime = new Date();
     newTime.setHours(reminderTime.hour, reminderTime.minute, 0, 0);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- must sync the picker's draft value whenever the persisted reminder time changes; the picker otherwise keeps a stale date.
     setSelectedTime(newTime);
   }, [reminderTime]);
 

@@ -1,9 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import Feather from "@react-native-vector-icons/feather/static";
-import DateTimePicker, {
-  type DateTimePickerEvent,
-} from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { PressableScale } from 'pressto';
 
 import type { ReminderStep as ReminderStepType, Theme } from '../../lib/onboarding/constants';
@@ -15,7 +13,8 @@ type ReminderSlideProps = {
   isDarkMode: boolean;
   selectedTime: Date;
   showPicker: boolean;
-  onTimeChange: (event: DateTimePickerEvent, time?: Date) => void;
+  onValueChange: (event: any, date: Date) => void;
+  onDismiss: () => void;
   onOpenTimePicker: () => void;
 };
 
@@ -25,7 +24,8 @@ export default function ReminderSlide({
   isDarkMode,
   selectedTime,
   showPicker,
-  onTimeChange,
+  onValueChange,
+  onDismiss,
   onOpenTimePicker,
 }: ReminderSlideProps) {
   const getReminderTime = () => {
@@ -74,7 +74,7 @@ export default function ReminderSlide({
               value={selectedTime}
               mode="time"
               display="compact"
-              onChange={onTimeChange}
+              onValueChange={onValueChange}
               style={styles.iosTimePicker}
               textColor={theme.text}
               themeVariant={isDarkMode ? 'dark' : 'light'}
@@ -107,7 +107,9 @@ export default function ReminderSlide({
                 value={selectedTime}
                 mode="time"
                 display="default"
-                onChange={onTimeChange}
+                onValueChange={onValueChange}
+                onDismiss={onDismiss}
+                onNeutralButtonPress={onDismiss}
                 is24Hour={false}
               />
             )}

@@ -4,7 +4,7 @@ import PagerView from 'react-native-pager-view';
 import type { PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
 import { PressableScale } from 'pressto';
 import AntDesign from "@react-native-vector-icons/ant-design/static";
-import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -27,7 +27,8 @@ type OnboardingPagerProps = {
   selectedTime: Date;
   showPicker: boolean;
   isSavingReminder: boolean;
-  onTimeChange: (event: DateTimePickerEvent, time?: Date) => void;
+  onValueChange: (event: any, date: Date) => void;
+  onDismiss: () => void;
   onOpenTimePicker: () => void;
   onSaveReminder: () => Promise<void>;
   onFinish: () => void;
@@ -39,7 +40,8 @@ export default function OnboardingPager({
   selectedTime,
   showPicker,
   isSavingReminder,
-  onTimeChange,
+  onValueChange,
+  onDismiss,
   onOpenTimePicker,
   onSaveReminder,
   onFinish,
@@ -119,7 +121,8 @@ export default function OnboardingPager({
                 isDarkMode={isDarkMode}
                 selectedTime={selectedTime}
                 showPicker={showPicker}
-                onTimeChange={onTimeChange}
+                onValueChange={onValueChange}
+                onDismiss={onDismiss}
                 onOpenTimePicker={onOpenTimePicker}
               />
             ) : (

@@ -353,11 +353,9 @@ export default function Share2() {
       } else {
         showAppToast({
           type: 'error',
-          text1: 'Sharing is unavailable',
-          text2: 'Please save the card and share it from your gallery.',
-          duration: 2200,
+          text1: 'Sharing unavailable',
+          duration: 2000,
           position: 'top',
-          topOffset: 64,
         });
       }
     } catch (error) {
@@ -365,10 +363,8 @@ export default function Share2() {
       showAppToast({
         type: 'error',
         text1: 'Share failed',
-        text2: 'Please try again.',
         duration: 1800,
         position: 'top',
-        topOffset: 64,
       });
     } finally {
       setIsSharing(false);
@@ -386,11 +382,9 @@ export default function Share2() {
       if (status !== 'granted') {
         showAppToast({
           type: 'error',
-          text1: 'Permission denied',
-          text2: 'Please allow photo access to save this image.',
+          text1: 'Photo access needed',
           duration: 2000,
           position: 'top',
-          topOffset: 64,
         });
         return;
       }
@@ -402,20 +396,16 @@ export default function Share2() {
       showAppToast({
         type: 'success',
         text1: 'Saved to gallery',
-        text2: 'Your shloka card is ready to share.',
-        duration: 2000,
+        duration: 1800,
         position: 'top',
-        topOffset: 64,
       });
     } catch (error) {
       console.error('[Save] Failed:', error);
       showAppToast({
         type: 'error',
         text1: 'Save failed',
-        text2: 'Please try again.',
         duration: 1800,
         position: 'top',
-        topOffset: 64,
       });
     } finally {
       setIsSaving(false);

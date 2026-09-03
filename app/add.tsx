@@ -13,7 +13,7 @@ import {
   FlatList,
   TouchableOpacity
 } from 'react-native';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '../components/TopBar';
 import { useKriya } from '../lib/store';
@@ -285,17 +285,16 @@ export default function Add() {
     setShowCustomPicker(false);
   };
 
-  const onCustomDateChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
+  const handleCustomValueChange = (_event: any, date: Date) => {
     if (Platform.OS === 'android') {
       setShowCustomPicker(false);
     }
-
-    if (!selectedDate) {
-      return;
-    }
-
-    setCustomDayKey(toStartOfDayKey(selectedDate));
+    setCustomDayKey(toStartOfDayKey(date));
     setIsCustom(true);
+  };
+
+  const handleCustomDismiss = () => {
+    setShowCustomPicker(false);
   };
 
 
@@ -537,7 +536,7 @@ export default function Add() {
                   value={customDayKey != null ? new Date(customDayKey) : new Date(tomorrowKey)}
                   mode="date"
                   display="spinner"
-                  onChange={onCustomDateChange}
+                  onValueChange={handleCustomValueChange}
                   minimumDate={new Date(todayKey())}
                   style={styles.iosDatePicker}
                   themeVariant={isDarkMode ? 'dark' : 'light'}
@@ -548,7 +547,9 @@ export default function Add() {
                 value={customDayKey != null ? new Date(customDayKey) : new Date(tomorrowKey)}
                 mode="date"
                 display="default"
-                onChange={onCustomDateChange}
+                onValueChange={handleCustomValueChange}
+                onDismiss={handleCustomDismiss}
+                onNeutralButtonPress={handleCustomDismiss}
                 minimumDate={new Date(todayKey())}
               />
             )

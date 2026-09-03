@@ -2,8 +2,6 @@ import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, StatusBar, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-
 import BlurBackground from '../../components/BlurBackground';
 import { useKriya } from '../../lib/store';
 import { buttonPressHaptic, selectionHaptic } from '../../lib/haptics';
@@ -72,15 +70,18 @@ export default function Onboarding() {
     setShowPicker(true);
   }, []);
 
-  const handleTimeChange = useCallback(
-    (event: DateTimePickerEvent, time?: Date) => {
+  const handleValueChange = useCallback(
+    (_event: any, date: Date) => {
       if (Platform.OS === 'android') setShowPicker(false);
-      if (event.type === 'dismissed' || !time) return;
-      setSelectedTime(time);
+      setSelectedTime(date);
       selectionHaptic();
     },
     [],
   );
+
+  const handleDismiss = useCallback(() => {
+    setShowPicker(false);
+  }, []);
 
   // ─── Render ────────────────────────────────────────────────────
   return (
@@ -105,7 +106,8 @@ export default function Onboarding() {
             selectedTime={selectedTime}
             showPicker={showPicker}
             isSavingReminder={isSavingReminder}
-            onTimeChange={handleTimeChange}
+            onValueChange={handleValueChange}
+            onDismiss={handleDismiss}
             onOpenTimePicker={handleOpenTimePicker}
             onSaveReminder={handleSaveReminder}
             onFinish={finishOnboarding}

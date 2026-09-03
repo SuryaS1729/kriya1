@@ -106,9 +106,8 @@ function RecitationSettings() {
         if (!audio) {
           showAppToast({
             type: 'error',
-            text1: 'Preview Unavailable',
-            text2: 'No recording found for this style yet.',
-            duration: 2500,
+            text1: 'No preview available',
+            duration: 2200,
             position: 'bottom',
           });
           errorHaptic();
@@ -152,9 +151,8 @@ function RecitationSettings() {
       console.warn('[RecitationSettings] Preview failed:', err);
       showAppToast({
         type: 'error',
-        text1: 'Preview Failed',
-        text2: 'Could not play this recording.',
-        duration: 2500,
+        text1: 'Preview failed',
+        duration: 2200,
         position: 'bottom',
       });
       errorHaptic();
@@ -286,9 +284,8 @@ function TranslationSettings() {
       taskCompleteHaptic();
       showAppToast({
         type: 'success',
-        text1: `${TRANSLATION_LANGUAGE_LIST.find(l => l.code === code)?.name} Downloaded`,
-        text2: 'You can now read shlokas in this language.',
-        duration: 2500,
+        text1: `${TRANSLATION_LANGUAGE_LIST.find(l => l.code === code)?.name} downloaded`,
+        duration: 2200,
         position: 'bottom',
       });
     } catch (err) {
@@ -296,9 +293,8 @@ function TranslationSettings() {
       errorHaptic();
       showAppToast({
         type: 'error',
-        text1: 'Download Failed',
-        text2: 'Could not download this translation. Check your connection and try again.',
-        duration: 3000,
+        text1: 'Download failed',
+        duration: 2500,
         position: 'bottom',
       });
     } finally {
@@ -329,9 +325,8 @@ function TranslationSettings() {
       errorHaptic();
       showAppToast({
         type: 'error',
-        text1: 'Remove Failed',
-        text2: 'Could not remove this translation. Please try again.',
-        duration: 3000,
+        text1: "Couldn't remove",
+        duration: 2200,
         position: 'bottom',
       });
     } finally {
@@ -515,55 +510,44 @@ function NotificationSettings() {
     setSelectedTime(newTime);
   }, [reminderTime]);
 
-  const handleTimeChange = async (event: any, time?: Date) => {
-    // Hide picker on Android when user interacts
+  // New API: onValueChange for set, onDismiss for cancel (replaces deprecated onChange)
+  const handleValueChange = async (_event: any, date: Date) => {
     if (Platform.OS === 'android') {
       setShowTimePicker(false);
     }
+    setSelectedTime(date);
 
-    if (time) {
-      setSelectedTime(time);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
 
-      // Save the time immediately for both platforms
-      const hours = time.getHours();
-      const minutes = time.getMinutes();
-
-      try {
-        await setReminderTime(hours, minutes);
-
-        // Format time for display in toast
-        const timeString = time.toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true
-        });
-
-        // console.log(`✅ Time updated to ${hours}:${minutes.toString().padStart(2, '0')}`);
-
-        showAppToast({
-          type: 'success',
-          text1: 'Reminder Time Set',
-          text2: `Your daily reminder is now set for ${timeString}`,
-          duration: 3000,
-          position: 'bottom',
-        });
-
-        taskCompleteHaptic(); // Changed from direct Haptics call
-      } catch {
-        showAppToast({
-          type: 'error',
-          text1: 'Failed to Set Time',
-          text2: 'Could not update your reminder time. Please try again.',
-          duration: 3000,
-          position: 'bottom',
-        });
-        errorHaptic(); // Changed from direct Haptics call
-      }
-    } else if (Platform.OS === 'android') {
-      // User cancelled on Android
-      // console.log('User cancelled time picker on Android');
+    try {
+      await setReminderTime(hours, minutes);
+      const timeString = date.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+      showAppToast({
+        type: 'success',
+        text1: `Reminder · ${timeString}`,
+        duration: 2200,
+        position: 'bottom',
+      });
+      taskCompleteHaptic();
+    } catch {
+      showAppToast({
+        type: 'error',
+        text1: "Couldn't save time",
+        duration: 2200,
+        position: 'bottom',
+      });
+      errorHaptic();
     }
   };
+
+  const handleDismiss = useCallback(() => {
+    setShowTimePicker(false);
+  }, []);
 
   const getDisplayTime = () => {
     return `${reminderTime.hour.toString().padStart(2, '0')}:${reminderTime.minute.toString().padStart(2, '0')}`;
@@ -586,17 +570,8 @@ function NotificationSettings() {
 
     showAppToast({
       type: enabled ? 'success' : attemptedEnable ? 'error' : 'info',
-      text1: enabled
-        ? 'Notifications Enabled'
-        : attemptedEnable
-          ? 'Permission Needed'
-          : 'Notifications Disabled',
-      text2: enabled
-        ? "You'll receive daily reminders to plan your day"
-        : attemptedEnable
-          ? 'Notifications were not enabled because permission was not granted.'
-          : 'Daily reminders have been turned off',
-      duration: 2500,
+      text1: enabled ? 'Reminders on' : attemptedEnable ? 'Permission needed' : 'Reminders off',
+      duration: 2000,
       position: 'bottom',
     });
   };
@@ -678,7 +653,7 @@ function NotificationSettings() {
                   value={selectedTime}
                   mode="time"
                   display="spinner"
-                  onValueChange={handleTimeChange}
+                  onValueChange={handleValueChange}
                   style={styles.nativeTimePicker}
                   textColor={isDarkMode ? '#fff' : '#000'}
                   themeVariant={isDarkMode ? 'dark' : 'light'}
@@ -702,7 +677,9 @@ function NotificationSettings() {
             value={selectedTime}
             mode="time"
             display="default"
-            onValueChange={handleTimeChange}
+            onValueChange={handleValueChange}
+            onDismiss={handleDismiss}
+            onNeutralButtonPress={handleDismiss}
             is24Hour={false}
           />
         )

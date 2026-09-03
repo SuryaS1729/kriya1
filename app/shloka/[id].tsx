@@ -284,19 +284,18 @@ const handleBookPress = () => {
   const showSavedToast = () => {
     showAppToast({
       type: 'success',
-      text1: 'Saved to Bookmarks',
-      text2: 'Find it in Profile -> Bookmarks or long press the bookmark icon',
-      duration: 2000,
-      bottomOffset: 80,
+      text1: 'Saved to bookmarks',
+      duration: 1800,
+      position: 'bottom',
     });
   };
 
   const showRemovedToast = () => {
     showAppToast({
       type: 'info',
-      text1: 'Bookmark Removed',
-      duration: 1000,
-      bottomOffset: 80,
+      text1: 'Bookmark removed',
+      duration: 1500,
+      position: 'bottom',
     });
   };
 
@@ -465,9 +464,9 @@ const handleBookPress = () => {
     if (code !== 'en' && !downloadedTranslations.includes(code)) {
       showAppToast({
         type: 'info',
-        text1: 'Not Downloaded',
-        text2: 'Download this language from My Journey → Translations / Languages.',
-        duration: 2500,
+        text1: 'Not downloaded',
+        text2: 'Get it in My Journey',
+        duration: 2200,
         position: 'bottom',
       });
       return;

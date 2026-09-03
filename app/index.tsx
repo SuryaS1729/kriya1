@@ -6,6 +6,8 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withTiming,
+  Easing,
   LinearTransition,
   interpolateColor,
   interpolate,
@@ -29,17 +31,17 @@ import {
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 const ALL_TASK_REORDER_DELAY_MS = 320;
 
-// Update the Checkbox component for better timing
+// SKILL.md §5 — soft ease-out for UI, not spring (no finger)
+const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 
 const Checkbox = ({ completed, isDarkMode }: { completed: boolean, isDarkMode: boolean }) => {
   const progress = useSharedValue(completed ? 1 : 0);
 
   React.useEffect(() => {
-    // Slightly slower spring so you can see the check animation
-    progress.value = withSpring(completed ? 1 : 0, {
-      stiffness: 300, // Reduced from 400
-      damping: 25,    // Reduced from 30
-      mass: 0.8,
+    // Gate: tens/day → near-imperceptible <150ms, timing not spring
+    progress.value = withTiming(completed ? 1 : 0, {
+      duration: 150,
+      easing: EASE_OUT,
     });
   }, [completed, progress]);
 
@@ -64,10 +66,8 @@ const Checkbox = ({ completed, isDarkMode }: { completed: boolean, isDarkMode: b
 
   const checkmarkStyle = useAnimatedStyle(() => {
     return {
-      opacity: interpolate(progress.value, [0, 0.6, 1], [0, 0, 1]), // Slower fade in
-      transform: [{
-        scale: interpolate(progress.value, [0, 0.6, 0.8, 1], [0, 0, 1.2, 1]) // More bounce
-      }],
+      opacity: interpolate(progress.value, [0, 1], [0, 1]),
+      transform: [{ scale: interpolate(progress.value, [0, 1], [0.96, 1]) }],
     };
   }, []);
 

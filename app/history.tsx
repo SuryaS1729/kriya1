@@ -11,6 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 // import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { StatusBar } from 'expo-status-bar';
+import Animated, { LinearTransition, Easing, useReducedMotion } from 'react-native-reanimated';
 import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic } from '../lib/haptics';
 import { showAppToast } from '../lib/appToast';
 import { shlokaRecitation } from '../lib/tts';
@@ -29,6 +30,15 @@ import {
 function getDateKey(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
+
+// Animation — SKILL.md build sequence:
+// Gate: occasional (≤5 downloads lifetime) → animate.
+// Purpose: state indication + preventing a jarring reorder when downloaded items move.
+// Tool: layout animation (list reflow) — cheapest that fits. Timing, not spring (no finger).
+// Easing per SKILL.md: moving on screen → ease-in-out, duration 200-220ms.
+const EASE_IN_OUT = Easing.bezier(0.77, 0, 0.175, 1);
+// Module scope — builders rebuilt in render cost every re-render (RECIPES.md)
+const TRANSLATION_REORDER_TRANSITION = LinearTransition.duration(220).easing(EASE_IN_OUT);
 
 
 // Recitation Settings Component
@@ -162,12 +172,12 @@ function RecitationSettings() {
     {
       id: 'hindi',
       title: 'Hindi Recitation',
-      description: 'Current TTS recitation of the shloka in Hindi',
+      description: 'Clear, natural Hindi narration',
     },
     {
       id: 'sanskrit',
       title: 'Authentic Sanskrit',
-      description: 'Traditional Sanskrit shloka recitation',
+      description: 'Traditional Sanskrit chant',
     },
   ];
 
@@ -185,7 +195,12 @@ function RecitationSettings() {
           return (
             <Pressable
               key={option.id}
-              style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
+              style={[
+                styles.settingRow,
+                !isDarkMode && styles.lightSettingRow,
+                isSelected && styles.settingRowSelected,
+                isSelected && !isDarkMode && styles.lightSettingRowSelected,
+              ]}
               onPress={() => handleSelect(option.id)}
               android_ripple={{ color: '#cccccc18' }}
             >
@@ -198,7 +213,7 @@ function RecitationSettings() {
                 </Text>
               </View>
 
-              {/* Inline audio preview */}
+              {/* Icon-only preview — preview ≠ select */}
               <Pressable
                 onPress={() => playPreview(option.id)}
                 hitSlop={8}
@@ -212,29 +227,13 @@ function RecitationSettings() {
                   <ActivityIndicator size="small" color={isPlaying ? '#fff' : (isDarkMode ? '#8ba5e1' : '#4a6a9a')} />
                 ) : (
                   <Feather
-                    name={isPlaying ? 'stop-circle' : 'play'}
+                    name={isPlaying ? 'pause' : 'play'}
                     size={16}
                     color={isPlaying ? '#fff' : (isDarkMode ? '#8ba5e1' : '#4a6a9a')}
+                    style={isPlaying ? undefined : { marginLeft: 2 }}
                   />
                 )}
-                <Text style={[
-                  styles.previewButtonText,
-                  isPlaying && styles.previewButtonTextActive,
-                ]}>
-                  {isPlaying ? 'Stop' : 'Preview'}
-                </Text>
               </Pressable>
-
-              <View style={[
-                styles.toggle,
-                isSelected && styles.toggleActive,
-                isSelected && !isDarkMode && styles.lightToggleActive
-              ]}>
-                <View style={[
-                  styles.toggleKnob,
-                  isSelected && styles.toggleKnobActive
-                ]} />
-              </View>
             </Pressable>
           );
         })}
@@ -248,6 +247,7 @@ function RecitationSettings() {
 // SQLite). Download/remove is the only responsibility of this section.
 function TranslationSettings() {
   const isDarkMode = useKriya(s => s.isDarkMode);
+  const reducedMotion = useReducedMotion();
   const translationLanguage = useKriya(s => s.translationLanguage);
   const setTranslationLanguage = useKriya(s => s.setTranslationLanguage);
   const downloadedTranslations = useKriya(s => s.downloadedTranslations);
@@ -339,6 +339,17 @@ function TranslationSettings() {
     }
   };
 
+  // Downloaded languages bubble to top with layout animation on change
+  const sortedLanguages = useMemo(() => {
+    return [...TRANSLATION_LANGUAGE_LIST].sort((a, b) => {
+      const aDl = localDownloaded.has(a.code);
+      const bDl = localDownloaded.has(b.code);
+      if (aDl && !bDl) return -1;
+      if (!aDl && bDl) return 1;
+      return TRANSLATION_LANGUAGE_LIST.indexOf(a) - TRANSLATION_LANGUAGE_LIST.indexOf(b);
+    });
+  }, [localDownloaded]);
+
   return (
     <View style={[styles.section, !isDarkMode && styles.lightSection]}>
       <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Translations / Languages</Text>
@@ -347,14 +358,15 @@ function TranslationSettings() {
       </Text>
 
       <View style={styles.notificationSettings}>
-        {TRANSLATION_LANGUAGE_LIST.map((lang) => {
+        {sortedLanguages.map((lang) => {
           const downloaded = localDownloaded.has(lang.code);
           const busy = busyLang === lang.code;
           return (
-            <View
+            <Animated.View
               key={lang.code}
-              style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
+              layout={reducedMotion ? undefined : TRANSLATION_REORDER_TRANSITION}
             >
+              <View style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}>
               <View style={styles.settingInfo}>
                 <Text style={[styles.settingTitle, !isDarkMode && styles.lightText]}>
                   {lang.name}
@@ -370,12 +382,13 @@ function TranslationSettings() {
                 <Pressable
                   onPress={() => handleRemove(lang.code)}
                   hitSlop={8}
-                  style={[styles.translationActionButton, !isDarkMode && styles.lightTranslationActionButton]}
+                  style={[
+                    styles.translationActionButton,
+                    styles.translationRemoveButton,
+                    !isDarkMode && styles.lightTranslationRemoveButton,
+                  ]}
                 >
-                  <Feather name="trash-2" size={14} color={isDarkMode ? '#f87171' : '#dc2626'} />
-                  <Text style={[styles.translationActionText, { color: isDarkMode ? '#f87171' : '#dc2626' }]}>
-                    Remove
-                  </Text>
+                  <Feather name="trash-2" size={16} color={isDarkMode ? '#f87171' : '#dc2626'} />
                 </Pressable>
               ) : (
                 <Pressable
@@ -383,13 +396,11 @@ function TranslationSettings() {
                   hitSlop={8}
                   style={[styles.translationActionButton, !isDarkMode && styles.lightTranslationActionButton]}
                 >
-                  <Feather name="download" size={14} color={isDarkMode ? '#8ba5e1' : '#4a6a9a'} />
-                  <Text style={[styles.translationActionText, { color: isDarkMode ? '#8ba5e1' : '#4a6a9a' }]}>
-                    Download
-                  </Text>
+                  <Feather name="download" size={16} color={isDarkMode ? '#8ba5e1' : '#4a6a9a'} />
                 </Pressable>
               )}
-            </View>
+              </View>
+            </Animated.View>
           );
         })}
       </View>
@@ -1380,12 +1391,22 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     backgroundColor: 'rgba(52, 76, 103, 0.3)',
-    borderWidth: 1,
-    borderColor: 'rgba(93, 123, 158, 0.3)',
+    borderWidth: 1.5,
+    borderColor: 'transparent',
   },
   lightSettingRow: {
     backgroundColor: 'rgba(248, 250, 252, 0.8)',
-    borderColor: 'rgba(226, 232, 240, 0.6)',
+    borderColor: 'transparent',
+  },
+  settingRowSelected: {
+    borderColor: '#8ba5e1',
+    borderWidth: 1.5,
+    backgroundColor: 'rgba(139, 165, 225, 0.14)',
+  },
+  lightSettingRowSelected: {
+    borderColor: '#4a6a9a',
+    borderWidth: 1.5,
+    backgroundColor: 'rgba(74, 106, 154, 0.10)',
   },
   settingInfo: {
     flex: 1,
@@ -1408,16 +1429,14 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   previewButton: {
-    flexDirection: 'row',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(139, 165, 225, 0.4)',
-    backgroundColor: 'rgba(139, 165, 225, 0.08)',
-    marginRight: 12,
+    borderColor: 'rgba(139, 165, 225, 0.35)',
+    backgroundColor: 'rgba(139, 165, 225, 0.10)',
   },
   previewButtonPressed: {
     opacity: 0.7,
@@ -1435,19 +1454,26 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   translationActionButton: {
-    flexDirection: 'row',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(139, 165, 225, 0.4)',
-    backgroundColor: 'rgba(139, 165, 225, 0.08)',
+    borderColor: 'rgba(139, 165, 225, 0.35)',
+    backgroundColor: 'rgba(139, 165, 225, 0.10)',
   },
   lightTranslationActionButton: {
-    borderColor: 'rgba(74, 106, 154, 0.3)',
-    backgroundColor: 'rgba(74, 106, 154, 0.06)',
+    borderColor: 'rgba(74, 106, 154, 0.30)',
+    backgroundColor: 'rgba(74, 106, 154, 0.10)',
+  },
+  translationRemoveButton: {
+    borderColor: 'rgba(248, 113, 113, 0.35)',
+    backgroundColor: 'rgba(248, 113, 113, 0.10)',
+  },
+  lightTranslationRemoveButton: {
+    borderColor: 'rgba(220, 38, 38, 0.30)',
+    backgroundColor: 'rgba(220, 38, 38, 0.08)',
   },
   translationActionText: {
     fontSize: 12,
@@ -1650,7 +1676,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(52, 76, 103, 0.4)',
     borderRadius: 16,
     padding: 20,
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: 'rgba(93, 123, 158, 0.3)',
   },
   lightGitaSection: {
@@ -1971,7 +1997,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(52, 76, 103, 0.4)',
     borderRadius: 16,
     padding: 20,
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: 'rgba(93, 123, 158, 0.3)',
   },
 
@@ -2005,7 +2031,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(36, 60, 85, 0.6)',
     borderRadius: 16,
     padding: 16,
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: 'rgba(93, 123, 158, 0.4)',
     marginRight: 16,
   },

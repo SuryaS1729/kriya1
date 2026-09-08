@@ -808,14 +808,14 @@ console.log('🔍 Guided Tour Debug:', {
             </Pressable>*/}
             <Link href="/calendar" asChild>
               <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
-                <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
+                <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#16283d' : '#e9effa' }]}>
                   <Ionicons name='calendar-outline' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
                 </View>
               </TouchableOpacity>
             </Link>
             <Link href="/history" asChild>
               <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
-                <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
+                <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#16283d' : '#e9effa' }]}>
                   <Feather name='user' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
                 </View>
               </TouchableOpacity>
@@ -846,20 +846,20 @@ console.log('🔍 Guided Tour Debug:', {
                     </View>
                     <View style={styles.emptyStateSteps}>
                       <View style={styles.emptyStateStepRow}>
-                        <Feather name="plus" size={14} color={isDarkMode ? '#959eb1ff' : '#64748b'} />
-                        <Text style={[styles.emptyStateStepText, { color: isDarkMode ? '#959eb1ff' : '#64748b' }]}>
+                        <Feather name="plus" size={14} color={isDarkMode ? '#959eb1ff' : '#475569'} />
+                        <Text style={[styles.emptyStateStepText, { color: isDarkMode ? '#959eb1ff' : '#475569' }]}>
                           Add your tasks for today
                         </Text>
                       </View>
                       <View style={styles.emptyStateStepRow}>
-                        <Feather name="book-open" size={14} color={isDarkMode ? '#959eb1ff' : '#64748b'} />
-                        <Text style={[styles.emptyStateStepText, { color: isDarkMode ? '#959eb1ff' : '#64748b' }]}>
+                        <Feather name="book-open" size={14} color={isDarkMode ? '#959eb1ff' : '#475569'} />
+                        <Text style={[styles.emptyStateStepText, { color: isDarkMode ? '#959eb1ff' : '#475569' }]}>
                           Complete tasks to unlock new shlokas
                         </Text>
                       </View>
                       <View style={styles.emptyStateStepRow}>
-                        <Feather name="sunrise" size={14} color={isDarkMode ? '#959eb1ff' : '#64748b'} />
-                        <Text style={[styles.emptyStateStepText, { color: isDarkMode ? '#959eb1ff' : '#64748b' }]}>
+                        <Ionicons name="footsteps-outline" size={15} color={isDarkMode ? '#959eb1ff' : '#475569'} />
+                        <Text style={[styles.emptyStateStepText, { color: isDarkMode ? '#959eb1ff' : '#475569' }]}>
                           Small steps, every day
                         </Text>
                       </View>
@@ -1016,9 +1016,7 @@ scrollContentSanskrit: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#f8fafc',
-    borderWidth: 0.5,
-    borderColor: '#e2e8f0',
+    backgroundColor: '#e9effa',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1170,15 +1168,17 @@ marginLeft:10
     justifyContent: 'center',
     alignItems: 'flex-start',
     paddingVertical: 20,
+    width: '100%',
 
   },
   emptyStateWrap: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'flex-start',
+    alignItems: 'stretch',
   },
   emptyStateContent: {
     alignItems: 'flex-start',
+    width: '100%',
   },
   emptyStateHeaderRow: {
     flexDirection: 'row',
@@ -1190,22 +1190,26 @@ marginLeft:10
     fontWeight: '600',
     color: '#64748b',
     fontFamily: "Kalam",
+    flexShrink: 1,
   },
   emptyStateSteps: {
-    marginTop: 14,
-    gap: 11,
+    marginTop: 26,
+    gap: 16,
     alignItems: 'flex-start',
+    width: '100%',
   },
   emptyStateStepRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    width: '100%',
   },
   emptyStateStepText: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 24,
     fontFamily: "Source Serif Pro",
-    fontWeight: "300",
+    fontWeight: "400",
+    flexShrink: 1,
   },
 
   yesterdaySection: {

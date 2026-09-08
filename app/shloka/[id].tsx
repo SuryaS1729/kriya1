@@ -39,6 +39,7 @@ import {
 import AntDesign from "@react-native-vector-icons/ant-design/static";
 import FontAwesome5 from "@react-native-vector-icons/fontawesome5/static";
 import MaterialIcons from "@react-native-vector-icons/material-icons/static";
+import Ionicons from "@react-native-vector-icons/ionicons/static";
 
 const PILL_W = 180;
 const SHLOKA_FADE_OUT_MS = 140;
@@ -530,7 +531,7 @@ return (
               { backgroundColor: isDarkMode ? 'rgba(23, 29, 63, 0.75)' : 'rgba(117, 117, 117, 0.08)' }
             ]}
           >
-            <FontAwesome5 name="globe" size={16} iconStyle="solid" color={isDarkMode ? '#ffffffff' : '#18464aff'} />
+            <Ionicons name="language" size={18} color={isDarkMode ? '#ffffffff' : '#18464aff'} />
           </View>
         </MenuView>
         {/* Bookmark Button */}

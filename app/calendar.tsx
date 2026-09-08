@@ -530,7 +530,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
   }, [handleSelectDate]);
 
   return (
-    <View style={[styles.topHalf, { backgroundColor: isDarkMode ? '#0f1e2d30' : '#ffffffaa' }]}> 
+    <View style={[styles.topHalf, { backgroundColor: isDarkMode ? '#0f1e2d30' : '#ffffffaa' }]}>
       <View style={styles.calendarHeaderRow}>
         <Pressable
           onPress={() => {
@@ -716,7 +716,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
           orderedTasks.length === 0 && styles.taskListEmpty,
         ]}
         ListEmptyComponent={
-          <Text style={[styles.emptyText, { color: isDarkMode ? '#7e8a9c' : '#94a3b8' }]}> 
+          <Text style={[styles.emptyText, { color: isDarkMode ? '#7e8a9c' : '#94a3b8' }]}>
             No tasks for this date yet.
           </Text>
         }
@@ -764,7 +764,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
           <Feather name="plus" size={20} color={isDarkMode ? '#ffffff' : '#606060'} />
         </View>
         <Text style={[styles.addTaskText, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
-          Add a task for this date
+          Add a task for this date ...
         </Text>
       </TouchableOpacity>
     </View>
@@ -797,13 +797,13 @@ export default function CalendarScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top']}>
       <StatusBar hidden= {true} />
-      
+
       <LinearGradient
         colors={isDarkMode ? ['#031d31e7', '#000000ff'] : ['#ffffffff', '#f0f2f8ff']}
         style={StyleSheet.absoluteFill}
       />
 
-      <View style={[styles.container, { paddingBottom: insets.bottom + 12 }]}> 
+      <View style={[styles.container, { paddingBottom: insets.bottom + 12 }]}>
         <CalendarSectionMemo isDarkMode={isDarkMode} />
         <TasksSection isDarkMode={isDarkMode} onWriteForToday={refreshTodayTasks} />
       </View>
@@ -1006,7 +1006,7 @@ const styles = StyleSheet.create({
   },
   addTaskText: {
     marginLeft: 12,
-    fontSize: 15,
+    fontSize: 13,
     color: '#64748b',
     fontFamily:"Space Mono",
     fontWeight:"400",

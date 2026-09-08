@@ -5,8 +5,10 @@ import { ActivityIndicator, FlatList, StyleSheet, Text, View, Pressable, ScrollV
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withRepeat,
   withSpring,
   withTiming,
+  cancelAnimation,
   Easing,
   LinearTransition,
   interpolateColor,
@@ -18,6 +20,7 @@ import { useKriya } from '../lib/store';
 import { setTaskCompleted, removeTask as removeTaskDb, getAllTasks, type Task } from '../lib/tasks';
 import { StatusBar } from 'expo-status-bar';
 import Feather from "@react-native-vector-icons/feather/static";
+import Ionicons from "@react-native-vector-icons/ionicons/static";
 import { taskCompleteHaptic, selectionHaptic, buttonPressHaptic, errorHaptic } from '../lib/haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
@@ -29,7 +32,27 @@ import {
 } from '../lib/shloka';
 
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
+const AnimatedIonicons = Animated.createAnimatedComponent(Ionicons);
 const ALL_TASK_REORDER_DELAY_MS = 320;
+
+const SlowSpinningSun = ({ color, size = 48 }: { color: string; size?: number }) => {
+  const rotation = useSharedValue(0);
+
+  useEffect(() => {
+    rotation.value = withRepeat(
+      withTiming(360, { duration: 24000, easing: Easing.linear }),
+      -1,
+      false
+    );
+    return () => cancelAnimation(rotation);
+  }, [rotation]);
+
+  const spinningStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
+
+  return <AnimatedIonicons name="sunny" size={size} color={color} style={spinningStyle} />;
+};
 
 // SKILL.md §5 — soft ease-out for UI, not spring (no finger)
 const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
@@ -786,7 +809,7 @@ console.log('🔍 Guided Tour Debug:', {
             <Link href="/calendar" asChild>
               <TouchableOpacity activeOpacity={0.8} onPress={() => buttonPressHaptic()}>
                 <View style={[styles.profileButton, { backgroundColor: isDarkMode ? '#1d2736ff' : '#f8fafc', borderColor: isDarkMode ? '#2a2f36ff' : '#e2e8f0' }]}>
-                  <Feather name='calendar' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
+                  <Ionicons name='calendar-outline' size={20} color={isDarkMode ? "#9db5daff" : "#7493d7ff"} />
                 </View>
               </TouchableOpacity>
             </Link>
@@ -807,27 +830,41 @@ console.log('🔍 Guided Tour Debug:', {
           contentContainerStyle={styles.tasksList}
           ListFooterComponent={showAllTasks ? null : yesterdayFooter}
           ListEmptyComponent={() => (
-            <View>
+            <View style={styles.emptyStateWrap}>
               <Pressable onPress={() => {
                 buttonPressHaptic(); // Add haptic for empty state press
                 router.push('/add');
               }}>
                 <View style={styles.emptyState}>
-                  <Feather name="sun" size={48} color={isDarkMode ? "#8a93a4ff" : "#cbd5e1"} />
-                  <Text style={[
-                    styles.emptyStateTitle,
-                    { color: isDarkMode ? '#9ca3af' : '#64748b' }
-                  ]}>It's a Fresh Start</Text>
-                  <View style={{ height: 10 }}></View>
-                <Text style={[styles.emptyStateSubtitle, { color: isDarkMode ? '#959eb1ff' : '#94a3b8' }]}>
-  1. Add your tasks for today 📝
-</Text>
-<Text style={[styles.emptyStateSubSubtitle, { color: isDarkMode ? '#959eb1ff' : '#94a3b8' }]}>
-  2. Complete tasks to unlock new shlokas ✅
-</Text>
-<Text style={[styles.emptyStateSubSubtitle, { color: isDarkMode ? '#959eb1ff' : '#94a3b8' }]}>
-  3. The Gita becomes part of your routine ☸️
-</Text>
+                  <View style={styles.emptyStateContent}>
+                    <View style={styles.emptyStateHeaderRow}>
+                      <SlowSpinningSun size={22} color={isDarkMode ? "#8a93a4ff" : "#cbd5e1"} />
+                      <Text style={[
+                        styles.emptyStateTitle,
+                        { color: isDarkMode ? '#9ca3af' : '#64748b' }
+                      ]}>It's a Fresh Start</Text>
+                    </View>
+                    <View style={styles.emptyStateSteps}>
+                      <View style={styles.emptyStateStepRow}>
+                        <Feather name="plus" size={14} color={isDarkMode ? '#959eb1ff' : '#64748b'} />
+                        <Text style={[styles.emptyStateStepText, { color: isDarkMode ? '#959eb1ff' : '#64748b' }]}>
+                          Add your tasks for today
+                        </Text>
+                      </View>
+                      <View style={styles.emptyStateStepRow}>
+                        <Feather name="book-open" size={14} color={isDarkMode ? '#959eb1ff' : '#64748b'} />
+                        <Text style={[styles.emptyStateStepText, { color: isDarkMode ? '#959eb1ff' : '#64748b' }]}>
+                          Complete tasks to unlock new shlokas
+                        </Text>
+                      </View>
+                      <View style={styles.emptyStateStepRow}>
+                        <Feather name="sunrise" size={14} color={isDarkMode ? '#959eb1ff' : '#64748b'} />
+                        <Text style={[styles.emptyStateStepText, { color: isDarkMode ? '#959eb1ff' : '#64748b' }]}>
+                          Small steps, every day
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
                 </View>
               </Pressable>
 
@@ -1130,39 +1167,45 @@ marginLeft:10
     alignItems: 'center',
   },
   emptyState: {
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    paddingVertical: 20,
+
+  },
+  emptyStateWrap: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  emptyStateContent: {
+    alignItems: 'flex-start',
+  },
+  emptyStateHeaderRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 10,
-
+    gap: 10,
   },
   emptyStateTitle: {
     fontSize: 20,
     fontWeight: '600',
     color: '#64748b',
-    marginTop: 26,
-    marginBottom: 8,
     fontFamily: "Kalam",
   },
-  emptyStateSubtitle: {
-    fontSize: 13,
-    color: '#94a3b8',
-    textAlign: 'center',
-    lineHeight: 22,
-    fontFamily: "Source Serif Pro",
-    fontWeight:"300",
-
+  emptyStateSteps: {
+    marginTop: 14,
+    gap: 11,
+    alignItems: 'flex-start',
   },
-  emptyStateSubSubtitle: {
-    fontSize: 13,
-    color: '#94a3b8',
-    textAlign: 'center',
-    lineHeight: 22,
+  emptyStateStepRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  emptyStateStepText: {
+    fontSize: 14,
+    lineHeight: 20,
     fontFamily: "Source Serif Pro",
-    fontWeight:"300",
-    marginTop:16
-
+    fontWeight: "300",
   },
 
   yesterdaySection: {

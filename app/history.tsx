@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Feather from "@react-native-vector-icons/feather/static";
 import FontAwesome5 from "@react-native-vector-icons/fontawesome5/static";
+import Ionicons from "@react-native-vector-icons/ionicons/static";
 import { Image } from 'expo-image';
 import BlurBackground from '@/components/BlurBackground';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -222,12 +223,12 @@ function RecitationSettings() {
                 ]}
               >
                 {loadingId === option.id ? (
-                  <ActivityIndicator size="small" color={isPlaying ? '#fff' : (isDarkMode ? '#8ba5e1' : '#4a6a9a')} />
+                  <ActivityIndicator size="small" color={isDarkMode ? '#e9f0fd' : '#b9cde9'} />
                 ) : (
-                  <Feather
+                  <Ionicons
                     name={isPlaying ? 'pause' : 'play'}
-                    size={16}
-                    color={isPlaying ? '#fff' : (isDarkMode ? '#8ba5e1' : '#4a6a9a')}
+                    size={20}
+                    color={isDarkMode ? '#e9f0fd' : '#b9cde9'}
                     style={isPlaying ? undefined : { marginLeft: 2 }}
                   />
                 )}
@@ -459,25 +460,25 @@ function WeeklySummary() {
     <View style={styles.summarySection}>
       <Text style={[styles.summaryTitle, !isDarkMode && styles.lightText]}>This Week</Text>
       <View style={styles.summaryGrid}>
-        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
+        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard, { borderWidth: 0 }]}>
           <Feather name="calendar" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.activeDays}</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Active Days</Text>
         </View>
 
-        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
+        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard, { borderWidth: 0 }]}>
           <Feather name="check-circle" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.completedTasks}</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Tasks Done</Text>
         </View>
 
-        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
+        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard, { borderWidth: 0 }]}>
           <Feather name="target" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.totalFocusSessions}</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Focus Sessions</Text>
         </View>
 
-        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard]}>
+        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard, { borderWidth: 0 }]}>
           <Feather name="clock" size={24} color="#8ba5e1" />
           <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.focusTime}m</Text>
           <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Focus Time</Text>
@@ -1368,7 +1369,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     backgroundColor: 'rgba(52, 76, 103, 0.3)',
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: 'transparent',
   },
   lightSettingRow: {
@@ -1376,14 +1377,14 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   settingRowSelected: {
-    borderColor: '#8ba5e1',
-    borderWidth: 1.5,
-    backgroundColor: 'rgba(139, 165, 225, 0.14)',
+    borderColor: '#b3862f',
+    borderWidth: 1,
+    backgroundColor: 'rgba(179, 134, 47, 0.16)',
   },
   lightSettingRowSelected: {
-    borderColor: '#4a6a9a',
-    borderWidth: 1.5,
-    backgroundColor: 'rgba(74, 106, 154, 0.10)',
+    borderColor: '#b25e00',
+    borderWidth: 1,
+    backgroundColor: 'rgba(178, 94, 0, 0.08)',
   },
   settingInfo: {
     flex: 1,
@@ -1411,16 +1412,11 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(139, 165, 225, 0.35)',
-    backgroundColor: 'rgba(139, 165, 225, 0.10)',
   },
   previewButtonPressed: {
     opacity: 0.7,
   },
   previewButtonActive: {
-    backgroundColor: 'rgba(139, 165, 225, 0.9)',
-    borderColor: 'rgba(139, 165, 225, 0.9)',
   },
   previewButtonText: {
     fontSize: 12,
@@ -1436,20 +1432,15 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(139, 165, 225, 0.35)',
     backgroundColor: 'rgba(139, 165, 225, 0.10)',
   },
   lightTranslationActionButton: {
-    borderColor: 'rgba(74, 106, 154, 0.30)',
     backgroundColor: 'rgba(74, 106, 154, 0.10)',
   },
   translationRemoveButton: {
-    borderColor: 'rgba(248, 113, 113, 0.35)',
     backgroundColor: 'rgba(248, 113, 113, 0.10)',
   },
   lightTranslationRemoveButton: {
-    borderColor: 'rgba(220, 38, 38, 0.30)',
     backgroundColor: 'rgba(220, 38, 38, 0.08)',
   },
   translationActionText: {
@@ -1593,8 +1584,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(52, 76, 103, 0.5)',
     borderRadius: 12,
     padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(93, 123, 158, 0.4)',
+    borderWidth: 0,
   },
   tipsHeaderContent: {
     flexDirection: 'row',
@@ -1610,8 +1600,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(52, 76, 103, 0.38)',
     borderRadius: 12,
     padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(93, 123, 158, 0.3)',
+    borderWidth: 0,
     gap: 14,
   },
   tipRow: {
@@ -1631,8 +1620,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(52, 76, 103, 0.5)',
     borderRadius: 12,
     padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(93, 123, 158, 0.4)',
+    borderWidth: 0,
   },
   actionButtonText: {
     color: 'white',
@@ -1850,14 +1838,11 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     backgroundColor: 'rgba(52, 76, 103, 0.5)',
-    borderWidth: 1,
-    borderColor: 'rgba(93, 123, 158, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   lightSocialButton: {
     backgroundColor: 'rgba(245, 245, 245, 0.7)',
-    borderColor: 'rgba(224, 224, 224, 0.6)',
   },
   footerInfo: {
     alignItems: 'center',

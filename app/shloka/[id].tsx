@@ -653,7 +653,9 @@ return (
           <Text
             style={[
               styles.en,
-              translationLang !== 'en' && styles.translationIndic,
+              translationLang === 'te'
+                ? styles.te
+                : translationLang !== 'en' && styles.translationIndic,
               { color: isDarkMode ? '#d1d5db' : '#545454' }
             ]}
             selectable={true}
@@ -674,7 +676,7 @@ return (
                   <Text
                     style={[
                       styles.en,
-                      styles.translationIndic,
+                      translationLang === 'te' ? styles.te : styles.translationIndic,
                       { color: isDarkMode ? '#d1d5db' : '#545454' }
                     ]}
                     selectable

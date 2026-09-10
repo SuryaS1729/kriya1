@@ -25,12 +25,13 @@ import { showAppToast } from '../lib/appToast';
 import { getShlokaAt, getTranslationForLanguage, type ShlokaRow } from '../lib/shloka';
 import Slider from '@react-native-community/slider';
 import {
-  SHARE_BACKGROUNDS,
+  DEFAULT_SHARE_BG_OPACITY,
+  DEFAULT_SHARE_TEXT_BOX_BG,
   getShareBackground,
   getShareBackgroundImageSource,
   getShareBackgrounds,
   loadRemoteBackgrounds,
-  type ShareBackground,
+  type ShareImageBackground,
   type ShareBackgroundId,
 } from '../lib/shareBackgrounds';
 
@@ -119,30 +120,27 @@ const ShareCard = memo(function ShareCard({
 }: ShareCardProps) {
   return (
     <View style={[styles.cardContainer, { width: previewWidth, height: previewHeight }]}>
-      {currentBackground.type === 'image' && currentBackgroundSource ? (
-        <View style={styles.backgroundLayer}>
-          <Image
-            source={currentBackgroundSource}
-            style={[styles.backgroundImage, { opacity: backgroundOpacity }]}
-            resizeMode="cover"
-            onLoad={onBackgroundLoad}
-            onError={(event) => onBackgroundError?.(event.nativeEvent.error)}
-          />
-          <LinearGradient
-            colors={['rgba(15, 12, 41, 0.08)', 'rgba(22, 33, 62, 0.08)']}
-            style={styles.backgroundTint}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          />
-        </View>
-      ) : (
-        <LinearGradient
-          colors={currentBackground.colors as unknown as [string, string, ...string[]]}
-          style={styles.backgroundLayer}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        />
-      )}
+      <View style={styles.backgroundLayer}>
+        {currentBackgroundSource ? (
+          <>
+            <Image
+              source={currentBackgroundSource}
+              style={[styles.backgroundImage, { opacity: backgroundOpacity }]}
+              resizeMode="cover"
+              onLoad={onBackgroundLoad}
+              onError={(event) => onBackgroundError?.(event.nativeEvent.error)}
+            />
+            <LinearGradient
+              colors={['rgba(15, 12, 41, 0.08)', 'rgba(22, 33, 62, 0.08)']}
+              style={styles.backgroundTint}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            />
+          </>
+        ) : (
+          <View style={[styles.backgroundImage, { backgroundColor: '#10121f', opacity: backgroundOpacity }]} />
+        )}
+      </View>
 
       <View style={[styles.cardOverlay, { justifyContent: getOverlayJustify(currentBackground.textBoxPosition) }]}>
         <View
@@ -236,9 +234,8 @@ export default function Share2() {
   const [failedBackgroundIds, setFailedBackgroundIds] = useState<Set<string>>(
     () => new Set(),
   );
-  // Remote backgrounds from R2 index.json; starts as the static set and is
-  // replaced with whatever R2 lists once the fetch resolves.
-  const [remoteBackgrounds, setRemoteBackgrounds] = useState<ShareBackground[]>(() =>
+  // Remote backgrounds from R2 index.json (pictures only — no gradients).
+  const [remoteBackgrounds, setRemoteBackgrounds] = useState<ShareImageBackground[]>(() =>
     getShareBackgrounds(),
   );
 
@@ -277,16 +274,26 @@ export default function Share2() {
     ?? routeTranslation
     ?? '';
   const [selectedFormat, setSelectedFormat] = useState<FormatId>('story');
-  const [selectedBackground, setSelectedBackground] = useState<ShareBackgroundId>('ocean');
+  const [selectedBackground, setSelectedBackground] = useState<ShareBackgroundId>('b01');
   const [isSharing, setIsSharing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [textboxOpacity, setTextboxOpacity] = useState<number>(
-    parseRgba(SHARE_BACKGROUNDS[0].textBoxBg).alpha,
+    parseRgba(DEFAULT_SHARE_TEXT_BOX_BG).alpha,
   );
   const [backgroundOpacity, setBackgroundOpacity] = useState<number>(
-    SHARE_BACKGROUNDS[0].defaultBgOpacity,
+    DEFAULT_SHARE_BG_OPACITY,
   );
   const [isBackgroundReady, setIsBackgroundReady] = useState(true);
+
+  // Snap the selection to the R2 list once it loads (e.g. default 'b01' may
+  // not exist in a custom index.json).
+  useEffect(() => {
+    if (remoteBackgrounds.length === 0) return;
+    if (!remoteBackgrounds.some((bg) => bg.id === selectedBackground)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing the selected id with the async R2 list; the guard prevents loops.
+      setSelectedBackground(remoteBackgrounds[0].id);
+    }
+  }, [remoteBackgrounds, selectedBackground]);
   
   const captureViewRef = useRef<CaptureViewRef>(null);
 
@@ -295,14 +302,13 @@ export default function Share2() {
   const currentTextBoxColor = parseRgba(currentBackground.textBoxBg);
   const resolvedTextBoxBg = formatRgba(currentTextBoxColor, textboxOpacity);
   const currentBackgroundSource = useMemo(
-    () => (currentBackground.type === 'image' && !failedBackgroundIds.has(currentBackground.id)
+    () => (!failedBackgroundIds.has(currentBackground.id)
       ? getShareBackgroundImageSource(currentBackground)
       : null),
     [currentBackground, failedBackgroundIds],
   );
 
   const handleBackgroundError = (error: unknown) => {
-    if (currentBackground.type !== 'image') return;
     console.warn('[Share] Background image failed:', {
       backgroundId: currentBackground.id,
       url: currentBackground.imageUrl,
@@ -318,7 +324,7 @@ export default function Share2() {
   useEffect(() => {
     // Do NOT reset opacity sliders here — the user's background/text box
     // opacity choices should persist across background selections.
-    setIsBackgroundReady(currentBackground.type !== 'image' || currentBackgroundSource === null);
+    setIsBackgroundReady(currentBackgroundSource === null);
   }, [currentBackground, currentBackgroundSource]);
 
   const updateTextboxOpacity = (nextOpacity: number) => {
@@ -529,7 +535,7 @@ export default function Share2() {
                 key={bg.id}
                 onPress={() => {
                   selectionHaptic();
-                  setIsBackgroundReady(bg.type !== 'image' || failedBackgroundIds.has(bg.id));
+                  setIsBackgroundReady(failedBackgroundIds.has(bg.id));
                   setSelectedBackground(bg.id);
                 }}
                 style={[
@@ -537,42 +543,27 @@ export default function Share2() {
                   selectedBackground === bg.id && styles.backgroundSwatchActive,
                 ]}
               >
-                {bg.type === 'image' ? (
-                  <View style={styles.backgroundSwatchImageContainer}>
-                    <LinearGradient
-                      colors={bg.colors as unknown as [string, string, ...string[]]}
-                      style={styles.backgroundSwatchGradient}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
+                <View style={styles.backgroundSwatchImageContainer}>
+                  {!failedBackgroundIds.has(bg.id) && (
+                    <Image
+                      source={getShareBackgroundImageSource(bg)}
+                      style={styles.backgroundSwatchImage}
+                      resizeMode="cover"
+                      onError={(event) => {
+                        console.warn('[Share] Background swatch failed:', {
+                          backgroundId: bg.id,
+                          url: bg.imageUrl,
+                          error: event.nativeEvent.error,
+                        });
+                        setFailedBackgroundIds((previous) => {
+                          const next = new Set(previous);
+                          next.add(bg.id);
+                          return next;
+                        });
+                      }}
                     />
-                    {!failedBackgroundIds.has(bg.id) && (
-                      <Image
-                        source={getShareBackgroundImageSource(bg)}
-                        style={styles.backgroundSwatchImage}
-                        resizeMode="cover"
-                        onError={(event) => {
-                          console.warn('[Share] Background swatch failed:', {
-                            backgroundId: bg.id,
-                            url: bg.imageUrl,
-                            error: event.nativeEvent.error,
-                          });
-                          setFailedBackgroundIds((previous) => {
-                            const next = new Set(previous);
-                            next.add(bg.id);
-                            return next;
-                          });
-                        }}
-                      />
-                    )}
-                  </View>
-                ) : (
-                  <LinearGradient
-                    colors={bg.colors as unknown as [string, string, ...string[]]}
-                    style={styles.backgroundSwatchGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  />
-                )}
+                  )}
+                </View>
               </Pressable>
             ))}
           </ScrollView>

@@ -53,6 +53,11 @@ const DEFAULT_REMOTE_STYLE = {
   defaultBgOpacity: 1,
 } as const satisfies Omit<ShareBackgroundBase, 'id' | 'label' | 'type'>;
 
+// Default textbox/opacity values for the share UI (previously read off
+// SHARE_BACKGROUNDS[0]; now standalone since gradients are gone).
+export const DEFAULT_SHARE_TEXT_BOX_BG = DEFAULT_REMOTE_STYLE.textBoxBg;
+export const DEFAULT_SHARE_BG_OPACITY = DEFAULT_REMOTE_STYLE.defaultBgOpacity;
+
 // The R2 index.json payload — only id is required; everything else is optional
 // and falls back to DEFAULT_REMOTE_STYLE.
 type RemoteBackgroundEntry = Partial<
@@ -61,34 +66,9 @@ type RemoteBackgroundEntry = Partial<
   id: string;
 };
 
-export const SHARE_BACKGROUNDS: ShareBackground[] = [
-  {
-    id: 'ocean',
-    label: 'Ocean',
-    type: 'gradient',
-    colors: ['#0f0c29', '#16537e', '#0f0c29'],
-    textBoxBg: 'rgba(15, 52, 96, 0.00)',
-    textBoxPosition: 'center',
-    textColor: '#e0f0ff',
-    translationColor: '#b8d8f0',
-    refColor: '#8ab4d4',
-    brandingColor: '#cce5ff',
-    defaultBgOpacity: 1,
-  },
-  {
-    id: 'midnight',
-    label: 'Midnight',
-    type: 'gradient',
-    colors: ['#0f0c29', '#302b63', '#24243e'],
-    textBoxBg: 'rgba(15, 12, 41, 0.00)',
-    textBoxPosition: 'center',
-    textColor: '#e8e6f0',
-    translationColor: '#c8c4d8',
-    refColor: '#9a96b0',
-    brandingColor: '#d4d0e8',
-    defaultBgOpacity: 1,
-  },
-];
+// Color/gradient backgrounds removed — share cards only use R2 pictures now.
+// Kept as an empty array so existing imports don't break.
+export const SHARE_BACKGROUNDS: ShareImageBackground[] = [];
 
 // Kept as a fallback so the UI still shows the classic remote set if the
 // index.json fetch fails (offline, R2 hiccup) — same ids it always shipped.
@@ -130,10 +110,9 @@ function resolveRemoteBackgrounds(): ShareImageBackground[] {
   return remoteBackgroundsCache ?? fallbackRemoteBackgrounds();
 }
 
-// Fetches backgrounds/index.json from R2 once and merges any entries into the
-// static list. Call this on app load; the resolved list is cached in memory.
-// Returns the full resolved list so the caller can also use it for rendering.
-export async function loadRemoteBackgrounds(): Promise<ShareBackground[]> {
+// Fetches backgrounds/index.json from R2 once. Returns the R2 picture list
+// (or the fallback ids when R2 is unreachable). No gradient backgrounds.
+export async function loadRemoteBackgrounds(): Promise<ShareImageBackground[]> {
   try {
     const response = await fetch(REMOTE_INDEX_URL);
     if (!response.ok) throw new Error(`R2 index.json: HTTP ${response.status}`);
@@ -161,7 +140,7 @@ export async function loadRemoteBackgrounds(): Promise<ShareBackground[]> {
 
     // Replace the cache with whatever R2 actually lists — no stale ids left behind.
     remoteBackgroundsCache = merged;
-    return merged.length > 0 ? [...SHARE_BACKGROUNDS, ...merged] : SHARE_BACKGROUNDS;
+    return merged.length > 0 ? merged : fallbackRemoteBackgrounds();
   } catch (error) {
     console.warn('[Share] Failed to load remote backgrounds index:', error);
     // Cache a sentinel so a failed fetch doesn't retry on every render.
@@ -170,17 +149,17 @@ export async function loadRemoteBackgrounds(): Promise<ShareBackground[]> {
   }
 }
 
-// Synchronous accessor used by the rest of the app: returns static gradients
-// plus whatever remote backgrounds have been resolved so far (fallback ids
-// until loadRemoteBackgrounds() completes, then the R2 list).
-export function getShareBackgrounds(): ShareBackground[] {
-  return [...SHARE_BACKGROUNDS, ...resolveRemoteBackgrounds()];
+// Synchronous accessor: R2 pictures only (fallback ids until
+// loadRemoteBackgrounds() completes, then the R2 list).
+export function getShareBackgrounds(): ShareImageBackground[] {
+  return resolveRemoteBackgrounds();
 }
 
 export type ShareBackgroundId = ShareBackground['id'];
 
 export function getShareBackground(id: ShareBackgroundId) {
-  return getShareBackgrounds().find((background) => background.id === id) ?? SHARE_BACKGROUNDS[0];
+  const backgrounds = getShareBackgrounds();
+  return backgrounds.find((background) => background.id === id) ?? backgrounds[0] ?? buildRemoteBackground('b01');
 }
 
 export function getShareBackgroundImageSource(background: ShareImageBackground): ImageSourcePropType {

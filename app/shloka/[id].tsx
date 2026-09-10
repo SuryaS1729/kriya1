@@ -25,7 +25,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { useKriya } from '../../lib/store';
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../../lib/haptics';
-import { textToSpeech, shlokaRecitation } from '../../lib/tts';
+import { shlokaRecitation, voiceoverAudio, type VoiceoverLanguage } from '../../lib/tts';
 import { useAudioPlayer } from 'expo-audio';
 import * as FileSystem from 'expo-file-system/legacy';
 import { showAppToast } from '../../lib/appToast';
@@ -404,20 +404,41 @@ const handleBookPress = () => {
     setTtsPlaying(true);
 
     try {
-      // Build the spoken text from the selected language:
-      // "Translation. {text} ... Commentary. {text}"
-      const translation = getTranslationForLanguage(row, language) ?? '';
+      // Voiceover follows the translate-button language: the shloka recitation
+      // is identical across languages, only the translation/commentary audio
+      // switches. Gate on downloaded text so we only request a language's
+      // folder when its translation is actually loaded; voiceoverAudio()
+      // falls back to the English recording when that language's file is
+      // missing in R2.
+      const hasDownloadedText =
+        translationLanguage !== 'en' &&
+        downloadedTranslations.includes(translationLanguage) &&
+        (translationText != null || commentaryText != null);
+      const voiceLang: VoiceoverLanguage = hasDownloadedText
+        ? (translationLanguage as VoiceoverLanguage)
+        : 'en';
+
+      // Presence check only (recordings are pre-generated in R2) — use the
+      // displayed text so Telugu/etc doesn't fall back to English text.
+      const displayedTranslation =
+        voiceLang !== 'en'
+          ? (translationText ?? getTranslationForLanguage(row, language) ?? '')
+          : (getTranslationForLanguage(row, language) ?? '');
+      const displayedCommentary =
+        voiceLang !== 'en'
+          ? (commentaryText ?? getCommentaryForLanguage(row, language))
+          : getCommentaryForLanguage(row, language);
       let speakText = '';
-      if (translation) speakText += `Translation. ${translation}`;
-      const commentary = getCommentaryForLanguage(row, language);
-      if (commentary) speakText += ` ... Commentary. ${commentary}`;
+      if (displayedTranslation) speakText += `Translation. ${displayedTranslation}`;
+      if (displayedCommentary) speakText += ` ... Commentary. ${displayedCommentary}`;
 
       // Fetch both audio files in parallel from cache/R2 recordings
       // The shloka recitation follows the user's chosen style (Hindi TTS or authentic Sanskrit)
-      const [shlokaAudio, spokenAudio] = await Promise.all([
+      const [shlokaAudio, voiceover] = await Promise.all([
         shlokaRecitation(recitationStyle, row.chapter_number, row.verse_number),
-        speakText ? textToSpeech(speakText, 'en-IN', row.chapter_number, row.verse_number) : Promise.resolve(null),
+        speakText ? voiceoverAudio(voiceLang, row.chapter_number, row.verse_number) : Promise.resolve(null),
       ]);
+      const spokenAudio = voiceover?.audio ?? null;
 
       if (ttsAbortRef.current || !shlokaAudio) {
         setTtsLoading(false);

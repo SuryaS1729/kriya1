@@ -7,6 +7,29 @@ import { PUBLIC_ASSET_BASE_URL } from './publicAssetBaseUrl';
 
 export type TTSLanguage = 'hi-IN' | 'en-IN';
 
+// --------------- Voiceover (translation + commentary) per display language ---------------
+// The shloka recitation is identical across languages; only this voiceover
+// switches with the translate-button language. English (`en-IN-m4a`) is the
+// default fallback — add a new folder here as you upload each language and
+// the player picks it up automatically, falling back to English until then.
+export type VoiceoverLanguage = 'en' | 'gu' | 'hi' | 'or' | 'ta' | 'te';
+
+const VOICEOVER_FOLDERS: Record<VoiceoverLanguage, string> = {
+  en: 'en-IN-m4a',
+  // NOTE: `hi-IN-m4a` is already the Hindi *recitation* folder (shloka only),
+  // so the Hindi translation voiceover needs its own folder to avoid
+  // `{chapter}_{verse}.m4a` collisions. Use this name when you upload it.
+  hi: 'hi-translation-m4a',
+  gu: 'gu-IN-m4a',
+  or: 'or-IN-m4a',
+  ta: 'ta-IN-m4a',
+  te: 'te-IN-m4a',
+};
+
+function getVoiceoverCacheKey(lang: VoiceoverLanguage, chapter: number, verse: number): string {
+  return `${CACHE_DIR}voiceover_${lang}_${chapter}_${verse}.m4a`;
+}
+
 // --------------- Device cache helpers ---------------
 
 const CACHE_DIR = `${FileSystem.cacheDirectory}tts/`;
@@ -101,6 +124,41 @@ export async function textToSpeech(
   }
 
   console.warn(`[TTS] Missing recording in R2: ${logName}`);
+  return null;
+}
+
+/**
+ * Load the translation/commentary voiceover for a display language.
+ *
+ * Tries the language's own R2 folder first, then falls back to the English
+ * recording (`en-IN-m4a`) so playback keeps working until you upload audio
+ * for that language. Returns the audio plus which language actually played.
+ */
+export async function voiceoverAudio(
+  displayLang: VoiceoverLanguage,
+  chapter: number,
+  verse: number
+): Promise<{ audio: string; lang: VoiceoverLanguage } | null> {
+  const attempts: VoiceoverLanguage[] =
+    displayLang === 'en' ? ['en'] : [displayLang, 'en'];
+
+  for (const lang of attempts) {
+    const cacheKey = getVoiceoverCacheKey(lang, chapter, verse);
+    const cached = await getFromDeviceCache(cacheKey);
+    if (cached) {
+      console.log(`[TTS] Device cache hit: voiceover_${lang}/${chapter}_${verse}`);
+      return { audio: cached, lang };
+    }
+
+    const r2Audio = await fetchFromR2(VOICEOVER_FOLDERS[lang], chapter, verse);
+    if (r2Audio) {
+      console.log(`[TTS] R2 hit: voiceover_${lang}/${chapter}_${verse}`);
+      await saveToDeviceCache(cacheKey, r2Audio);
+      return { audio: r2Audio, lang };
+    }
+  }
+
+  console.warn(`[TTS] Missing voiceover in R2: ${displayLang}/${chapter}_${verse} (English fallback also missing)`);
   return null;
 }
 

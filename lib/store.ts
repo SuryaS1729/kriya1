@@ -56,15 +56,6 @@ interface KriyaState {
   language: ContentLanguage;
   setLanguage: (language: ContentLanguage) => void;
   tasksToday: Task[];
-   hasCompletedTour: boolean;
-  setTourCompleted: (completed: boolean) => void;
-    hasSeenGuidedTour: boolean;
-      setHasSeenGuidedTour: (seen: boolean) => void;
-
-
-
-
-
   // actions
   init: () => void;
   refresh: () => void;
@@ -226,12 +217,6 @@ export const useKriya = create<KriyaState>()(
       hasCompletedOnboarding: false,
       focusSessions: {},
       _totalCompletedCache: null,
-      hasCompletedTour: false,
-        hasSeenGuidedTour: false,
-        setHasSeenGuidedTour: (seen: boolean) => {
-          set({ hasSeenGuidedTour: seen });
-        },
-
 
       // Default notification settings
       notificationsEnabled: true,
@@ -257,20 +242,6 @@ export const useKriya = create<KriyaState>()(
           const total = getTotalShlokas();
           if (total > 0) ensureProgressForToday(total);
 
-           // Migration logic for existing users
-    const { hasCompletedOnboarding, hasSeenGuidedTour } = get();
-    if (hasCompletedOnboarding && hasSeenGuidedTour === false) {
-      // This is likely an existing user who completed onboarding before the tour was added
-      // Check if they have any tasks or bookmarks (signs of existing usage)
-      const existingTasks = getTasksForDay(get().todayKey());
-      const existingBookmarks = get().bookmarks;
-      
-      if (existingTasks.length > 0 || existingBookmarks.length > 0) {
-        // Skip tour for existing users
-        set({ hasSeenGuidedTour: true });
-      }
-    }
-    
           set({ tasksToday: getTasksForDay(get().todayKey()) });
           set({ ready: true });
         } catch (e) {
@@ -279,13 +250,7 @@ export const useKriya = create<KriyaState>()(
         }
       },
 
-       
-      setTourCompleted: (completed: boolean) => {
-        set({ hasCompletedTour: completed });
-      },
-      
-
-      refresh: () => {
+       refresh: () => {
         try {
           set({ tasksToday: getTasksForDay(get().todayKey()), _totalCompletedCache: null });
         } catch (e) {
@@ -542,7 +507,6 @@ export const useKriya = create<KriyaState>()(
         recitationStyle: state.recitationStyle,
         translationLanguage: state.translationLanguage,
         downloadedTranslations: state.downloadedTranslations,
-                hasSeenGuidedTour: state.hasSeenGuidedTour,
 
         // Don't persist notification token
       }),

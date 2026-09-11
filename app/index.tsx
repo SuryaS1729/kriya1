@@ -25,7 +25,6 @@ import { taskCompleteHaptic, selectionHaptic, buttonPressHaptic, errorHaptic } f
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from 'expo-router';
 import * as Notifications from 'expo-notifications';
-import { GuidedTour } from '../components/GuidedTour/GuidedTour';
 import { PressableScale } from 'pressto';
 import {
   getTranslationForLanguage,
@@ -354,10 +353,8 @@ export default function Home() {
   const navigationRef = useRef(false);
     const initializeNotifications = useKriya(s => s.initializeNotifications);
   const notificationsEnabled = useKriya(s => s.notificationsEnabled);
-  const hasSeenGuidedTour = useKriya(s => s.hasSeenGuidedTour);
-  const setHasSeenGuidedTour = useKriya(s => s.setHasSeenGuidedTour);
 
- // ADD refs to track listeners
+  // ADD refs to track listeners
   const notificationListener = useRef<Notifications.EventSubscription | null>(null);
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
   const todayTaskReorderTimeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
@@ -523,20 +520,6 @@ export default function Home() {
       },
     });
   }, []);
-  const handleTourComplete = () => {
-    setHasSeenGuidedTour(true);
-  };
-
-    const shouldShowGuidedTour = ready && hasCompletedOnboarding && !hasSeenGuidedTour;
-
-console.log('🔍 Guided Tour Debug:', {
-    ready,
-    hasCompletedOnboarding,
-    hasSeenGuidedTour,
-    tasksLength: tasks.length,
-    shouldShowGuidedTour
-  });
-
   const renderItem = useCallback(({ item }: { item: Task }) => (
     <Animated.View
       entering={FadeIn.duration(90)}
@@ -888,18 +871,6 @@ console.log('🔍 Guided Tour Debug:', {
     </LinearGradient>
   );
 
- if (shouldShowGuidedTour) {
-    return (
-      <GuidedTour
-      onComplete={handleTourComplete}
-      hasUserTasks={tasks.length > 0}
->
-        {mainContent}
-      </GuidedTour>
-    );
-  }
-
-
   return mainContent
 }
 
@@ -1146,7 +1117,7 @@ marginLeft:10
     borderWidth: 1.5,
     borderColor: 'transparent',
     backgroundColor: '#efefef37',
-    marginLeft:-5.8
+    marginLeft: -5.8,
   },
   addTaskText: {
     marginLeft: 12,

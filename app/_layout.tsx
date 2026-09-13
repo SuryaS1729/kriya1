@@ -49,10 +49,10 @@ export default function Root() {
       }, 0);
       return;
     }
-    
+
     globalDbInitialized = true;
     // console.log('Initializing DB for the first time...');
-    
+
     try {
       await runMigrationsSafe(db);
 
@@ -65,7 +65,7 @@ export default function Root() {
       // console.log('Shlokas count:', row?.c ?? 0);
 
       setDbReady(true);
-      
+
       // Use setTimeout to prevent potential state update conflicts
       setTimeout(() => {
         useKriya.getState().init();
@@ -165,7 +165,7 @@ export default function Root() {
           <Stack.Screen name="add" options={{  animation:'fade',  animationDuration:100 }} />
           <Stack.Screen name="calendar" options={{ animation:'default', animationDuration:180 }} />
           <Stack.Screen name="history" options={{animation:'fade', animationDuration:200	}}/>
-          <Stack.Screen name="read" options={{animation:'slide_from_bottom', animationDuration:300}} />
+          <Stack.Screen name="read" options={{animation:"fade", animationDuration:100}} />
           <Stack.Screen name="shloka/[id]" options={{animation:'fade', animationDuration:100}}/>
           <Stack.Screen name="bookmarks" options={{animation:'fade',animationDuration:200}}/>
           <Stack.Screen name="focus" options={{ title: 'Focus Mode' , animation:'fade',animationDuration:100}} />

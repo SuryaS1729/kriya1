@@ -106,6 +106,47 @@ export function getIndexOf(chapter: number, verse: number): number {
   return Math.max(0, idx);
 }
 
+/**
+ * Global 0-based index of a chapter's first verse — one query.
+ * Verses within a chapter are contiguous (1..N, verified), so any verse's
+ * global index is just `base + verse_number - 1` with zero further queries.
+ * Use this instead of calling getIndexOf() per row in lists.
+ */
+export function getChapterBaseIndex(chapter: number): number {
+  if (!isDbReady()) return 0;
+  const db = getDb();
+  const r = db.getFirstSync(
+    `
+    SELECT COUNT(*) AS idx
+    FROM ${TABLE}
+    WHERE chapter_number < ?
+    `,
+    [chapter]
+  ) as { idx: number } | null;
+  return Math.max(0, r?.idx ?? 0);
+}
+
+/**
+ * Map of "chapter.verse" -> global 0-based index, built with a single
+ * ordered scan. For cross-chapter lists (e.g. search results) where the
+ * base+arithmetic trick doesn't apply — look up per row from the map
+ * instead of querying per row.
+ */
+export function getGlobalIndexMap(): Map<string, number> {
+  const map = new Map<string, number>();
+  if (!isDbReady()) return map;
+  const db = getDb();
+  const rows = db.getAllSync<{ chapter_number: number; verse_number: number }>(
+    `
+    SELECT chapter_number, verse_number
+    FROM ${TABLE}
+    ORDER BY chapter_number ASC, verse_number ASC
+    `
+  );
+  rows.forEach((r, i) => map.set(`${r.chapter_number}.${r.verse_number}`, i));
+  return map;
+}
+
 /** Prev/next indices around a given index. */
 export function getPrevNextIndices(index: number, total: number) {
   return {

@@ -1,16 +1,17 @@
 // app/read.tsx
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
 import {
-  Pressable, StyleSheet, Text, TextInput, View,
+  ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import {
   getChapterCounts,
   getVersesForChapter,
   searchShlokasLike,
-  getIndexOf,
+  getChapterBaseIndex,
+  getGlobalIndexMap,
 } from '../lib/shloka';
 import { useKriya } from '../lib/store';
 import { StatusBar } from 'expo-status-bar';
@@ -35,7 +36,26 @@ export default function Read() {
     // TELUGU DISABLED: Telugu DB lookup skipped; always show English content.
     (item.translation_2 ?? item.description ?? item.text);
 
-  const verses = useMemo(() => getVersesForChapter(chapter), [chapter]);
+  // Verses load after first paint so the screen itself opens instantly and
+  // the list fills in a frame later. On chapter switch the previous list
+  // stays visible until the new one arrives (no spinner flash).
+  type VerseData = { verses: ReturnType<typeof getVersesForChapter>; baseIndex: number };
+  const [verseData, setVerseData] = useState<VerseData | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: load verses after first paint so the screen opens instantly; the list fills in on the next render.
+    setVerseData({
+      verses: getVersesForChapter(chapter),
+      baseIndex: getChapterBaseIndex(chapter),
+    });
+  }, [chapter]);
+  // Chapter/verse -> global index for search results. Built lazily on first
+  // search (one scan; the shloka table is static) so mounting the screen
+  // never pays for it.
+  const indexMapRef = useRef<Map<string, number> | null>(null);
+  const lookupGlobalIndex = (chapterNumber: number, verseNumber: number): number => {
+    if (!indexMapRef.current) indexMapRef.current = getGlobalIndexMap();
+    return indexMapRef.current.get(`${chapterNumber}.${verseNumber}`) ?? 0;
+  };
   const results = useMemo(
     () => (query.trim() ? searchShlokasLike(query.trim()) : []),
     [query]
@@ -97,7 +117,7 @@ export default function Read() {
             keyExtractor={(r) => `${r.chapter_number}.${r.verse_number}`}
             keyboardShouldPersistTaps="handled"
             renderItem={({ item }) => {
-              const idx = getIndexOf(item.chapter_number, item.verse_number);
+              const idx = lookupGlobalIndex(item.chapter_number, item.verse_number);
               return (
                 <Link
                   href={{ pathname: '/shloka/[id]', params: { id: String(idx) } }}
@@ -194,12 +214,13 @@ export default function Read() {
             ]} />
 
             {/* VERSES LIST FOR SELECTED CHAPTER */}
-            <View style={styles.right}>
+            <View style={[styles.right, !verseData && styles.loadingWrap]}>
+              {verseData ? (
               <FlashList
-                data={verses}
+                data={verseData.verses}
                 keyExtractor={(v) => `${chapter}.${v.verse_number}`}
                 renderItem={({ item }) => {
-                  const idx = getIndexOf(chapter, item.verse_number);
+                  const idx = verseData.baseIndex + item.verse_number - 1;
                   return (
                     <Link
                       href={{ pathname: '/shloka/[id]', params: { id: String(idx) } }}
@@ -236,6 +257,12 @@ export default function Read() {
                   ]} />
                 )}
               />
+              ) : (
+                <ActivityIndicator
+                  size="large"
+                  color={isDarkMode ? '#e5e7eb' : '#64748b'}
+                />
+              )}
             </View>
           </View>
         )}
@@ -276,6 +303,7 @@ const styles = StyleSheet.create({
   split: { flex: 1, flexDirection: 'row', gap: 0 }, // Changed gap to 0 since we have divider
   left: { flex: 1, maxWidth: 96 },
   right: { flex: 1 },
+  loadingWrap: { justifyContent: 'center', alignItems: 'center' },
   chRow: {
     flexDirection: 'row',
     alignItems: 'center',

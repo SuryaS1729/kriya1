@@ -1,9 +1,9 @@
 // app/read.tsx
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
 import {
-  ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View,
+  Pressable, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import {
@@ -36,18 +36,11 @@ export default function Read() {
     // TELUGU DISABLED: Telugu DB lookup skipped; always show English content.
     (item.translation_2 ?? item.description ?? item.text);
 
-  // Verses load after first paint so the screen itself opens instantly and
-  // the list fills in a frame later. On chapter switch the previous list
-  // stays visible until the new one arrives (no spinner flash).
-  type VerseData = { verses: ReturnType<typeof getVersesForChapter>; baseIndex: number };
-  const [verseData, setVerseData] = useState<VerseData | null>(null);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: load verses after first paint so the screen opens instantly; the list fills in on the next render.
-    setVerseData({
-      verses: getVersesForChapter(chapter),
-      baseIndex: getChapterBaseIndex(chapter),
-    });
-  }, [chapter]);
+  const verses = useMemo(() => getVersesForChapter(chapter), [chapter]);
+  // Global index of this chapter's first verse (one query). Verses are
+  // contiguous, so each row's link index is base + verse_number - 1 with
+  // no per-row DB calls during render.
+  const baseIndex = useMemo(() => getChapterBaseIndex(chapter), [chapter]);
   // Chapter/verse -> global index for search results. Built lazily on first
   // search (one scan; the shloka table is static) so mounting the screen
   // never pays for it.
@@ -214,13 +207,12 @@ export default function Read() {
             ]} />
 
             {/* VERSES LIST FOR SELECTED CHAPTER */}
-            <View style={[styles.right, !verseData && styles.loadingWrap]}>
-              {verseData ? (
+            <View style={styles.right}>
               <FlashList
-                data={verseData.verses}
+                data={verses}
                 keyExtractor={(v) => `${chapter}.${v.verse_number}`}
                 renderItem={({ item }) => {
-                  const idx = verseData.baseIndex + item.verse_number - 1;
+                  const idx = baseIndex + item.verse_number - 1;
                   return (
                     <Link
                       href={{ pathname: '/shloka/[id]', params: { id: String(idx) } }}
@@ -257,12 +249,6 @@ export default function Read() {
                   ]} />
                 )}
               />
-              ) : (
-                <ActivityIndicator
-                  size="large"
-                  color={isDarkMode ? '#e5e7eb' : '#64748b'}
-                />
-              )}
             </View>
           </View>
         )}
@@ -303,7 +289,6 @@ const styles = StyleSheet.create({
   split: { flex: 1, flexDirection: 'row', gap: 0 }, // Changed gap to 0 since we have divider
   left: { flex: 1, maxWidth: 96 },
   right: { flex: 1 },
-  loadingWrap: { justifyContent: 'center', alignItems: 'center' },
   chRow: {
     flexDirection: 'row',
     alignItems: 'center',

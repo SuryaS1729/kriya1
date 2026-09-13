@@ -1,11 +1,10 @@
-import { memo, useEffect, useMemo, useState, useRef, useCallback } from 'react';
+import { memo, useEffect, useMemo, useState, useCallback } from 'react';
 import { StyleSheet, Text, View, Pressable, ScrollView, Alert, Modal, Platform, Linking, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useKriya } from '../lib/store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Feather from "@react-native-vector-icons/feather/static";
 import FontAwesome5 from "@react-native-vector-icons/fontawesome5/static";
-import Ionicons from "@react-native-vector-icons/ionicons/static";
 import { Image } from 'expo-image';
 import BlurBackground from '@/components/BlurBackground';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -15,9 +14,6 @@ import { StatusBar } from 'expo-status-bar';
 import Animated, { LinearTransition, Easing, useReducedMotion } from 'react-native-reanimated';
 import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic } from '../lib/haptics';
 import { showAppToast } from '../lib/appToast';
-import { shlokaRecitation } from '../lib/tts';
-import { useAudioPlayer } from 'expo-audio';
-import * as FileSystem from 'expo-file-system/legacy';
 import {
   TRANSLATION_LANGUAGE_LIST,
   downloadTranslation,
@@ -43,204 +39,6 @@ const TRANSLATION_REORDER_TRANSITION = LinearTransition.duration(220).easing(EAS
 
 
 // Recitation Settings Component
-// Preview verse used for inline audio previews (chapter 1, verse 1 — the
-// opening shloka, available in both the Hindi and Sanskrit R2 buckets).
-const PREVIEW_CHAPTER = 1;
-const PREVIEW_VERSE = 1;
-
-function RecitationSettings() {
-  const isDarkMode = useKriya(s => s.isDarkMode);
-  const recitationStyle = useKriya(s => s.recitationStyle);
-  const setRecitationStyle = useKriya(s => s.setRecitationStyle);
-
-  // Shared audio player for previews — playing one style stops the other.
-  const previewPlayer = useAudioPlayer(null);
-  const [playingId, setPlayingId] = useState<'hindi' | 'sanskrit' | null>(null);
-  const [loadingId, setLoadingId] = useState<'hindi' | 'sanskrit' | null>(null);
-  const abortRef = useRef(false);
-  const isMountedRef = useRef(true);
-  const playbackSessionRef = useRef(0);
-
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-      abortRef.current = true;
-      playbackSessionRef.current += 1;
-      try {
-        previewPlayer.pause();
-      } catch {
-        // Player may already be released during screen transition.
-      }
-    };
-  }, [previewPlayer]);
-
-  const stopPreview = useCallback(() => {
-    abortRef.current = true;
-    playbackSessionRef.current += 1;
-    try {
-      previewPlayer.pause();
-    } catch {
-      // Ignore — player may already be idle.
-    }
-    setPlayingId(null);
-    setLoadingId(null);
-  }, [previewPlayer]);
-
-  const playPreview = useCallback(async (style: 'hindi' | 'sanskrit') => {
-    if (!isMountedRef.current) return;
-    buttonPressHaptic();
-
-    // Toggle off if this style is already playing.
-    if (playingId === style) {
-      stopPreview();
-      return;
-    }
-
-    stopPreview();
-    abortRef.current = false;
-    setLoadingId(style);
-    setPlayingId(style);
-
-    try {
-      const audio = await shlokaRecitation(style, PREVIEW_CHAPTER, PREVIEW_VERSE);
-      if (!isMountedRef.current || abortRef.current || !audio) {
-        if (!audio) {
-          showAppToast({
-            type: 'error',
-            text1: 'No preview available',
-            duration: 2200,
-            position: 'bottom',
-          });
-          errorHaptic();
-        }
-        setLoadingId(null);
-        setPlayingId(null);
-        return;
-      }
-
-      const tempFile = `${FileSystem.cacheDirectory}recitation_preview_${style}_${Date.now()}.m4a`;
-      await FileSystem.writeAsStringAsync(tempFile, audio, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      if (!isMountedRef.current || abortRef.current) {
-        FileSystem.deleteAsync(tempFile, { idempotent: true });
-        setLoadingId(null);
-        setPlayingId(null);
-        return;
-      }
-
-      const sessionId = playbackSessionRef.current;
-      previewPlayer.replace({ uri: tempFile });
-      previewPlayer.play();
-      setLoadingId(null);
-
-      // Poll until playback finishes (or is stopped), then clean up.
-      const checkStatus = setInterval(() => {
-        if (!isMountedRef.current || abortRef.current || sessionId !== playbackSessionRef.current) {
-          clearInterval(checkStatus);
-          FileSystem.deleteAsync(tempFile, { idempotent: true });
-          return;
-        }
-        if (!previewPlayer.playing && previewPlayer.currentTime > 0) {
-          clearInterval(checkStatus);
-          FileSystem.deleteAsync(tempFile, { idempotent: true });
-          setPlayingId(null);
-        }
-      }, 200);
-    } catch (err) {
-      console.warn('[RecitationSettings] Preview failed:', err);
-      showAppToast({
-        type: 'error',
-        text1: 'Preview failed',
-        duration: 2200,
-        position: 'bottom',
-      });
-      errorHaptic();
-      setLoadingId(null);
-      setPlayingId(null);
-    }
-  }, [playingId, stopPreview, previewPlayer]);
-
-  const handleSelect = (id: 'hindi' | 'sanskrit') => {
-    selectionHaptic();
-    setRecitationStyle(id);
-  };
-
-  const options: { id: 'hindi' | 'sanskrit'; title: string; description: string }[] = [
-    {
-      id: 'hindi',
-      title: 'Hindi Recitation',
-      description: 'Clear, natural Hindi narration',
-    },
-    {
-      id: 'sanskrit',
-      title: 'Authentic Sanskrit',
-      description: 'Traditional Sanskrit chant',
-    },
-  ];
-
-  return (
-    <View style={[styles.section, !isDarkMode && styles.lightSection]}>
-      <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Recitation Settings</Text>
-      <Text style={[styles.recitationHint, !isDarkMode && styles.lightSubText]}>
-        Tap play to preview each style, then pick the one you prefer.
-      </Text>
-
-      <View style={styles.notificationSettings}>
-        {options.map((option) => {
-          const isSelected = recitationStyle === option.id;
-          const isPlaying = playingId === option.id;
-          return (
-            <Pressable
-              key={option.id}
-              style={[
-                styles.settingRow,
-                !isDarkMode && styles.lightSettingRow,
-                isSelected && styles.settingRowSelected,
-                isSelected && !isDarkMode && styles.lightSettingRowSelected,
-              ]}
-              onPress={() => handleSelect(option.id)}
-              android_ripple={{ color: '#cccccc18' }}
-            >
-              <View style={styles.settingInfo}>
-                <Text style={[styles.settingTitle, !isDarkMode && styles.lightText]}>
-                  {option.title}
-                </Text>
-                <Text style={[styles.settingDescription, !isDarkMode && styles.lightSubText]}>
-                  {option.description}
-                </Text>
-              </View>
-
-              {/* Icon-only preview — preview ≠ select */}
-              <Pressable
-                onPress={() => playPreview(option.id)}
-                hitSlop={8}
-                style={({ pressed }) => [
-                  styles.previewButton,
-                  pressed && styles.previewButtonPressed,
-                  isPlaying && styles.previewButtonActive,
-                ]}
-              >
-                {loadingId === option.id ? (
-                  <ActivityIndicator size="small" color={isDarkMode ? '#e9f0fd' : '#b9cde9'} />
-                ) : (
-                  <Ionicons
-                    name={isPlaying ? 'pause' : 'play'}
-                    size={20}
-                    color={isDarkMode ? '#e9f0fd' : '#b9cde9'}
-                    style={isPlaying ? undefined : { marginLeft: 2 }}
-                  />
-                )}
-              </Pressable>
-            </Pressable>
-          );
-        })}
-      </View>
-    </View>
-  );
-}
-
 // Translation Settings Component
 // Manages downloaded Indian-language translation files (R2 JSON, kept out of
 // SQLite). Download/remove is the only responsibility of this section.
@@ -1277,10 +1075,7 @@ export default function History() {
            {/* ADD: Notification Settings - Add this here */}
           <NotificationSettings />
 
-          {/* Recitation Settings */}
-          <RecitationSettings />
-
-          {/* Translation Settings */}
+           {/* Translation Settings */}
           <TranslationSettings />
 
                   <Footer />

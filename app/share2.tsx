@@ -222,7 +222,6 @@ export default function Share2() {
   
   const isDarkMode = useKriya(s => s.isDarkMode);
   const isReady = useKriya(s => s.ready);
-  const language = useKriya(s => s.language);
   const firstParam = (value: string | string[] | undefined) =>
     Array.isArray(value) ? value[0] : value;
   const routeId = firstParam(params.id);

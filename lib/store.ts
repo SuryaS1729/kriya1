@@ -46,7 +46,7 @@ export interface Bookmark {
   createdAt: string;
 }
 
-export type ContentLanguage = 'en' | 'te';
+export type ContentLanguage = 'en';
 
 // Indian-language translations (downloaded as R2 JSON files, kept out of SQLite).
 export type TranslationDisplayLanguage = 'en' | 'gu' | 'hi' | 'or' | 'ta' | 'te';
@@ -100,10 +100,6 @@ interface KriyaState {
   getTotalCompletedTasks: () => number;
   // Cache for getTotalCompletedTasks; null = needs recompute
   _totalCompletedCache: number | null;
-
-  // Recitation style: 'hindi' (current TTS recitation) or 'sanskrit' (authentic Sanskrit recordings)
-  recitationStyle: 'hindi' | 'sanskrit';
-  setRecitationStyle: (style: 'hindi' | 'sanskrit') => void;
 
   // Indian-language translation layer (R2 JSON, isolated from SQLite)
   translationLanguage: TranslationDisplayLanguage;
@@ -223,9 +219,7 @@ export const useKriya = create<KriyaState>()(
       reminderTime: { hour: 8, minute: 0 }, // 8:00 AM default
       notificationToken: null,
 
-      // Default recitation style: Hindi (the existing TTS recitation)
-      recitationStyle: 'hindi',
-      setRecitationStyle: (style: 'hindi' | 'sanskrit') => set({ recitationStyle: style }),
+      // Shloka recitation is always the authentic Sanskrit recording (see lib/tts.ts).
 
       // Indian-language translation layer defaults (English = SQLite content)
       translationLanguage: 'en',
@@ -504,7 +498,6 @@ export const useKriya = create<KriyaState>()(
         focusSessions: state.focusSessions,
         notificationsEnabled: state.notificationsEnabled,
         reminderTime: state.reminderTime,
-        recitationStyle: state.recitationStyle,
         translationLanguage: state.translationLanguage,
         downloadedTranslations: state.downloadedTranslations,
 

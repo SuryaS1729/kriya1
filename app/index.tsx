@@ -345,8 +345,6 @@ export default function Home() {
   const remove    = useKriya(s => s.removeTask);
   const getTasksForDay = useKriya(s => s.getTasksForDay);
   const isDarkMode = useKriya(s => s.isDarkMode);
-  const language = useKriya(s => s.language);
-  const setLanguage = useKriya(s => s.setLanguage);
   const hasCompletedOnboarding = useKriya(s => s.hasCompletedOnboarding);
   const refresh   = useKriya(s => s.refresh);
   const insets    = useSafeAreaInsets();

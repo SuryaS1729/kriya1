@@ -73,8 +73,6 @@ async function saveToDeviceCache(cacheKey: string, base64Audio: string): Promise
 
 // --------------- R2 fetch ---------------
 
-export type RecitationStyle = 'hindi' | 'sanskrit';
-
 async function fetchFromR2(
   folder: string,
   chapter: number,
@@ -162,28 +160,23 @@ export async function voiceoverAudio(
   return null;
 }
 
-// --------------- Shloka recitation (Hindi TTS or authentic Sanskrit) ---------------
+// --------------- Shloka recitation (authentic Sanskrit only) ---------------
 
-const RECITATION_FOLDERS: Record<RecitationStyle, string> = {
-  hindi: 'hi-IN-m4a',
-  sanskrit: 'authentic_sanskrit_m4a',
-};
+const RECITATION_FOLDER = 'authentic_sanskrit_m4a';
 
-function getRecitationCacheKey(style: RecitationStyle, chapter: number, verse: number): string {
-  return `${CACHE_DIR}recitation_${style}_${chapter}_${verse}.m4a`;
+function getRecitationCacheKey(chapter: number, verse: number): string {
+  return `${CACHE_DIR}recitation_sanskrit_${chapter}_${verse}.m4a`;
 }
 
 /**
- * Load the shloka recitation audio (Hindi TTS or authentic Sanskrit
- * recordings from R2), with device caching.
+ * Load the authentic Sanskrit shloka recitation audio from R2, with device caching.
  */
 export async function shlokaRecitation(
-  style: RecitationStyle,
   chapter: number,
   verse: number
 ): Promise<string | null> {
-  const cacheKey = getRecitationCacheKey(style, chapter, verse);
-  const logName = `${style}/${chapter}_${verse}`;
+  const cacheKey = getRecitationCacheKey(chapter, verse);
+  const logName = `sanskrit/${chapter}_${verse}`;
 
   const cached = await getFromDeviceCache(cacheKey);
   if (cached) {
@@ -191,7 +184,7 @@ export async function shlokaRecitation(
     return cached;
   }
 
-  const r2Audio = await fetchFromR2(RECITATION_FOLDERS[style], chapter, verse);
+  const r2Audio = await fetchFromR2(RECITATION_FOLDER, chapter, verse);
   if (r2Audio) {
     console.log(`[TTS] R2 hit: ${logName}`);
     await saveToDeviceCache(cacheKey, r2Audio);

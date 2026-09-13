@@ -2,7 +2,6 @@
 import { getDb } from './db';
 import { daysSinceEpoch } from './date';
 import { isDbReady } from './dbReady';
-import type { ContentLanguage } from './store';
 
 const TABLE = 'shlokas';
 
@@ -17,51 +16,19 @@ export type ShlokaRow = {
   commentary: string | null;
 };
 
-/** Fetch the Telugu translation for a shloka, or null when unavailable. */
-export function getTeluguTranslation(chapter: number, verse: number): string | null {
-  if (!isDbReady()) return null;
-  const db = getDb();
-  const row = db.getFirstSync<{ translation: string | null }>(
-    `SELECT translation FROM telugu_translations WHERE chapter_number = ? AND verse_number = ? LIMIT 1`,
-    [chapter, verse]
-  );
-  const value = row?.translation ?? null;
-  return value && value.trim() !== '' ? value : null;
-}
-
-/** Fetch the Telugu commentary for a shloka, or null when unavailable. */
-export function getTeluguCommentary(chapter: number, verse: number): string | null {
-  if (!isDbReady()) return null;
-  const db = getDb();
-  const row = db.getFirstSync<{ commentary: string | null }>(
-    `SELECT commentary FROM telugu_commentaries WHERE chapter_number = ? AND verse_number = ? LIMIT 1`,
-    [chapter, verse]
-  );
-  const value = row?.commentary ?? null;
-  return value && value.trim() !== '' ? value : null;
-}
-
-/** Best available translation for the requested language, falling back to English then the description. */
+/** Best available English translation (Indian-language content lives in R2 JSON via translationService, never SQLite). */
 export function getTranslationForLanguage(
   row: ShlokaRow,
-  language: ContentLanguage
+  _language?: string
 ): string | null {
-  if (language === 'te') {
-    return getTeluguTranslation(row.chapter_number, row.verse_number)
-      ?? row.translation_2
-      ?? row.description;
-  }
   return row.translation_2 ?? row.description;
 }
 
-/** Best available commentary for the requested language, falling back to English. */
+/** English commentary (Indian-language content lives in R2 JSON via translationService, never SQLite). */
 export function getCommentaryForLanguage(
   row: ShlokaRow,
-  language: ContentLanguage
+  _language?: string
 ): string | null {
-  if (language === 'te') {
-    return getTeluguCommentary(row.chapter_number, row.verse_number) ?? row.commentary;
-  }
   return row.commentary;
 }
 

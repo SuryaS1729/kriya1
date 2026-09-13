@@ -52,7 +52,6 @@ export default function ShlokaDetail() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const isDarkMode = useKriya(s => s.isDarkMode);
   const language = useKriya(s => s.language);
-  const recitationStyle = useKriya(s => s.recitationStyle);
   const translationLanguage = useKriya(s => s.translationLanguage);
   const setTranslationLanguage = useKriya(s => s.setTranslationLanguage);
   const downloadedTranslations = useKriya(s => s.downloadedTranslations);
@@ -432,10 +431,10 @@ const handleBookPress = () => {
       if (displayedTranslation) speakText += `Translation. ${displayedTranslation}`;
       if (displayedCommentary) speakText += ` ... Commentary. ${displayedCommentary}`;
 
-      // Fetch both audio files in parallel from cache/R2 recordings
-      // The shloka recitation follows the user's chosen style (Hindi TTS or authentic Sanskrit)
+      // Fetch both audio files in parallel from cache/R2 recordings.
+      // The shloka recitation is always the authentic Sanskrit recording.
       const [shlokaAudio, voiceover] = await Promise.all([
-        shlokaRecitation(recitationStyle, row.chapter_number, row.verse_number),
+        shlokaRecitation(row.chapter_number, row.verse_number),
         speakText ? voiceoverAudio(voiceLang, row.chapter_number, row.verse_number) : Promise.resolve(null),
       ]);
       const spokenAudio = voiceover?.audio ?? null;

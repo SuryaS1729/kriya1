@@ -17,10 +17,6 @@ import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 // Add haptics import
 import { buttonPressHaptic, selectionHaptic } from '../lib/haptics';
-// TELUGU DISABLED: getTeluguTranslation import no longer used while Telugu features are paused.
-// import {
-//   getTeluguTranslation,
-// } from '../lib/shloka';
 
 export default function Read() {
   const isDarkMode = useKriya(s => s.isDarkMode);

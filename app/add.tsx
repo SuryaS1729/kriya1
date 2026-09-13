@@ -24,13 +24,15 @@ import {
   type Task,
 } from '../lib/tasks';
 import Feather from "@react-native-vector-icons/feather/static";
+import AntDesign from "@react-native-vector-icons/ant-design/static";
 import Animated, { 
   useSharedValue, 
   useAnimatedStyle, 
   withSpring,
   interpolate,
   LinearTransition,
-  FadeInDown
+  FadeInDown,
+  ZoomIn
 } from 'react-native-reanimated';
 import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -374,10 +376,10 @@ export default function Add() {
           variant="close"
           right={(
             <Pressable onPress={openHelpModal} hitSlop={12} style={styles.helpButton}>
-              <Feather
-                name="help-circle"
-                size={18}
-                color={isDarkMode ? '#cbd5e1' : '#475569'}
+              <AntDesign
+                name="bulb"
+                size={19}
+                color="#fbbf24"
               />
             </Pressable>
           )}
@@ -598,31 +600,51 @@ export default function Add() {
         visible={showHelpModal}
         onRequestClose={closeHelpModal}
       >
-        <View style={styles.helpModalBackdrop}>
-          <View
+        <Pressable style={styles.helpModalBackdrop} onPress={closeHelpModal}>
+          {/* Nested pressable swallows taps so interacting with the card
+              doesn't dismiss the modal — only the backdrop does. */}
+          <AnimatedPressable
+            entering={ZoomIn.duration(180)}
+            onPress={() => {}}
             style={[
               styles.helpModalCard,
               {
                 backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
+                borderColor: isDarkMode ? '#1e293b' : '#e2e8f0',
                 shadowColor: isDarkMode ? '#000000' : '#0f172a',
               },
             ]}
           >
             <View style={styles.helpModalHeader}>
+              <View style={[
+                styles.helpModalIconWrap,
+                { backgroundColor: isDarkMode ? '#451a03' : '#fef3c7' },
+              ]}>
+                <AntDesign
+                  name="bulb"
+                  size={19}
+                  color="#fbbf24"
+                />
+              </View>
               <Text style={[styles.helpModalTitle, { color: isDarkMode ? '#f9fafb' : '#111827' }]}>
                 Quick Add shortcut
               </Text>
               <Pressable onPress={closeHelpModal} hitSlop={12} style={styles.helpCloseButton}>
-                <Feather name="x" size={20} color={isDarkMode ? '#cbd5e1' : '#475569'} />
+                <Feather name="x" size={18} color={isDarkMode ? '#94a3b8' : '#64748b'} />
               </Pressable>
             </View>
 
             <Text style={[styles.helpModalText, { color: isDarkMode ? '#cbd5e1' : '#475569' }]}>
               Type multiple tasks in one go by separating them with a full stop.
             </Text>
-            <Text style={[styles.helpModalExample, { color: isDarkMode ? '#f9fafb' : '#0f172a' }]}>
-              Call mom. Buy milk. Send email.
-            </Text>
+            <View style={[
+              styles.helpModalExampleBox,
+              { backgroundColor: isDarkMode ? '#1e293b' : '#f1f5f9' },
+            ]}>
+              <Text style={[styles.helpModalExample, { color: isDarkMode ? '#e2e8f0' : '#0f172a' }]}>
+                Call mom. Buy milk. Send email.
+              </Text>
+            </View>
             <Text style={[styles.helpModalSubtext, { color: isDarkMode ? '#94a3b8' : '#64748b' }]}>
               When you submit, each sentence gets added as its own task.
             </Text>
@@ -636,8 +658,8 @@ export default function Add() {
             >
               <Text style={styles.helpModalPrimaryButtonText}>Got it</Text>
             </Pressable>
-          </View>
-        </View>
+          </AnimatedPressable>
+        </Pressable>
       </Modal>
     </SafeAreaView>
   );
@@ -725,6 +747,7 @@ const styles = StyleSheet.create({
   helpModalCard: {
     width: '100%',
     borderRadius: 22,
+    borderWidth: 1,
     padding: 22,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.22,
@@ -734,42 +757,52 @@ const styles = StyleSheet.create({
   helpModalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginBottom: 14,
+    gap: 10,
+    marginBottom: 12,
+  },
+  helpModalIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   helpModalTitle: {
     flex: 1,
-    fontSize: 21,
+    fontSize: 19,
     fontWeight: '700',
     fontFamily: 'Source Serif Pro',
   },
   helpCloseButton: {
-    padding: 2,
+    padding: 6,
+    borderRadius: 16,
   },
   helpModalText: {
     fontSize: 15,
     lineHeight: 22,
-    marginBottom: 14,
+    marginBottom: 12,
+  },
+  helpModalExampleBox: {
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 12,
   },
   helpModalExample: {
     fontSize: 16,
     lineHeight: 24,
     fontWeight: '600',
     fontFamily: 'Space Mono',
-    marginBottom: 12,
   },
   helpModalSubtext: {
     fontSize: 14,
     lineHeight: 21,
-    marginBottom: 20,
+    marginBottom: 18,
   },
   helpModalPrimaryButton: {
-    alignSelf: 'flex-end',
-    minWidth: 96,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    borderRadius: 12,
+    alignSelf: 'stretch',
+    paddingVertical: 14,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
   },

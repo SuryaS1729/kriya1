@@ -44,13 +44,13 @@ const imageBackground = (
 // values in index.json. Keeps the JSON payload tiny (just ids + optional overrides).
 const DEFAULT_REMOTE_STYLE = {
   colors: ['#1a1a2e', '#16213e'],
-  textBoxBg: 'rgba(0, 17, 28, 0.55)',
+  textBoxBg: 'rgba(0, 17, 28, 0.20)',
   textBoxPosition: 'center',
   textColor: '#ffffff',
   translationColor: '#f5f5f5',
   refColor: '#ffffff',
   brandingColor: '#ffffff',
-  defaultBgOpacity: 1,
+  defaultBgOpacity: 0.3,
 } as const satisfies Omit<ShareBackgroundBase, 'id' | 'label' | 'type'>;
 
 // Default textbox/opacity values for the share UI (previously read off

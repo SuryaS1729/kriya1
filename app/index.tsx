@@ -715,11 +715,15 @@ export default function Home() {
   // Show loading while not ready
   if (!ready) {
     return (
-      <View style={{ flex: 1, justifyContent: 'space-evenly', alignItems: 'center', backgroundColor: isDarkMode ? '#000' : '#fff' }}>
+      <LinearGradient
+        colors={isDarkMode ? ['#2e455fff', '#000000ff'] : ['#ffffffd2', '#ced7ec']}
+        style={{ flex: 1, justifyContent: 'space-evenly', alignItems: 'center' }}
+      >
+        <StatusBar style={isDarkMode ? "light" : "dark"} />
         <View></View>
         <ActivityIndicator size="large" color={isDarkMode ? '#fff' : '#000'} />
         <Text style={{ fontSize: 20, fontFamily:"Instrument Serif", fontStyle:"italic", color: isDarkMode ? '#fff' : '#000' }}>loading...</Text>
-      </View>
+      </LinearGradient>
     );
   }
 

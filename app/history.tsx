@@ -531,18 +531,6 @@ function QuickActions() {
           <Feather name="bookmark" size={24} color="#fbbf24" />
           <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Bookmarks</Text>
         </Pressable>
-
-        <Pressable
-          style={[styles.actionButton, !isDarkMode && styles.lightCard]}
-          onPress={() => {
-            buttonPressHaptic();
-            router.push('/loaders');
-          }}
-          android_ripple={{ color: '#cccccc18' }}
-        >
-          <Feather name="loader" size={24} color="#bada55" />
-          <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Skia Loaders</Text>
-        </Pressable>
       </View>
     </View>
   );

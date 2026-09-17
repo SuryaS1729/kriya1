@@ -214,8 +214,10 @@ export const useKriya = create<KriyaState>()(
       focusSessions: {},
       _totalCompletedCache: null,
 
-      // Default notification settings
-      notificationsEnabled: true,
+      // Default notification settings — off until the user explicitly
+      // enables them from My Journey → Notification Settings (history.tsx).
+      // This keeps the onboarding flow permission-free.
+      notificationsEnabled: false,
       reminderTime: { hour: 8, minute: 0 }, // 8:00 AM default
       notificationToken: null,
 

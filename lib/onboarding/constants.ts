@@ -123,6 +123,6 @@ export const onboardingSteps: OnboardingStep[] = [
     type: 'reminder',
     title: 'When do you start your day?',
     description:
-      "Set a time for a gentle daily reminder to plan your tasks and stay on track. We'll ask for notification permission when you continue.",
+      "Set a time for a gentle daily reminder to plan your tasks and stay on track. We'll ask for notification permission when you tap Set Reminder — or tap Skip to skip reminders entirely.",
   },
 ];

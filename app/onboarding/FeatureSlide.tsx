@@ -12,6 +12,7 @@ type FeatureSlideProps = {
   step: FeatureStepType;
   theme: Theme;
   isActive: boolean;
+  player?: VideoPlayer | null;
 };
 
 /** Inline replica of the "View in English" toggle pill */
@@ -69,17 +70,19 @@ function RichDescription({
   );
 }
 
-export default function FeatureSlide({ step, theme, isActive }: FeatureSlideProps) {
-  const player = useVideoPlayer(step.videoUrl ?? null);
-  const playerRef = React.useRef<VideoPlayer | null>(player);
+export default function FeatureSlide({ step, theme, isActive, player: preloadedPlayer }: FeatureSlideProps) {
+  // When a preloaded player is passed (created during the welcome phase),
+  // use it directly so buffering starts before this slide appears.
+  // Otherwise fall back to creating a player lazily here.
+  const fallbackPlayer = useVideoPlayer(preloadedPlayer ? null : (step.videoUrl ?? null), (p) => {
+    p.loop = true;
+  });
+  const player = preloadedPlayer ?? fallbackPlayer;
+  const playerRef = React.useRef<VideoPlayer | null>(null);
 
   React.useEffect(() => {
     playerRef.current = player;
-
-    if (!step.videoUrl) return;
-
-    playerRef.current.loop = true;
-  }, [player, step.videoUrl]);
+  }, [player]);
 
   React.useEffect(() => {
     const currentPlayer = playerRef.current;

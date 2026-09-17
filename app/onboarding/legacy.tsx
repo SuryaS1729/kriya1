@@ -1,12 +1,20 @@
-import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, StatusBar, Platform } from 'react-native';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { View, StyleSheet, StatusBar, Platform, Image as RNImage } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { useVideoPlayer } from 'expo-video';
 import BlurBackground from '../../components/BlurBackground';
 import { useKriya } from '../../lib/store';
 import { buttonPressHaptic, selectionHaptic } from '../../lib/haptics';
 
-import { themes, CONTEMPLATION_DELAY } from '../../lib/onboarding/constants';
+import {
+  themes,
+  CONTEMPLATION_DELAY,
+  GITA_IMAGE_URL,
+  ADD_TASKS_VIDEO_URL,
+  COMPLETE_TASKS_VIDEO_URL,
+  VOICE_BY_SARVAM_VIDEO_URL,
+} from '../../lib/onboarding/constants';
 import { useAmbientAudio } from '../../lib/onboarding/useAmbientAudio';
 import WelcomeScreen from './WelcomeScreen';
 import OnboardingPager from './OnboardingPager';
@@ -18,7 +26,6 @@ export default function Onboarding() {
   // ─── Store ─────────────────────────────────────────────────────
   const isDarkMode = useKriya(s => s.isDarkMode);
   const reminderTime = useKriya(s => s.reminderTime);
-  const notificationsEnabled = useKriya(s => s.notificationsEnabled);
   const completeOnboarding = useKriya(s => s.completeOnboarding);
   const setReminderTime = useKriya(s => s.setReminderTime);
   const initializeNotifications = useKriya(s => s.initializeNotifications);
@@ -38,6 +45,33 @@ export default function Onboarding() {
   // ─── Audio ─────────────────────────────────────────────────────
   const { fadeOut } = useAmbientAudio();
 
+  // ─── Asset prefetch ────────────────────────────────────────────
+  // Create video players while the user is still on the welcome screen,
+  // so buffering starts before the pager mounts and slides appear instantly.
+  const addTasksPlayer = useVideoPlayer(ADD_TASKS_VIDEO_URL, (p) => {
+    p.loop = true;
+  });
+  const completeTasksPlayer = useVideoPlayer(COMPLETE_TASKS_VIDEO_URL, (p) => {
+    p.loop = true;
+  });
+  const voicePlayer = useVideoPlayer(VOICE_BY_SARVAM_VIDEO_URL, (p) => {
+    p.loop = true;
+  });
+
+  const players = useMemo(
+    () => ({
+      [ADD_TASKS_VIDEO_URL]: addTasksPlayer,
+      [COMPLETE_TASKS_VIDEO_URL]: completeTasksPlayer,
+      [VOICE_BY_SARVAM_VIDEO_URL]: voicePlayer,
+    }),
+    [addTasksPlayer, completeTasksPlayer, voicePlayer],
+  );
+
+  // Warm the loading-screen image cache during welcome too.
+  useEffect(() => {
+    RNImage.prefetch(GITA_IMAGE_URL).catch(() => {});
+  }, []);
+
   // ─── Callbacks ─────────────────────────────────────────────────
   const handleBeginJourney = useCallback(() => {
     setPhase('onboarding');
@@ -54,16 +88,17 @@ export default function Onboarding() {
   }, [fadeOut, completeOnboarding]);
 
   const handleSaveReminder = useCallback(async () => {
+    // User explicitly tapped "Set Reminder" → save time + request permission
+    // here and now. Skip users never reach this (Skip → onFinish directly),
+    // and since the store defaults to disabled, index.tsx won't prompt them.
     setIsSavingReminder(true);
     try {
       await setReminderTime(selectedTime.getHours(), selectedTime.getMinutes());
-      if (notificationsEnabled) {
-        await initializeNotifications();
-      }
+      await initializeNotifications();
     } finally {
       setIsSavingReminder(false);
     }
-  }, [selectedTime, notificationsEnabled, setReminderTime, initializeNotifications]);
+  }, [selectedTime, setReminderTime, initializeNotifications]);
 
   const handleOpenTimePicker = useCallback(() => {
     buttonPressHaptic();
@@ -106,6 +141,7 @@ export default function Onboarding() {
             selectedTime={selectedTime}
             showPicker={showPicker}
             isSavingReminder={isSavingReminder}
+            players={players}
             onValueChange={handleValueChange}
             onDismiss={handleDismiss}
             onOpenTimePicker={handleOpenTimePicker}

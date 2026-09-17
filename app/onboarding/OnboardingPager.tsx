@@ -12,6 +12,7 @@ import Animated, {
   FadeIn,
 } from 'react-native-reanimated';
 
+import type { VideoPlayer } from 'expo-video';
 import {
   onboardingSteps,
   Theme,
@@ -27,6 +28,7 @@ type OnboardingPagerProps = {
   selectedTime: Date;
   showPicker: boolean;
   isSavingReminder: boolean;
+  players?: Record<string, VideoPlayer | null>;
   onValueChange: (event: any, date: Date) => void;
   onDismiss: () => void;
   onOpenTimePicker: () => void;
@@ -40,6 +42,7 @@ export default function OnboardingPager({
   selectedTime,
   showPicker,
   isSavingReminder,
+  players,
   onValueChange,
   onDismiss,
   onOpenTimePicker,
@@ -126,7 +129,12 @@ export default function OnboardingPager({
                 onOpenTimePicker={onOpenTimePicker}
               />
             ) : (
-              <FeatureSlide step={step} theme={theme} isActive={index === currentPage} />
+              <FeatureSlide
+                step={step}
+                theme={theme}
+                isActive={index === currentPage}
+                player={step.videoUrl ? players?.[step.videoUrl] ?? null : null}
+              />
             )}
           </View>
         ))}

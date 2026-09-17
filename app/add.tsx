@@ -354,6 +354,19 @@ export default function Add() {
       ]} numberOfLines={2}>
         {item.title}
       </Text>
+      {!item.completed && (
+        <Pressable
+          onPress={() => {
+            errorHaptic(); // Same haptic as long-press delete
+            removeTaskDb(item.id);
+            refreshSelectedDayTasks();
+          }}
+          hitSlop={8}
+          style={styles.deleteButton}
+        >
+          <Text style={[styles.deleteIcon, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>✕</Text>
+        </Pressable>
+      )}
     </AnimatedPressable>
   );
 
@@ -694,6 +707,18 @@ const styles = StyleSheet.create({
     fontStyle:"normal" },
   done: { opacity: 0.6, textDecorationLine: 'line-through',    color: '#94a3b8', 
  },
+  deleteButton: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  deleteIcon: {
+    fontSize: 11,
+    fontWeight: '600',
+    opacity: 0.5,
+  },
   sep: { height: 0.5, backgroundColor: '#f1f5f9', marginLeft: 16 },
 
   // bottom input bar

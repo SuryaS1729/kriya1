@@ -8,15 +8,17 @@ import AntDesign from "@react-native-vector-icons/ant-design/static";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  useReducedMotion,
   withTiming,
   FadeIn,
+  Easing,
+  ReduceMotion,
 } from 'react-native-reanimated';
 
 import type { VideoPlayer } from 'expo-video';
 import {
   onboardingSteps,
   Theme,
-  FADE_DURATION,
 } from '../../lib/onboarding/constants';
 import FeatureSlide from './FeatureSlide';
 import ReminderSlide from './ReminderSlide';
@@ -51,13 +53,17 @@ export default function OnboardingPager({
 }: OnboardingPagerProps) {
   const pagerRef = useRef<PagerView>(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const reducedMotion = useReducedMotion();
 
   const contentOpacity = useSharedValue(0);
 
-  // Fade in on mount.
+  // Fade in on mount — short, spec curve; instant under reduced motion.
   React.useEffect(() => {
-    contentOpacity.value = withTiming(1, { duration: FADE_DURATION });
-  }, [contentOpacity]);
+    contentOpacity.value = withTiming(1, {
+      duration: reducedMotion ? 0 : 250,
+      easing: Easing.bezier(0.23, 1, 0.32, 1),
+    });
+  }, [contentOpacity, reducedMotion]);
 
   const animatedContentStyle = useAnimatedStyle(() => ({
     opacity: contentOpacity.value,
@@ -140,28 +146,36 @@ export default function OnboardingPager({
         ))}
       </PagerView>
 
-      {/* Progress dots */}
+      {/* Progress dots — state-driven, so a CSS transition on
+          transform/opacity only (no layout props animated). */}
       <View style={styles.progressContainer}>
-        {onboardingSteps.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.progressDot,
-              { backgroundColor: theme.progressDot },
-              index === currentPage && {
-                backgroundColor: theme.text,
-                width: 12,
-                height: 12,
-                borderRadius: 6,
-              },
-            ]}
-          />
-        ))}
+        {onboardingSteps.map((_, index) => {
+          const isActive = index === currentPage;
+          return (
+            <Animated.View
+              key={index}
+              style={[
+                styles.progressDot,
+                { backgroundColor: isActive ? theme.text : theme.progressDot },
+                !reducedMotion && {
+                  transitionProperty: ['transform', 'opacity'],
+                  transitionDuration: 150,
+                },
+                {
+                  opacity: isActive ? 1 : 0.6,
+                  transform: [{ scale: isActive ? 1.5 : 1 }],
+                },
+              ]}
+            />
+          );
+        })}
       </View>
 
       {/* Navigation bar */}
       <Animated.View
-        entering={FadeIn.delay(300).duration(FADE_DURATION)}
+        entering={FadeIn.delay(100)
+          .duration(250)
+          .reduceMotion(ReduceMotion.System)}
         style={styles.navigationContainer}
       >
         {/* Back button — hidden on first page */}

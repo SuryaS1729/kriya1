@@ -3,14 +3,15 @@ import { View, Text, StyleSheet, Image, ActivityIndicator, useWindowDimensions }
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  useReducedMotion,
   withTiming,
+  Easing,
 } from 'react-native-reanimated';
 
 import {
   Theme,
   GITA_IMAGE_URL,
   LOADING_TEXTS,
-  FADE_DURATION,
 } from '../../lib/onboarding/constants';
 
 type LoadingScreenProps = {
@@ -23,14 +24,27 @@ export default function LoadingScreen({ theme }: LoadingScreenProps) {
   const [currentLoadingText, setCurrentLoadingText] = useState(LOADING_TEXTS[0]);
 
   const loadingOpacity = useSharedValue(0);
-  const loadingScale = useSharedValue(0.8);
+  const loadingScale = useSharedValue(1);
   const loadingTextOpacity = useSharedValue(0);
+  const reducedMotion = useReducedMotion();
 
-  // Entrance animation.
+  // Entrance: opacity state change + a near-full-scale settle (never from 0).
+  // Reduced motion drops the scale entirely.
   useEffect(() => {
-    loadingOpacity.value = withTiming(1, { duration: FADE_DURATION });
-    loadingScale.value = withTiming(1, { duration: FADE_DURATION });
-  }, [loadingOpacity, loadingScale]);
+    if (reducedMotion) {
+      loadingOpacity.value = withTiming(1, { duration: 150 });
+      return;
+    }
+    loadingScale.value = 0.95;
+    loadingOpacity.value = withTiming(1, {
+      duration: 250,
+      easing: Easing.bezier(0.23, 1, 0.32, 1),
+    });
+    loadingScale.value = withTiming(1, {
+      duration: 250,
+      easing: Easing.bezier(0.23, 1, 0.32, 1),
+    });
+  }, [loadingOpacity, loadingScale, reducedMotion]);
 
   // Cycle through loading texts.
   useEffect(() => {

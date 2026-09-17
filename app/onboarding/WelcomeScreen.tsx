@@ -7,21 +7,28 @@ import { EaseView } from 'react-native-ease';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  useReducedMotion,
   withTiming,
   withRepeat,
   withSequence,
+  Easing,
 } from 'react-native-reanimated';
 
 import {
   Theme,
-  SLIDE_DURATION,
-  FADE_DURATION,
   CHEVRON_BOUNCE_DURATION,
   SHIMMER_SLIDE_DURATION,
   SHIMMER_PAUSE_DURATION,
   SHIMMER_START_DELAY,
 } from '../../lib/onboarding/constants';
 import { taskCompleteHaptic } from '../../lib/haptics';
+
+// ─── Motion spec (per animate-expo skill) ──────────────────────────
+// Exits stay at/below platform-transition length; constant motion is linear.
+const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
+const EXIT_SLIDE_DURATION = 300;
+const EXIT_FADE_DURATION = 250;
+const REDUCED_EXIT_FADE_DURATION = 150;
 
 type WelcomeScreenProps = {
   theme: Theme;
@@ -30,6 +37,7 @@ type WelcomeScreenProps = {
 
 export default function WelcomeScreen({ theme, onBegin }: WelcomeScreenProps) {
   const { height: SCREEN_HEIGHT } = useWindowDimensions();
+  const reducedMotion = useReducedMotion();
 
   // ─── Animated values ───────────────────────────────────────────
   const titleTranslateY = useSharedValue(0);
@@ -41,11 +49,13 @@ export default function WelcomeScreen({ theme, onBegin }: WelcomeScreenProps) {
   const shimmerTranslateX = useSharedValue(-200);
 
   React.useEffect(() => {
+    // Reduced motion: no looping shimmer — the static button stands alone.
+    if (reducedMotion) return;
     const timer = setTimeout(() => {
       shimmerTranslateX.value = withRepeat(
         withSequence(
           withTiming(-200, { duration: 0 }),
-          withTiming(400, { duration: SHIMMER_SLIDE_DURATION }),
+          withTiming(400, { duration: SHIMMER_SLIDE_DURATION, easing: Easing.linear }),
           withTiming(400, { duration: SHIMMER_PAUSE_DURATION }),
         ),
         -1,
@@ -54,7 +64,7 @@ export default function WelcomeScreen({ theme, onBegin }: WelcomeScreenProps) {
     }, SHIMMER_START_DELAY);
 
     return () => clearTimeout(timer);
-  }, [shimmerTranslateX]);
+  }, [shimmerTranslateX, reducedMotion]);
 
   // ─── Animated styles ───────────────────────────────────────────
   const animatedTitleStyle = useAnimatedStyle(() => ({
@@ -82,15 +92,24 @@ export default function WelcomeScreen({ theme, onBegin }: WelcomeScreenProps) {
   const handleBegin = () => {
     taskCompleteHaptic();
 
+    // Reduced motion: keep the opacity state change, drop all translation.
+    if (reducedMotion) {
+      titleOpacity.value = withTiming(0, { duration: REDUCED_EXIT_FADE_DURATION });
+      subtitleOpacity.value = withTiming(0, { duration: REDUCED_EXIT_FADE_DURATION });
+      cardOpacity.value = withTiming(0, { duration: REDUCED_EXIT_FADE_DURATION });
+      setTimeout(onBegin, REDUCED_EXIT_FADE_DURATION);
+      return;
+    }
+
     // Slide title up, subtitle up, card down — then notify parent.
-    titleTranslateY.value = withTiming(-200, { duration: SLIDE_DURATION });
-    titleOpacity.value = withTiming(0, { duration: FADE_DURATION });
-    subtitleTranslateY.value = withTiming(-100, { duration: 700 });
-    subtitleOpacity.value = withTiming(0, { duration: 500 });
-    cardTranslateY.value = withTiming(300, { duration: SLIDE_DURATION });
-    cardOpacity.value = withTiming(0, { duration: FADE_DURATION });
-  
-    setTimeout(onBegin, SLIDE_DURATION);
+    titleTranslateY.value = withTiming(-200, { duration: EXIT_SLIDE_DURATION, easing: EASE_OUT });
+    titleOpacity.value = withTiming(0, { duration: EXIT_FADE_DURATION });
+    subtitleTranslateY.value = withTiming(-100, { duration: EXIT_SLIDE_DURATION, easing: EASE_OUT });
+    subtitleOpacity.value = withTiming(0, { duration: EXIT_FADE_DURATION });
+    cardTranslateY.value = withTiming(300, { duration: EXIT_SLIDE_DURATION, easing: EASE_OUT });
+    cardOpacity.value = withTiming(0, { duration: EXIT_FADE_DURATION });
+
+    setTimeout(onBegin, EXIT_SLIDE_DURATION);
   };
 
   return (
@@ -126,19 +145,25 @@ export default function WelcomeScreen({ theme, onBegin }: WelcomeScreenProps) {
         ]}
       >
         <View style={styles.cardContent}>
-          <EaseView
-            style={styles.arrowContainer}
-            animate={{ translateY: 4 }}
-            initialAnimate={{ translateY: 0 }}
-            transition={{
-              type: 'timing',
-              duration: CHEVRON_BOUNCE_DURATION,
-              easing: 'easeInOut',
-              loop: 'reverse',
-            }}
-          >
-            <Feather name="chevrons-down" size={30} color={theme.arrowColor} />
-          </EaseView>
+          {reducedMotion ? (
+            <View style={styles.arrowContainer}>
+              <Feather name="chevrons-down" size={30} color={theme.arrowColor} />
+            </View>
+          ) : (
+            <EaseView
+              style={styles.arrowContainer}
+              animate={{ translateY: 4 }}
+              initialAnimate={{ translateY: 0 }}
+              transition={{
+                type: 'timing',
+                duration: CHEVRON_BOUNCE_DURATION,
+                easing: 'easeInOut',
+                loop: 'reverse',
+              }}
+            >
+              <Feather name="chevrons-down" size={30} color={theme.arrowColor} />
+            </EaseView>
+          )}
 
           <PressableScale
             onPress={handleBegin}

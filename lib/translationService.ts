@@ -11,7 +11,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { PUBLIC_ASSET_BASE_URL } from './publicAssetBaseUrl';
 
-export type TranslationLanguageCode = 'gu' | 'hi' | 'or' | 'ta' | 'te';
+export type TranslationLanguageCode = 'gu' | 'hi' | 'kn' | 'ml' | 'mr' | 'or' | 'ta' | 'te';
 
 /** English is not an R2 translation file — it is the SQLite/fallback language. */
 export type ShlokaDisplayLanguage = 'en' | TranslationLanguageCode;
@@ -30,6 +30,9 @@ export interface TranslationLanguage {
 export const TRANSLATION_LANGUAGES: Record<TranslationLanguageCode, TranslationLanguage> = {
   gu: { code: 'gu', name: 'Gujarati', file: 'bhagavad_gita_gu.json', fontFamily: 'NTR' },
   hi: { code: 'hi', name: 'Hindi', file: 'bhagavad_gita_hi.json', fontFamily: 'NTR' },
+  kn: { code: 'kn', name: 'Kannada', file: 'bhagavad_gita_kn.json', fontFamily: 'NTR' },
+  ml: { code: 'ml', name: 'Malayalam', file: 'bhagavad_gita_ml.json', fontFamily: 'NTR' },
+  mr: { code: 'mr', name: 'Marathi', file: 'bhagavad_gita_mr.json', fontFamily: 'NTR' },
   or: { code: 'or', name: 'Odia', file: 'bhagavad_gita_or.json', fontFamily: 'NTR' },
   ta: { code: 'ta', name: 'Tamil', file: 'bhagavad_gita_ta.json', fontFamily: 'NTR' },
   te: { code: 'te', name: 'Telugu', file: 'bhagavad_gita_te.json', fontFamily: 'NTR' },
@@ -38,6 +41,9 @@ export const TRANSLATION_LANGUAGES: Record<TranslationLanguageCode, TranslationL
 export const TRANSLATION_LANGUAGE_LIST: TranslationLanguage[] = [
   TRANSLATION_LANGUAGES.gu,
   TRANSLATION_LANGUAGES.hi,
+  TRANSLATION_LANGUAGES.kn,
+  TRANSLATION_LANGUAGES.ml,
+  TRANSLATION_LANGUAGES.mr,
   TRANSLATION_LANGUAGES.or,
   TRANSLATION_LANGUAGES.ta,
   TRANSLATION_LANGUAGES.te,

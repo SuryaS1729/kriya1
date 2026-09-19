@@ -12,7 +12,7 @@ export type TTSLanguage = 'hi-IN' | 'en-IN';
 // switches with the translate-button language. English (`en-IN-m4a`) is the
 // default fallback — add a new folder here as you upload each language and
 // the player picks it up automatically, falling back to English until then.
-export type VoiceoverLanguage = 'en' | 'gu' | 'hi' | 'or' | 'ta' | 'te';
+export type VoiceoverLanguage = 'en' | 'gu' | 'hi' | 'kn' | 'ml' | 'mr' | 'or' | 'ta' | 'te';
 
 const VOICEOVER_FOLDERS: Record<VoiceoverLanguage, string> = {
   en: 'en-IN-m4a',
@@ -21,6 +21,9 @@ const VOICEOVER_FOLDERS: Record<VoiceoverLanguage, string> = {
   // `{chapter}_{verse}.m4a` collisions. Use this name when you upload it.
   hi: 'hi-translation-m4a',
   gu: 'gu-IN-m4a',
+  kn: 'kn-IN-m4a',
+  ml: 'ml-IN-m4a',
+  mr: 'mr-IN-m4a',
   or: 'or-IN-m4a',
   ta: 'ta-IN-m4a',
   te: 'te-IN-m4a',

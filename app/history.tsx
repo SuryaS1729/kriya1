@@ -11,7 +11,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 // import * as Haptics from 'expo-haptics';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { StatusBar } from 'expo-status-bar';
-import Animated, { LinearTransition, Easing, useReducedMotion } from 'react-native-reanimated';
 import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic } from '../lib/haptics';
 import { showAppToast } from '../lib/appToast';
 import {
@@ -28,15 +27,6 @@ function getDateKey(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
 }
 
-// Animation — SKILL.md build sequence:
-// Gate: occasional (≤5 downloads lifetime) → animate.
-// Purpose: state indication + preventing a jarring reorder when downloaded items move.
-// Tool: layout animation (list reflow) — cheapest that fits. Timing, not spring (no finger).
-// Easing per SKILL.md: moving on screen → ease-in-out, duration 200-220ms.
-const EASE_IN_OUT = Easing.bezier(0.77, 0, 0.175, 1);
-// Module scope — builders rebuilt in render cost every re-render (RECIPES.md)
-const TRANSLATION_REORDER_TRANSITION = LinearTransition.duration(220).easing(EASE_IN_OUT);
-
 
 // Recitation Settings Component
 // Translation Settings Component
@@ -44,7 +34,6 @@ const TRANSLATION_REORDER_TRANSITION = LinearTransition.duration(220).easing(EAS
 // SQLite). Download/remove is the only responsibility of this section.
 function TranslationSettings() {
   const isDarkMode = useKriya(s => s.isDarkMode);
-  const reducedMotion = useReducedMotion();
   const translationLanguage = useKriya(s => s.translationLanguage);
   const setTranslationLanguage = useKriya(s => s.setTranslationLanguage);
   const downloadedTranslations = useKriya(s => s.downloadedTranslations);
@@ -101,7 +90,7 @@ function TranslationSettings() {
     }
   };
 
-  const handleRemove = async (code: TranslationLanguageCode) => {
+  const doRemove = async (code: TranslationLanguageCode) => {
     if (busyLang) return;
     selectionHaptic();
     setBusyLang(code);
@@ -133,68 +122,115 @@ function TranslationSettings() {
     }
   };
 
-  // Downloaded languages bubble to top with layout animation on change
-  const sortedLanguages = useMemo(() => {
-    return [...TRANSLATION_LANGUAGE_LIST].sort((a, b) => {
-      const aDl = localDownloaded.has(a.code);
-      const bDl = localDownloaded.has(b.code);
-      if (aDl && !bDl) return -1;
-      if (!aDl && bDl) return 1;
-      return TRANSLATION_LANGUAGE_LIST.indexOf(a) - TRANSLATION_LANGUAGE_LIST.indexOf(b);
-    });
-  }, [localDownloaded]);
+  const handleRemove = (code: TranslationLanguageCode) => {
+    if (busyLang) return;
+    const name = TRANSLATION_LANGUAGE_LIST.find(l => l.code === code)?.name ?? code;
+    Alert.alert(
+      `Remove ${name}?`,
+      'You can download it again anytime.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Remove', style: 'destructive', onPress: () => { void doRemove(code); } },
+      ],
+    );
+  };
+
+  // Pill interaction: tap downloads (if missing) or selects (if downloaded).
+  // Long-press on a downloaded pill removes it (with confirm above).
+  const handlePillPress = (code: TranslationLanguageCode) => {
+    if (busyLang) return;
+    if (!localDownloaded.has(code)) {
+      void handleDownload(code);
+      return;
+    }
+    if (translationLanguage === code) return;
+    selectionHaptic();
+    setTranslationLanguage(code);
+  };
+
+  const handleEnglishPress = () => {
+    if (busyLang || translationLanguage === 'en') return;
+    selectionHaptic();
+    setTranslationLanguage('en');
+  };
 
   return (
     <View style={[styles.section, !isDarkMode && styles.lightSection]}>
       <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Translations / Languages</Text>
       <Text style={[styles.recitationHint, !isDarkMode && styles.lightSubText]}>
-        Download a language to read shlokas in it. You can remove it anytime.
+        Tap to download or select. Long-press a downloaded language to remove it.
       </Text>
 
-      <View style={styles.notificationSettings}>
-        {sortedLanguages.map((lang) => {
+      <View style={styles.translationPillsWrap}>
+        {/* English is always available (SQLite) — no download needed. */}
+        <Pressable
+          onPress={handleEnglishPress}
+          android_ripple={{ color: '#cccccc18' }}
+          style={[
+            styles.translationPill,
+            !isDarkMode && styles.lightTranslationPill,
+            translationLanguage === 'en' && styles.translationPillActive,
+            translationLanguage === 'en' && !isDarkMode && styles.lightTranslationPillActive,
+          ]}
+        >
+          <Feather
+            name="check"
+            size={14}
+            color={translationLanguage === 'en' ? '#b3862f' : isDarkMode ? '#9ca3af' : '#64748b'}
+          />
+          <Text
+            style={[
+              styles.translationPillText,
+              !isDarkMode && styles.lightText,
+              translationLanguage === 'en' && styles.translationPillTextActive,
+            ]}
+          >
+            English
+          </Text>
+        </Pressable>
+
+        {TRANSLATION_LANGUAGE_LIST.map((lang) => {
           const downloaded = localDownloaded.has(lang.code);
           const busy = busyLang === lang.code;
+          const active = translationLanguage === lang.code;
           return (
-            <Animated.View
+            <Pressable
               key={lang.code}
-              layout={reducedMotion ? undefined : TRANSLATION_REORDER_TRANSITION}
+              onPress={() => handlePillPress(lang.code)}
+              onLongPress={() => { if (downloaded && !busy) handleRemove(lang.code); }}
+              android_ripple={{ color: '#cccccc18' }}
+              style={[
+                styles.translationPill,
+                !isDarkMode && styles.lightTranslationPill,
+                downloaded && styles.translationPillDownloaded,
+                downloaded && !isDarkMode && styles.lightTranslationPillDownloaded,
+                active && styles.translationPillActive,
+                active && !isDarkMode && styles.lightTranslationPillActive,
+              ]}
             >
-              <View style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}>
-              <View style={styles.settingInfo}>
-                <Text style={[styles.settingTitle, !isDarkMode && styles.lightText]}>
-                  {lang.name}
-                </Text>
-                <Text style={[styles.settingDescription, !isDarkMode && styles.lightSubText]}>
-                  {downloaded ? 'Downloaded ✓' : 'Not downloaded'}
-                </Text>
-              </View>
-
               {busy ? (
                 <ActivityIndicator size="small" color={isDarkMode ? '#8ba5e1' : '#4a6a9a'} />
               ) : downloaded ? (
-                <Pressable
-                  onPress={() => handleRemove(lang.code)}
-                  hitSlop={8}
-                  style={[
-                    styles.translationActionButton,
-                    styles.translationRemoveButton,
-                    !isDarkMode && styles.lightTranslationRemoveButton,
-                  ]}
-                >
-                  <Feather name="trash-2" size={16} color={isDarkMode ? '#f87171' : '#dc2626'} />
-                </Pressable>
+                <Feather
+                  name="check"
+                  size={14}
+                  color={active ? '#b3862f' : isDarkMode ? '#8ba5e1' : '#4a6a9a'}
+                />
               ) : (
-                <Pressable
-                  onPress={() => handleDownload(lang.code)}
-                  hitSlop={8}
-                  style={[styles.translationActionButton, !isDarkMode && styles.lightTranslationActionButton]}
-                >
-                  <Feather name="download" size={16} color={isDarkMode ? '#8ba5e1' : '#4a6a9a'} />
-                </Pressable>
+                <Feather name="download" size={14} color={isDarkMode ? '#9ca3af' : '#64748b'} />
               )}
-              </View>
-            </Animated.View>
+              <Text
+                style={[
+                  styles.translationPillText,
+                  !isDarkMode && styles.lightText,
+                  !downloaded && styles.translationPillTextMuted,
+                  !downloaded && !isDarkMode && styles.lightTranslationPillTextMuted,
+                  active && styles.translationPillTextActive,
+                ]}
+              >
+                {lang.name}
+              </Text>
+            </Pressable>
           );
         })}
       </View>
@@ -1241,6 +1277,56 @@ const styles = StyleSheet.create({
   translationActionText: {
     fontSize: 12,
     fontWeight: '600',
+  },
+  translationPillsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  translationPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    backgroundColor: 'rgba(52, 76, 103, 0.3)',
+  },
+  lightTranslationPill: {
+    backgroundColor: 'rgba(248, 250, 252, 0.8)',
+  },
+  translationPillDownloaded: {
+    borderColor: 'rgba(139, 165, 225, 0.35)',
+    backgroundColor: 'rgba(139, 165, 225, 0.12)',
+  },
+  lightTranslationPillDownloaded: {
+    borderColor: 'rgba(74, 106, 154, 0.35)',
+    backgroundColor: 'rgba(74, 106, 154, 0.10)',
+  },
+  translationPillActive: {
+    borderColor: '#b3862f',
+    backgroundColor: 'rgba(179, 134, 47, 0.18)',
+  },
+  lightTranslationPillActive: {
+    borderColor: '#b25e00',
+    backgroundColor: 'rgba(178, 94, 0, 0.10)',
+  },
+  translationPillText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  translationPillTextMuted: {
+    fontWeight: '400',
+    color: '#cbd5e1',
+  },
+  lightTranslationPillTextMuted: {
+    color: '#64748b',
+  },
+  translationPillTextActive: {
+    fontWeight: '700',
   },
   timeDisplay: {
     flexDirection: 'row',

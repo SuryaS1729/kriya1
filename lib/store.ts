@@ -49,7 +49,7 @@ export interface Bookmark {
 export type ContentLanguage = 'en';
 
 // Indian-language translations (downloaded as R2 JSON files, kept out of SQLite).
-export type TranslationDisplayLanguage = 'en' | 'gu' | 'hi' | 'or' | 'ta' | 'te';
+export type TranslationDisplayLanguage = 'en' | 'gu' | 'hi' | 'kn' | 'ml' | 'mr' | 'or' | 'ta' | 'te';
 
 interface KriyaState {
   ready: boolean;
@@ -482,7 +482,7 @@ export const useKriya = create<KriyaState>()(
         // Guard the translation layer: only valid codes persist, and the
         // selected language must always be one that is actually downloaded.
         if (state) {
-          const valid: TranslationDisplayLanguage[] = ['en', 'gu', 'hi', 'or', 'ta', 'te'];
+          const valid: TranslationDisplayLanguage[] = ['en', 'gu', 'hi', 'kn', 'ml', 'mr', 'or', 'ta', 'te'];
           const downloaded = (state.downloadedTranslations ?? []).filter((l): l is TranslationDisplayLanguage =>
             valid.includes(l)
           );

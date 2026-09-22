@@ -33,6 +33,7 @@ import {
   TRANSLATION_LANGUAGE_LIST,
   getTranslation,
   getCommentary,
+  getTranslatedShloka,
   type ShlokaDisplayLanguage,
 } from '../../lib/translationService';
 
@@ -72,6 +73,7 @@ export default function ShlokaDetail() {
   // non-English language is selected; never triggers a network request.
   const [translationText, setTranslationText] = useState<string | null>(null);
   const [commentaryText, setCommentaryText] = useState<string | null>(null);
+  const [shlokaText, setShlokaText] = useState<string | null>(null);
   const [translationLang, setTranslationLang] = useState<ShlokaDisplayLanguage>('en');
 
   useEffect(() => {
@@ -81,16 +83,20 @@ export default function ShlokaDetail() {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting the loaded translation is part of syncing with the selected language/file state; the effect is the single source that feeds the async read below.
       setTranslationText(null);
       setCommentaryText(null);
+      setShlokaText(null);
+      setTranslationLang('en');
       return;
     }
     (async () => {
-      const [t, c] = await Promise.all([
+      const [t, c, s] = await Promise.all([
         getTranslation(row.chapter_number, row.verse_number, translationLanguage),
         getCommentary(row.chapter_number, row.verse_number, translationLanguage),
+        getTranslatedShloka(row.chapter_number, row.verse_number, translationLanguage),
       ]);
       if (!cancelled) {
         setTranslationText(t);
         setCommentaryText(c);
+        setShlokaText(s);
         setTranslationLang(translationLanguage);
       }
     })();
@@ -652,11 +658,30 @@ return (
             Adhyaya {row!.chapter_number}, Shloka {row!.verse_number}
           </Text>
 
-          <Text style={[styles.sa, { color: isDarkMode ? '#e5e7eb' : '#545454' }]} selectable>
-            {row!.text}
-          </Text>
+          {/* Devanagari verse — hidden for non-Devanagari languages when the
+              localized verse is available, so only the language's own script shows. */}
+          {(translationLang === 'en' || translationLang === 'hi' || translationLang === 'mr' || !shlokaText) ? (
+            <Text style={[styles.sa, { color: isDarkMode ? '#e5e7eb' : '#545454' }]} selectable>
+              {row!.text}
+            </Text>
+          ) : null}
 
-          {row!.transliteration ? (
+          {/* Localized verse in the language's own script — skipped for Hindi/Marathi
+              since they share Devanagari with the Sanskrit verse above. */}
+          {translationLang !== 'en' && translationLang !== 'hi' && translationLang !== 'mr' && shlokaText ? (
+            <Text
+              style={[
+                styles.shlokaIndic,
+                translationLang === 'te' ? styles.te : styles.translationIndic,
+                { color: isDarkMode ? '#e5e7eb' : '#545454' },
+              ]}
+              selectable
+            >
+              {shlokaText}
+            </Text>
+          ) : null}
+
+          {translationLang === 'en' && row!.transliteration ? (
             <>
               <Text style={[styles.section, { color: isDarkMode ? '#9ca3af' : '#4a4a4aff' }]}>
                 Transliteration :
@@ -823,6 +848,13 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     fontWeight: "400",
     fontStyle: "normal"
+  },
+  // Localized shloka verse (R2 `shloka` field) — same Indic font handling as
+  // translations, but centered like the Sanskrit verse above it.
+  shlokaIndic: {
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 10,
   },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   pillWrap: {

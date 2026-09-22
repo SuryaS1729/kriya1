@@ -58,6 +58,7 @@ interface TranslationEntry {
   verse: number;
   translation: string;
   commentary?: string;
+  shloka?: string;
 }
 
 // Downloaded files live in documentDirectory so they survive cache eviction
@@ -123,11 +124,12 @@ export async function removeTranslation(lang: TranslationLanguageCode): Promise<
   await FileSystem.deleteAsync(filePathForLang(lang), { idempotent: true });
 }
 
-// Per-language in-memory map: chapter.verse -> { translation, commentary }.
+// Per-language in-memory map: chapter.verse -> { translation, commentary, shloka }.
 // Kept so repeated reads across shlokas don't re-parse the JSON file every time.
 interface TranslationContent {
   translation: string | null;
   commentary: string | null;
+  shloka: string | null;
 }
 
 const cachedEntries = new Map<TranslationLanguageCode, Map<string, TranslationContent>>();
@@ -185,6 +187,10 @@ async function loadLanguageFile(lang: TranslationLanguageCode): Promise<Map<stri
           typeof item.commentary === 'string' && item.commentary.trim().length > 0
             ? item.commentary
             : null,
+        shloka:
+          typeof item.shloka === 'string' && item.shloka.trim().length > 0
+            ? item.shloka
+            : null,
       });
     }
   }
@@ -231,6 +237,27 @@ export async function getCommentary(
     return map.get(cacheKey(chapter, verse))?.commentary ?? null;
   } catch (err) {
     console.warn(`[Translations] Commentary lookup failed for ${lang} ${chapter}.${verse}:`, err);
+    return null;
+  }
+}
+
+/**
+ * Look up the shloka verse text in the given language's script.
+ *
+ * @returns the transliterated/local-script shloka, or null when the language
+ *          is not downloaded or the verse is missing. Never throws.
+ */
+export async function getTranslatedShloka(
+  chapter: number,
+  verse: number,
+  lang: TranslationLanguageCode
+): Promise<string | null> {
+  try {
+    const map = await loadLanguageFile(lang);
+    if (!map) return null;
+    return map.get(cacheKey(chapter, verse))?.shloka ?? null;
+  } catch (err) {
+    console.warn(`[Translations] Shloka lookup failed for ${lang} ${chapter}.${verse}:`, err);
     return null;
   }
 }

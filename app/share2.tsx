@@ -8,7 +8,6 @@ import {
   Image,
   Dimensions,
   ScrollView,
-  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -24,7 +23,9 @@ import { Asset, Album, getPermissionsAsync, requestPermissionsAsync } from 'expo
 import { File } from 'expo-file-system';
 import { showAppToast } from '../lib/appToast';
 import { getShlokaAt, getTranslationForLanguage } from '../lib/shloka';
-import Slider from '@react-native-community/slider';
+import { OpacitySlider } from '../components/OpacitySlider';
+import { NativeButtonLoader } from '../components/NativeButtonLoader';
+import { NativeSegmented } from '../components/NativeSegmented';
 import {
   DEFAULT_SHARE_BG_OPACITY,
   DEFAULT_SHARE_TEXT_BOX_BG,
@@ -511,6 +512,17 @@ export default function Share2() {
     setBackgroundOpacity(Math.round(clamp(nextOpacity, SLIDER_MIN, SLIDER_MAX) * 100) / 100);
   };
 
+  // Hold-to-preview: press-and-hold the eye button hides the whole settings
+  // pane so the card can be judged on its own; releasing brings it back.
+  const [previewing, setPreviewing] = useState(false);
+  const handlePreviewIn = () => {
+    selectionHaptic();
+    setPreviewing(true);
+  };
+  const handlePreviewOut = () => {
+    setPreviewing(false);
+  };
+
   // Calculate preview dimensions to fit screen
   const PREVIEW_PADDING = 40;
   const maxWidth = SCREEN_WIDTH - PREVIEW_PADDING * 2;
@@ -676,7 +688,20 @@ export default function Share2() {
           <Text style={[styles.headerTitle, { color: isDarkMode ? '#fff' : '#000' }]}>
             Share Shloka
           </Text>
-          <View style={{ width: 24 }} />
+          <Pressable
+            onPressIn={handlePreviewIn}
+            onPressOut={handlePreviewOut}
+            hitSlop={16}
+            accessibilityRole="button"
+            accessibilityLabel="Hold to preview card"
+            accessibilityHint="Hides the settings panel while held"
+          >
+            <Feather
+              name="eye"
+              size={22}
+              color={previewing ? (isDarkMode ? '#0f766e' : '#2563eb') : (isDarkMode ? '#fff' : '#000')}
+            />
+          </Pressable>
         </View>
 
         {/* Preview Area - Now at the top */}
@@ -707,70 +732,38 @@ export default function Share2() {
         </ScrollView>
 
         {/* Bottom Controls Panel */}
-        <View style={[styles.bottomPanel, { backgroundColor: isDarkMode ? '#00151a' : '#ffffff' }]}>
+        <View
+          pointerEvents={previewing ? 'none' : 'auto'}
+          style={[
+            styles.bottomPanel,
+            { backgroundColor: isDarkMode ? '#00151a' : '#ffffff' },
+            previewing && { display: 'none' },
+          ]}
+        >
           {/* Format Selector */}
           <View style={styles.formatSelector}>
-            {FORMATS.map((format) => (
-              <Pressable
-                key={format.id}
-                onPress={() => {
-                  selectionHaptic();
-                  setSelectedFormat(format.id);
-                }}
-                style={[
-                  styles.formatTab,
-                  selectedFormat === format.id && styles.formatTabActive,
-                  {
-                    backgroundColor: selectedFormat === format.id
-                      ? (isDarkMode ? '#013540' : '#2563eb')
-                      : (isDarkMode ? '#293a3d' : '#e5e7eb')
-                  }
-                ]}
-              >
-                <Text style={[
-                  styles.formatTabText,
-                  { color: selectedFormat === format.id ? '#fff' : (isDarkMode ? '#9ca3af' : '#6b7280') }
-                ]}>
-                  {format.label}
-                </Text>
-              </Pressable>
-            ))}
+            <NativeSegmented
+              values={FORMATS.map((f) => f.label)}
+              selectedIndex={Math.max(0, FORMATS.findIndex((f) => f.id === selectedFormat))}
+              onValueChange={(index) => {
+                selectionHaptic();
+                setSelectedFormat(FORMATS[index]?.id ?? 'story');
+              }}
+              dark={isDarkMode}
+            />
           </View>
 
           <View style={styles.alignmentSelector}>
-            {([
-              { id: 'left', icon: 'align-left', label: 'Align text left' },
-              { id: 'center', icon: 'align-center', label: 'Align text center' },
-              { id: 'right', icon: 'align-right', label: 'Align text right' },
-            ] as const).map((alignment) => {
-              const isActive = textAlignment === alignment.id;
-              return (
-                <Pressable
-                  key={alignment.id}
-                  onPress={() => {
-                    selectionHaptic();
-                    setTextAlignment(alignment.id);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={alignment.label}
-                  accessibilityState={{ selected: isActive }}
-                  style={[
-                    styles.alignmentButton,
-                    {
-                      backgroundColor: isActive
-                        ? (isDarkMode ? '#013540' : '#2563eb')
-                        : (isDarkMode ? '#293a3d' : '#e5e7eb'),
-                    },
-                  ]}
-                >
-                  <Feather
-                    name={alignment.icon}
-                    size={18}
-                    color={isActive ? '#fff' : (isDarkMode ? '#9ca3af' : '#6b7280')}
-                  />
-                </Pressable>
-              );
-            })}
+            <NativeSegmented
+              values={['Left', 'Center', 'Right']}
+              selectedIndex={['left', 'center', 'right'].indexOf(textAlignment)}
+              onValueChange={(index) => {
+                selectionHaptic();
+                setTextAlignment((['left', 'center', 'right'] as const)[index] ?? 'center');
+              }}
+              dark={isDarkMode}
+              width={270}
+            />
           </View>
 
           {/* Background Selector */}
@@ -798,16 +791,12 @@ export default function Share2() {
               </Text>
             </View>
             <View style={styles.opacityControlRow}>
-              <Slider
-                style={{ width: '100%' }}
-                value={Math.round(backgroundOpacity * 100)}
-                minimumValue={0}
-                maximumValue={100}
-                step={1}
-                minimumTrackTintColor={isDarkMode ? '#0f766e' : '#2563eb'}
-                maximumTrackTintColor={isDarkMode ? '#374151' : '#e5e7eb'}
-                thumbTintColor={isDarkMode ? '#ffffff' : '#f8fafc'}
-                onValueChange={(value) => updateBackgroundOpacity(value / 100)}
+              <OpacitySlider
+                value={backgroundOpacity}
+                onValueChange={updateBackgroundOpacity}
+                accent={isDarkMode ? '#5a7d84' : '#8ea0b5'}
+                inactiveTrackColor={isDarkMode ? '#22333a' : '#e6ebf0'}
+                thumbColor={isDarkMode ? '#9db4b8' : '#75879a'}
               />
             </View>
           </View>
@@ -819,16 +808,12 @@ export default function Share2() {
               </Text>
             </View>
             <View style={styles.opacityControlRow}>
-              <Slider
-                style={{ width: '100%' }}
-                value={Math.round(textboxOpacity * 100)}
-                minimumValue={0}
-                maximumValue={100}
-                step={1}
-                minimumTrackTintColor={isDarkMode ? '#0f766e' : '#2563eb'}
-                maximumTrackTintColor={isDarkMode ? '#374151' : '#e5e7eb'}
-                thumbTintColor={isDarkMode ? '#ffffff' : '#f8fafc'}
-                onValueChange={(value) => updateTextboxOpacity(value / 100)}
+              <OpacitySlider
+                value={textboxOpacity}
+                onValueChange={updateTextboxOpacity}
+                accent={isDarkMode ? '#5a7d84' : '#8ea0b5'}
+                inactiveTrackColor={isDarkMode ? '#22333a' : '#e6ebf0'}
+                thumbColor={isDarkMode ? '#9db4b8' : '#75879a'}
               />
             </View>
           </View>
@@ -850,7 +835,7 @@ export default function Share2() {
               ]}
             >
               {isSaving ? (
-                <ActivityIndicator size="small" color={isDarkMode ? '#fff' : '#000'} />
+                <NativeButtonLoader color={isDarkMode ? '#fff' : '#000'} />
               ) : (
                 <>
                   <Feather name="download" size={20} color={isDarkMode ? '#fff' : '#000'} />
@@ -876,7 +861,7 @@ export default function Share2() {
               ]}
             >
               {isSharing ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <NativeButtonLoader color="#fff" />
               ) : (
                 <>
                   <Feather name="share" size={20} color="#fff" />
@@ -1090,6 +1075,7 @@ marginTop: 10,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
+    minHeight: 50,
     borderRadius: 12,
     gap: 8,
   },

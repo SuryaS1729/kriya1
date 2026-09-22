@@ -21,6 +21,7 @@ import {
   getTasksForDay,
   removeTask as removeTaskDb,
   setTaskCompleted,
+  updateTaskTitle,
   type Task,
 } from '../lib/tasks';
 import Feather from "@react-native-vector-icons/feather/static";
@@ -99,6 +100,7 @@ export default function Add() {
   const [customDayKey, setCustomDayKey] = useState<number | null>(null);
   const [showCustomPicker, setShowCustomPicker] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const inputRef = useRef<TextInput>(null);
 
   // Reanimated shared value for rotation
@@ -132,7 +134,9 @@ export default function Add() {
   const customLabel = customDayKey != null ? formatDateLabel(customDayKey) : 'Pick a date';
 
   // Calculate dynamic placeholder text
-  const placeholderText = visibleTasks.length > 6
+  const placeholderText = editingId != null
+    ? "Edit task…"
+    : visibleTasks.length > 6
     ? "Easy there, overachiever 😅"
     : isTomorrow
       ? "Plan ahead for tomorrow 🌅"
@@ -225,6 +229,20 @@ export default function Add() {
   const addAndStay=()=> {
     mediumImpactHaptic(); // More reliable haptic
 
+    // Editing mode: the arrow saves the edit instead of adding.
+    if (editingId != null) {
+      const title = text.trim();
+      if (title.length === 0) return;
+      updateTaskTitle(editingId, title);
+      setEditingId(null);
+      setText('');
+      refreshSelectedDayTasks();
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+      return;
+    }
+
     const tasks = splitInputIntoTasks(text);
     if (tasks.length === 0) return;
 
@@ -238,6 +256,23 @@ export default function Add() {
     }, 0);
   }
   function addAndStayOrGoHome() {
+  // Editing mode: submit saves the edit; empty text cancels it.
+  if (editingId != null) {
+    const title = text.trim();
+    if (title.length === 0) {
+      setEditingId(null);
+      setText('');
+      return;
+    }
+    updateTaskTitle(editingId, title);
+    setEditingId(null);
+    setText('');
+    refreshSelectedDayTasks();
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+    return;
+  }
   const tasks = splitInputIntoTasks(text);
   if (tasks.length === 0) {
     // If empty, go back to homescreen
@@ -305,6 +340,21 @@ export default function Add() {
     ...visibleTasks.filter((task) => task.completed).sort((a, b) => a.created_at - b.created_at),
   ];
 
+  const startEdit = (task: Task) => {
+    selectionHaptic();
+    setEditingId(task.id);
+    setText(task.title);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+  };
+
+  const cancelEdit = () => {
+    selectionHaptic();
+    setEditingId(null);
+    setText('');
+  };
+
   const renderItem = ({ item, index }: { item: Task; index: number }) => (
     <AnimatedPressable
       entering={FadeInDown.duration(100).delay(Math.min(index, 3) * 6)}
@@ -313,11 +363,19 @@ export default function Add() {
         selectionHaptic(); // Add haptic feedback
         const next = !item.completed;
         setTaskCompleted(item.id, next, null);
+        if (item.id === editingId) {
+          setEditingId(null);
+          setText('');
+        }
         refreshSelectedDayTasks();
       }}
       onLongPress={() => {
         errorHaptic(); // Different haptic for delete
         removeTaskDb(item.id);
+        if (item.id === editingId) {
+          setEditingId(null);
+          setText('');
+        }
         refreshSelectedDayTasks();
       }}
       style={[styles.row, { borderBottomColor: isDarkMode ? '#374151' : '#f1f5f9' }]}
@@ -355,17 +413,34 @@ export default function Add() {
         {item.title}
       </Text>
       {!item.completed && (
-        <Pressable
-          onPress={() => {
-            errorHaptic(); // Same haptic as long-press delete
-            removeTaskDb(item.id);
-            refreshSelectedDayTasks();
-          }}
-          hitSlop={8}
-          style={styles.deleteButton}
-        >
-          <Text style={[styles.deleteIcon, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>✕</Text>
-        </Pressable>
+        <View style={styles.rowActions}>
+          <Pressable
+            onPress={() => startEdit(item)}
+            hitSlop={8}
+            style={styles.editButton}
+          >
+            <Feather
+              name="edit-3"
+              size={14}
+              color={isDarkMode ? '#6b7280' : '#94a3b8'}
+            />
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              errorHaptic(); // Same haptic as long-press delete
+              removeTaskDb(item.id);
+              if (item.id === editingId) {
+                setEditingId(null);
+                setText('');
+              }
+              refreshSelectedDayTasks();
+            }}
+            hitSlop={8}
+            style={styles.deleteButton}
+          >
+            <Text style={[styles.deleteIcon, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>✕</Text>
+          </Pressable>
+        </View>
       )}
     </AnimatedPressable>
   );
@@ -603,6 +678,11 @@ export default function Add() {
               placeholderTextColor={isDarkMode ? '#6b7280' : '#9ca3af'}
               blurOnSubmit={false}
             />
+            {editingId != null && (
+              <Pressable onPress={cancelEdit} hitSlop={8} style={styles.cancelEditButton}>
+                <Feather name="x" size={18} color={isDarkMode ? '#94a3b8' : '#64748b'} />
+              </Pressable>
+            )}
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -713,6 +793,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 8,
+  },
+  editButton: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rowActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cancelEditButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   deleteIcon: {
     fontSize: 11,

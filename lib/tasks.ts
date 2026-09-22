@@ -119,3 +119,9 @@ export function removeTask(id: number) {
 
   db.runSync('DELETE FROM tasks WHERE id = ?', [id]);
 }
+
+export function updateTaskTitle(id: number, title: string) {
+  const db = getDb();
+
+  db.runSync('UPDATE tasks SET title = ? WHERE id = ?', [title.trim(), id]);
+}

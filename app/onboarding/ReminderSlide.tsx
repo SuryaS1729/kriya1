@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import Feather from "@react-native-vector-icons/feather/static";
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { DateTimePicker } from '@expo/ui/community/datetime-picker';
+import { NativeTimeDialog } from '../../components/NativeTimeDialog';
 import { PressableScale } from 'pressto';
 
 import type { ReminderStep as ReminderStepType, Theme } from '../../lib/onboarding/constants';
@@ -76,8 +77,8 @@ export default function ReminderSlide({
               display="compact"
               onValueChange={onValueChange}
               style={styles.iosTimePicker}
-              textColor={theme.text}
               themeVariant={isDarkMode ? 'dark' : 'light'}
+              accentColor={isDarkMode ? '#5a7d84' : '#8ea0b5'}
             />
           </View>
         ) : (
@@ -103,14 +104,13 @@ export default function ReminderSlide({
             </PressableScale>
 
             {showPicker && (
-              <DateTimePicker
+              <NativeTimeDialog
                 value={selectedTime}
-                mode="time"
-                display="default"
                 onValueChange={onValueChange}
                 onDismiss={onDismiss}
-                onNeutralButtonPress={onDismiss}
                 is24Hour={false}
+                accentColor={isDarkMode ? '#5a7d84' : '#8ea0b5'}
+                dark={isDarkMode}
               />
             )}
           </View>

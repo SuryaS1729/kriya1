@@ -202,7 +202,6 @@
           "enableBackgroundPlayback": true
         }
       ],
-      "@react-native-community/datetimepicker",
       "expo-asset",
       [
         "expo-media-library",

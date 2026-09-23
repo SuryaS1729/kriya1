@@ -13,7 +13,8 @@ import {
   FlatList,
   TouchableOpacity
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { DateTimePicker } from '@expo/ui/community/datetime-picker';
+import { NativeDateDialog } from '../components/NativeDateDialog';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '../components/TopBar';
 import { useKriya } from '../lib/store';
@@ -630,17 +631,17 @@ export default function Add() {
                   minimumDate={new Date(todayKey())}
                   style={styles.iosDatePicker}
                   themeVariant={isDarkMode ? 'dark' : 'light'}
+                  accentColor={isDarkMode ? '#5a7d84' : '#8ea0b5'}
                 />
               </View>
             ) : (
-              <DateTimePicker
+              <NativeDateDialog
                 value={customDayKey != null ? new Date(customDayKey) : new Date(tomorrowKey)}
-                mode="date"
-                display="default"
                 onValueChange={handleCustomValueChange}
                 onDismiss={handleCustomDismiss}
-                onNeutralButtonPress={handleCustomDismiss}
                 minimumDate={new Date(todayKey())}
+                accentColor={isDarkMode ? '#5a7d84' : '#8ea0b5'}
+                dark={isDarkMode}
               />
             )
           )}

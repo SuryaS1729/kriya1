@@ -9,7 +9,8 @@ import { Image } from 'expo-image';
 import BlurBackground from '@/components/BlurBackground';
 import { LinearGradient } from 'expo-linear-gradient';
 // import * as Haptics from 'expo-haptics';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { DateTimePicker } from '@expo/ui/community/datetime-picker';
+import { NativeTimeDialog } from '../components/NativeTimeDialog';
 import { StatusBar } from 'expo-status-bar';
 import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic } from '../lib/haptics';
 import { showAppToast } from '../lib/appToast';
@@ -490,8 +491,8 @@ function NotificationSettings() {
                   display="spinner"
                   onValueChange={handleValueChange}
                   style={styles.nativeTimePicker}
-                  textColor={isDarkMode ? '#fff' : '#000'}
                   themeVariant={isDarkMode ? 'dark' : 'light'}
+                  accentColor={isDarkMode ? '#5a7d84' : '#8ea0b5'}
                 />
               </View>
 
@@ -508,14 +509,13 @@ function NotificationSettings() {
         </Modal>
       ) : (
         showTimePicker && (
-          <DateTimePicker
+          <NativeTimeDialog
             value={selectedTime}
-            mode="time"
-            display="default"
             onValueChange={handleValueChange}
             onDismiss={handleDismiss}
-            onNeutralButtonPress={handleDismiss}
             is24Hour={false}
+            accentColor={isDarkMode ? '#5a7d84' : '#8ea0b5'}
+            dark={isDarkMode}
           />
         )
       )}

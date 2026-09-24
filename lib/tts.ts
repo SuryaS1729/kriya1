@@ -16,10 +16,7 @@ export type VoiceoverLanguage = 'en' | 'gu' | 'hi' | 'kn' | 'ml' | 'mr' | 'or' |
 
 const VOICEOVER_FOLDERS: Record<VoiceoverLanguage, string> = {
   en: 'en-IN-m4a',
-  // NOTE: `hi-IN-m4a` is already the Hindi *recitation* folder (shloka only),
-  // so the Hindi translation voiceover needs its own folder to avoid
-  // `{chapter}_{verse}.m4a` collisions. Use this name when you upload it.
-  hi: 'hi-translation-m4a',
+  hi: 'hi-IN-m4a',
   gu: 'gu-IN-m4a',
   kn: 'kn-IN-m4a',
   ml: 'ml-IN-m4a',

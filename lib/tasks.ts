@@ -1,4 +1,5 @@
 import { getDb } from './db';
+import { removeRemindersForTask } from './reminders';
 
 export type Task = {
   id: number;
@@ -119,6 +120,7 @@ export function setTaskCompleted(id: number, completed: boolean, shlokaIdWhenDon
 export function removeTask(id: number) {
   const db = getDb();
 
+  removeRemindersForTask(id);
   db.runSync('DELETE FROM tasks WHERE id = ?', [id]);
 }
 

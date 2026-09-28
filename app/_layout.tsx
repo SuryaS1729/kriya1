@@ -134,6 +134,18 @@ export default function Root() {
     db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_day_key ON tasks(day_key)`);
     db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_completed_at ON tasks(completed_at)`);
 
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS task_reminders(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        task_id INTEGER NOT NULL,
+        day_key INTEGER NOT NULL,
+        hour INTEGER NOT NULL,
+        minute INTEGER NOT NULL,
+        notification_id TEXT
+      );
+    `);
+    db.execSync(`CREATE INDEX IF NOT EXISTS idx_task_reminders_task_id ON task_reminders(task_id)`);
+
     // Keep verse citations out of the Sanskrit text used by text-to-speech.
     // This is intentionally idempotent so existing installed databases are
     // updated even though the bundled asset is only copied on first launch.

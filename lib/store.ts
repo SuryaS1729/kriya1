@@ -16,6 +16,7 @@ import {
   type Task,
 } from './tasks';
 import { getShlokaAt, getTotalShlokas } from './shloka';
+import { rescheduleTaskReminders } from './reminders';
 import { ensureProgressForToday, countCompletedSince } from './progress';
 import { isDbReady } from './dbReady';
 import type { ShlokaRow } from './shloka';
@@ -196,6 +197,9 @@ async function scheduleTaskReminder(hour: number, minute: number) {
       minute: reminderMinute,
     },
   });
+
+  // cancelAll above wiped per-task reminders too — bring them back.
+  await rescheduleTaskReminders();
   
   // console.log(`✅ Daily reminder scheduled for ${reminderHour.toString().padStart(2, '0')}:${reminderMinute.toString().padStart(2, '0')}`);
 }
@@ -449,12 +453,13 @@ export const useKriya = create<KriyaState>()(
       initializeNotifications: async () => {
         try {
           // console.log('🔔 Initializing notifications...');
-          const result = await registerForPushNotificationsAsync();
-          if (!result) {
-            set({ notificationsEnabled: false, notificationToken: null });
-            await Notifications.cancelAllScheduledNotificationsAsync();
-            return false;
-          }
+        const result = await registerForPushNotificationsAsync();
+        if (!result) {
+          set({ notificationsEnabled: false, notificationToken: null });
+          await Notifications.cancelAllScheduledNotificationsAsync();
+          await rescheduleTaskReminders();
+          return false;
+        }
 
           set({ notificationsEnabled: true, notificationToken: result });
 
@@ -463,12 +468,13 @@ export const useKriya = create<KriyaState>()(
 
           // console.log('✅ Local notifications initialized successfully');
           return true;
-        } catch (error) {
-          set({ notificationsEnabled: false, notificationToken: null });
-          await Notifications.cancelAllScheduledNotificationsAsync();
-          // console.error('❌ Failed to initialize notifications:', error);
-          return false;
-        }
+      } catch (error) {
+        set({ notificationsEnabled: false, notificationToken: null });
+        await Notifications.cancelAllScheduledNotificationsAsync();
+        await rescheduleTaskReminders();
+        // console.error('❌ Failed to initialize notifications:', error);
+        return false;
+      }
       },
 
     }),

@@ -684,24 +684,58 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const handledResponseIds: string[] = [];
+
+    const handleResponse = (response: Notifications.NotificationResponse) => {
+      const identifier = response.notification.request.identifier;
+      // The same response arrives both from the live listener and from
+      // getLastNotificationResponseAsync — only act on it once.
+      if (handledResponseIds.includes(identifier)) return;
+      handledResponseIds.push(identifier);
+      if (handledResponseIds.length > 10) handledResponseIds.shift();
+
+      const data = response.notification.request.content.data;
+
+      if (data?.type === 'task_time_reminder' && data?.taskId != null) {
+        // Tapped a per-task reminder — jump straight to that task's details.
+        router.push({
+          pathname: '/task/[id]',
+          params: { id: String(data.taskId) },
+        });
+      } else if (data?.type === 'task_reminder') {
+        // Navigate to add task screen
+        router.push('/add');
+      }
+    };
 
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
       // console.log('📱 Notification received:', notification);
     });
 
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(handleResponse);
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      // console.log('📱 Notification response:', response);
-      const data = response.notification.request.content.data;
-
-      if (data?.type === 'task_reminder') {
-        // Navigate to add task screen
-        router.push('/add');
-      }
+    // Cold start: the app was launched by tapping a notification, so no live
+    // event will fire. Hold it until the store rehydrates and the onboarding
+    // redirect has had its say, then navigate.
+    let pending: Notifications.NotificationResponse | null = null;
+    const flushPending = () => {
+      if (!pending) return;
+      const state = useKriya.getState();
+      if (!state.ready || !state.hasCompletedOnboarding) return;
+      const response = pending;
+      pending = null;
+      handleResponse(response);
+    };
+    const unsubscribeStore = useKriya.subscribe(flushPending);
+    Notifications.getLastNotificationResponseAsync().then(response => {
+      if (!response) return;
+      pending = response;
+      flushPending();
     });
 
     // Cleanup listeners
     return () => {
+      unsubscribeStore();
       if (notificationListener.current) {
         notificationListener.current.remove();
       }

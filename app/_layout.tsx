@@ -127,6 +127,9 @@ export default function Root() {
     if (!has('shloka_id')) {
       db.execSync(`ALTER TABLE tasks ADD COLUMN shloka_id INTEGER`);
     }
+    if (!has('description')) {
+      db.execSync(`ALTER TABLE tasks ADD COLUMN description TEXT`);
+    }
 
     db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_day_key ON tasks(day_key)`);
     db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_completed_at ON tasks(completed_at)`);
@@ -168,6 +171,7 @@ export default function Root() {
           <Stack.Screen name="read" options={{animation:"slide_from_bottom", animationDuration:100}} />
           <Stack.Screen name="shloka/[id]" options={{animation:'fade', animationDuration:100}}/>
           <Stack.Screen name="bookmarks" options={{animation:'fade',animationDuration:200}}/>
+          <Stack.Screen name="task/[id]" options={{animation:'fade', animationDuration:100}} />
           <Stack.Screen name="focus" options={{ title: 'Focus Mode' , animation:'fade',animationDuration:100}} />
           <Stack.Screen name="share2" options={{animation:'slide_from_bottom', animationDuration:200}}/>
         </Stack>

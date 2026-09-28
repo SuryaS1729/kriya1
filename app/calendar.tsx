@@ -217,6 +217,7 @@ const useCalendarTaskStore = create<CalendarTaskStore>((set, get) => ({
       completed_at: null,
       shloka_id: null,
       day_key: dayKey,
+      description: null,
     };
 
     set((state) => ({

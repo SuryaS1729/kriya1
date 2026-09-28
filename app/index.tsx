@@ -113,17 +113,17 @@ const TaskRow = React.memo(({
   isDarkMode,
   onToggle,
   onRemove,
-  onFocus,
+  onOpenDetails,
 }: {
   item: Task;
   isDarkMode: boolean;
   onToggle: (id: number, completed: boolean) => void;
   onRemove: (id: number) => void;
-  onFocus: (task: Task) => void;
+  onOpenDetails: (task: Task) => void;
 }) => {
   const handleToggle = () => onToggle(item.id, item.completed);
   const handleRemove = () => onRemove(item.id);
-  const handleFocus = () => onFocus(item);
+  const handleOpenDetails = () => onOpenDetails(item);
 
   return (
     <View style={[styles.row, { borderBottomColor: isDarkMode ? '#1a2535ff' : '#d8dde1ff' }]}>
@@ -138,7 +138,7 @@ const TaskRow = React.memo(({
 
         <Pressable
           onPress={handleToggle}
-          onLongPress={handleFocus}
+          onLongPress={handleOpenDetails}
           style={{ flex: 1, paddingVertical: 5, paddingLeft: 8 }}
         >
           <Text
@@ -508,13 +508,12 @@ export default function Home() {
     refresh();
   }, [refresh]);
 
-  const onFocus = useCallback((task: Task) => {
+  const onOpenDetails = useCallback((task: Task) => {
     buttonPressHaptic(); // Light haptic for navigation
     router.push({
-      pathname: '/focus',
+      pathname: '/task/[id]',
       params: {
         id: String(task.id),
-        title: task.title,
       },
     });
   }, []);
@@ -528,10 +527,10 @@ export default function Home() {
         isDarkMode={isDarkMode}
         onToggle={onToggle}
         onRemove={onRemove}
-        onFocus={onFocus}
+        onOpenDetails={onOpenDetails}
       />
     </Animated.View>
-  ), [isDarkMode, onToggle, onRemove, onFocus]);
+  ), [isDarkMode, onToggle, onRemove, onOpenDetails]);
 
   const renderAllTaskItem = useCallback(({ item }: { item: Task }) => (
     <Animated.View
@@ -543,10 +542,10 @@ export default function Home() {
         isDarkMode={isDarkMode}
         onToggle={onToggleAllTask}
         onRemove={onRemoveAllTask}
-        onFocus={onFocus}
+        onOpenDetails={onOpenDetails}
       />
     </Animated.View>
-  ), [isDarkMode, onToggleAllTask, onRemoveAllTask, onFocus]);
+  ), [isDarkMode, onToggleAllTask, onRemoveAllTask, onOpenDetails]);
 
   const keyExtractor = useCallback((item: Task) => `task-${item.id}`, []);
 
@@ -636,10 +635,10 @@ export default function Home() {
         isDarkMode={isDarkMode}
         onToggle={onToggleYesterdayTask}
         onRemove={onRemoveYesterday}
-        onFocus={onFocus}
+        onOpenDetails={onOpenDetails}
       />
     </Animated.View>
-  ), [isDarkMode, onToggleYesterdayTask, onRemoveYesterday, onFocus]);
+  ), [isDarkMode, onToggleYesterdayTask, onRemoveYesterday, onOpenDetails]);
 
   const yesterdayKeyExtractor = useCallback((item: Task) => `yesterday-task-${item.id}`, []);
 

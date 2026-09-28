@@ -8,6 +8,7 @@ export type Task = {
   completed_at: number | null;
   shloka_id: number | null;  // optional link to the shloka at completion time
   day_key?: number;
+  description: string | null;
 };
 
 type Row = {
@@ -18,6 +19,7 @@ type Row = {
   completed_at: number | null;
   shloka_id: number | null;
   day_key: number;
+  description: string | null;
 };
 
 export function getAllTasks(): Task[] {
@@ -124,4 +126,21 @@ export function updateTaskTitle(id: number, title: string) {
   const db = getDb();
 
   db.runSync('UPDATE tasks SET title = ? WHERE id = ?', [title.trim(), id]);
+}
+
+export function updateTaskDescription(id: number, description: string) {
+  const db = getDb();
+
+  db.runSync('UPDATE tasks SET description = ? WHERE id = ?', [description, id]);
+}
+
+export function getTaskById(id: number): Task | null {
+  try {
+    const db = getDb();
+    const row = db.getFirstSync<Row>('SELECT * FROM tasks WHERE id = ?', [id]);
+    if (!row) return null;
+    return { ...row, completed: !!row.completed };
+  } catch {
+    return null;
+  }
 }

@@ -38,7 +38,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { mediumImpactHaptic, selectionHaptic, errorHaptic } from '../lib/haptics';
+import { mediumImpactHaptic, selectionHaptic, errorHaptic, buttonPressHaptic } from '../lib/haptics';
 import { PressableScale } from 'pressto';
 
 
@@ -371,13 +371,12 @@ export default function Add() {
         refreshSelectedDayTasks();
       }}
       onLongPress={() => {
-        errorHaptic(); // Different haptic for delete
-        removeTaskDb(item.id);
-        if (item.id === editingId) {
-          setEditingId(null);
-          setText('');
-        }
-        refreshSelectedDayTasks();
+        buttonPressHaptic();
+        Keyboard.dismiss();
+        router.push({
+          pathname: '/task/[id]',
+          params: { id: String(item.id) },
+        });
       }}
       style={[styles.row, { borderBottomColor: isDarkMode ? '#374151' : '#f1f5f9' }]}
       android_ripple={{ color: '#eeeeee1c' }}

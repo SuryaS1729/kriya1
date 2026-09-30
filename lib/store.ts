@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist, createJSONStorage, devtools } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import {
@@ -138,26 +137,24 @@ async function registerForPushNotificationsAsync() {
     });
   }
 
-  if (Device.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    
-    if (finalStatus !== 'granted') {
-      // console.log('Failed to get push token for push notification!');
-      return null;
-    }
-    
-      // console.log('✅ Local notification permissions granted');
-    return 'local-notifications-enabled'; // Return a simple success indicator
-  } else {
-    // console.log('Must use physical device for notifications');
+  // Only local notifications are used here (the return value is not a push
+  // token), so the permission must be requested on simulators too — the old
+  // `Device.isDevice` gate was false there and silently skipped the prompt.
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
+
+  if (existingStatus !== 'granted') {
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+
+  if (finalStatus !== 'granted') {
+    // console.log('Failed to get push token for push notification!');
     return null;
   }
+
+  // console.log('✅ Local notification permissions granted');
+  return 'local-notifications-enabled'; // Return a simple success indicator
 }
 
 // Updated scheduling function - Using proper trigger format

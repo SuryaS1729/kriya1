@@ -1,4 +1,5 @@
 import { Host, ProgressView } from '@expo/ui/swift-ui';
+import { tint } from '@expo/ui/swift-ui/modifiers';
 
 type Props = {
   color?: string;
@@ -6,10 +7,9 @@ type Props = {
 
 /** iOS native loader — SwiftUI ProgressView (indeterminate) inside a Host. */
 export function NativeButtonLoader({ color }: Props) {
-  void color;
   return (
-    <Host style={{ width: 22, height: 22, alignItems: 'center', justifyContent: 'center' }}>
-      <ProgressView />
+    <Host matchContents>
+      <ProgressView modifiers={color ? [tint(color)] : undefined} />
     </Host>
   );
 }

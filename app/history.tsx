@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState, useCallback } from 'react';
+import { memo, useEffect, useState, useCallback } from 'react';
 import { StyleSheet, Text, View, Pressable, ScrollView, Alert, Modal, Platform, Linking, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useKriya } from '../lib/store';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +10,7 @@ import BlurBackground from '@/components/BlurBackground';
 import { LinearGradient } from 'expo-linear-gradient';
 // import * as Haptics from 'expo-haptics';
 import { DateTimePicker } from '@expo/ui/community/datetime-picker';
+import * as Notifications from 'expo-notifications';
 import { NativeTimeDialog } from '../components/NativeTimeDialog';
 import { StatusBar } from 'expo-status-bar';
 import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic } from '../lib/haptics';
@@ -22,11 +23,6 @@ import {
   invalidateTranslationCache,
   type TranslationLanguageCode,
 } from '../lib/translationService';
-
-
-function getDateKey(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-}
 
 
 // Recitation Settings Component
@@ -239,92 +235,6 @@ function TranslationSettings() {
   );
 }
 
-// Weekly Summary Component
-function WeeklySummary() {
-  const getForDay = useKriya(s => s.getTasksForDay);
-  const getFocusSessionsForDay = useKriya(s => s.getFocusSessionsForDay);
-  const isDarkMode = useKriya(s => s.isDarkMode);
-
-  const tasksToday = useKriya(s => s.tasksToday);
-  const focusSessions = useKriya(s => s.focusSessions);
-
-  const weeklyStats = useMemo(() => {
-    const today = new Date();
-    const currentWeekStart = new Date(today);
-    currentWeekStart.setDate(today.getDate() - today.getDay());
-    const todayKey = getDateKey(today);
-
-    let totalTasks = 0;
-    let completedTasks = 0;
-    let totalFocusSessions = 0;
-    let activeDays = 0;
-
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(currentWeekStart);
-      day.setDate(currentWeekStart.getDate() + i);
-      const dayKey = getDateKey(day);
-
-      // Today's data comes from the subscribed store values (change signals);
-      // other days are read through the store getters.
-      const isToday = dayKey === todayKey;
-      const tasks = isToday ? tasksToday : getForDay(dayKey);
-      const focusSessionsForDay = isToday
-        ? (focusSessions[dayKey] || 0)
-        : (getFocusSessionsForDay ? getFocusSessionsForDay(dayKey) : 0);
-
-      if (tasks.length > 0 || focusSessionsForDay > 0) {
-        activeDays++;
-      }
-
-      totalTasks += tasks.length;
-      completedTasks += tasks.filter(t => t.completed).length;
-      totalFocusSessions += focusSessionsForDay;
-    }
-
-    return {
-      activeDays,
-      completedTasks,
-      totalTasks,
-      totalFocusSessions,
-      completionRate: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
-      focusTime: totalFocusSessions * 25 // 25 minutes per session
-    };
-  }, [getForDay, getFocusSessionsForDay, tasksToday, focusSessions]);
-
-  return (
-    <View style={styles.summarySection}>
-      <Text style={[styles.summaryTitle, !isDarkMode && styles.lightText]}>This Week</Text>
-      <View style={styles.summaryGrid}>
-        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard, { borderWidth: 0 }]}>
-          <Feather name="calendar" size={24} color="#8ba5e1" />
-          <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.activeDays}</Text>
-          <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Active Days</Text>
-        </View>
-
-        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard, { borderWidth: 0 }]}>
-          <Feather name="check-circle" size={24} color="#8ba5e1" />
-          <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.completedTasks}</Text>
-          <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Tasks Done</Text>
-        </View>
-
-        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard, { borderWidth: 0 }]}>
-          <Feather name="target" size={24} color="#8ba5e1" />
-          <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.totalFocusSessions}</Text>
-          <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Focus Sessions</Text>
-        </View>
-
-        <View style={[styles.summaryCard, !isDarkMode && styles.lightCard, { borderWidth: 0 }]}>
-          <Feather name="clock" size={24} color="#8ba5e1" />
-          <Text style={[styles.summaryValue, !isDarkMode && styles.lightText]}>{weeklyStats.focusTime}m</Text>
-          <Text style={[styles.summaryLabel, !isDarkMode && styles.lightSubText]}>Focus Time</Text>
-        </View>
-      </View>
-    </View>
-  );
-}
-
-
-
 // Updated NotificationSettings component with proper Modal
 // Updated NotificationSettings component with native DateTimePicker
 // Updated NotificationSettings component with proper Android handling
@@ -401,8 +311,26 @@ function NotificationSettings() {
 
   const handleToggleNotifications = async () => {
     selectionHaptic(); // Changed from direct Haptics call
-    const enabled = await toggleNotifications();
     const attemptedEnable = !notificationsEnabled;
+
+    if (attemptedEnable) {
+      // iOS only presents the permission prompt once. Once it's locked out the
+      // toggle would dead-end on "Permission needed", so send the user to the
+      // system Settings app instead.
+      const { status, canAskAgain } = await Notifications.getPermissionsAsync();
+      if (status !== 'granted' && !canAskAgain) {
+        showAppToast({
+          type: 'error',
+          text1: 'Enable notifications in Settings',
+          duration: 2500,
+          position: 'bottom',
+        });
+        Linking.openSettings();
+        return;
+      }
+    }
+
+    const enabled = await toggleNotifications();
 
     showAppToast({
       type: enabled ? 'success' : attemptedEnable ? 'error' : 'info',
@@ -499,9 +427,16 @@ function NotificationSettings() {
               <View style={styles.nativeTimePickerActions}>
                 <Pressable
                   onPress={() => setShowTimePicker(false)}
-                  style={[styles.timePickerButton, styles.timePickerCancelButton]}
+                  accessibilityRole="button"
+                  accessibilityLabel="Confirm reminder time"
+                  style={[
+                    styles.timePickerButton,
+                    { backgroundColor: isDarkMode ? '#33484f' : '#e5e7eb' },
+                  ]}
                 >
-                  <Text style={[styles.timePickerCancelText, !isDarkMode && { color: '#4b5563' }]}>Done</Text>
+                  <Text style={[styles.timePickerButtonText, { color: isDarkMode ? '#e8eef0' : '#111827' }]}>
+                    Done
+                  </Text>
                 </Pressable>
               </View>
             </View>
@@ -529,103 +464,20 @@ function QuickActions() {
 
   return (
     <View style={styles.actionsSection}>
-      <Text style={[styles.actionsTitle, !isDarkMode && styles.lightText]}>Quick Actions</Text>
-      <View style={styles.actionButtons}>
-        <Pressable
-          style={[styles.actionButton, !isDarkMode && styles.lightCard]}
-            onPress={() => {
-            buttonPressHaptic(); // Add haptic for add tasks
-            router.push('/add');
-          }}
-          android_ripple={{ color: '#cccccc18' }}
-        >
-          <Feather name="plus-circle" size={24} color="#35E21B" />
-          <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Add Tasks</Text>
-        </Pressable>
-
-        <Pressable
-          style={[styles.actionButton, !isDarkMode && styles.lightCard]}
-          onPress={() => {
-            buttonPressHaptic(); // Add haptic for focus session
-            router.push('/focus');
-          }}
-          android_ripple={{ color: '#cccccc18' }}
-
-        >
-          <Feather name="target" size={24} color="#00FFFF" />
-          <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Focus Session</Text>
-        </Pressable>
-
-        <Pressable
-          style={[styles.actionButton, !isDarkMode && styles.lightCard]}
- onPress={() => {
-            buttonPressHaptic(); // Add haptic for bookmarks
-            router.push('/bookmarks');
-          }}
-          android_ripple={{ color: '#cccccc18' }}
-        >
-          <Feather name="bookmark" size={24} color="#fbbf24" />
-          <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Bookmarks</Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-}
-
-function TipsDropdown() {
-  const isDarkMode = useKriya(s => s.isDarkMode);
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <View style={styles.actionsSection}>
       <Pressable
-        style={[styles.tipsHeader, !isDarkMode && styles.lightCard]}
+        style={[styles.actionButton, !isDarkMode && styles.lightCard]}
         onPress={() => {
-          selectionHaptic();
-          setIsOpen((prev) => !prev);
+          buttonPressHaptic();
+          router.push('/bookmarks');
         }}
         android_ripple={{ color: '#cccccc18' }}
       >
-        <View style={styles.tipsHeaderContent}>
-          <Feather name="info" size={20} color={isDarkMode ? '#cbd5e1' : '#475569'} />
-          <Text style={[styles.actionsTitle, styles.tipsTitle, !isDarkMode && styles.lightText]}>
-            Tips
-          </Text>
-        </View>
-        <Feather
-          name={isOpen ? 'chevron-up' : 'chevron-down'}
-          size={20}
-          color={isDarkMode ? '#cbd5e1' : '#475569'}
-        />
+        <Feather name="bookmark" size={24} color="#fbbf24" />
+        <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Your Bookmarks</Text>
       </Pressable>
-
-      {isOpen && (
-        <View style={[styles.tipsBody, !isDarkMode && styles.lightCard]}>
-          <View style={styles.tipRow}>
-            <Feather name="help-circle" size={16} color={isDarkMode ? '#93c5fd' : '#2563eb'} />
-            <Text style={[styles.tipText, !isDarkMode && styles.lightSubText]}>
-              In Quick Add, separate tasks with a full stop to add multiple tasks in one go.
-            </Text>
-          </View>
-          <View style={styles.tipRow}>
-            <Feather name="target" size={16} color="#00FFFF" />
-            <Text style={[styles.tipText, !isDarkMode && styles.lightSubText]}>
-              Long press a task on the home screen to open Focus Mode.
-            </Text>
-          </View>
-          <View style={styles.tipRow}>
-            <Feather name="bookmark" size={16} color="#fbbf24" />
-            <Text style={[styles.tipText, !isDarkMode && styles.lightSubText]}>
-              Long press the bookmark icon to view your bookmarks.
-            </Text>
-          </View>
-        </View>
-      )}
     </View>
   );
 }
-
-
 
 // Gita Progress Component
 const GitaProgress = memo(function GitaProgress() {
@@ -668,7 +520,7 @@ const GitaProgress = memo(function GitaProgress() {
     <View style={[styles.gitaProgressCard, !isDarkMode && styles.lightGitaSection]}>
       <View style={styles.gitaHeader}>
         <View style={styles.gitaTitle}>
-          <Text style={[styles.gitaTitleText, !isDarkMode && styles.lightText]}>🕉️ Bhagavad Gita Journey</Text>
+          <Text style={[styles.gitaTitleText, !isDarkMode && styles.lightText]}>Bhagavad Gita Journey</Text>
           <Text style={[styles.gitaSubtitle, !isDarkMode && styles.lightSubText]}>
             Chapter {currentChapter}, Verse {currentVerse}
           </Text>
@@ -698,7 +550,7 @@ const GitaProgress = memo(function GitaProgress() {
         <Text style={[styles.milestonesTitle, !isDarkMode && styles.lightSubText]}>Next Milestone</Text>
         <View style={styles.milestoneItem}>
           <View style={[styles.milestoneIcon, { borderColor: "grey" }]}>
-            <Text style={styles.milestoneIconText}>📿</Text>
+            <Feather name="flag" size={16} color={isDarkMode ? "#cbd5e1" : "#475569"} />
           </View>
           <View style={styles.milestoneText}>
             <Text style={[styles.milestoneTitle, !isDarkMode && styles.lightText]}>
@@ -949,11 +801,22 @@ const ScripturesProgress = memo(function ScripturesProgress() {
 function Footer() {
   const isDarkMode = useKriya(s => s.isDarkMode);
 
-  const openLink = (url: string) => {
-        buttonPressHaptic(); // Add haptic for link opening
+  const openLink = async (url: string) => {
+    buttonPressHaptic(); // Add haptic for link opening
 
-    Linking.openURL(url); // Opens the provided URL
-    // console.log('Opening:', url);
+    try {
+      await Linking.openURL(url); // Opens the provided URL
+      // console.log('Opening:', url);
+    } catch {
+      // No handler for the URL (e.g. the iOS Simulator has no Mail app for
+      // mailto:) — report it instead of throwing an uncaught rejection.
+      showAppToast({
+        type: 'error',
+        text1: 'Couldn’t open link',
+        duration: 2000,
+        position: 'bottom',
+      });
+    }
   };
 
   return (
@@ -1040,7 +903,7 @@ function Footer() {
       {/* Copyright */}
       <View style={styles.footerCopyright}>
         <Text style={[styles.footerCopyrightText, !isDarkMode && styles.lightSubText]}>
-          © 2024 Kriya. No rights reserved.
+          © 2024 Kriya. No rights reserved. 🙏
         </Text>
       </View>
     </View>
@@ -1096,25 +959,19 @@ export default function History() {
           {/* Gita Progress */}
           <GitaProgress />
 
-          {/* Weekly Summary */}
-          <WeeklySummary />
+          {/* Notification Settings */}
+          <NotificationSettings />
 
+          {/* Translation Settings */}
+          <TranslationSettings />
 
-             {/* NEW: Scriptures Progress List */}
-        <ScripturesProgress />
+          {/* Scriptures Progress List */}
+          <ScripturesProgress />
 
           {/* Quick Actions */}
           <QuickActions />
 
-          <TipsDropdown />
-
-           {/* ADD: Notification Settings - Add this here */}
-          <NotificationSettings />
-
-           {/* Translation Settings */}
-          <TranslationSettings />
-
-                  <Footer />
+          <Footer />
 
         </ScrollView>
       </SafeAreaView>
@@ -1163,10 +1020,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   toggleActive: {
-    backgroundColor: '#10b981',
+    backgroundColor: '#2e4fa3',
   },
   lightToggleActive: {
-    backgroundColor: '#059669',
+    backgroundColor: '#2e4fa3',
   },
   toggleKnob: {
     width: 20,
@@ -1289,8 +1146,8 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 10,
     paddingHorizontal: 14,
-    borderRadius: 999,
-    borderWidth: 1,
+    borderRadius: 6,
+    borderWidth: 0.5,
     borderColor: 'transparent',
     backgroundColor: 'rgba(52, 76, 103, 0.3)',
   },
@@ -1359,20 +1216,15 @@ const styles = StyleSheet.create({
 
 
   timePickerButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
+    minWidth: 140,
+    height: 46,
+    borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  timePickerCancelButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#4b5563',
-  },
-
-  timePickerCancelText: {
-    color: '#9ca3af',
-    fontWeight: '500',
+  timePickerButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
    nativeTimePickerModal: {
     backgroundColor: '#1f2937',
@@ -1404,96 +1256,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // Weekly Summary
-  summarySection: {
-    marginBottom: 30,
-  },
-  summaryTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  summaryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  summaryCard: {
-    flex: 1,
-    minWidth: '47%',
-    backgroundColor: 'rgba(52, 76, 103, 0.5)',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(93, 123, 158, 0.4)',
-  },
   lightCard: {
     backgroundColor: 'rgba(245, 245, 245, 0.7)',
     borderColor: 'rgba(224, 224, 224, 0.6)',
-  },
-  summaryValue: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '600',
-    marginTop: 8,
-  },
-  summaryLabel: {
-    color: '#888',
-    fontSize: 12,
-    marginTop: 4,
   },
 
   // Quick Actions
   actionsSection: {
     marginBottom: 20,
   },
-  actionsTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-  },
   actionButtons: {
     gap: 12,
-  },
-  tipsHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(52, 76, 103, 0.5)',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 0,
-  },
-  tipsHeaderContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  tipsTitle: {
-    marginBottom: 0,
-    fontSize: 16,
-  },
-  tipsBody: {
-    marginTop: 12,
-    backgroundColor: 'rgba(52, 76, 103, 0.38)',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 0,
-    gap: 14,
-  },
-  tipRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-  },
-  tipText: {
-    flex: 1,
-    color: '#cbd5e1',
-    fontSize: 14,
-    lineHeight: 20,
   },
   actionButton: {
     flexDirection: 'row',
@@ -1616,9 +1389,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
 
-  },
-  milestoneIconText: {
-    fontSize: 16,
   },
   milestoneText: {
     flex: 1,

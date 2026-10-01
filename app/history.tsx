@@ -479,6 +479,36 @@ function QuickActions() {
   );
 }
 
+function SupportLink() {
+  const isDarkMode = useKriya(s => s.isDarkMode);
+
+  const openSupportLink = async () => {
+    buttonPressHaptic();
+    try {
+      await Linking.openURL('https://kriya.bitwisedharma.com/donate');
+    } catch {
+      showAppToast({
+        type: 'error',
+        text1: 'Couldn’t open link',
+        duration: 2000,
+        position: 'bottom',
+      });
+    }
+  };
+
+  return (
+    <Pressable
+      style={[styles.supportButton, !isDarkMode && styles.lightSupportButton]}
+      onPress={openSupportLink}
+      android_ripple={{ color: '#b3862f22' }}
+    >
+      <Text style={[styles.supportButtonText, !isDarkMode && styles.lightSupportButtonText]}>
+        If Kriya has been useful, consider supporting its continued growth →
+      </Text>
+    </Pressable>
+  );
+}
+
 // Gita Progress Component
 const GitaProgress = memo(function GitaProgress() {
   const isDarkMode = useKriya(s => s.isDarkMode);
@@ -882,7 +912,7 @@ function Footer() {
 
       {/* App Info */}
       <View style={styles.footerInfo}>
-        <Text style={[styles.footerVersion, !isDarkMode && styles.lightSubText]}>Version 2.0.0</Text>
+        <Text style={[styles.footerVersion, !isDarkMode && styles.lightSubText]}>Version 3.0.0</Text>
         <View style={styles.footerLinks}>
           <Pressable onPress={() => openLink('https://kriya.bitwisedharma.com/privacy')}>
             <Text style={[styles.footerLink, !isDarkMode && styles.lightFooterLink]}>Privacy Policy</Text>
@@ -965,11 +995,14 @@ export default function History() {
           {/* Translation Settings */}
           <TranslationSettings />
 
+          {/* Quick Actions */}
+          <QuickActions />
+
           {/* Scriptures Progress List */}
           <ScripturesProgress />
 
-          {/* Quick Actions */}
-          <QuickActions />
+          {/* Support Link */}
+          <SupportLink />
 
           <Footer />
 
@@ -1263,7 +1296,7 @@ const styles = StyleSheet.create({
 
   // Quick Actions
   actionsSection: {
-    marginBottom: 20,
+    marginBottom: 12,
   },
   actionButtons: {
     gap: 12,
@@ -1423,7 +1456,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
     footerContainer: {
-    marginTop: 40,
+    marginTop: 20,
     marginBottom: 20,
     paddingTop: 30,
     paddingHorizontal: 4,
@@ -1602,6 +1635,31 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 13,
     fontWeight: '600',
+  },
+  supportButton: {
+    alignItems: 'center',
+    marginHorizontal: 8,
+    marginTop: 12,
+    marginBottom: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 153, 255, 0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(57, 181, 255, 0.8)',
+  },
+  lightSupportButton: {
+    backgroundColor: 'rgba(0, 132, 255, 0.09)',
+    borderColor: 'rgba(0, 112, 230, 0.55)',
+  },
+  supportButtonText: {
+    color: '#69d2ff',
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  lightSupportButtonText: {
+    color: '#006fda',
   },
 
    // New Scripture Styles

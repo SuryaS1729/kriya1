@@ -497,15 +497,23 @@ function SupportLink() {
   };
 
   return (
-    <Pressable
-      style={[styles.supportButton, !isDarkMode && styles.lightSupportButton]}
-      onPress={openSupportLink}
-      android_ripple={{ color: '#b3862f22' }}
-    >
-      <Text style={[styles.supportButtonText, !isDarkMode && styles.lightSupportButtonText]}>
-        If Kriya has been useful, consider supporting its continued growth →
-      </Text>
-    </Pressable>
+    <View style={[styles.section, !isDarkMode && styles.lightSection]}>
+      <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Contribute</Text>
+      <Pressable
+        style={[styles.supportButton, !isDarkMode && styles.lightSupportButton]}
+        onPress={openSupportLink}
+        android_ripple={{ color: '#b3862f22' }}
+      >
+        <Text style={[styles.supportButtonText, !isDarkMode && styles.lightSupportButtonText]}>
+          If Kriya has been useful, consider supporting its continued growth
+        </Text>
+        <Feather
+          name="arrow-right"
+          size={20}
+          color={isDarkMode ? '#69d2ff' : '#006fda'}
+        />
+      </Pressable>
+    </View>
   );
 }
 
@@ -1637,7 +1645,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   supportButton: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
     marginHorizontal: 8,
     marginTop: 12,
     marginBottom: 8,
@@ -1653,10 +1664,11 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 112, 230, 0.55)',
   },
   supportButtonText: {
+    flex: 1,
     color: '#69d2ff',
     fontSize: 13,
     fontWeight: '600',
-    textAlign: 'center',
+    textAlign: 'left',
   },
   lightSupportButtonText: {
     color: '#006fda',

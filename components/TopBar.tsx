@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import Ionicons from "@react-native-vector-icons/ionicons/static";
 
 type Props = {
   title?: string;
@@ -21,7 +22,15 @@ export function TopBar({ title, variant = 'back', right, isDarkMode }: Props) {
     <View style={styles.wrap}>
       {variant === 'none' ? <View style={styles.side} /> : (
         <Pressable onPress={handlePrimaryAction} hitSlop={12} style={styles.btn}>
-          <Text style={[styles.icon, { color: isDarkMode ? '#f9fafb' : '#111827' }]}>{variant === 'back' ? '←' : '✕'}</Text>
+          {variant === 'back' ? (
+            <Ionicons
+              name="arrow-back"
+              size={26}
+              color={isDarkMode ? '#f9fafb' : '#111827'}
+            />
+          ) : (
+            <Text style={[styles.icon, { color: isDarkMode ? '#f9fafb' : '#111827' }]}>✕</Text>
+          )}
         </Pressable>
       )}
       <Text style={[styles.title, { color: isDarkMode ? '#f9fafb' : '#111827' }]} numberOfLines={1}>{title ?? ''}</Text>

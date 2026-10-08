@@ -184,7 +184,7 @@ async function scheduleTaskReminder(hour: number, minute: number) {
       sound: true,
        ...(Platform.OS === 'android' && {
         icon: './assets/icons/icon.png',
-        color: '#0026ffff', // Use your app's orange color
+        color: '#1e40afff',
       }),
   
     },

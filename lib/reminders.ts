@@ -144,7 +144,7 @@ async function scheduleReminder(row: TaskReminder): Promise<string | null> {
         sound: true,
         ...(Platform.OS === 'android' && {
           icon: './assets/icons/icon.png',
-          color: '#0026ffff',
+          color: '#1e40afff',
         }),
       },
       trigger: {

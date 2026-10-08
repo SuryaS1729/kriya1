@@ -24,10 +24,11 @@ import {
 import { taskCompleteHaptic } from '../../lib/haptics';
 
 // ─── Motion spec (per animate-expo skill) ──────────────────────────
-// Exits stay at/below platform-transition length; constant motion is linear.
-const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
-const EXIT_SLIDE_DURATION = 300;
-const EXIT_FADE_DURATION = 250;
+// Exits stay gentle: slow ease-out for a calm, unhurried farewell.
+// Constant motion stays linear; reduced-motion exits stay quick.
+const EASE_GENTLE = Easing.bezier(0.33, 1, 0.68, 1);
+const EXIT_SLIDE_DURATION = 550;
+const EXIT_FADE_DURATION = 500;
 const REDUCED_EXIT_FADE_DURATION = 150;
 
 type WelcomeScreenProps = {
@@ -102,11 +103,11 @@ export default function WelcomeScreen({ theme, onBegin }: WelcomeScreenProps) {
     }
 
     // Slide title up, subtitle up, card down — then notify parent.
-    titleTranslateY.value = withTiming(-200, { duration: EXIT_SLIDE_DURATION, easing: EASE_OUT });
+    titleTranslateY.value = withTiming(-200, { duration: EXIT_SLIDE_DURATION, easing: EASE_GENTLE });
     titleOpacity.value = withTiming(0, { duration: EXIT_FADE_DURATION });
-    subtitleTranslateY.value = withTiming(-100, { duration: EXIT_SLIDE_DURATION, easing: EASE_OUT });
+    subtitleTranslateY.value = withTiming(-100, { duration: EXIT_SLIDE_DURATION, easing: EASE_GENTLE });
     subtitleOpacity.value = withTiming(0, { duration: EXIT_FADE_DURATION });
-    cardTranslateY.value = withTiming(300, { duration: EXIT_SLIDE_DURATION, easing: EASE_OUT });
+    cardTranslateY.value = withTiming(300, { duration: EXIT_SLIDE_DURATION, easing: EASE_GENTLE });
     cardOpacity.value = withTiming(0, { duration: EXIT_FADE_DURATION });
 
     setTimeout(onBegin, EXIT_SLIDE_DURATION);

@@ -38,6 +38,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { mediumImpactHaptic, selectionHaptic, errorHaptic, buttonPressHaptic } from '../lib/haptics';
 import { PressableScale } from 'pressto';
 
@@ -46,6 +47,10 @@ import { PressableScale } from 'pressto';
 // Create animated Feather component
 const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const DETAILS_HINT_OPENS_KEY = 'kriya-task-details-opens';
+const DETAILS_HINT_DISMISSED_KEY = 'kriya-task-details-hint-dismissed';
+const DETAILS_HINT_MAX_OPENS = 3;
 
 function normalizeDayKey(input?: string | string[]) {
   const raw = Array.isArray(input) ? input[0] : input;
@@ -102,6 +107,7 @@ export default function Add() {
   const [showCustomPicker, setShowCustomPicker] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [showDetailsHint, setShowDetailsHint] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   // Reanimated shared value for rotation
@@ -157,6 +163,55 @@ export default function Add() {
   useEffect(() => {
     refreshSelectedDayTasks();
   }, [refreshSelectedDayTasks]);
+
+  // One-time "hold for details" hint: show until dismissed or user has
+  // opened task details a few times.
+  useEffect(() => {
+    (async () => {
+      try {
+        const [opensRaw, dismissed] = await Promise.all([
+          AsyncStorage.getItem(DETAILS_HINT_OPENS_KEY),
+          AsyncStorage.getItem(DETAILS_HINT_DISMISSED_KEY),
+        ]);
+        if (dismissed === '1') return;
+        const opens = Number(opensRaw ?? '0') || 0;
+        if (opens < DETAILS_HINT_MAX_OPENS) setShowDetailsHint(true);
+      } catch {
+        // Storage unavailable — don't block UI, just skip the hint.
+      }
+    })();
+  }, []);
+
+  const recordTaskDetailsOpen = useCallback(async () => {
+    try {
+      const raw = await AsyncStorage.getItem(DETAILS_HINT_OPENS_KEY);
+      const next = (Number(raw ?? '0') || 0) + 1;
+      await AsyncStorage.setItem(DETAILS_HINT_OPENS_KEY, String(next));
+      if (next >= DETAILS_HINT_MAX_OPENS) setShowDetailsHint(false);
+    } catch {
+      // Ignore storage errors.
+    }
+  }, []);
+
+  const openTaskDetails = useCallback((taskId: number) => {
+    buttonPressHaptic();
+    Keyboard.dismiss();
+    void recordTaskDetailsOpen();
+    router.push({
+      pathname: '/task/[id]',
+      params: { id: String(taskId) },
+    });
+  }, [recordTaskDetailsOpen]);
+
+  const dismissDetailsHint = useCallback(async () => {
+    selectionHaptic();
+    setShowDetailsHint(false);
+    try {
+      await AsyncStorage.setItem(DETAILS_HINT_DISMISSED_KEY, '1');
+    } catch {
+      // Ignore storage errors.
+    }
+  }, []);
 
   const focusInput = useCallback(() => {
     inputRef.current?.focus();
@@ -370,14 +425,7 @@ export default function Add() {
         }
         refreshSelectedDayTasks();
       }}
-      onLongPress={() => {
-        buttonPressHaptic();
-        Keyboard.dismiss();
-        router.push({
-          pathname: '/task/[id]',
-          params: { id: String(item.id) },
-        });
-      }}
+      onLongPress={() => openTaskDetails(item.id)}
       style={[styles.row, { borderBottomColor: isDarkMode ? '#374151' : '#f1f5f9' }]}
       android_ripple={{ color: '#eeeeee1c' }}
     >
@@ -442,6 +490,19 @@ export default function Add() {
           </Pressable>
         </View>
       )}
+      <Pressable
+        onPress={() => openTaskDetails(item.id)}
+        hitSlop={12}
+        style={styles.chevronButton}
+        accessibilityLabel="Open task details"
+        accessibilityHint="Opens the full task view"
+      >
+        <Feather
+          name="chevron-right"
+          size={16}
+          color={isDarkMode ? '#4b5563' : '#cbd5e1'}
+        />
+      </Pressable>
     </AnimatedPressable>
   );
 
@@ -517,6 +578,21 @@ export default function Add() {
           />
 
           {/* DATE PILLS — only shown when navigated for today */}
+          {showDetailsHint && orderedTasks.length > 0 && (
+            <View style={styles.hintWrap}>
+              <Feather
+                name="info"
+                size={12}
+                color={isDarkMode ? '#6b7280' : '#94a3b8'}
+              />
+              <Text style={[styles.hintText, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>
+                Hold a task or tap › for details
+              </Text>
+              <Pressable onPress={dismissDetailsHint} hitSlop={10} style={styles.hintClose}>
+                <Feather name="x" size={12} color={isDarkMode ? '#6b7280' : '#94a3b8'} />
+              </Pressable>
+            </View>
+          )}
           {isTodayScreen && (
             <View style={styles.pillWrap}>
               <View style={styles.pillRow}>
@@ -802,6 +878,32 @@ const styles = StyleSheet.create({
   },
   rowActions: {
     flexDirection: 'row',
+    alignItems: 'center',
+  },
+  chevronButton: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: -4,
+    opacity: 0.9,
+  },
+  hintWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 6,
+    paddingTop: 4,
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+  },
+  hintText: {
+    fontSize: 12.5,
+  },
+  hintClose: {
+    padding: 4,
+    borderRadius: 10,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   cancelEditButton: {

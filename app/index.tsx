@@ -161,6 +161,19 @@ const TaskRow = React.memo(({
           <Text style={[styles.deleteIcon, { color: isDarkMode ? '#6b7280' : '#94a3b8' }]}>✕</Text>
         </Pressable>
       )}
+      <Pressable
+        onPress={handleOpenDetails}
+        hitSlop={12}
+        style={styles.chevronButton}
+        accessibilityLabel="Open task details"
+        accessibilityHint="Opens the full task view"
+      >
+        <Feather
+          name="chevron-right"
+          size={16}
+          color={isDarkMode ? '#4b5563' : '#cbd5e1'}
+        />
+      </Pressable>
     </View>
   );
 });
@@ -1115,6 +1128,14 @@ marginLeft:10
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 8,
+  },
+  chevronButton: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+    opacity: 0.9,
   },
   deleteIcon: {
     fontSize: 11,

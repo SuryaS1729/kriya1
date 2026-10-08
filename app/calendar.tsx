@@ -700,6 +700,14 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
     }
   }, [deleteTask, onWriteForToday, selectedDate]);
 
+  const handleOpenDetails = useCallback((id: number) => {
+    buttonPressHaptic();
+    router.push({
+      pathname: '/task/[id]',
+      params: { id: String(id) },
+    });
+  }, []);
+
   return (
     <View style={[styles.bottomHalf, { backgroundColor: isDarkMode ? '#08131f66' : '#ffffffb3' }]}>
       <View style={styles.selectedDateRow}>
@@ -736,21 +744,41 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
               </View>
             </Pressable>
 
-            <Text
-              style={[
-                styles.taskTitle,
-                {
-                  color: item.completed ? '#94a3b8' : isDarkMode ? '#f9fafb' : '#111827',
-                  textDecorationLine: item.completed ? 'line-through' : 'none',
-                },
-              ]}
-              numberOfLines={2}
+            <Pressable
+              style={{ flex: 1 }}
+              onPress={() => handleToggleTask(item)}
+              onLongPress={() => handleOpenDetails(item.id)}
             >
-              {item.title}
-            </Text>
+              <Text
+                style={[
+                  styles.taskTitle,
+                  {
+                    color: item.completed ? '#94a3b8' : isDarkMode ? '#f9fafb' : '#111827',
+                    textDecorationLine: item.completed ? 'line-through' : 'none',
+                  },
+                ]}
+                numberOfLines={2}
+              >
+                {item.title}
+              </Text>
+            </Pressable>
 
-            <Pressable onPress={() => handleDeleteTask(item.id)} hitSlop={10}>
+            <Pressable onPress={() => handleDeleteTask(item.id)} hitSlop={10} style={styles.deleteButton}>
               <Feather name="x" size={16} color={isDarkMode ? '#94a3b8' : '#64748b'} />
+            </Pressable>
+
+            <Pressable
+              onPress={() => handleOpenDetails(item.id)}
+              hitSlop={12}
+              style={styles.chevronButton}
+              accessibilityLabel="Open task details"
+              accessibilityHint="Opens the full task view"
+            >
+              <Feather
+                name="chevron-right"
+                size={16}
+                color={isDarkMode ? '#4b5563' : '#cbd5e1'}
+              />
             </Pressable>
           </View>
         )}
@@ -991,6 +1019,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Source Serif Pro',
     fontWeight: '300',
+  },
+  deleteButton: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chevronButton: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 6,
+    opacity: 0.9,
   },
   addTaskButton: {
     flexDirection: 'row',

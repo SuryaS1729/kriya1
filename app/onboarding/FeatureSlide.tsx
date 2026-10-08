@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Linking } from 'react-native';
 import Feather from "@react-native-vector-icons/feather/static";
 import AntDesign from "@react-native-vector-icons/ant-design/static";
 import { Image } from 'expo-image';
@@ -7,6 +7,9 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 
 import type { FeatureStep as FeatureStepType, Theme } from '../../lib/onboarding/constants';
 import type { VideoPlayer } from 'expo-video';
+
+const SARVAM_URL = 'https://www.sarvam.ai/';
+const VAGDHENU_URL = 'https://prathosh.in/vagdhenu/';
 
 type FeatureSlideProps = {
   step: FeatureStepType;
@@ -128,11 +131,31 @@ export default function FeatureSlide({ step, theme, isActive, player: preloadedP
             <Text style={[styles.poweredByText, { color: theme.textTertiary }]}>
               powered by
             </Text>
-            <Image
-              source={require('../../assets/icons/sarvam.svg')}
-              style={[styles.sarvamLogo, { tintColor: theme.textTertiary }]}
-              contentFit="contain"
-            />
+            <Pressable
+              onPress={() => Linking.openURL(SARVAM_URL)}
+              hitSlop={8}
+              accessibilityLabel="Visit Sarvam"
+              accessibilityHint="Opens sarvam.ai in your browser"
+            >
+              <Image
+                source={require('../../assets/icons/sarvam.svg')}
+                style={[styles.sarvamLogo, { tintColor: theme.textTertiary }]}
+                contentFit="contain"
+              />
+            </Pressable>
+            <Text style={[styles.poweredByText, { color: theme.textTertiary }]}>
+              and
+            </Text>
+            <Pressable
+              onPress={() => Linking.openURL(VAGDHENU_URL)}
+              hitSlop={8}
+              accessibilityLabel="Visit Vagdhenu"
+              accessibilityHint="Opens the Vagdhenu page in your browser"
+            >
+              <Text style={[styles.vagdhenuText, { color: theme.textTertiary }]}>
+                vagdhenu
+              </Text>
+            </Pressable>
           </View>
         )}
 
@@ -198,11 +221,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: -20,
     marginBottom: 22,
+    gap: 6,
   },
   poweredByText: {
     fontSize: 13,
     fontFamily: 'Source Serif Pro',
     marginRight: 4,
+  },
+  vagdhenuText: {
+    fontSize: 15,
+    fontFamily: 'Source Serif Pro',
+    fontWeight: '600',
+    letterSpacing: 0.2,
   },
   description: {
     fontSize: 16,

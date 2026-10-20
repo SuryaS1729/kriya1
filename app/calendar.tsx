@@ -10,13 +10,13 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Feather from "@react-native-vector-icons/feather/static";
-import { useFocusEffect } from 'expo-router';
+
 import {
   Calendar,
   fromDateId,
   toDateId,
 } from '@marceloterreiro/flash-calendar';
-import { router } from 'expo-router';
+import { useFocusEffect, router } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { create } from 'zustand';
 import { EaseView } from 'react-native-ease';

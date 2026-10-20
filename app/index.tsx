@@ -1,5 +1,5 @@
 // app/index.tsx
-import { Link, router } from 'expo-router';
+import { Link, router,useFocusEffect } from 'expo-router';
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View, Pressable, ScrollView, TouchableOpacity } from 'react-native';
 import Animated, {
@@ -23,7 +23,7 @@ import Feather from "@react-native-vector-icons/feather/static";
 import Ionicons from "@react-native-vector-icons/ionicons/static";
 import { taskCompleteHaptic, selectionHaptic, buttonPressHaptic, errorHaptic } from '../lib/haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useFocusEffect } from 'expo-router';
+
 import * as Notifications from 'expo-notifications';
 import { PressableScale } from 'pressto';
 import {
@@ -38,10 +38,12 @@ const SlowSpinningSun = ({ color, size = 48 }: { color: string; size?: number })
   const rotation = useSharedValue(0);
 
   useEffect(() => {
-    rotation.value = withRepeat(
-      withTiming(360, { duration: 24000, easing: Easing.linear }),
-      -1,
-      false
+    rotation.set(
+      withRepeat(
+        withTiming(360, { duration: 24000, easing: Easing.linear }),
+        -1,
+        false
+      )
     );
     return () => cancelAnimation(rotation);
   }, [rotation]);
@@ -61,10 +63,12 @@ const Checkbox = ({ completed, isDarkMode }: { completed: boolean, isDarkMode: b
 
   React.useEffect(() => {
     // Gate: tens/day → near-imperceptible <150ms, timing not spring
-    progress.value = withTiming(completed ? 1 : 0, {
-      duration: 150,
-      easing: EASE_OUT,
-    });
+    progress.set(
+      withTiming(completed ? 1 : 0, {
+        duration: 150,
+        easing: EASE_OUT,
+      })
+    );
   }, [completed, progress]);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -202,20 +206,20 @@ const ShlokaCard = React.memo(function ShlokaCard({ topInset }: { topInset: numb
   useFocusEffect(
     React.useCallback(() => {
       if (!ready) return;
-      fade.value = 0;
-      fade.value = withSpring(1);
+      fade.set(0);
+      fade.set(withSpring(1));
     }, [ready, fade])
   );
 
   useEffect(() => {
     if (!ready || shlokaIndex < 0) return;
-    fade.value = 0;
-    fade.value = withSpring(1);
+    fade.set(0);
+    fade.set(withSpring(1));
   }, [ready, shlokaIndex, fade, showTranslation]);
 
   React.useEffect(() => {
     return () => {
-      fade.value = 0;
+      fade.set(0);
     };
   }, [fade]);
 
@@ -229,18 +233,22 @@ const ShlokaCard = React.memo(function ShlokaCard({ topInset }: { topInset: numb
 
   const handleTogglePress = useCallback(() => {
     selectionHaptic();
-    toggleScale.value = withSpring(0.90, {
-      stiffness: 800,
-      damping: 12,
-      mass: 0.2,
-    });
+    toggleScale.set(
+      withSpring(0.90, {
+        stiffness: 800,
+        damping: 12,
+        mass: 0.2,
+      })
+    );
 
     setTimeout(() => {
-      toggleScale.value = withSpring(1, {
-        stiffness: 700,
-        damping: 18,
-        mass: 0.3,
-      });
+      toggleScale.set(
+        withSpring(1, {
+          stiffness: 700,
+          damping: 18,
+          mass: 0.3,
+        })
+      );
     }, 50);
 
     setShowTranslation((value) => !value);
@@ -578,9 +586,11 @@ export default function Home() {
   }, [ready, hasCompletedOnboarding]);
 
   useEffect(() => {
-    if (ready) {
-      loadYesterdayTasks();
-    }
+    if (!ready) return;
+    // Defer so the state update happens outside the effect body (React
+    // Compiler flags synchronous setState from effects).
+    const timer = setTimeout(loadYesterdayTasks, 0);
+    return () => clearTimeout(timer);
   }, [ready, loadYesterdayTasks]);
 
   const sortedYesterdayTasks = useMemo(() => {

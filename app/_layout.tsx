@@ -16,6 +16,142 @@ const DB_ASSET = require('../assets/db/gita.db');
 
 let globalDbInitialized = false; // Global flag to prevent multiple initializations
 
+// Defined at module scope so DB bootstrapping is not treated as a render-time
+// side effect by the React Compiler lint rules.
+async function runMigrationsSafe(db: any) {
+  // base tables
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS tasks(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      completed INTEGER NOT NULL DEFAULT 0,
+      created_at INTEGER NOT NULL
+    );
+  `);
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS kriya_progress(
+      day_key INTEGER PRIMARY KEY,
+      base_index INTEGER NOT NULL,
+      day_start_ms INTEGER NOT NULL
+    );
+  `);
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS schema_migrations(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE NOT NULL,
+      applied_at INTEGER NOT NULL
+    );
+  `);
+  db.execSync(`DROP TABLE IF EXISTS goals`);
+
+  // Legacy cleanup (Telugu-in-SQLite was never shipped; the bundled asset
+  // no longer contains these tables): drop them on dev devices that copied
+  // an older asset. Indian-language content now lives in R2 JSON files
+  // (see lib/translationService.ts) and never touches SQLite.
+  db.execSync(`DROP TABLE IF EXISTS telugu_translations`);
+  db.execSync(`DROP TABLE IF EXISTS telugu_commentaries`);
+
+  const cols = (db.getAllSync(`PRAGMA table_info(tasks)`) as unknown as { name: string }[]) || [];
+  const has = (n: string) => cols.some(c => c.name === n);
+
+  if (!has('completed_at')) {
+    db.execSync(`ALTER TABLE tasks ADD COLUMN completed_at INTEGER`);
+  }
+  if (!has('day_key')) {
+    db.execSync(`ALTER TABLE tasks ADD COLUMN day_key INTEGER DEFAULT 0`);
+    db.execSync(`
+      UPDATE tasks
+      SET day_key = (CAST(created_at / 86400000 AS INTEGER) * 86400000)
+      WHERE day_key = 0 OR day_key IS NULL
+    `);
+  }
+  if (!has('shloka_id')) {
+    db.execSync(`ALTER TABLE tasks ADD COLUMN shloka_id INTEGER`);
+  }
+  if (!has('description')) {
+    db.execSync(`ALTER TABLE tasks ADD COLUMN description TEXT`);
+  }
+
+  db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_day_key ON tasks(day_key)`);
+  db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_completed_at ON tasks(completed_at)`);
+
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS task_reminders(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      task_id INTEGER NOT NULL,
+      day_key INTEGER NOT NULL,
+      hour INTEGER NOT NULL,
+      minute INTEGER NOT NULL,
+      notification_id TEXT
+    );
+  `);
+  db.execSync(`CREATE INDEX IF NOT EXISTS idx_task_reminders_task_id ON task_reminders(task_id)`);
+
+  // Keep verse citations out of the Sanskrit text used by text-to-speech.
+  // This is intentionally idempotent so existing installed databases are
+  // updated even though the bundled asset is only copied on first launch.
+  const shlokas = db.getAllSync(
+    `SELECT id, chapter_number, verse_number, text FROM shlokas`
+  ) as { id: number; chapter_number: number; verse_number: number; text: string }[];
+  for (const shloka of shlokas) {
+    const suffix = `${shloka.chapter_number}.${shloka.verse_number}`;
+    const text = shloka.text || '';
+    const trailingWhitespace = text.match(/\s*$/)?.[0] ?? '';
+    const core = text.slice(0, text.length - trailingWhitespace.length);
+    let cleanedCore = core;
+    if (core.endsWith(`${suffix}।।`)) {
+      cleanedCore = core.slice(0, -(`${suffix}।।`.length));
+    } else if (core.endsWith(`${suffix}।`)) {
+      cleanedCore = core.slice(0, -(`${suffix}।`.length));
+    }
+    const cleaned = cleanedCore + trailingWhitespace;
+    if (cleaned !== text) {
+      db.runSync(`UPDATE shlokas SET text = ? WHERE id = ?`, [cleaned, shloka.id]);
+    }
+  }
+}
+
+async function onInit(db: any) {
+  // Always store the latest provider DB handle to avoid stale/closed references.
+  setDb(db);
+
+  // Use global flag to prevent multiple initializations
+  if (globalDbInitialized) {
+    // console.log('DB already initialized globally, skipping...');
+    setDbReady(true);
+    setTimeout(() => {
+      useKriya.getState().init();
+    }, 0);
+    return;
+  }
+
+  globalDbInitialized = true;
+  // console.log('Initializing DB for the first time...');
+
+  try {
+    await runMigrationsSafe(db);
+
+    db.getAllSync(
+      `SELECT name FROM sqlite_master WHERE type='table' ORDER BY name`
+    ) as { name: string }[];
+    // console.log('SQLite tables:', tables.map(t => t.name).join(', '));
+
+    // const row = db.getFirstSync<{ c: number }>(`SELECT COUNT(*) AS c FROM shlokas`);
+    // console.log('Shlokas count:', row?.c ?? 0);
+
+    setDbReady(true);
+
+    // Use setTimeout to prevent potential state update conflicts
+    setTimeout(() => {
+      useKriya.getState().init();
+    }, 100);
+  } catch {
+    // console.warn('DB migrate/init failed:', e);
+    setDbReady(false);
+    globalDbInitialized = false; // Reset on error
+  }
+}
+
 export default function Root() {
   const [booted, setBooted] = useState(false);
 
@@ -35,140 +171,6 @@ export default function Root() {
   }, []);
 
   if (!booted) return null;
-
-  async function onInit(db: any) {
-    // Always store the latest provider DB handle to avoid stale/closed references.
-    setDb(db);
-
-    // Use global flag to prevent multiple initializations
-    if (globalDbInitialized) {
-      // console.log('DB already initialized globally, skipping...');
-      setDbReady(true);
-      setTimeout(() => {
-        useKriya.getState().init();
-      }, 0);
-      return;
-    }
-
-    globalDbInitialized = true;
-    // console.log('Initializing DB for the first time...');
-
-    try {
-      await runMigrationsSafe(db);
-
-      db.getAllSync(
-        `SELECT name FROM sqlite_master WHERE type='table' ORDER BY name`
-      ) as { name: string }[];
-      // console.log('SQLite tables:', tables.map(t => t.name).join(', '));
-
-      // const row = db.getFirstSync<{ c: number }>(`SELECT COUNT(*) AS c FROM shlokas`);
-      // console.log('Shlokas count:', row?.c ?? 0);
-
-      setDbReady(true);
-
-      // Use setTimeout to prevent potential state update conflicts
-      setTimeout(() => {
-        useKriya.getState().init();
-      }, 100);
-    } catch {
-      // console.warn('DB migrate/init failed:', e);
-      setDbReady(false);
-      globalDbInitialized = false; // Reset on error
-    }
-  }
-
-  async function runMigrationsSafe(db: any) {
-    // base tables
-    db.execSync(`
-      CREATE TABLE IF NOT EXISTS tasks(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        completed INTEGER NOT NULL DEFAULT 0,
-        created_at INTEGER NOT NULL
-      );
-    `);
-    db.execSync(`
-      CREATE TABLE IF NOT EXISTS kriya_progress(
-        day_key INTEGER PRIMARY KEY,
-        base_index INTEGER NOT NULL,
-        day_start_ms INTEGER NOT NULL
-      );
-    `);
-    db.execSync(`
-      CREATE TABLE IF NOT EXISTS schema_migrations(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT UNIQUE NOT NULL,
-        applied_at INTEGER NOT NULL
-      );
-    `);
-    db.execSync(`DROP TABLE IF EXISTS goals`);
-
-    // Legacy cleanup (Telugu-in-SQLite was never shipped; the bundled asset
-    // no longer contains these tables): drop them on dev devices that copied
-    // an older asset. Indian-language content now lives in R2 JSON files
-    // (see lib/translationService.ts) and never touches SQLite.
-    db.execSync(`DROP TABLE IF EXISTS telugu_translations`);
-    db.execSync(`DROP TABLE IF EXISTS telugu_commentaries`);
-
-    const cols = (db.getAllSync(`PRAGMA table_info(tasks)`) as unknown as { name: string }[]) || [];
-    const has = (n: string) => cols.some(c => c.name === n);
-
-    if (!has('completed_at')) {
-      db.execSync(`ALTER TABLE tasks ADD COLUMN completed_at INTEGER`);
-    }
-    if (!has('day_key')) {
-      db.execSync(`ALTER TABLE tasks ADD COLUMN day_key INTEGER DEFAULT 0`);
-      db.execSync(`
-        UPDATE tasks
-        SET day_key = (CAST(created_at / 86400000 AS INTEGER) * 86400000)
-        WHERE day_key = 0 OR day_key IS NULL
-      `);
-    }
-    if (!has('shloka_id')) {
-      db.execSync(`ALTER TABLE tasks ADD COLUMN shloka_id INTEGER`);
-    }
-    if (!has('description')) {
-      db.execSync(`ALTER TABLE tasks ADD COLUMN description TEXT`);
-    }
-
-    db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_day_key ON tasks(day_key)`);
-    db.execSync(`CREATE INDEX IF NOT EXISTS idx_tasks_completed_at ON tasks(completed_at)`);
-
-    db.execSync(`
-      CREATE TABLE IF NOT EXISTS task_reminders(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        task_id INTEGER NOT NULL,
-        day_key INTEGER NOT NULL,
-        hour INTEGER NOT NULL,
-        minute INTEGER NOT NULL,
-        notification_id TEXT
-      );
-    `);
-    db.execSync(`CREATE INDEX IF NOT EXISTS idx_task_reminders_task_id ON task_reminders(task_id)`);
-
-    // Keep verse citations out of the Sanskrit text used by text-to-speech.
-    // This is intentionally idempotent so existing installed databases are
-    // updated even though the bundled asset is only copied on first launch.
-    const shlokas = db.getAllSync(
-      `SELECT id, chapter_number, verse_number, text FROM shlokas`
-    ) as { id: number; chapter_number: number; verse_number: number; text: string }[];
-    for (const shloka of shlokas) {
-      const suffix = `${shloka.chapter_number}.${shloka.verse_number}`;
-      const text = shloka.text || '';
-      const trailingWhitespace = text.match(/\s*$/)?.[0] ?? '';
-      const core = text.slice(0, text.length - trailingWhitespace.length);
-      let cleanedCore = core;
-      if (core.endsWith(`${suffix}।।`)) {
-        cleanedCore = core.slice(0, -(`${suffix}।।`.length));
-      } else if (core.endsWith(`${suffix}।`)) {
-        cleanedCore = core.slice(0, -(`${suffix}।`.length));
-      }
-      const cleaned = cleanedCore + trailingWhitespace;
-      if (cleaned !== text) {
-        db.runSync(`UPDATE shlokas SET text = ? WHERE id = ?`, [cleaned, shloka.id]);
-      }
-    }
-  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

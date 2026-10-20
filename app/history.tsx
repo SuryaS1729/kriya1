@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { DateTimePicker } from '@expo/ui/community/datetime-picker';
 import * as Notifications from 'expo-notifications';
 import { NativeTimeDialog } from '../components/NativeTimeDialog';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { StatusBar } from 'expo-status-bar';
 import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic } from '../lib/haptics';
 import { showAppToast } from '../lib/appToast';
@@ -38,6 +39,7 @@ function TranslationSettings() {
 
   // Local state keyed by language code for download/remove in-flight spinners
   const [busyLang, setBusyLang] = useState<TranslationLanguageCode | null>(null);
+  const [pendingRemove, setPendingRemove] = useState<TranslationLanguageCode | null>(null);
   const [localDownloaded, setLocalDownloaded] = useState<Set<string>>(new Set());
 
   // Sync the row "Downloaded" state with the persisted store list + actual
@@ -121,15 +123,7 @@ function TranslationSettings() {
 
   const handleRemove = (code: TranslationLanguageCode) => {
     if (busyLang) return;
-    const name = TRANSLATION_LANGUAGE_LIST.find(l => l.code === code)?.name ?? code;
-    Alert.alert(
-      `Remove ${name}?`,
-      'You can download it again anytime.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Remove', style: 'destructive', onPress: () => { void doRemove(code); } },
-      ],
-    );
+    setPendingRemove(code);
   };
 
   // Pill interaction: tap downloads (if missing) or selects (if downloaded).
@@ -231,6 +225,20 @@ function TranslationSettings() {
           );
         })}
       </View>
+
+      <ConfirmDialog
+        visible={pendingRemove !== null}
+        isDarkMode={isDarkMode}
+        title={`Remove ${TRANSLATION_LANGUAGE_LIST.find(l => l.code === pendingRemove)?.name ?? 'language'}?`}
+        message="You can download it again anytime."
+        confirmLabel="Remove"
+        onCancel={() => setPendingRemove(null)}
+        onConfirm={() => {
+          const code = pendingRemove;
+          setPendingRemove(null);
+          if (code) void doRemove(code);
+        }}
+      />
     </View>
   );
 }
@@ -997,6 +1005,9 @@ export default function History() {
           {/* Gita Progress */}
           <GitaProgress />
 
+          {/* Scriptures Progress List */}
+          <ScripturesProgress />
+
           {/* Notification Settings */}
           <NotificationSettings />
 
@@ -1005,9 +1016,6 @@ export default function History() {
 
           {/* Quick Actions */}
           <QuickActions />
-
-          {/* Scriptures Progress List */}
-          <ScripturesProgress />
 
           {/* Support Link */}
           <SupportLink />

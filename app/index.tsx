@@ -17,6 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useKriya } from '../lib/store';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { setTaskCompleted, removeTask as removeTaskDb, getAllTasks, type Task } from '../lib/tasks';
 import { StatusBar } from 'expo-status-bar';
 import Feather from "@react-native-vector-icons/feather/static";
@@ -385,6 +386,7 @@ export default function Home() {
   const [delayedTodayCompletedTaskIds, setDelayedTodayCompletedTaskIds] = useState<number[]>([]);
   const [delayedCompletedTaskIds, setDelayedCompletedTaskIds] = useState<number[]>([]);
   const [delayedYesterdayCompletedTaskIds, setDelayedYesterdayCompletedTaskIds] = useState<number[]>([]);
+  const [pendingTaskDelete, setPendingTaskDelete] = useState<{ id: number; source: 'today' | 'all' | 'yesterday' } | null>(null);
 
   const loadYesterdayTasks = useCallback(() => {
     const yesterday = new Date();
@@ -468,15 +470,8 @@ export default function Home() {
   }, [toggle]);
 
   const onRemove = useCallback((id: number) => {
-    const existingTimeout = todayTaskReorderTimeouts.current[id];
-    if (existingTimeout) {
-      clearTimeout(existingTimeout);
-      delete todayTaskReorderTimeouts.current[id];
-    }
-    errorHaptic(); // Error haptic for deletion
-    setDelayedTodayCompletedTaskIds((state) => state.filter((taskId) => taskId !== id));
-    remove(id);
-  }, [remove]);
+    setPendingTaskDelete({ id, source: 'today' });
+  }, []);
 
   // Handlers for "All Tasks" mode
   const onToggleAllTask = useCallback((id: number, completed: boolean) => {
@@ -516,18 +511,8 @@ export default function Home() {
   }, [refresh]);
 
   const onRemoveAllTask = useCallback((id: number) => {
-    const existingTimeout = allTaskReorderTimeouts.current[id];
-    if (existingTimeout) {
-      clearTimeout(existingTimeout);
-      delete allTaskReorderTimeouts.current[id];
-    }
-    errorHaptic();
-    removeTaskDb(id);
-    setDelayedCompletedTaskIds(state => state.filter(taskId => taskId !== id));
-    setAllTasksState(state => state.filter(t => t.id !== id));
-    // Also refresh today's tasks in case this was a today task
-    refresh();
-  }, [refresh]);
+    setPendingTaskDelete({ id, source: 'all' });
+  }, []);
 
   const onOpenDetails = useCallback((task: Task) => {
     buttonPressHaptic(); // Light haptic for navigation
@@ -637,16 +622,46 @@ export default function Home() {
   }, []);
 
   const onRemoveYesterday = useCallback((id: number) => {
+    setPendingTaskDelete({ id, source: 'yesterday' });
+  }, []);
+
+  const confirmTaskDelete = useCallback(() => {
+    const pending = pendingTaskDelete;
+    setPendingTaskDelete(null);
+    if (!pending) return;
+    const { id, source } = pending;
+    errorHaptic();
+    if (source === 'today') {
+      const existingTimeout = todayTaskReorderTimeouts.current[id];
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+        delete todayTaskReorderTimeouts.current[id];
+      }
+      setDelayedTodayCompletedTaskIds((state) => state.filter((taskId) => taskId !== id));
+      remove(id);
+      return;
+    }
+    if (source === 'all') {
+      const existingTimeout = allTaskReorderTimeouts.current[id];
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+        delete allTaskReorderTimeouts.current[id];
+      }
+      removeTaskDb(id);
+      setDelayedCompletedTaskIds(state => state.filter(taskId => taskId !== id));
+      setAllTasksState(state => state.filter(t => t.id !== id));
+      refresh();
+      return;
+    }
     const existingTimeout = yesterdayTaskReorderTimeouts.current[id];
     if (existingTimeout) {
       clearTimeout(existingTimeout);
       delete yesterdayTaskReorderTimeouts.current[id];
     }
-    errorHaptic();
     removeTaskDb(id);
     setDelayedYesterdayCompletedTaskIds((state) => state.filter((taskId) => taskId !== id));
     setYesterdayTasksState((state) => state.filter((task) => task.id !== id));
-  }, []);
+  }, [pendingTaskDelete, remove, refresh]);
 
   const renderYesterdayItem = useCallback(({ item }: { item: Task }) => (
     <Animated.View
@@ -926,6 +941,16 @@ export default function Home() {
           </TouchableOpacity>
         </Link>
       </View>
+
+      <ConfirmDialog
+        visible={pendingTaskDelete !== null}
+        isDarkMode={isDarkMode}
+        title="Delete task?"
+        message="This task will be permanently removed."
+        confirmLabel="Delete"
+        onCancel={() => setPendingTaskDelete(null)}
+        onConfirm={confirmTaskDelete}
+      />
     </LinearGradient>
   );
 

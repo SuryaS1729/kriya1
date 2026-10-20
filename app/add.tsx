@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { DateTimePicker } from '@expo/ui/community/datetime-picker';
 import { NativeDateDialog } from '../components/NativeDateDialog';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '../components/TopBar';
 import { useKriya } from '../lib/store';
@@ -108,6 +109,7 @@ export default function Add() {
   const [showCustomPicker, setShowCustomPicker] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [pendingTaskDelete, setPendingTaskDelete] = useState<{ id: number; title: string } | null>(null);
   const [showDetailsHint, setShowDetailsHint] = useState(false);
   const inputRef = useRef<TextInputInstance>(null);
 
@@ -162,7 +164,10 @@ export default function Add() {
   }, [isActiveToday, refresh, activeDayKey]);
 
   useEffect(() => {
-    refreshSelectedDayTasks();
+    // Defer so the state update happens outside the effect body (React
+    // Compiler flags synchronous setState from effects).
+    const timer = setTimeout(refreshSelectedDayTasks, 0);
+    return () => clearTimeout(timer);
   }, [refreshSelectedDayTasks]);
 
   // One-time "hold for details" hint: show until dismissed or user has
@@ -475,15 +480,7 @@ export default function Add() {
             />
           </Pressable>
           <Pressable
-            onPress={() => {
-              errorHaptic(); // Same haptic as long-press delete
-              removeTaskDb(item.id);
-              if (item.id === editingId) {
-                setEditingId(null);
-                setText('');
-              }
-              refreshSelectedDayTasks();
-            }}
+            onPress={() => setPendingTaskDelete({ id: item.id, title: item.title })}
             hitSlop={8}
             style={styles.deleteButton}
           >
@@ -763,6 +760,27 @@ export default function Add() {
           </View>
         </View>
       </KeyboardAvoidingView>
+
+      <ConfirmDialog
+        visible={pendingTaskDelete !== null}
+        isDarkMode={isDarkMode}
+        title="Delete task?"
+        message={pendingTaskDelete ? `“${pendingTaskDelete.title}” will be permanently removed.` : undefined}
+        confirmLabel="Delete"
+        onCancel={() => setPendingTaskDelete(null)}
+        onConfirm={() => {
+          const pending = pendingTaskDelete;
+          setPendingTaskDelete(null);
+          if (!pending) return;
+          errorHaptic();
+          removeTaskDb(pending.id);
+          if (pending.id === editingId) {
+            setEditingId(null);
+            setText('');
+          }
+          refreshSelectedDayTasks();
+        }}
+      />
 
       <Modal
         animationType="fade"

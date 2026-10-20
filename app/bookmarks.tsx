@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,12 +13,14 @@ import { useKriya, type Bookmark } from '../lib/store';
 import { StatusBar } from 'expo-status-bar';
 import AntDesign from "@react-native-vector-icons/ant-design/static";
 import MaterialIcons from "@react-native-vector-icons/material-icons/static";
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 export default function Bookmarks() {
   const insets = useSafeAreaInsets();
   const isDarkMode = useKriya(s => s.isDarkMode);
   const bookmarks = useKriya(s => s.getBookmarks());
   const removeBookmark = useKriya(s => s.removeBookmark);
+  const [pendingRemove, setPendingRemove] = useState<Bookmark | null>(null);
 
   // Sort bookmarks by creation date (newest first)
   const sortedBookmarks = useMemo(() => {
@@ -40,7 +42,7 @@ export default function Bookmarks() {
           Adhyaya {item.chapter}, Shloka {item.verse}
         </Text>
         <Pressable
-          onPress={() => removeBookmark(item.shlokaIndex)}
+          onPress={() => setPendingRemove(item)}
           hitSlop={8}
           style={styles.removeButton}
         >
@@ -117,6 +119,20 @@ export default function Bookmarks() {
           />
         )}
       </View>
+
+      <ConfirmDialog
+        visible={pendingRemove !== null}
+        isDarkMode={isDarkMode}
+        title="Remove bookmark?"
+        message={pendingRemove ? `Adhyaya ${pendingRemove.chapter}, Shloka ${pendingRemove.verse} will be removed from your bookmarks.` : undefined}
+        confirmLabel="Remove"
+        onCancel={() => setPendingRemove(null)}
+        onConfirm={() => {
+          const bookmark = pendingRemove;
+          setPendingRemove(null);
+          if (bookmark) removeBookmark(bookmark.shlokaIndex);
+        }}
+      />
     </SafeAreaView>
   );
 }

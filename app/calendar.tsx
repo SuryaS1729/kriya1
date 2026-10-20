@@ -10,6 +10,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Feather from "@react-native-vector-icons/feather/static";
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 import {
   Calendar,
@@ -654,6 +655,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
   const tasks = useCalendarTaskStore((s) => s.tasksByDate[s.selectedDate] ?? EMPTY_TASKS);
   const toggleTask = useCalendarTaskStore((s) => s.toggleTask);
   const deleteTask = useCalendarTaskStore((s) => s.deleteTask);
+  const [pendingDeleteTaskId, setPendingDeleteTaskId] = useState<number | null>(null);
 
   const orderedTasks = useMemo(() => {
     const incomplete = tasks
@@ -693,12 +695,19 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
   }, [onWriteForToday, selectedDate, toggleTask]);
 
   const handleDeleteTask = useCallback((id: number) => {
+    setPendingDeleteTaskId(id);
+  }, []);
+
+  const confirmDeleteTask = useCallback(() => {
+    const id = pendingDeleteTaskId;
+    setPendingDeleteTaskId(null);
+    if (id == null) return;
     errorHaptic();
     deleteTask(id, selectedDate);
     if (selectedDate === toDateId(new Date())) {
       onWriteForToday();
     }
-  }, [deleteTask, onWriteForToday, selectedDate]);
+  }, [pendingDeleteTaskId, deleteTask, onWriteForToday, selectedDate]);
 
   const handleOpenDetails = useCallback((id: number) => {
     buttonPressHaptic();
@@ -796,6 +805,16 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
           Add a task for this date ...
         </Text>
       </TouchableOpacity>
+
+      <ConfirmDialog
+        visible={pendingDeleteTaskId !== null}
+        isDarkMode={isDarkMode}
+        title="Delete task?"
+        message="This task will be permanently removed."
+        confirmLabel="Delete"
+        onCancel={() => setPendingDeleteTaskId(null)}
+        onConfirm={confirmDeleteTask}
+      />
     </View>
   );
 });

@@ -211,7 +211,7 @@ export default function ShlokaDetail() {
       opacity: fade.value,
       transform: [{ translateY: contentTranslateY.value }],
     };
-  }, []);
+  });
 
   // prev/next indices from current index and total
   const { prevIndex, nextIndex } = getPrevNextIndices(currentIndex ?? 0, total);

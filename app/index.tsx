@@ -84,14 +84,14 @@ const Checkbox = ({ completed, isDarkMode }: { completed: boolean, isDarkMode: b
           : ['#e2e8f0', '#AADBA3']
       ),
     };
-  }, [isDarkMode]);
+  });
 
   const checkmarkStyle = useAnimatedStyle(() => {
     return {
       opacity: interpolate(progress.value, [0, 1], [0, 1]),
       transform: [{ scale: interpolate(progress.value, [0, 1], [0.96, 1]) }],
     };
-  }, []);
+  });
 
   return (
     <Animated.View style={[styles.checkbox, animatedStyle]}>

@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  type TextInputInstance,
   View,
   FlatList,
   TouchableOpacity
@@ -108,7 +109,7 @@ export default function Add() {
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showDetailsHint, setShowDetailsHint] = useState(false);
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputInstance>(null);
 
   // Reanimated shared value for rotation
   const rotationValue = useSharedValue(0);

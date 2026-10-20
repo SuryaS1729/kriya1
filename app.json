@@ -6,6 +6,9 @@
     "scheme": "acme",
     "icon": "./assets/icons/androidicon1.png",
     "userInterfaceStyle": "automatic",
+    "web": {
+      "output": "static"
+    },
     "experiments": {
       "reactCompiler": true
     },

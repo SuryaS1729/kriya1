@@ -1,0 +1,1371 @@
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/results.bin b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/results.bin
+new file mode 100644
+index 0000000..7ed749e
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/results.bin
+@@ -0,0 +1 @@
++o/bundleLibRuntimeToDirDebug
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/BuildConfig.dex b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/BuildConfig.dex
+new file mode 100644
+index 0000000..eae4af2
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/BuildConfig.dex differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureModule$Companion.dex b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureModule$Companion.dex
+new file mode 100644
+index 0000000..0108d22
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureModule$Companion.dex differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureModule.dex b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureModule.dex
+new file mode 100644
+index 0000000..75a1601
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureModule.dex differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureUtils.dex b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureUtils.dex
+new file mode 100644
+index 0000000..a144d66
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureUtils.dex differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureViewPackage.dex b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureViewPackage.dex
+new file mode 100644
+index 0000000..58f151b
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureViewPackage.dex differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureViewView.dex b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureViewView.dex
+new file mode 100644
+index 0000000..7a7c6dc
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureViewView.dex differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureViewViewManager$Companion.dex b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureViewViewManager$Companion.dex
+new file mode 100644
+index 0000000..d409a6d
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureViewViewManager$Companion.dex differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureViewViewManager.dex b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureViewViewManager.dex
+new file mode 100644
+index 0000000..f440fc1
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/CaptureViewViewManager.dex differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/NativeCaptureModuleSpec.dex b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/NativeCaptureModuleSpec.dex
+new file mode 100644
+index 0000000..c80039a
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/captureview/NativeCaptureModuleSpec.dex differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/facebook/react/viewmanagers/CaptureViewViewManagerDelegate.dex b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/facebook/react/viewmanagers/CaptureViewViewManagerDelegate.dex
+new file mode 100644
+index 0000000..31723e6
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/facebook/react/viewmanagers/CaptureViewViewManagerDelegate.dex differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/facebook/react/viewmanagers/CaptureViewViewManagerInterface.dex b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/facebook/react/viewmanagers/CaptureViewViewManagerInterface.dex
+new file mode 100644
+index 0000000..39e164c
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_dex/com/facebook/react/viewmanagers/CaptureViewViewManagerInterface.dex differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureModule$$InternalSyntheticLambda$2$0d72295244079ac465fa60ce6e2a10a769afb7b6f541c6a9b8c3a306090fa0f9$0.globals b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureModule$$InternalSyntheticLambda$2$0d72295244079ac465fa60ce6e2a10a769afb7b6f541c6a9b8c3a306090fa0f9$0.globals
+new file mode 100644
+index 0000000..cf6ce7d
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureModule$$InternalSyntheticLambda$2$0d72295244079ac465fa60ce6e2a10a769afb7b6f541c6a9b8c3a306090fa0f9$0.globals differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureModule$$InternalSyntheticLambda$2$0d72295244079ac465fa60ce6e2a10a769afb7b6f541c6a9b8c3a306090fa0f9$1.globals b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureModule$$InternalSyntheticLambda$2$0d72295244079ac465fa60ce6e2a10a769afb7b6f541c6a9b8c3a306090fa0f9$1.globals
+new file mode 100644
+index 0000000..cf6ce7d
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureModule$$InternalSyntheticLambda$2$0d72295244079ac465fa60ce6e2a10a769afb7b6f541c6a9b8c3a306090fa0f9$1.globals differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureModule$$InternalSyntheticLambda$2$4d5c8b0a634ebf289f54157b19eeb8b471ac86083633218b644fb3f1defd7d06$0.globals b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureModule$$InternalSyntheticLambda$2$4d5c8b0a634ebf289f54157b19eeb8b471ac86083633218b644fb3f1defd7d06$0.globals
+new file mode 100644
+index 0000000..cf6ce7d
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureModule$$InternalSyntheticLambda$2$4d5c8b0a634ebf289f54157b19eeb8b471ac86083633218b644fb3f1defd7d06$0.globals differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureModule$$InternalSyntheticLambda$2$c12214c84b3908f4d28a18c5c9fe06a474e4d6dba2c13516e8199325ef5482be$0.globals b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureModule$$InternalSyntheticLambda$2$c12214c84b3908f4d28a18c5c9fe06a474e4d6dba2c13516e8199325ef5482be$0.globals
+new file mode 100644
+index 0000000..cf6ce7d
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureModule$$InternalSyntheticLambda$2$c12214c84b3908f4d28a18c5c9fe06a474e4d6dba2c13516e8199325ef5482be$0.globals differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureUtils$$InternalSyntheticLambda$2$08c6ef01f83118c0068b7cc2f713d6de9f67bfbdd70e405ffe9f69da4b393817$0.globals b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureUtils$$InternalSyntheticLambda$2$08c6ef01f83118c0068b7cc2f713d6de9f67bfbdd70e405ffe9f69da4b393817$0.globals
+new file mode 100644
+index 0000000..cf6ce7d
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureUtils$$InternalSyntheticLambda$2$08c6ef01f83118c0068b7cc2f713d6de9f67bfbdd70e405ffe9f69da4b393817$0.globals differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureViewPackage$$InternalSyntheticLambda$2$f95ff99a7e8024c77e1f816f2bdec428fd27dbe73f1325a30deaaefe8e941bca$0.globals b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureViewPackage$$InternalSyntheticLambda$2$f95ff99a7e8024c77e1f816f2bdec428fd27dbe73f1325a30deaaefe8e941bca$0.globals
+new file mode 100644
+index 0000000..cf6ce7d
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/bundleLibRuntimeToDirDebug_global-synthetics/com/captureview/CaptureViewPackage$$InternalSyntheticLambda$2$f95ff99a7e8024c77e1f816f2bdec428fd27dbe73f1325a30deaaefe8e941bca$0.globals differ
+diff --git a/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin
+new file mode 100644
+index 0000000..601f245
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/.transforms/11bf81801f882c81a84d7874b071b066/transformed/bundleLibRuntimeToDirDebug/desugar_graph.bin differ
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/buildConfig/debug/com/captureview/BuildConfig.java b/node_modules/react-native-capture-view/android/build/generated/source/buildConfig/debug/com/captureview/BuildConfig.java
+new file mode 100644
+index 0000000..a3b2af2
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/buildConfig/debug/com/captureview/BuildConfig.java
+@@ -0,0 +1,10 @@
++/**
++ * Automatically generated file. DO NOT MODIFY
++ */
++package com.captureview;
++
++public final class BuildConfig {
++  public static final boolean DEBUG = Boolean.parseBoolean("true");
++  public static final String LIBRARY_PACKAGE_NAME = "com.captureview";
++  public static final String BUILD_TYPE = "debug";
++}
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/java/com/captureview/NativeCaptureModuleSpec.java b/node_modules/react-native-capture-view/android/build/generated/source/codegen/java/com/captureview/NativeCaptureModuleSpec.java
+new file mode 100644
+index 0000000..c75d5a7
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/java/com/captureview/NativeCaptureModuleSpec.java
+@@ -0,0 +1,43 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleJavaSpec.js
++ *
++ * @nolint
++ */
++
++package com.captureview;
++
++import com.facebook.proguard.annotations.DoNotStrip;
++import com.facebook.react.bridge.Promise;
++import com.facebook.react.bridge.ReactApplicationContext;
++import com.facebook.react.bridge.ReactContextBaseJavaModule;
++import com.facebook.react.bridge.ReactMethod;
++import com.facebook.react.bridge.ReadableMap;
++import com.facebook.react.turbomodule.core.interfaces.TurboModule;
++import javax.annotation.Nonnull;
++
++public abstract class NativeCaptureModuleSpec extends ReactContextBaseJavaModule implements TurboModule {
++  public static final String NAME = "NativeCaptureModule";
++
++  public NativeCaptureModuleSpec(ReactApplicationContext reactContext) {
++    super(reactContext);
++  }
++
++  @Override
++  public @Nonnull String getName() {
++    return NAME;
++  }
++
++  @ReactMethod
++  @DoNotStrip
++  public abstract void captureScreen(ReadableMap options, Promise promise);
++
++  @ReactMethod
++  @DoNotStrip
++  public abstract void waitForCapture(String callbackId, Promise promise);
++}
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/java/com/facebook/react/viewmanagers/CaptureViewViewManagerDelegate.java b/node_modules/react-native-capture-view/android/build/generated/source/codegen/java/com/facebook/react/viewmanagers/CaptureViewViewManagerDelegate.java
+new file mode 100644
+index 0000000..3af18ad
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/java/com/facebook/react/viewmanagers/CaptureViewViewManagerDelegate.java
+@@ -0,0 +1,37 @@
++/**
++* This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++*
++* Do not edit this file as changes may cause incorrect behavior and will be lost
++* once the code is regenerated.
++*
++* @generated by codegen project: GeneratePropsJavaDelegate.js
++*/
++
++package com.facebook.react.viewmanagers;
++
++import android.view.View;
++import androidx.annotation.Nullable;
++import com.facebook.react.bridge.ReadableArray;
++import com.facebook.react.uimanager.BaseViewManager;
++import com.facebook.react.uimanager.BaseViewManagerDelegate;
++import com.facebook.react.uimanager.LayoutShadowNode;
++
++@SuppressWarnings("deprecation")
++public class CaptureViewViewManagerDelegate<T extends View, U extends BaseViewManager<T, ? extends LayoutShadowNode> & CaptureViewViewManagerInterface<T>> extends BaseViewManagerDelegate<T, U> {
++  public CaptureViewViewManagerDelegate(U viewManager) {
++    super(viewManager);
++  }
++  @Override
++  public void setProperty(T view, String propName, @Nullable Object value) {
++    super.setProperty(view, propName, value);
++  }
++
++  @Override
++  public void receiveCommand(T view, String commandName, ReadableArray args) {
++    switch (commandName) {
++      case "capture":
++        mViewManager.capture(view, args.getString(0), args.getString(1), args.getString(2), args.getString(3), args.getBoolean(4));
++        break;
++    }
++  }
++}
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/java/com/facebook/react/viewmanagers/CaptureViewViewManagerInterface.java b/node_modules/react-native-capture-view/android/build/generated/source/codegen/java/com/facebook/react/viewmanagers/CaptureViewViewManagerInterface.java
+new file mode 100644
+index 0000000..78e00c4
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/java/com/facebook/react/viewmanagers/CaptureViewViewManagerInterface.java
+@@ -0,0 +1,18 @@
++/**
++* This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++*
++* Do not edit this file as changes may cause incorrect behavior and will be lost
++* once the code is regenerated.
++*
++* @generated by codegen project: GeneratePropsJavaInterface.js
++*/
++
++package com.facebook.react.viewmanagers;
++
++import android.view.View;
++import com.facebook.react.uimanager.ViewManagerWithGeneratedInterface;
++
++public interface CaptureViewViewManagerInterface<T extends View> extends ViewManagerWithGeneratedInterface {
++  // No props
++  void capture(T view, String callbackId, String format, String quality, String resultType, boolean snapshotContentContainer);
++}
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/CMakeLists.txt b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/CMakeLists.txt
+new file mode 100644
+index 0000000..235d174
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/CMakeLists.txt
+@@ -0,0 +1,28 @@
++# Copyright (c) Meta Platforms, Inc. and affiliates.
++#
++# This source code is licensed under the MIT license found in the
++# LICENSE file in the root directory of this source tree.
++
++cmake_minimum_required(VERSION 3.13)
++set(CMAKE_VERBOSE_MAKEFILE on)
++
++file(GLOB react_codegen_SRCS CONFIGURE_DEPENDS *.cpp react/renderer/components/RNCaptureViewSpec/*.cpp)
++
++add_library(
++  react_codegen_RNCaptureViewSpec
++  OBJECT
++  ${react_codegen_SRCS}
++)
++
++target_include_directories(react_codegen_RNCaptureViewSpec PUBLIC . react/renderer/components/RNCaptureViewSpec)
++
++target_link_libraries(
++  react_codegen_RNCaptureViewSpec
++  fbjni
++  jsi
++  # We need to link different libraries based on whether we are building rncore or not, that's necessary
++  # because we want to break a circular dependency between react_codegen_rncore and reactnative
++  reactnative
++)
++
++target_compile_reactnative_options(react_codegen_RNCaptureViewSpec PRIVATE)
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/RNCaptureViewSpec-generated.cpp b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/RNCaptureViewSpec-generated.cpp
+new file mode 100644
+index 0000000..0eaa866
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/RNCaptureViewSpec-generated.cpp
+@@ -0,0 +1,38 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleJniCpp.js
++ */
++
++#include "RNCaptureViewSpec.h"
++
++namespace facebook::react {
++
++static facebook::jsi::Value __hostFunction_NativeCaptureModuleSpecJSI_captureScreen(facebook::jsi::Runtime& rt, TurboModule &turboModule, const facebook::jsi::Value* args, size_t count) {
++  static jmethodID cachedMethodId = nullptr;
++  return static_cast<JavaTurboModule &>(turboModule).invokeJavaMethod(rt, PromiseKind, "captureScreen", "(Lcom/facebook/react/bridge/ReadableMap;Lcom/facebook/react/bridge/Promise;)V", args, count, cachedMethodId);
++}
++
++static facebook::jsi::Value __hostFunction_NativeCaptureModuleSpecJSI_waitForCapture(facebook::jsi::Runtime& rt, TurboModule &turboModule, const facebook::jsi::Value* args, size_t count) {
++  static jmethodID cachedMethodId = nullptr;
++  return static_cast<JavaTurboModule &>(turboModule).invokeJavaMethod(rt, PromiseKind, "waitForCapture", "(Ljava/lang/String;Lcom/facebook/react/bridge/Promise;)V", args, count, cachedMethodId);
++}
++
++NativeCaptureModuleSpecJSI::NativeCaptureModuleSpecJSI(const JavaTurboModule::InitParams &params)
++  : JavaTurboModule(params) {
++  methodMap_["captureScreen"] = MethodMetadata {1, __hostFunction_NativeCaptureModuleSpecJSI_captureScreen};
++  methodMap_["waitForCapture"] = MethodMetadata {1, __hostFunction_NativeCaptureModuleSpecJSI_waitForCapture};
++}
++
++std::shared_ptr<TurboModule> RNCaptureViewSpec_ModuleProvider(const std::string &moduleName, const JavaTurboModule::InitParams &params) {
++  if (moduleName == "NativeCaptureModule") {
++    return std::make_shared<NativeCaptureModuleSpecJSI>(params);
++  }
++  return nullptr;
++}
++
++} // namespace facebook::react
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/RNCaptureViewSpec.h b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/RNCaptureViewSpec.h
+new file mode 100644
+index 0000000..fab8e7b
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/RNCaptureViewSpec.h
+@@ -0,0 +1,31 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleJniH.js
++ */
++
++#pragma once
++
++#include <ReactCommon/JavaTurboModule.h>
++#include <ReactCommon/TurboModule.h>
++#include <jsi/jsi.h>
++
++namespace facebook::react {
++
++/**
++ * JNI C++ class for module 'NativeCaptureModule'
++ */
++class JSI_EXPORT NativeCaptureModuleSpecJSI : public JavaTurboModule {
++public:
++  NativeCaptureModuleSpecJSI(const JavaTurboModule::InitParams &params);
++};
++
++
++JSI_EXPORT
++std::shared_ptr<TurboModule> RNCaptureViewSpec_ModuleProvider(const std::string &moduleName, const JavaTurboModule::InitParams &params);
++
++} // namespace facebook::react
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/ComponentDescriptors.cpp b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/ComponentDescriptors.cpp
+new file mode 100644
+index 0000000..9750600
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/ComponentDescriptors.cpp
+@@ -0,0 +1,22 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateComponentDescriptorCpp.js
++ */
++
++#include <react/renderer/components/RNCaptureViewSpec/ComponentDescriptors.h>
++#include <react/renderer/core/ConcreteComponentDescriptor.h>
++#include <react/renderer/componentregistry/ComponentDescriptorProviderRegistry.h>
++
++namespace facebook::react {
++
++void RNCaptureViewSpec_registerComponentDescriptorsFromCodegen(
++  std::shared_ptr<const ComponentDescriptorProviderRegistry> registry) {
++registry->add(concreteComponentDescriptorProvider<CaptureViewViewComponentDescriptor>());
++}
++
++} // namespace facebook::react
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/ComponentDescriptors.h b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/ComponentDescriptors.h
+new file mode 100644
+index 0000000..a08c2a3
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/ComponentDescriptors.h
+@@ -0,0 +1,24 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateComponentDescriptorH.js
++ */
++
++#pragma once
++
++#include <react/renderer/components/RNCaptureViewSpec/ShadowNodes.h>
++#include <react/renderer/core/ConcreteComponentDescriptor.h>
++#include <react/renderer/componentregistry/ComponentDescriptorProviderRegistry.h>
++
++namespace facebook::react {
++
++using CaptureViewViewComponentDescriptor = ConcreteComponentDescriptor<CaptureViewViewShadowNode>;
++
++void RNCaptureViewSpec_registerComponentDescriptorsFromCodegen(
++  std::shared_ptr<const ComponentDescriptorProviderRegistry> registry);
++
++} // namespace facebook::react
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/EventEmitters.cpp b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/EventEmitters.cpp
+new file mode 100644
+index 0000000..07a97fa
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/EventEmitters.cpp
+@@ -0,0 +1,16 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateEventEmitterCpp.js
++ */
++
++#include <react/renderer/components/RNCaptureViewSpec/EventEmitters.h>
++
++
++namespace facebook::react {
++
++} // namespace facebook::react
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/EventEmitters.h b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/EventEmitters.h
+new file mode 100644
+index 0000000..2add0e1
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/EventEmitters.h
+@@ -0,0 +1,23 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateEventEmitterH.js
++ */
++#pragma once
++
++#include <react/renderer/components/view/ViewEventEmitter.h>
++
++
++namespace facebook::react {
++class CaptureViewViewEventEmitter : public ViewEventEmitter {
++ public:
++  using ViewEventEmitter::ViewEventEmitter;
++
++  
++  
++};
++} // namespace facebook::react
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/Props.cpp b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/Props.cpp
+new file mode 100644
+index 0000000..155ea45
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/Props.cpp
+@@ -0,0 +1,44 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GeneratePropsCpp.js
++ */
++
++#include <react/renderer/components/RNCaptureViewSpec/Props.h>
++#include <react/renderer/core/PropsParserContext.h>
++#include <react/renderer/core/propsConversions.h>
++
++namespace facebook::react {
++
++CaptureViewViewProps::CaptureViewViewProps(
++    const PropsParserContext &context,
++    const CaptureViewViewProps &sourceProps,
++    const RawProps &rawProps): ViewProps(context, sourceProps, rawProps)
++
++     {}
++    
++#ifdef RN_SERIALIZABLE_STATE
++ComponentName CaptureViewViewProps::getDiffPropsImplementationTarget() const {
++  return "CaptureViewView";
++}
++
++folly::dynamic CaptureViewViewProps::getDiffProps(
++    const Props* prevProps) const {
++  static const auto defaultProps = CaptureViewViewProps();
++  const CaptureViewViewProps* oldProps = prevProps == nullptr
++      ? &defaultProps
++      : static_cast<const CaptureViewViewProps*>(prevProps);
++  if (this == oldProps) {
++    return folly::dynamic::object();
++  }
++  folly::dynamic result = HostPlatformViewProps::getDiffProps(prevProps);
++  
++  return result;
++}
++#endif
++
++} // namespace facebook::react
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/Props.h b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/Props.h
+new file mode 100644
+index 0000000..12586dc
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/Props.h
+@@ -0,0 +1,36 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GeneratePropsH.js
++ */
++#pragma once
++
++#include <react/renderer/components/view/ViewProps.h>
++#include <react/renderer/core/PropsParserContext.h>
++#include <react/renderer/debug/DebugStringConvertible.h>
++
++namespace facebook::react {
++
++class CaptureViewViewProps final : public ViewProps {
++ public:
++  CaptureViewViewProps() = default;
++  CaptureViewViewProps(const PropsParserContext& context, const CaptureViewViewProps &sourceProps, const RawProps &rawProps);
++
++#pragma mark - Props
++
++  
++
++  #ifdef RN_SERIALIZABLE_STATE
++  ComponentName getDiffPropsImplementationTarget() const override;
++
++  folly::dynamic getDiffProps(const Props* prevProps) const override;
++  #endif
++
++  
++};
++
++} // namespace facebook::react
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/RNCaptureViewSpecJSI.h b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/RNCaptureViewSpecJSI.h
+new file mode 100644
+index 0000000..1128926
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/RNCaptureViewSpecJSI.h
+@@ -0,0 +1,47 @@
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateModuleH.js
++ */
++
++#pragma once
++
++#include <ReactCommon/TurboModule.h>
++#include <react/bridging/Bridging.h>
++
++namespace facebook::react {
++
++
++template <typename T>
++class JSI_EXPORT NativeCaptureModuleCxxSpec : public TurboModule {
++public:
++  static constexpr std::string_view kModuleName = "NativeCaptureModule";
++
++protected:
++  NativeCaptureModuleCxxSpec(std::shared_ptr<CallInvoker> jsInvoker) : TurboModule(std::string{NativeCaptureModuleCxxSpec::kModuleName}, jsInvoker) {
++    methodMap_["captureScreen"] = MethodMetadata {.argCount = 1, .invoker = __captureScreen};
++    methodMap_["waitForCapture"] = MethodMetadata {.argCount = 1, .invoker = __waitForCapture};
++  }
++  
++private:
++  static jsi::Value __captureScreen(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
++    static_assert(
++      bridging::getParameterCount(&T::captureScreen) == 2,
++      "Expected captureScreen(...) to have 2 parameters");
++    return bridging::callFromJs<jsi::Value>(rt, &T::captureScreen,  static_cast<NativeCaptureModuleCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
++      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asObject(rt));
++  }
++
++  static jsi::Value __waitForCapture(jsi::Runtime &rt, TurboModule &turboModule, const jsi::Value* args, size_t count) {
++    static_assert(
++      bridging::getParameterCount(&T::waitForCapture) == 2,
++      "Expected waitForCapture(...) to have 2 parameters");
++    return bridging::callFromJs<jsi::Value>(rt, &T::waitForCapture,  static_cast<NativeCaptureModuleCxxSpec*>(&turboModule)->jsInvoker_, static_cast<T*>(&turboModule),
++      count <= 0 ? throw jsi::JSError(rt, "Expected argument in position 0 to be passed") : args[0].asString(rt));
++  }
++};
++
++} // namespace facebook::react
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/ShadowNodes.cpp b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/ShadowNodes.cpp
+new file mode 100644
+index 0000000..a4c5291
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/ShadowNodes.cpp
+@@ -0,0 +1,17 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateShadowNodeCpp.js
++ */
++
++#include <react/renderer/components/RNCaptureViewSpec/ShadowNodes.h>
++
++namespace facebook::react {
++
++extern const char CaptureViewViewComponentName[] = "CaptureViewView";
++
++} // namespace facebook::react
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/ShadowNodes.h b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/ShadowNodes.h
+new file mode 100644
+index 0000000..202c758
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/ShadowNodes.h
+@@ -0,0 +1,32 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateShadowNodeH.js
++ */
++
++#pragma once
++
++#include <react/renderer/components/RNCaptureViewSpec/EventEmitters.h>
++#include <react/renderer/components/RNCaptureViewSpec/Props.h>
++#include <react/renderer/components/RNCaptureViewSpec/States.h>
++#include <react/renderer/components/view/ConcreteViewShadowNode.h>
++#include <jsi/jsi.h>
++
++namespace facebook::react {
++
++JSI_EXPORT extern const char CaptureViewViewComponentName[];
++
++/*
++ * `ShadowNode` for <CaptureViewView> component.
++ */
++using CaptureViewViewShadowNode = ConcreteViewShadowNode<
++    CaptureViewViewComponentName,
++    CaptureViewViewProps,
++    CaptureViewViewEventEmitter,
++    CaptureViewViewState>;
++
++} // namespace facebook::react
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/States.cpp b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/States.cpp
+new file mode 100644
+index 0000000..a0941ab
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/States.cpp
+@@ -0,0 +1,16 @@
++
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateStateCpp.js
++ */
++#include <react/renderer/components/RNCaptureViewSpec/States.h>
++
++namespace facebook::react {
++
++
++
++} // namespace facebook::react
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/States.h b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/States.h
+new file mode 100644
+index 0000000..a6aff52
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/jni/react/renderer/components/RNCaptureViewSpec/States.h
+@@ -0,0 +1,20 @@
++/**
++ * This code was generated by [react-native-codegen](https://www.npmjs.com/package/react-native-codegen).
++ *
++ * Do not edit this file as changes may cause incorrect behavior and will be lost
++ * once the code is regenerated.
++ *
++ * @generated by codegen project: GenerateStateH.js
++ */
++#pragma once
++
++#include <react/renderer/core/StateData.h>
++#ifdef RN_SERIALIZABLE_STATE
++#include <folly/dynamic.h>
++#endif
++
++namespace facebook::react {
++
++using CaptureViewViewState = StateData;
++
++} // namespace facebook::react
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/generated/source/codegen/schema.json b/node_modules/react-native-capture-view/android/build/generated/source/codegen/schema.json
+new file mode 100644
+index 0000000..80602ad
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/generated/source/codegen/schema.json
+@@ -0,0 +1 @@
++{"libraryName":"","modules":{"CaptureViewView":{"type":"Component","components":{"CaptureViewView":{"extendsProps":[{"type":"ReactNativeBuiltInType","knownTypeName":"ReactNativeCoreViewProps"}],"events":[],"props":[],"commands":[{"name":"capture","optional":false,"typeAnnotation":{"type":"FunctionTypeAnnotation","params":[{"name":"callbackId","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"format","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"quality","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"resultType","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"snapshotContentContainer","optional":false,"typeAnnotation":{"type":"BooleanTypeAnnotation"}}],"returnTypeAnnotation":{"type":"VoidTypeAnnotation"}}}]}}},"NativeCaptureModule":{"type":"NativeModule","aliasMap":{},"enumMap":{},"spec":{"eventEmitters":[],"methods":[{"name":"captureScreen","optional":false,"typeAnnotation":{"type":"FunctionTypeAnnotation","returnTypeAnnotation":{"type":"PromiseTypeAnnotation","elementType":{"type":"ObjectTypeAnnotation","properties":[{"name":"uri","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"base64","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"width","optional":false,"typeAnnotation":{"type":"NumberTypeAnnotation"}},{"name":"height","optional":false,"typeAnnotation":{"type":"NumberTypeAnnotation"}},{"name":"format","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}}]}},"params":[{"name":"options","optional":false,"typeAnnotation":{"type":"ObjectTypeAnnotation","properties":[{"name":"format","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"quality","optional":false,"typeAnnotation":{"type":"NumberTypeAnnotation"}},{"name":"result","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}}]}}]}},{"name":"waitForCapture","optional":false,"typeAnnotation":{"type":"FunctionTypeAnnotation","returnTypeAnnotation":{"type":"PromiseTypeAnnotation","elementType":{"type":"ObjectTypeAnnotation","properties":[{"name":"uri","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"base64","optional":true,"typeAnnotation":{"type":"StringTypeAnnotation"}},{"name":"width","optional":false,"typeAnnotation":{"type":"NumberTypeAnnotation"}},{"name":"height","optional":false,"typeAnnotation":{"type":"NumberTypeAnnotation"}},{"name":"format","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}}]}},"params":[{"name":"callbackId","optional":false,"typeAnnotation":{"type":"StringTypeAnnotation"}}]}}]},"moduleName":"NativeCaptureModule"}}}
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml b/node_modules/react-native-capture-view/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+new file mode 100644
+index 0000000..95263ff
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.captureview" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json b/node_modules/react-native-capture-view/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+new file mode 100644
+index 0000000..aab1786
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/aapt_friendly_merged_manifests/debug/processDebugManifest/aapt/output-metadata.json
+@@ -0,0 +1,18 @@
++{
++  "version": 3,
++  "artifactType": {
++    "type": "AAPT_FRIENDLY_MERGED_MANIFESTS",
++    "kind": "Directory"
++  },
++  "applicationId": "com.captureview",
++  "variantName": "debug",
++  "elements": [
++    {
++      "type": "SINGLE",
++      "filters": [],
++      "attributes": [],
++      "outputFile": "AndroidManifest.xml"
++    }
++  ],
++  "elementType": "File"
++}
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties b/node_modules/react-native-capture-view/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+new file mode 100644
+index 0000000..b4c821b
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/aar_metadata/debug/writeDebugAarMetadata/aar-metadata.properties
+@@ -0,0 +1,7 @@
++aarFormatVersion=1.0
++aarMetadataVersion=1.0
++minCompileSdk=37
++minCompileMinorSdk=0
++minCompileSdkExtension=0
++minAndroidGradlePluginVersion=1.0.0
++coreLibraryDesugaringEnabled=false
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/android_res_source_set_path_map/debug/mapDebugSourceSetPaths/file-map.txt b/node_modules/react-native-capture-view/android/build/intermediates/android_res_source_set_path_map/debug/mapDebugSourceSetPaths/file-map.txt
+new file mode 100644
+index 0000000..6a4be9c
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/android_res_source_set_path_map/debug/mapDebugSourceSetPaths/file-map.txt
+@@ -0,0 +1,9 @@
++com.captureview.react-native-capture-view-pngs-0 /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/build/generated/res/pngs/debug
++com.captureview.react-native-capture-view-updated_navigation_xml-1 /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/build/generated/updated_navigation_xml/debug
++com.captureview.react-native-capture-view-mergeDebugResources-2 /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/build/intermediates/incremental/debug/mergeDebugResources/merged.dir
++com.captureview.react-native-capture-view-mergeDebugResources-3 /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/build/intermediates/incremental/debug/mergeDebugResources/stripped.dir
++com.captureview.react-native-capture-view-debug-4 /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/build/intermediates/merged_res/debug/mergeDebugResources
++com.captureview.react-native-capture-view-debug-5 /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/build/intermediates/packaged_res/debug/packageDebugResources
++com.captureview.react-native-capture-view-debug-6 /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/debug/res
++com.captureview.react-native-capture-view-main-7 /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/res
++gradleHome-0 /Users/saaketsurya/.gradle
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json b/node_modules/react-native-capture-view/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+new file mode 100644
+index 0000000..9e26dfe
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/annotation_processor_list/debug/javaPreCompileDebug/annotationProcessors.json
+@@ -0,0 +1 @@
++{}
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar b/node_modules/react-native-capture-view/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar
+new file mode 100644
+index 0000000..f331909
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/compile_library_classes_jar/debug/bundleLibCompileToJarDebug/classes.jar differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar b/node_modules/react-native-capture-view/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar
+new file mode 100644
+index 0000000..52b7ca9
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/compile_r_class_jar/debug/generateDebugRFile/R.jar differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt b/node_modules/react-native-capture-view/android/build/intermediates/compile_symbol_list/debug/generateDebugRFile/R.txt
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties b/node_modules/react-native-capture-view/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+new file mode 100644
+index 0000000..a162a00
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/incremental/debug/packageDebugResources/compile-file-map.properties
+@@ -0,0 +1 @@
++#Mon Oct 19 03:40:55 IST 2026
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml b/node_modules/react-native-capture-view/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+new file mode 100644
+index 0000000..dac4df4
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/incremental/debug/packageDebugResources/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="main" generated-set="main$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~:!&lt;dir>navigation"><source path="/Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/debug/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="debug" generated-set="debug$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~:!&lt;dir>navigation"><source path="/Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/debug/res"/></dataSet><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated$Generated" generated="true" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"/><dataSet aapt-namespace="http://schemas.android.com/apk/res-auto" config="generated" generated-set="generated$Generated" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~:!&lt;dir>navigation"/><mergedItems/></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/incremental/mergeDebugAssets/merger.xml b/node_modules/react-native-capture-view/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+new file mode 100644
+index 0000000..da20fe8
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/incremental/mergeDebugAssets/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/assets"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/debug/assets"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml b/node_modules/react-native-capture-view/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+new file mode 100644
+index 0000000..b67d042
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/incremental/mergeDebugJniLibFolders/merger.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<merger version="3"><dataSet config="main" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/jniLibs"/></dataSet><dataSet config="debug" ignore_pattern="!.svn:!.git:!.ds_store:!*.scc:.*:&lt;dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"><source path="/Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/debug/jniLibs"/></dataSet></merger>
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/java_res/debug/processDebugJavaRes/out/META-INF/react-native-capture-view_debug.kotlin_module b/node_modules/react-native-capture-view/android/build/intermediates/java_res/debug/processDebugJavaRes/out/META-INF/react-native-capture-view_debug.kotlin_module
+new file mode 100644
+index 0000000..ef915de
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/java_res/debug/processDebugJavaRes/out/META-INF/react-native-capture-view_debug.kotlin_module differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/captureview/BuildConfig.class b/node_modules/react-native-capture-view/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/captureview/BuildConfig.class
+new file mode 100644
+index 0000000..e0f9940
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/captureview/BuildConfig.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/captureview/NativeCaptureModuleSpec.class b/node_modules/react-native-capture-view/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/captureview/NativeCaptureModuleSpec.class
+new file mode 100644
+index 0000000..a568eaf
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/captureview/NativeCaptureModuleSpec.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/facebook/react/viewmanagers/CaptureViewViewManagerDelegate.class b/node_modules/react-native-capture-view/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/facebook/react/viewmanagers/CaptureViewViewManagerDelegate.class
+new file mode 100644
+index 0000000..13f95c1
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/facebook/react/viewmanagers/CaptureViewViewManagerDelegate.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/facebook/react/viewmanagers/CaptureViewViewManagerInterface.class b/node_modules/react-native-capture-view/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/facebook/react/viewmanagers/CaptureViewViewManagerInterface.class
+new file mode 100644
+index 0000000..a6ce018
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/facebook/react/viewmanagers/CaptureViewViewManagerInterface.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt b/node_modules/react-native-capture-view/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+new file mode 100644
+index 0000000..78ac5b8
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/local_only_symbol_list/debug/parseDebugLocalResources/R-def.txt
+@@ -0,0 +1,2 @@
++R_DEF: Internal format may change without notice
++local
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt b/node_modules/react-native-capture-view/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+new file mode 100644
+index 0000000..9f5d0e9
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/manifest_merge_blame_file/debug/processDebugManifest/manifest-merger-blame-debug-report.txt
+@@ -0,0 +1,9 @@
++1<?xml version="1.0" encoding="utf-8"?>
++2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++3    package="com.captureview" >
++4
++5    <uses-sdk android:minSdkVersion="24" />
++5-->INJECTED
++5-->INJECTED
++6
++7</manifest>
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml b/node_modules/react-native-capture-view/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+new file mode 100644
+index 0000000..95263ff
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/merged_manifest/debug/processDebugManifest/AndroidManifest.xml
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="utf-8"?>
++<manifest xmlns:android="http://schemas.android.com/apk/res/android"
++    package="com.captureview" >
++
++    <uses-sdk android:minSdkVersion="24" />
++
++</manifest>
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json b/node_modules/react-native-capture-view/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+new file mode 100644
+index 0000000..0637a08
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/navigation_json/debug/extractDeepLinksDebug/navigation.json
+@@ -0,0 +1 @@
++[]
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt b/node_modules/react-native-capture-view/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+new file mode 100644
+index 0000000..08f4ebe
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/nested_resources_validation_report/debug/generateDebugResources/nestedResourcesValidationReport.txt
+@@ -0,0 +1 @@
++0 Warning/Error
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/META-INF/react-native-capture-view_debug.kotlin_module b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/META-INF/react-native-capture-view_debug.kotlin_module
+new file mode 100644
+index 0000000..ef915de
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/META-INF/react-native-capture-view_debug.kotlin_module differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/BuildConfig.class b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/BuildConfig.class
+new file mode 100644
+index 0000000..e0f9940
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/BuildConfig.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureModule$Companion.class b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureModule$Companion.class
+new file mode 100644
+index 0000000..16eabd6
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureModule$Companion.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureModule.class b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureModule.class
+new file mode 100644
+index 0000000..d668397
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureModule.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureUtils.class b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureUtils.class
+new file mode 100644
+index 0000000..3015eae
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureUtils.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureViewPackage.class b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureViewPackage.class
+new file mode 100644
+index 0000000..3ff5471
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureViewPackage.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureViewView.class b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureViewView.class
+new file mode 100644
+index 0000000..4630012
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureViewView.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureViewViewManager$Companion.class b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureViewViewManager$Companion.class
+new file mode 100644
+index 0000000..e0f51c7
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureViewViewManager$Companion.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureViewViewManager.class b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureViewViewManager.class
+new file mode 100644
+index 0000000..4457ded
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/CaptureViewViewManager.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/NativeCaptureModuleSpec.class b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/NativeCaptureModuleSpec.class
+new file mode 100644
+index 0000000..a568eaf
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/captureview/NativeCaptureModuleSpec.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/facebook/react/viewmanagers/CaptureViewViewManagerDelegate.class b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/facebook/react/viewmanagers/CaptureViewViewManagerDelegate.class
+new file mode 100644
+index 0000000..13f95c1
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/facebook/react/viewmanagers/CaptureViewViewManagerDelegate.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/facebook/react/viewmanagers/CaptureViewViewManagerInterface.class b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/facebook/react/viewmanagers/CaptureViewViewManagerInterface.class
+new file mode 100644
+index 0000000..a6ce018
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/intermediates/runtime_library_classes_dir/debug/bundleLibRuntimeToDirDebug/com/facebook/react/viewmanagers/CaptureViewViewManagerInterface.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt b/node_modules/react-native-capture-view/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+new file mode 100644
+index 0000000..bc1c475
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/intermediates/symbol_list_with_package_name/debug/generateDebugRFile/package-aware-r.txt
+@@ -0,0 +1 @@
++com.captureview
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab
+new file mode 100644
+index 0000000..e8af006
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream
+new file mode 100644
+index 0000000..d92e768
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len
+new file mode 100644
+index 0000000..77a10ed
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.keystream.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.len
+new file mode 100644
+index 0000000..ec8f944
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at
+new file mode 100644
+index 0000000..6a009e8
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab.values.at differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i
+new file mode 100644
+index 0000000..c73a04c
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/inputs/source-to-output.tab_i.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab
+new file mode 100644
+index 0000000..bd3c417
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream
+new file mode 100644
+index 0000000..36a7940
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream.len
+new file mode 100644
+index 0000000..0b22d3c
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.keystream.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.len
+new file mode 100644
+index 0000000..817b326
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at
+new file mode 100644
+index 0000000..92b2b7d
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab.values.at differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i
+new file mode 100644
+index 0000000..281bb4b
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-attributes.tab_i.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab
+new file mode 100644
+index 0000000..c71c6da
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream
+new file mode 100644
+index 0000000..36a7940
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream.len
+new file mode 100644
+index 0000000..0b22d3c
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.keystream.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len
+new file mode 100644
+index 0000000..817b326
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at
+new file mode 100644
+index 0000000..ff1f48a
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab.values.at differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i
+new file mode 100644
+index 0000000..281bb4b
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/class-fq-name-to-source.tab_i.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab
+new file mode 100644
+index 0000000..0c29c2a
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream
+new file mode 100644
+index 0000000..3022876
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream.len
+new file mode 100644
+index 0000000..8af03de
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.keystream.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.len
+new file mode 100644
+index 0000000..01bdaa1
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.values.at b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.values.at
+new file mode 100644
+index 0000000..609b59a
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab.values.at differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i
+new file mode 100644
+index 0000000..aa90da4
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/constants.tab_i.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab
+new file mode 100644
+index 0000000..c71c6da
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream
+new file mode 100644
+index 0000000..30563e7
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream.len
+new file mode 100644
+index 0000000..0b22d3c
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.keystream.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len
+new file mode 100644
+index 0000000..817b326
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at
+new file mode 100644
+index 0000000..ff1f48a
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab.values.at differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i
+new file mode 100644
+index 0000000..69a16d3
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/internal-name-to-source.tab_i.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab
+new file mode 100644
+index 0000000..dc03c3f
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream
+new file mode 100644
+index 0000000..02d945a
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream.len
+new file mode 100644
+index 0000000..783cd02
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.keystream.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len
+new file mode 100644
+index 0000000..fa606b6
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at
+new file mode 100644
+index 0000000..04865fc
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab.values.at differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i
+new file mode 100644
+index 0000000..328c077
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/proto.tab_i.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab
+new file mode 100644
+index 0000000..765c604
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream
+new file mode 100644
+index 0000000..d92e768
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len
+new file mode 100644
+index 0000000..77a10ed
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.keystream.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.len
+new file mode 100644
+index 0000000..ec8f944
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at
+new file mode 100644
+index 0000000..66c75d1
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab.values.at differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i
+new file mode 100644
+index 0000000..c73a04c
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/source-to-classes.tab_i.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab
+new file mode 100644
+index 0000000..f25e49d
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream
+new file mode 100644
+index 0000000..8cb343c
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len
+new file mode 100644
+index 0000000..0455898
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.keystream.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len
+new file mode 100644
+index 0000000..ec8f944
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at
+new file mode 100644
+index 0000000..b98b8e2
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab.values.at differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i
+new file mode 100644
+index 0000000..8c41a56
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/subtypes.tab_i.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab
+new file mode 100644
+index 0000000..4371a22
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream
+new file mode 100644
+index 0000000..f557dee
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream.len
+new file mode 100644
+index 0000000..2a17e6e
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.keystream.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.len
+new file mode 100644
+index 0000000..93a595b
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at
+new file mode 100644
+index 0000000..119d6fc
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab.values.at differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i
+new file mode 100644
+index 0000000..cde7585
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/jvm/kotlin/supertypes.tab_i.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/counters.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/counters.tab
+new file mode 100644
+index 0000000..4a12dea
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/counters.tab
+@@ -0,0 +1,2 @@
++5
++0
+\ No newline at end of file
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab
+new file mode 100644
+index 0000000..f1a8ec7
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream
+new file mode 100644
+index 0000000..d92e768
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len
+new file mode 100644
+index 0000000..77a10ed
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.keystream.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.len
+new file mode 100644
+index 0000000..ec8f944
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at
+new file mode 100644
+index 0000000..f6a4f17
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab.values.at differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i
+new file mode 100644
+index 0000000..c73a04c
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/file-to-id.tab_i.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab
+new file mode 100644
+index 0000000..676251b
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream
+new file mode 100644
+index 0000000..1dd772c
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len
+new file mode 100644
+index 0000000..62f3e6f
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.keystream.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len
+new file mode 100644
+index 0000000..ec8f944
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at
+new file mode 100644
+index 0000000..6951acf
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab.values.at differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i
+new file mode 100644
+index 0000000..e6ff6ac
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/id-to-file.tab_i.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab
+new file mode 100644
+index 0000000..115b4bd
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream
+new file mode 100644
+index 0000000..24a17e6
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len
+new file mode 100644
+index 0000000..b4052ea
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.keystream.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len
+new file mode 100644
+index 0000000..d41c09b
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at
+new file mode 100644
+index 0000000..e0b2874
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab.values.at differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i
+new file mode 100644
+index 0000000..47382d1
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len
+new file mode 100644
+index 0000000..131e265
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/caches-jvm/lookups/lookups.tab_i.len differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/last-build.bin b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/last-build.bin
+new file mode 100644
+index 0000000..3a24a7b
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/cacheable/last-build.bin differ
+diff --git a/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin
+new file mode 100644
+index 0000000..fec8042
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/kotlin/compileDebugKotlin/classpath-snapshot/shrunk-classpath-snapshot.bin differ
+diff --git a/node_modules/react-native-capture-view/android/build/outputs/logs/manifest-merger-debug-report.txt b/node_modules/react-native-capture-view/android/build/outputs/logs/manifest-merger-debug-report.txt
+new file mode 100644
+index 0000000..d1800e2
+--- /dev/null
++++ b/node_modules/react-native-capture-view/android/build/outputs/logs/manifest-merger-debug-report.txt
+@@ -0,0 +1,16 @@
++-- Merging decision tree log ---
++manifest
++ADDED from /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/AndroidManifest.xml:1:1-2:12
++INJECTED from /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/AndroidManifest.xml:1:1-2:12
++	package
++		INJECTED from /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/AndroidManifest.xml
++	xmlns:android
++		ADDED from /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/AndroidManifest.xml:1:11-69
++uses-sdk
++INJECTED from /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
++INJECTED from /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/AndroidManifest.xml
++INJECTED from /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/AndroidManifest.xml
++	android:targetSdkVersion
++		INJECTED from /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/AndroidManifest.xml
++	android:minSdkVersion
++		INJECTED from /Users/saaketsurya/Desktop/Projects/kriya1/node_modules/react-native-capture-view/android/src/main/AndroidManifest.xml
+diff --git a/node_modules/react-native-capture-view/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin b/node_modules/react-native-capture-view/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin
+new file mode 100644
+index 0000000..4aa8cfc
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/tmp/compileDebugJavaWithJavac/previous-compilation-data.bin differ
+diff --git a/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/META-INF/react-native-capture-view_debug.kotlin_module b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/META-INF/react-native-capture-view_debug.kotlin_module
+new file mode 100644
+index 0000000..ef915de
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/META-INF/react-native-capture-view_debug.kotlin_module differ
+diff --git a/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureModule$Companion.class b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureModule$Companion.class
+new file mode 100644
+index 0000000..16eabd6
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureModule$Companion.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureModule.class b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureModule.class
+new file mode 100644
+index 0000000..d668397
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureModule.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureUtils.class b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureUtils.class
+new file mode 100644
+index 0000000..3015eae
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureUtils.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureViewPackage.class b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureViewPackage.class
+new file mode 100644
+index 0000000..3ff5471
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureViewPackage.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureViewView.class b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureViewView.class
+new file mode 100644
+index 0000000..4630012
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureViewView.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureViewViewManager$Companion.class b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureViewViewManager$Companion.class
+new file mode 100644
+index 0000000..e0f51c7
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureViewViewManager$Companion.class differ
+diff --git a/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureViewViewManager.class b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureViewViewManager.class
+new file mode 100644
+index 0000000..4457ded
+Binary files /dev/null and b/node_modules/react-native-capture-view/android/build/tmp/kotlin-classes/debug/com/captureview/CaptureViewViewManager.class differ
+diff --git a/node_modules/react-native-capture-view/android/src/main/java/com/captureview/CaptureModule.kt b/node_modules/react-native-capture-view/android/src/main/java/com/captureview/CaptureModule.kt
+index 06ad863..e084a75 100644
+--- a/node_modules/react-native-capture-view/android/src/main/java/com/captureview/CaptureModule.kt
++++ b/node_modules/react-native-capture-view/android/src/main/java/com/captureview/CaptureModule.kt
+@@ -63,7 +63,7 @@ class CaptureModule(private val reactContext: ReactApplicationContext) :
+         val resultType = if (options.hasKey("result")) options.getString("result") ?: "tmpfile" else "tmpfile"
+ 
+         reactContext.runOnUiQueueThread {
+-            val activity = currentActivity
++            val activity = reactContext.currentActivity
+             if (activity == null) {
+                 promise.reject("E_NO_ACTIVITY", "No current activity")
+                 return@runOnUiQueueThread

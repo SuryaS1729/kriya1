@@ -361,7 +361,7 @@ export const useKriya = create<KriyaState>()(
           chapter: shlokaData.chapter_number,
           verse: shlokaData.verse_number,
           text: shlokaData.text,
-          translation: shlokaData.translation_2,
+          translation: shlokaData.translation_2 ?? shlokaData.description ?? '',
           createdAt: new Date().toISOString(),
         };
         

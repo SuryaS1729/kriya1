@@ -859,7 +859,7 @@ export default function Home() {
           renderItem={showAllTasks ? renderAllTaskItem : renderItem}
           keyExtractor={showAllTasks ? ((item: Task) => `all-task-${item.id}`) : keyExtractor}
           contentContainerStyle={styles.tasksList}
-          ListFooterComponent={showAllTasks ? null : yesterdayFooter}
+          ListFooterComponent={showAllTasks ? undefined : yesterdayFooter ?? undefined}
           ListEmptyComponent={() => (
             <View style={styles.emptyStateWrap}>
               <Pressable onPress={() => {

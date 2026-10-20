@@ -11,7 +11,7 @@ import {
   Pressable,
   ActivityIndicator,
 } from 'react-native';
-import { MenuView } from '@expo/ui/community/menu';
+import { TranslationLanguageMenu } from '../../components/TranslationLanguageMenu';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, Easing, runOnJS } from 'react-native-reanimated';
 import {
   getShlokaAt,
@@ -24,16 +24,18 @@ import {
 
 import { StatusBar } from 'expo-status-bar';
 import { useKriya } from '../../lib/store';
-import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../../lib/haptics';
+import { buttonPressHaptic, errorHaptic, selectionHaptic, taskCompleteHaptic } from '../../lib/haptics';
 import { shlokaRecitation, voiceoverAudio, type VoiceoverLanguage } from '../../lib/tts';
 import { useAudioPlayer } from 'expo-audio';
 import * as FileSystem from 'expo-file-system/legacy';
 import { showAppToast } from '../../lib/appToast';
 import {
   TRANSLATION_LANGUAGE_LIST,
+  downloadTranslation,
   getTranslation,
   getCommentary,
   getTranslatedShloka,
+  invalidateTranslationCache,
   type ShlokaDisplayLanguage,
 } from '../../lib/translationService';
 
@@ -56,6 +58,10 @@ export default function ShlokaDetail() {
   const translationLanguage = useKriya(s => s.translationLanguage);
   const setTranslationLanguage = useKriya(s => s.setTranslationLanguage);
   const downloadedTranslations = useKriya(s => s.downloadedTranslations);
+  const setDownloadedTranslations = useKriya(s => s.setDownloadedTranslations);
+
+  // Language currently being downloaded from the in-screen language menu.
+  const [downloadingLanguage, setDownloadingLanguage] = useState<ShlokaDisplayLanguage | null>(null);
 
   // Treat URL param as *index* (0-based)
   const initialIndex = useMemo(() => {
@@ -484,21 +490,58 @@ const handleBookPress = () => {
     });
   };
 
-  // Language selection (native menu via Expo UI). Non-downloaded languages
-  // show a toast pointing at My Journey → Translations / Languages.
-  const selectLanguage = (code: ShlokaDisplayLanguage) => {
+  // Language selection (native menu via Expo UI). Selecting a language that
+  // isn't downloaded yet fetches it here instead of sending the user to My
+  // Journey; the Settings page still offers the same download independently.
+  const selectLanguage = async (code: ShlokaDisplayLanguage) => {
     selectionHaptic();
-    if (code !== 'en' && !downloadedTranslations.includes(code)) {
+    if (code === 'en' || downloadedTranslations.includes(code)) {
+      setTranslationLanguage(code);
+      return;
+    }
+    if (downloadingLanguage) {
       showAppToast({
         type: 'info',
-        text1: 'Not downloaded',
-        text2: 'Get it in My Journey',
-        duration: 2200,
+        text1: 'Download in progress',
+        duration: 1600,
         position: 'bottom',
       });
       return;
     }
-    setTranslationLanguage(code);
+
+    const name = TRANSLATION_LANGUAGE_LIST.find(l => l.code === code)?.name ?? 'Translation';
+    setDownloadingLanguage(code);
+    showAppToast({
+      type: 'info',
+      text1: `Downloading ${name}…`,
+      duration: 60_000,
+      position: 'bottom',
+    });
+
+    try {
+      await downloadTranslation(code);
+      invalidateTranslationCache(code);
+      setDownloadedTranslations(Array.from(new Set([...downloadedTranslations, code])));
+      setTranslationLanguage(code);
+      taskCompleteHaptic();
+      showAppToast({
+        type: 'success',
+        text1: `${name} downloaded`,
+        duration: 2200,
+        position: 'bottom',
+      });
+    } catch (err) {
+      console.warn('[Shloka] Translation download failed:', err);
+      errorHaptic();
+      showAppToast({
+        type: 'error',
+        text1: `Couldn't download ${name}`,
+        duration: 2500,
+        position: 'bottom',
+      });
+    } finally {
+      setDownloadingLanguage(null);
+    }
   };
 
 const headerHeight = insets.top + 12 + 36 + 12; // safeArea + paddingTop + buttonHeight + paddingBottom
@@ -538,8 +581,8 @@ return (
       {/* Action Buttons */}
       <View style={styles.headerActions}>
         {/* Language selector — native menu (Expo UI) with English + all Indian languages */}
-        <MenuView
-          title="Translation Language"
+        <TranslationLanguageMenu
+          isDarkMode={isDarkMode}
           actions={[
             { id: 'en', title: 'English', state: translationLanguage === 'en' ? 'on' : 'off' },
             ...TRANSLATION_LANGUAGE_LIST.map(lang => ({
@@ -559,7 +602,7 @@ return (
           >
             <Ionicons name="language" size={18} color={isDarkMode ? '#ffffffff' : '#18464aff'} />
           </View>
-        </MenuView>
+        </TranslationLanguageMenu>
         {/* Bookmark Button */}
         <Pressable
           onPress={toggleBookmark}

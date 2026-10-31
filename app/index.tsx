@@ -368,6 +368,7 @@ export default function Home() {
   const getTasksForDay = useKriya(s => s.getTasksForDay);
   const isDarkMode = useKriya(s => s.isDarkMode);
   const hasCompletedOnboarding = useKriya(s => s.hasCompletedOnboarding);
+  const hasHydrated = useKriya(s => s.hasHydrated);
   const refresh   = useKriya(s => s.refresh);
   const insets    = useSafeAreaInsets();
   const navigationRef = useRef(false);
@@ -557,7 +558,7 @@ export default function Home() {
 
   // Handle onboarding redirect - only once when ready
   useEffect(() => {
-    if (ready && !navigationRef.current) {
+    if (ready && hasHydrated && !navigationRef.current) {
       navigationRef.current = true;
       // console.log('🔍 Checking onboarding status:', hasCompletedOnboarding);
 
@@ -568,7 +569,7 @@ export default function Home() {
         // console.log('🔍 Onboarding already completed, staying on main app');
       }
     }
-  }, [ready, hasCompletedOnboarding]);
+  }, [ready, hasHydrated, hasCompletedOnboarding]);
 
   useEffect(() => {
     if (!ready) return;

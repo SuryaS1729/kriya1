@@ -17,6 +17,7 @@ import { DateTimePicker } from '@expo/ui/community/datetime-picker';
 import Feather from "@react-native-vector-icons/feather/static";
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { TopBar } from '../../components/TopBar';
+import { NativeTimeDialog } from '../../components/NativeTimeDialog';
 import { useKriya } from '../../lib/store';
 import {
   getTaskById,
@@ -60,7 +61,6 @@ export default function TaskDetails() {
   const [description, setDescription] = useState('');
   const [loadedId, setLoadedId] = useState<number | null>(null);
   const [reminders, setReminders] = useState<TaskReminder[]>([]);
-  const [panelOpen, setPanelOpen] = useState(false);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerValue, setPickerValue] = useState(() => new Date());
 
@@ -75,7 +75,6 @@ export default function TaskDetails() {
     }
     const rows = getRemindersForTask(taskId);
     setReminders(rows);
-    setPanelOpen(rows.length > 0);
   }, [taskId]);
 
   useFocusEffect(
@@ -173,35 +172,6 @@ export default function TaskDetails() {
     [ensureNotifications, taskId, syncReminders, reportFailure]
   );
 
-  // A reminder can only ever land on the task's own day, so a task from
-  // yesterday (or earlier) can't be reminded about any more.
-  const taskDayEnded = (() => {
-    if (!task || task.day_key == null) return false;
-    const now = new Date();
-    const todayKey = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-    return task.day_key < todayKey;
-  })();
-
-  const onBellPress = useCallback(async () => {
-    selectionHaptic();
-    if (panelOpen) {
-      setPanelOpen(false);
-      return;
-    }
-    if (taskDayEnded) {
-      showAppToast({
-        type: 'info',
-        text1: 'This task’s day has already passed',
-        text2: 'Reminders can only be set for today or a future day.',
-      });
-      return;
-    }
-    setPanelOpen(true);
-    if (reminders.length > 0) return;
-    // No reminders yet: the bell itself drops in the morning reminder.
-    await createReminder(DEFAULT_REMINDER_HOUR, 0);
-  }, [panelOpen, reminders.length, createReminder, taskDayEnded]);
-
   const openPicker = useCallback(() => {
     selectionHaptic();
     Keyboard.dismiss();
@@ -252,7 +222,30 @@ export default function TaskDetails() {
         keyboardVerticalOffset={0}
         style={{ flex: 1 }}
       >
-        <TopBar title="Task" variant="back" isDarkMode={isDarkMode} />
+        <TopBar
+          title="Task"
+          variant="back"
+          isDarkMode={isDarkMode}
+          right={(
+            <View style={styles.topActions}>
+              <Pressable
+                onPress={startFocus}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Start focus session"
+                style={({ pressed }) => [
+                  styles.topActionButton,
+                  {
+                    backgroundColor: isDarkMode ? '#1e3a5f' : '#1d4ed8',
+                    opacity: pressed ? 0.75 : 1,
+                  },
+                ]}
+              >
+                <Feather name="zap" size={17} color="#ffffff" />
+              </Pressable>
+            </View>
+          )}
+        />
 
         <ScrollView
           style={{ flex: 1 }}
@@ -287,47 +280,25 @@ export default function TaskDetails() {
                 />
               </Animated.View>
 
-              <Animated.View entering={FadeInDown.duration(120).delay(40)}>
-                <View style={styles.actionRow}>
-                  <Pressable
-                    onPress={startFocus}
-                    style={({ pressed }) => [
-                      styles.focusButton,
-                      {
-                        backgroundColor: isDarkMode ? '#1e3a5f' : '#1d4ed8',
-                        opacity: pressed ? 0.85 : 1,
-                      },
-                    ]}
-                  >
-                    <Feather name="zap" size={18} color="#ffffff" />
-                    <Text style={styles.focusButtonText}>Focus</Text>
-                  </Pressable>
-
-                  <Pressable
-                    onPress={onBellPress}
-                    style={({ pressed }) => [
-                      styles.bellButton,
-                      {
-                        backgroundColor: reminders.length > 0
-                          ? (isDarkMode ? '#1e3a5f' : '#dbeafe')
-                          : (isDarkMode ? '#1f2937' : '#f1f5f9'),
-                        borderColor: reminders.length > 0
-                          ? (isDarkMode ? '#3b82f6' : '#93c5fd')
-                          : (isDarkMode ? '#374151' : '#e2e8f0'),
-                        opacity: pressed ? 0.85 : 1,
-                      },
-                    ]}
-                  >
-                    <Feather
-                      name="bell"
-                      size={20}
-                      color={reminders.length > 0 ? accent : (isDarkMode ? '#9ca3af' : '#64748b')}
-                    />
-                  </Pressable>
-                </View>
+              <Animated.View entering={FadeInDown.duration(120).delay(120)}>
+                <Text style={[styles.label, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
+                  Description
+                </Text>
+                <TextInput
+                  value={description}
+                  onChangeText={onDescriptionChange}
+                  placeholder="Add a description…"
+                  placeholderTextColor={isDarkMode ? '#6b7280' : '#9ca3af'}
+                  style={[
+                    styles.descriptionInput,
+                    { color: isDarkMode ? '#e5e7eb' : '#334155' },
+                  ]}
+                  multiline
+                  textAlignVertical="top"
+                  onFocus={() => selectionHaptic()}
+                />
               </Animated.View>
 
-              {panelOpen && (
                 <Animated.View entering={FadeInDown.duration(120).delay(80)}>
                   <Text style={[styles.label, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
                     Reminders
@@ -373,7 +344,7 @@ export default function TaskDetails() {
                     >
                       <Feather name="plus" size={14} color={isDarkMode ? '#9ca3af' : '#64748b'} />
                       <Text style={[styles.addTimeText, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
-                        Add another time
+                        Add time
                       </Text>
                     </Pressable>
                   </View>
@@ -385,26 +356,6 @@ export default function TaskDetails() {
                     </Text>
                   )}
                 </Animated.View>
-              )}
-
-              <Animated.View entering={FadeInDown.duration(120).delay(120)}>
-                <Text style={[styles.label, { color: isDarkMode ? '#9ca3af' : '#64748b' }]}>
-                  Description
-                </Text>
-                <TextInput
-                  value={description}
-                  onChangeText={onDescriptionChange}
-                  placeholder="Add a description…"
-                  placeholderTextColor={isDarkMode ? '#6b7280' : '#9ca3af'}
-                  style={[
-                    styles.descriptionInput,
-                    { color: isDarkMode ? '#e5e7eb' : '#334155' },
-                  ]}
-                  multiline
-                  textAlignVertical="top"
-                  onFocus={() => selectionHaptic()}
-                />
-              </Animated.View>
             </>
           )}
         </ScrollView>
@@ -445,18 +396,17 @@ export default function TaskDetails() {
           </View>
         )}
 
-        {pickerVisible && Platform.OS !== 'ios' && !notFound && (
-          <DateTimePicker
+        {pickerVisible && Platform.OS === 'android' && !notFound && (
+          <NativeTimeDialog
             value={pickerValue}
-            mode="time"
-            presentation="dialog"
+            is24Hour={false}
+            accentColor={accent}
+            dark={isDarkMode}
             onValueChange={(_event, date) => {
               setPickerVisible(false);
               void commitPicker(date);
             }}
             onDismiss={() => setPickerVisible(false)}
-            accentColor={accent}
-            themeVariant={isDarkMode ? 'dark' : 'light'}
           />
         )}
       </KeyboardAvoidingView>
@@ -486,32 +436,15 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     paddingVertical: 4,
   },
-  actionRow: {
+  topActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginTop: 6,
+    gap: 6,
   },
-  focusButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 30,
-    paddingVertical: 14,
-    gap: 8,
-  },
-  focusButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '700',
-    fontFamily: 'Source Serif Pro',
-  },
-  bellButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 1,
+  topActionButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },

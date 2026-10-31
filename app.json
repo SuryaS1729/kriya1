@@ -16,11 +16,11 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#2e455f",
           "image": "./assets/icons/splash-icon-dark.png",
           "dark": {
             "image": "./assets/icons/splash-icon-light.png",
-            "backgroundColor": "#000000"
+            "backgroundColor": "#2e455f"
           },
           "imageWidth": 200
         }
@@ -211,7 +211,8 @@
         {
           "photosPermission": "Allow Kriya to access your photos.",
           "savePhotosPermission": "Allow Kriya to save photos.",
-          "isAccessMediaLocationEnabled": true
+          "isAccessMediaLocationEnabled": false,
+          "granularPermissions": []
         }
       ],
       "expo-router",
@@ -232,7 +233,15 @@
     "android": {
       "allowBackup": false,
       "package": "com.surya7314.kriya",
-      "versionCode": 2,
+      "versionCode": 9,
+      "blockedPermissions": [
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
+      ],
       "softwareKeyboardLayoutMode": "resize"
     },
     "ios": {

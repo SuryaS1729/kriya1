@@ -53,6 +53,8 @@ export type TranslationDisplayLanguage = 'en' | 'gu' | 'hi' | 'kn' | 'ml' | 'mr'
 
 interface KriyaState {
   ready: boolean;
+  hasHydrated: boolean;
+  markHydrated: () => void;
   language: ContentLanguage;
   setLanguage: (language: ContentLanguage) => void;
   tasksToday: Task[];
@@ -206,6 +208,8 @@ export const useKriya = create<KriyaState>()(
   persist(
     (set, get) => ({
       ready: false,
+      hasHydrated: false,
+      markHydrated: () => set({ hasHydrated: true }),
       language: 'en',
       setLanguage: (language) => set({ language }),
       tasksToday: [],
@@ -481,10 +485,10 @@ export const useKriya = create<KriyaState>()(
       // TELUGU DISABLED: force English on every load so a persisted 'te' state
       // cannot re-enable Telugu features while they are paused.
       onRehydrateStorage: () => (state) => {
-        if (state) state.language = 'en';
-        // Guard the translation layer: only valid codes persist, and the
-        // selected language must always be one that is actually downloaded.
         if (state) {
+          state.language = 'en';
+          // Guard the translation layer: only valid codes persist, and the
+          // selected language must always be one that is actually downloaded.
           const valid: TranslationDisplayLanguage[] = ['en', 'gu', 'hi', 'kn', 'ml', 'mr', 'or', 'ta', 'te'];
           const downloaded = (state.downloadedTranslations ?? []).filter((l): l is TranslationDisplayLanguage =>
             valid.includes(l)
@@ -493,6 +497,10 @@ export const useKriya = create<KriyaState>()(
           if (state.translationLanguage !== 'en' && !downloaded.includes(state.translationLanguage)) {
             state.translationLanguage = 'en';
           }
+          state.markHydrated();
+        } else {
+          // Let the app continue with defaults if persisted storage cannot be read.
+          useKriya.setState({ hasHydrated: true });
         }
       },
       partialize: (state) => ({

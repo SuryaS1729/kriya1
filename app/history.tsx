@@ -14,6 +14,14 @@ import * as Notifications from 'expo-notifications';
 import { NativeTimeDialog } from '../components/NativeTimeDialog';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { StatusBar } from 'expo-status-bar';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic } from '../lib/haptics';
 import { showAppToast } from '../lib/appToast';
 import {
@@ -489,6 +497,25 @@ function QuickActions() {
 
 function SupportLink() {
   const isDarkMode = useKriya(s => s.isDarkMode);
+  const reducedMotion = useReducedMotion();
+  const pulse = useSharedValue(0);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      pulse.value = 0.55;
+      return;
+    }
+    pulse.value = withRepeat(
+      withTiming(1, { duration: 1300, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true,
+    );
+  }, [pulse, reducedMotion]);
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: reducedMotion ? 0.55 : 0.2 + pulse.value * 0.65,
+    transform: [{ scale: 1 + pulse.value * 0.012 }],
+  }));
 
   const openSupportLink = async () => {
     buttonPressHaptic();
@@ -507,20 +534,30 @@ function SupportLink() {
   return (
     <View style={[styles.section, !isDarkMode && styles.lightSection]}>
       <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Contribute</Text>
-      <Pressable
-        style={[styles.supportButton, !isDarkMode && styles.lightSupportButton]}
-        onPress={openSupportLink}
-        android_ripple={{ color: '#b3862f22' }}
-      >
-        <Text style={[styles.supportButtonText, !isDarkMode && styles.lightSupportButtonText]}>
-          If Kriya has been useful, consider supporting its continued growth
-        </Text>
-        <Feather
-          name="arrow-right"
-          size={20}
-          color={isDarkMode ? '#69d2ff' : '#006fda'}
+      <View style={styles.supportButtonWrap}>
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.supportGlow,
+            { borderColor: isDarkMode ? '#69d2ff' : '#0070e6' },
+            glowStyle,
+          ]}
         />
-      </Pressable>
+        <Pressable
+          style={[styles.supportButton, !isDarkMode && styles.lightSupportButton]}
+          onPress={openSupportLink}
+          android_ripple={{ color: '#b3862f22' }}
+        >
+          <Text style={[styles.supportButtonText, !isDarkMode && styles.lightSupportButtonText]}>
+            If Kriya has been useful, consider supporting its continued growth
+          </Text>
+          <Feather
+            name="arrow-right"
+            size={20}
+            color={isDarkMode ? '#69d2ff' : '#006fda'}
+          />
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -1657,15 +1694,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
-    marginHorizontal: 8,
-    marginTop: 12,
-    marginBottom: 8,
     paddingVertical: 14,
     paddingHorizontal: 18,
     borderRadius: 12,
     backgroundColor: 'rgba(0, 153, 255, 0.14)',
     borderWidth: 1,
     borderColor: 'rgba(57, 181, 255, 0.8)',
+  },
+  supportButtonWrap: {
+    position: 'relative',
+    marginHorizontal: 8,
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  supportGlow: {
+    position: 'absolute',
+    top: -3,
+    right: -3,
+    bottom: -3,
+    left: -3,
+    borderRadius: 15,
+    borderWidth: 2,
+    shadowColor: '#39b5ff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 12,
+    shadowOpacity: 0.8,
+    elevation: 5,
   },
   lightSupportButton: {
     backgroundColor: 'rgba(0, 132, 255, 0.09)',

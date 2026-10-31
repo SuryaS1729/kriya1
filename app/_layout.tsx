@@ -42,8 +42,6 @@ async function runMigrationsSafe(db: any) {
       applied_at INTEGER NOT NULL
     );
   `);
-  db.execSync(`DROP TABLE IF EXISTS goals`);
-
   // Legacy cleanup (Telugu-in-SQLite was never shipped; the bundled asset
   // no longer contains these tables): drop them on dev devices that copied
   // an older asset. Indian-language content now lives in R2 JSON files

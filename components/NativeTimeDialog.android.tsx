@@ -27,7 +27,19 @@ export function NativeTimeDialog({ value, onValueChange, onDismiss, is24Hour, ac
         color={accentColor}
         elementColors={{
           containerColor: dark ? '#101f2e' : '#ffffff',
+          clockDialColor: dark ? '#18323e' : '#eef5f8',
+          clockDialSelectedContentColor: dark ? '#06232a' : '#ffffff',
+          clockDialContentColor: dark ? '#e2f1f3' : '#2b4971',
+          selectorColor: accentColor,
           periodSelectorBorderColor: dark ? '#22333a' : '#e2e8f0',
+          periodSelectorSelectedContainerColor: accentColor,
+          periodSelectorContainerColor: dark ? '#18323e' : '#eef5f8',
+          periodSelectorSelectedContentColor: dark ? '#06232a' : '#ffffff',
+          periodSelectorContentColor: dark ? '#e2f1f3' : '#2b4971',
+          timeSelectorSelectedContainerColor: accentColor,
+          timeSelectorSelectedContentColor: dark ? '#06232a' : '#ffffff',
+          timeSelectorContainerColor: dark ? '#18323e' : '#eef5f8',
+          timeSelectorContentColor: dark ? '#e2f1f3' : '#2b4971',
         }}
         onDateSelected={(date) => onValueChange(buildEvent(date), date)}
         onDismissRequest={onDismiss}

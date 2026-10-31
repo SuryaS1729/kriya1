@@ -19,7 +19,7 @@ import { useKriya } from '../lib/store';
 import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../lib/haptics';
 import { CaptureView, type CaptureViewRef } from 'react-native-capture-view';
 import * as Sharing from 'expo-sharing';
-import { Asset, Album, getPermissionsAsync, requestPermissionsAsync } from 'expo-media-library';
+import { Asset, getPermissionsAsync, requestPermissionsAsync } from 'expo-media-library';
 import { File } from 'expo-file-system';
 import { showAppToast } from '../lib/appToast';
 import { getShlokaAt, getTranslationForLanguage } from '../lib/shloka';
@@ -612,15 +612,15 @@ export default function Share2() {
 
     let uri: string | null = null;
     try {
-      const existing = await getPermissionsAsync(false);
+      const existing = await getPermissionsAsync(true);
       const { status } =
         existing.status === 'granted'
           ? existing
-          : await requestPermissionsAsync(false);
+          : await requestPermissionsAsync(true);
       if (status !== 'granted') {
         showAppToast({
           type: 'error',
-          text1: 'Photo access needed',
+          text1: 'Allow Kriya to save photos',
           duration: 2000,
           position: 'top',
         });
@@ -628,19 +628,7 @@ export default function Share2() {
       }
 
       uri = await captureCardUri();
-      const asset = await Asset.create(uri);
-
-      // Best effort: group saves under a Kriya album; ignore failures.
-      try {
-        const album = await Album.get('Kriya');
-        if (album) {
-          await album.add(asset);
-        } else {
-          await Album.create('Kriya', [asset], false);
-        }
-      } catch {
-        // Asset is already in the gallery; album grouping is optional.
-      }
+      await Asset.create(uri);
 
       taskCompleteHaptic();
       showAppToast({

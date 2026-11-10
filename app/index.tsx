@@ -11,8 +11,6 @@ import Animated, {
   cancelAnimation,
   Easing,
   LinearTransition,
-  interpolateColor,
-  interpolate,
   FadeIn,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +22,7 @@ import Feather from "@react-native-vector-icons/feather/static";
 import Ionicons from "@react-native-vector-icons/ionicons/static";
 import { selectionHaptic, buttonPressHaptic, deleteHaptic, useTaskDoneHaptic } from '../lib/haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+import Checkbox from '../components/Checkbox';
 import { hideSplash, SPLASH_BACKGROUND } from '../lib/splash';
 import StartupScreen from '../components/StartupScreen';
 
@@ -33,7 +32,6 @@ import {
   getTranslationForLanguage,
 } from '../lib/shloka';
 
-const AnimatedFeather = Animated.createAnimatedComponent(Feather);
 const AnimatedIonicons = Animated.createAnimatedComponent(Ionicons);
 const ALL_TASK_REORDER_DELAY_MS = 320;
 
@@ -58,62 +56,6 @@ const SlowSpinningSun = ({ color, size = 48 }: { color: string; size?: number })
   return <AnimatedIonicons name="sunny" size={size} color={color} style={spinningStyle} />;
 };
 
-// SKILL.md §5 — soft ease-out for UI, not spring (no finger)
-const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
-
-const Checkbox = ({ completed, isDarkMode }: { completed: boolean, isDarkMode: boolean }) => {
-  const progress = useSharedValue(completed ? 1 : 0);
-
-  React.useEffect(() => {
-    // Gate: tens/day → near-imperceptible <150ms, timing not spring
-    progress.set(
-      withTiming(completed ? 1 : 0, {
-        duration: 150,
-        easing: EASE_OUT,
-      })
-    );
-  }, [completed, progress]);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      backgroundColor: interpolateColor(
-        progress.value,
-        [0, 1],
-        isDarkMode
-          ? ['#1f2937', '#65a25cff']
-          : ['white', '#98d590ff']
-      ),
-      borderColor: interpolateColor(
-        progress.value,
-        [0, 1],
-        isDarkMode
-          ? ['#4b5563', '#65a25cff']
-          : ['#e2e8f0', '#AADBA3']
-      ),
-    };
-  });
-
-  const checkmarkStyle = useAnimatedStyle(() => {
-    return {
-      opacity: interpolate(progress.value, [0, 1], [0, 1]),
-      transform: [{ scale: interpolate(progress.value, [0, 1], [0.96, 1]) }],
-    };
-  });
-
-  return (
-    <Animated.View style={[styles.checkbox, animatedStyle]}>
-      {completed && (
-        <AnimatedFeather
-          name="check"
-          size={14}
-          color={isDarkMode ? "#17481bff" : "#ffffff"}
-          style={checkmarkStyle}
-
-        />
-      )}
-    </Animated.View>
-  );
-};
 
 const TaskRow = React.memo(({
   item,
@@ -135,18 +77,23 @@ const TaskRow = React.memo(({
   return (
     <View style={[styles.row, { borderBottomColor: isDarkMode ? '#1a2535ff' : '#d8dde1ff' }]}>
       <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+        {/* Only the checkbox completes a task; the title opens it. */}
         <Pressable
           onPress={handleToggle}
           hitSlop={12}
           style={{ padding: 4 }}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: item.completed }}
+          accessibilityLabel={item.title}
         >
           <Checkbox completed={item.completed} isDarkMode={isDarkMode} />
         </Pressable>
 
         <Pressable
-          onPress={handleToggle}
-          onLongPress={handleOpenDetails}
+          onPress={handleOpenDetails}
           style={{ flex: 1, paddingVertical: 5, paddingLeft: 8 }}
+          accessibilityRole="button"
+          accessibilityHint="Opens the task details"
         >
           <Text
             style={[
@@ -1155,22 +1102,6 @@ marginLeft:10
     fontSize: 11,
     fontWeight: '600',
     opacity: 0.5,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 3,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxOn: {
-    backgroundColor: '#AADBA3',
-    borderColor: '#AADBA3',
-  },
-  checkboxOff: {
-    borderColor: '#e2e8f0',
-    backgroundColor: 'white',
   },
   done: {
     color: '#94a3b8',

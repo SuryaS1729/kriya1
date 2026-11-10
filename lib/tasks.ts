@@ -71,6 +71,20 @@ export function getTasksForDay(dayKey: number): Task[] {
   }
 }
 
+/** Tasks whose day falls in [startDayKey, endDayKey). Uses idx_tasks_day_key. */
+export function getTasksBetween(startDayKey: number, endDayKey: number): Task[] {
+  try {
+    const db = getDb();
+    const rows = db.getAllSync<Row>(
+      'SELECT * FROM tasks WHERE day_key >= ? AND day_key < ? ORDER BY id DESC',
+      [startDayKey, endDayKey]
+    );
+    return rows.map(r => ({ ...r, completed: !!r.completed }));
+  } catch {
+    return [];
+  }
+}
+
 export function getCompletedTaskCount(): number {
   try {
     const db = getDb();

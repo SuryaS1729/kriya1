@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -11,6 +11,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient';
 import Feather from "@react-native-vector-icons/feather/static";
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import Checkbox from '../components/Checkbox';
 
 import {
   Calendar,
@@ -26,9 +27,8 @@ import Animated, { interpolate, useAnimatedStyle } from 'react-native-reanimated
 
 import { useKriya } from '../lib/store';
 import {
-  getAllTasks,
+  getTasksBetween,
   getTasksForDay,
-  insertTaskForDay,
   removeTask,
   setTaskCompleted,
   type Task,
@@ -37,6 +37,15 @@ import { buttonPressHaptic, deleteHaptic, selectionHaptic, useTaskDoneHaptic } f
 import { StatusBar } from 'expo-status-bar';
 
 const EMPTY_TASKS: Task[] = [];
+
+// Same as Home: a just-completed task lingers in place briefly before
+// sinking to the completed group, so the tick registers before it moves.
+const COMPLETED_REORDER_DELAY_MS = 320;
+
+/** Whether a day has tasks, and whether they're all done. */
+type DayTaskStatus = 'none' | 'pending' | 'done';
+
+const TASK_DOT_DONE = '#65a25c'; // same green as the completed checkbox
 
 const WEEK_DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const WEEK_DAYS_MON = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -47,7 +56,6 @@ type FastDayMeta = {
   isDifferentMonth: boolean;
   isStartOfWeek: boolean;
   isWeekend: boolean;
-  state: 'idle' | 'today' | 'disabled';
 };
 
 function buildMonthGrid(
@@ -64,8 +72,6 @@ function buildMonthGrid(
   const daysInPrevMonth = new Date(year, m, 0).getDate();
   const startOfWeekIdx = firstDay === 'sunday' ? 0 : 1;
 
-  const todayId = toDateId(new Date());
-
   const weeks: FastDayMeta[][] = [[]];
 
   // Previous month trailing days
@@ -79,7 +85,6 @@ function buildMonthGrid(
       isDifferentMonth: true,
       isStartOfWeek: dow === startOfWeekIdx,
       isWeekend: dow === 0 || dow === 6,
-      state: 'idle',
     });
   }
 
@@ -90,14 +95,12 @@ function buildMonthGrid(
 
     const d = new Date(year, m, day);
     const dow = d.getDay();
-    const id = toDateId(d);
     weeks[weeks.length - 1].push({
-      id,
+      id: toDateId(d),
       displayLabel: String(day),
       isDifferentMonth: false,
       isStartOfWeek: dow === startOfWeekIdx,
       isWeekend: dow === 0 || dow === 6,
-      state: id === todayId ? 'today' : 'idle',
     });
   }
 
@@ -113,7 +116,6 @@ function buildMonthGrid(
       isDifferentMonth: true,
       isStartOfWeek: dow === startOfWeekIdx,
       isWeekend: dow === 0 || dow === 6,
-      state: 'idle',
     });
   }
 
@@ -123,10 +125,12 @@ function buildMonthGrid(
 const monthCache = new Map<string, FastDayMeta[][]>();
 
 function getMonthGrid(monthId: string, firstDay: 'sunday' | 'monday' = 'sunday'): FastDayMeta[][] {
-  const cached = monthCache.get(monthId);
+  // Week start changes the layout, so it's part of the key.
+  const key = `${monthId}:${firstDay}`;
+  const cached = monthCache.get(key);
   if (cached) return cached;
   const grid = buildMonthGrid(monthId, firstDay);
-  monthCache.set(monthId, grid);
+  monthCache.set(key, grid);
   return grid;
 }
 
@@ -153,6 +157,16 @@ function useFastCalendar({
   }, [calendarMonthId, calendarFirstDayOfWeek]);
 }
 
+/** First day of the month containing `date`, as a date id. */
+function monthIdFor(date: Date) {
+  return toDateId(new Date(date.getFullYear(), date.getMonth(), 1));
+}
+
+function shiftMonthId(monthId: string, delta: number) {
+  const base = fromDateId(monthId);
+  return toDateId(new Date(base.getFullYear(), base.getMonth() + delta, 1));
+}
+
 function dayKeyFromDateId(dateId: string) {
   const d = fromDateId(dateId);
   return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
@@ -177,10 +191,12 @@ function dateIdFromTask(task: Task) {
 type CalendarTaskStore = {
   tasksByDate: Record<string, Task[]>;
   selectedDate: string;
-  loaded: boolean;
+  /** First day of the month shown in the grid. */
+  monthId: string;
   setSelectedDate: (date: string) => void;
+  setMonth: (monthId: string) => void;
+  resetToToday: () => void;
   loadTasks: () => void;
-  addTask: (title: string, dateId: string) => void;
   toggleTask: (task: Task, dateId: string) => void;
   deleteTask: (id: number, dateId: string) => void;
 };
@@ -188,58 +204,39 @@ type CalendarTaskStore = {
 const useCalendarTaskStore = create<CalendarTaskStore>((set, get) => ({
   tasksByDate: {},
   selectedDate: toDateId(new Date()),
-  loaded: false,
+  monthId: monthIdFor(new Date()),
 
   setSelectedDate: (date) => set({ selectedDate: date }),
 
-  loadTasks: () => {
-    const allTasks = getAllTasks();
-    const grouped: Record<string, Task[]> = {};
+  setMonth: (monthId) => {
+    set({ monthId });
+    get().loadTasks();
+  },
 
-    allTasks.forEach((task) => {
+  resetToToday: () => set({ selectedDate: toDateId(new Date()), monthId: monthIdFor(new Date()) }),
+
+  // Loads only the visible month and its neighbours (for instant month
+  // flips), plus the selected day if it's outside that window — instead of
+  // every task ever created.
+  loadTasks: () => {
+    const { monthId, selectedDate } = get();
+    const start = dayKeyFromDateId(shiftMonthId(monthId, -1));
+    const end = dayKeyFromDateId(shiftMonthId(monthId, 2));
+    const tasks = getTasksBetween(start, end);
+
+    const selectedKey = dayKeyFromDateId(selectedDate);
+    if (selectedKey < start || selectedKey >= end) {
+      tasks.push(...getTasksForDay(selectedKey));
+    }
+
+    const grouped: Record<string, Task[]> = {};
+    tasks.forEach((task) => {
       const dateId = dateIdFromTask(task);
       if (!grouped[dateId]) grouped[dateId] = [];
       grouped[dateId].push(task);
     });
 
-    set({ tasksByDate: grouped, loaded: true });
-  },
-
-  addTask: (title, dateId) => {
-    const trimmed = title.trim();
-    if (!trimmed) return;
-
-    const dayKey = dayKeyFromDateId(dateId);
-    const optimistic: Task = {
-      id: -Date.now(),
-      title: trimmed,
-      completed: false,
-      created_at: Date.now(),
-      completed_at: null,
-      shloka_id: null,
-      day_key: dayKey,
-      description: null,
-    };
-
-    set((state) => ({
-      tasksByDate: {
-        ...state.tasksByDate,
-        [dateId]: [optimistic, ...(state.tasksByDate[dateId] ?? [])],
-      },
-    }));
-
-    try {
-      insertTaskForDay(trimmed, dayKey, null);
-      const persisted = getTasksForDay(dayKey);
-      set((state) => ({
-        tasksByDate: {
-          ...state.tasksByDate,
-          [dateId]: persisted,
-        },
-      }));
-    } catch {
-      get().loadTasks();
-    }
+    set({ tasksByDate: grouped });
   },
 
   toggleTask: (task, dateId) => {
@@ -294,7 +291,7 @@ const CalendarDayPill = React.memo(function CalendarDayPill({
   pressed,
   isDarkMode,
   accent,
-  isDisabled,
+  taskStatus,
 }: {
   label: string;
   isSelected: boolean;
@@ -303,7 +300,7 @@ const CalendarDayPill = React.memo(function CalendarDayPill({
   pressed: boolean;
   isDarkMode: boolean;
   accent: string;
-  isDisabled: boolean;
+  taskStatus: DayTaskStatus;
 }) {
   const isTodayOnly = isToday && !isSelected;
   const bgColor = isSelected
@@ -318,7 +315,7 @@ const CalendarDayPill = React.memo(function CalendarDayPill({
   const textColor = isSelected
     ? '#ffffff'
     : isToday
-    ? "#9ce1ff"
+    ? (isDarkMode ? '#9ce1ff' : '#3b5fb0')
     : isWeekend
     ? (isDarkMode ? '#94a3b8' : '#64748b')
     : isDarkMode
@@ -333,7 +330,6 @@ const CalendarDayPill = React.memo(function CalendarDayPill({
           borderWidth,
           borderColor,
           backgroundColor: bgColor,
-          opacity: isDisabled ? 0.45 : 1,
         }
       ]}
     >
@@ -345,6 +341,18 @@ const CalendarDayPill = React.memo(function CalendarDayPill({
       >
         {label}
       </Text>
+      {taskStatus !== 'none' && (
+        <View
+          style={[
+            styles.taskDot,
+            isSelected
+              ? { backgroundColor: '#ffffff', opacity: taskStatus === 'done' ? 1 : 0.6 }
+              : taskStatus === 'done'
+              ? { backgroundColor: TASK_DOT_DONE }
+              : { backgroundColor: isDarkMode ? '#94a3b8' : '#64748b', opacity: 0.7 },
+          ]}
+        />
+      )}
     </View>
   );
 });
@@ -364,13 +372,15 @@ const DayCell = React.memo(function DayCell({
   isDarkMode,
   accent,
   onSelect,
+  taskStatus,
 }: {
-  dayProps: { id: string; displayLabel: string; isWeekend: boolean; isStartOfWeek: boolean; isDifferentMonth: boolean; state: string };
+  dayProps: FastDayMeta;
   selectedDateId: string;
   todayDateId: string;
   isDarkMode: boolean;
   accent: string;
   onSelect: (dateId: string) => void;
+  taskStatus: DayTaskStatus;
 }) {
   const handlePress = useCallback(() => {
     buttonPressHaptic();
@@ -396,7 +406,6 @@ const DayCell = React.memo(function DayCell({
       isStartOfWeek={dayProps.isStartOfWeek}
     >
       <Pressable
-        disabled={dayProps.state === 'disabled'}
         onPress={handlePress}
         style={() => dayCellStyle}
       >
@@ -409,7 +418,7 @@ const DayCell = React.memo(function DayCell({
             pressed={pressed}
             isDarkMode={isDarkMode}
             accent={accent}
-            isDisabled={dayProps.state === 'disabled'}
+            taskStatus={taskStatus}
           />
         )}
       </Pressable>
@@ -470,10 +479,23 @@ const CalendarChevronButton = ({
 };
 
 const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
+  // The store is the single source of truth for the selected date, so the
+  // highlighted day and the task list below can never disagree.
+  const selectedDateId = useCalendarTaskStore((s) => s.selectedDate);
   const setSelectedDate = useCalendarTaskStore((s) => s.setSelectedDate);
+  const tasksByDate = useCalendarTaskStore((s) => s.tasksByDate);
 
-  const [selectedDateId, setSelectedDateId] = useState(() => toDateId(new Date()));
-  const [calendarMonthId, setCalendarMonthId] = useState(() => toDateId(new Date()));
+  const taskStatusByDate = useMemo(() => {
+    const map: Record<string, DayTaskStatus> = {};
+    for (const [dateId, tasks] of Object.entries(tasksByDate)) {
+      if (tasks.length === 0) continue;
+      map[dateId] = tasks.every((t) => t.completed) ? 'done' : 'pending';
+    }
+    return map;
+  }, [tasksByDate]);
+
+  const calendarMonthId = useCalendarTaskStore((s) => s.monthId);
+  const setMonth = useCalendarTaskStore((s) => s.setMonth);
   const [todayDateId, setTodayDateId] = useState(() => toDateId(new Date()));
 
   const accent = isDarkMode ? '#056c99' : '#7493d7';
@@ -511,25 +533,18 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
   });
 
   const shiftMonth = useCallback((delta: number) => {
-    setCalendarMonthId((prevMonthId) => {
-      const base = fromDateId(prevMonthId);
-      const shifted = new Date(base.getFullYear(), base.getMonth() + delta, 1);
-      return toDateId(shifted);
-    });
-  }, []);
+    setMonth(shiftMonthId(calendarMonthId, delta));
+  }, [calendarMonthId, setMonth]);
 
   const handleSelectDate = useCallback((dateId: string) => {
-    setSelectedDateId(dateId);
     setSelectedDate(dateId);
   }, [setSelectedDate]);
 
   const jumpToToday = useCallback(() => {
     const today = new Date();
-    const todayId = toDateId(today);
-    const todayMonthId = toDateId(new Date(today.getFullYear(), today.getMonth(), 1));
-    setCalendarMonthId(todayMonthId);
-    handleSelectDate(todayId);
-  }, [handleSelectDate]);
+    handleSelectDate(toDateId(today));
+    setMonth(monthIdFor(today));
+  }, [handleSelectDate, setMonth]);
 
   return (
     <View style={[styles.topHalf, { backgroundColor: isDarkMode ? '#0f1e2d30' : '#ffffffaa' }]}>
@@ -605,6 +620,7 @@ const CalendarSectionContent = ({ isDarkMode }: CalendarSectionProps) => {
                     isDarkMode={isDarkMode}
                     accent={accent}
                     onSelect={handleSelectDate}
+                    taskStatus={taskStatusByDate[dayProps.id] ?? 'none'}
                   />
                 ))}
               </Calendar.Row.Week>
@@ -657,16 +673,24 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
   const taskDoneHaptic = useTaskDoneHaptic();
   const deleteTask = useCalendarTaskStore((s) => s.deleteTask);
   const [pendingDeleteTaskId, setPendingDeleteTaskId] = useState<number | null>(null);
+  const [lingeringIds, setLingeringIds] = useState<number[]>([]);
+  const lingerTimeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+
+  useEffect(() => {
+    const timeouts = lingerTimeouts.current;
+    return () => Object.values(timeouts).forEach(clearTimeout);
+  }, []);
 
   const orderedTasks = useMemo(() => {
+    const isSettledDone = (t: Task) => t.completed && !lingeringIds.includes(t.id);
     const incomplete = tasks
-      .filter((t) => !t.completed)
+      .filter((t) => !isSettledDone(t))
       .sort((a, b) => a.created_at - b.created_at);
     const completed = tasks
-      .filter((t) => t.completed)
+      .filter(isSettledDone)
       .sort((a, b) => a.created_at - b.created_at);
     return [...incomplete, ...completed];
-  }, [tasks]);
+  }, [tasks, lingeringIds]);
 
   const selectedDateLabel = useMemo(
     () => toReadableDate(fromDateId(selectedDate)),
@@ -683,10 +707,22 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
 
   const handleToggleTask = useCallback((task: Task) => {
     const next = !task.completed;
+    const existing = lingerTimeouts.current[task.id];
+    if (existing) {
+      clearTimeout(existing);
+      delete lingerTimeouts.current[task.id];
+    }
+
     if (next) {
       taskDoneHaptic();
+      setLingeringIds((ids) => (ids.includes(task.id) ? ids : [...ids, task.id]));
+      lingerTimeouts.current[task.id] = setTimeout(() => {
+        setLingeringIds((ids) => ids.filter((id) => id !== task.id));
+        delete lingerTimeouts.current[task.id];
+      }, COMPLETED_REORDER_DELAY_MS);
     } else {
       selectionHaptic();
+      setLingeringIds((ids) => ids.filter((id) => id !== task.id));
     }
 
     toggleTask(task, selectedDate);
@@ -741,23 +777,23 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
         }
         renderItem={({ item }) => (
           <View style={[styles.taskRow, { borderBottomColor: isDarkMode ? '#2c3d51' : '#e2e8f0' }]}>
-            <Pressable onPress={() => handleToggleTask(item)} hitSlop={10} style={styles.checkboxWrap}>
-              <View
-                style={[
-                  styles.checkbox,
-                  item.completed
-                    ? { backgroundColor: '#65a25cff', borderColor: '#65a25cff' }
-                    : { borderColor: isDarkMode ? '#6b7280' : '#cbd5e1' },
-                ]}
-              >
-                {item.completed ? <Feather name="check" size={13} color="#ffffff" /> : null}
-              </View>
+            {/* Only the checkbox completes a task; the title opens it. */}
+            <Pressable
+              onPress={() => handleToggleTask(item)}
+              hitSlop={10}
+              style={styles.checkboxWrap}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: item.completed }}
+              accessibilityLabel={item.title}
+            >
+              <Checkbox completed={item.completed} isDarkMode={isDarkMode} />
             </Pressable>
 
             <Pressable
               style={{ flex: 1 }}
-              onPress={() => handleToggleTask(item)}
-              onLongPress={() => handleOpenDetails(item.id)}
+              onPress={() => handleOpenDetails(item.id)}
+              accessibilityRole="button"
+              accessibilityHint="Opens the task details"
             >
               <Text
                 style={[
@@ -825,21 +861,20 @@ export default function CalendarScreen() {
   const isDarkMode = useKriya((s) => s.isDarkMode);
   const refreshTodayTasks = useKriya((s) => s.refresh);
   const loadTasks = useCalendarTaskStore((s) => s.loadTasks);
-  const setSelectedDate = useCalendarTaskStore((s) => s.setSelectedDate);
+  const resetToToday = useCalendarTaskStore((s) => s.resetToToday);
 
+  // Every visit opens on today's month and date.
   useEffect(() => {
-    setSelectedDate(toDateId(new Date()));
+    resetToToday();
+  }, [resetToToday]);
 
-    const id = requestAnimationFrame(() => {
-      loadTasks();
-    });
-
-    return () => cancelAnimationFrame(id);
-  }, [loadTasks, setSelectedDate]);
-
+  // Focus also fires on first mount, so this is the only load: on open and
+  // on returning from Add / task details. Deferred a frame so the screen
+  // paints first.
   useFocusEffect(
     useCallback(() => {
-      loadTasks();
+      const id = requestAnimationFrame(loadTasks);
+      return () => cancelAnimationFrame(id);
     }, [loadTasks])
   );
 
@@ -926,6 +961,13 @@ const styles = StyleSheet.create({
   },
   dayPillText: {
     textAlign: 'center',
+  },
+  taskDot: {
+    position: 'absolute',
+    bottom: 2,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
   },
   calendarCard: {
     borderRadius: 18,
@@ -1025,14 +1067,6 @@ const styles = StyleSheet.create({
   },
   checkboxWrap: {
     padding: 2,
-  },
-  checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   taskTitle: {
     flex: 1,

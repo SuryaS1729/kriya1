@@ -79,6 +79,8 @@ export default function FeatureSlide({ step, theme, isActive, player: preloadedP
   // Otherwise fall back to creating a player lazily here.
   const fallbackPlayer = useVideoPlayer(preloadedPlayer ? null : (step.videoUrl ?? null), (p) => {
     p.loop = true;
+    // Never take audio focus from the onboarding ambient track.
+    p.audioMixingMode = 'mixWithOthers';
   });
   const player = preloadedPlayer ?? fallbackPlayer;
   const playerRef = React.useRef<VideoPlayer | null>(null);

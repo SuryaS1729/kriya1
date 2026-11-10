@@ -12,6 +12,8 @@ import AppToastHost from '../components/AppToastHost';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SystemUI from 'expo-system-ui';
 import { hideSplash, SPLASH_BACKGROUND } from '../lib/splash';
+import { useStartupStatus } from '../lib/startupStatus';
+import StartupScreen from '../components/StartupScreen';
 
 // Safety net: never leave the splash up if startup stalls.
 const SPLASH_MAX_MS = 6000;
@@ -152,11 +154,25 @@ async function onInit(db: any) {
     // console.warn('DB migrate/init failed:', e);
     setDbReady(false);
     globalDbInitialized = false; // Reset on error
+    // Without this the home screen would wait on `ready` forever.
+    useStartupStatus.getState().markFailed();
   }
 }
 
+// SQLiteProvider reports open failures during render; defer the state
+// update so we never set state while React is rendering another component.
+function onDbError() {
+  setTimeout(() => useStartupStatus.getState().markFailed(), 0);
+}
+
 export default function Root() {
-  const [booted, setBooted] = useState(false);
+  const failed = useStartupStatus((s) => s.failed);
+  const attempt = useStartupStatus((s) => s.attempt);
+  const retry = useStartupStatus((s) => s.retry);
+  // The DB copy re-runs on each retry; we're booted once it has finished
+  // for the current attempt.
+  const [bootedAttempt, setBootedAttempt] = useState(-1);
+  const booted = bootedAttempt === attempt;
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -166,24 +182,40 @@ export default function Root() {
     // instead of the default white.
     SystemUI.setBackgroundColorAsync(SPLASH_BACKGROUND).catch(() => {});
     const splashTimeout = setTimeout(hideSplash, SPLASH_MAX_MS);
+    return () => clearTimeout(splashTimeout);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
         await ensureDatabasePresent(DB_NAME, DB_ASSET, { forceReplace: false });
       } catch {
         // console.warn('ensureDatabasePresent failed:', e);
       } finally {
-        setBooted(true);
+        if (!cancelled) setBootedAttempt(attempt);
       }
     })();
-    return () => clearTimeout(splashTimeout);
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [attempt]);
+
+  // Show the error right away rather than holding the splash.
+  useEffect(() => {
+    if (failed) hideSplash();
+  }, [failed]);
+
+  if (failed) {
+    return <StartupScreen state="failed" onRetry={retry} />;
+  }
 
   if (!booted) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-      <SQLiteProvider databaseName={DB_NAME} onInit={onInit}>
+      <SQLiteProvider key={attempt} databaseName={DB_NAME} onInit={onInit} onError={onDbError}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" options={{animation:'fade'}}/>
           <Stack.Screen name="onboarding/index" options={{ headerShown: false, animation:'fade' }} />

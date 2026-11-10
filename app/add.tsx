@@ -41,7 +41,7 @@ import Animated, {
 import { useFocusEffect } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { mediumImpactHaptic, selectionHaptic, errorHaptic, buttonPressHaptic } from '../lib/haptics';
+import { mediumImpactHaptic, selectionHaptic, deleteHaptic, buttonPressHaptic } from '../lib/haptics';
 import { PressableScale } from 'pressto';
 
 
@@ -772,7 +772,7 @@ export default function Add() {
           const pending = pendingTaskDelete;
           setPendingTaskDelete(null);
           if (!pending) return;
-          errorHaptic();
+          deleteHaptic();
           removeTaskDb(pending.id);
           if (pending.id === editingId) {
             setEditingId(null);

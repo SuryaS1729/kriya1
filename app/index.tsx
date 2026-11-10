@@ -1,7 +1,7 @@
 // app/index.tsx
 import { Link, router,useFocusEffect } from 'expo-router';
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View, Pressable, ScrollView, TouchableOpacity } from 'react-native';
+import { FlatList, StyleSheet, Text, View, Pressable, ScrollView, TouchableOpacity } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -22,9 +22,10 @@ import { setTaskCompleted, removeTask as removeTaskDb, getAllTasks, type Task } 
 import { StatusBar } from 'expo-status-bar';
 import Feather from "@react-native-vector-icons/feather/static";
 import Ionicons from "@react-native-vector-icons/ionicons/static";
-import { taskCompleteHaptic, selectionHaptic, buttonPressHaptic, errorHaptic } from '../lib/haptics';
+import { selectionHaptic, buttonPressHaptic, deleteHaptic, useTaskDoneHaptic } from '../lib/haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { hideSplash, SPLASH_BACKGROUND } from '../lib/splash';
+import StartupScreen from '../components/StartupScreen';
 
 import * as Notifications from 'expo-notifications';
 import { PressableScale } from 'pressto';
@@ -362,6 +363,7 @@ const ShlokaCard = React.memo(function ShlokaCard({ topInset }: { topInset: numb
 });
 
 export default function Home() {
+  const taskDoneHaptic = useTaskDoneHaptic();
   const ready     = useKriya(s => s.ready);
   const tasks     = useKriya(s => s.tasksToday);
   const toggle    = useKriya(s => s.toggleTask);
@@ -454,7 +456,7 @@ export default function Home() {
     }
 
     if (!completed) {
-      taskCompleteHaptic(); // Success haptic for completing tasks
+      taskDoneHaptic();
       setDelayedTodayCompletedTaskIds((state) => (state.includes(id) ? state : [...state, id]));
     } else {
       selectionHaptic(); // Light haptic for uncompleting
@@ -469,7 +471,7 @@ export default function Home() {
         delete todayTaskReorderTimeouts.current[id];
       }, ALL_TASK_REORDER_DELAY_MS);
     }
-  }, [toggle]);
+  }, [toggle, taskDoneHaptic]);
 
   const onRemove = useCallback((id: number) => {
     setPendingTaskDelete({ id, source: 'today' });
@@ -485,7 +487,7 @@ export default function Home() {
     }
 
     if (next) {
-      taskCompleteHaptic();
+      taskDoneHaptic();
       setDelayedCompletedTaskIds((state) => (state.includes(id) ? state : [...state, id]));
     } else {
       selectionHaptic();
@@ -510,7 +512,7 @@ export default function Home() {
 
     // Also refresh today's tasks in case this was a today task
     refresh();
-  }, [refresh]);
+  }, [refresh, taskDoneHaptic]);
 
   const onRemoveAllTask = useCallback((id: number) => {
     setPendingTaskDelete({ id, source: 'all' });
@@ -599,7 +601,7 @@ export default function Home() {
     }
 
     if (next) {
-      taskCompleteHaptic();
+      taskDoneHaptic();
       setDelayedYesterdayCompletedTaskIds((state) => (state.includes(id) ? state : [...state, id]));
     } else {
       selectionHaptic();
@@ -621,7 +623,7 @@ export default function Home() {
         delete yesterdayTaskReorderTimeouts.current[id];
       }, ALL_TASK_REORDER_DELAY_MS);
     }
-  }, []);
+  }, [taskDoneHaptic]);
 
   const onRemoveYesterday = useCallback((id: number) => {
     setPendingTaskDelete({ id, source: 'yesterday' });
@@ -632,7 +634,7 @@ export default function Home() {
     setPendingTaskDelete(null);
     if (!pending) return;
     const { id, source } = pending;
-    errorHaptic();
+    deleteHaptic();
     if (source === 'today') {
       const existingTimeout = todayTaskReorderTimeouts.current[id];
       if (existingTimeout) {
@@ -785,41 +787,16 @@ export default function Home() {
     };
   }, []);
 
-  // Show loading while not ready
+  // Fallback only: the native splash normally covers this. It appears if
+  // startup outlasts the splash safety timeout (e.g. first-launch DB copy
+  // on a slow phone), and is styled to read as the splash continuing.
   if (!ready) {
-    return (
-      <LinearGradient
-        colors={isDarkMode ? ['#2e455fff', '#000000ff'] : ['#ffffffd2', '#ced7ec']}
-        style={{ flex: 1, justifyContent: 'space-evenly', alignItems: 'center' }}
-      >
-        <StatusBar style={isDarkMode ? "light" : "dark"} />
-        <View></View>
-        <ActivityIndicator size="large" color={isDarkMode ? '#fff' : '#000'} />
-        <Text style={{ fontSize: 20, fontFamily:"Instrument Serif", fontStyle:"italic", color: isDarkMode ? '#fff' : '#000' }}>loading...</Text>
-      </LinearGradient>
-    );
+    return <StartupScreen state="loading" />;
   }
 
   // Going to onboarding: hold the splash colour, never a blank white frame.
   if (!hasCompletedOnboarding) {
     return <View style={{ flex: 1, backgroundColor: SPLASH_BACKGROUND }} />;
-  }
-
-  // Minimal skeleton while DB/store warm up
-  if (!ready) {
-    return (
-      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-        <StatusBar style={isDarkMode ? "light" : "auto"} />
-        <View style={[styles.card, { height: 240, opacity: 0.5, backgroundColor: isDarkMode ? '#374151' : '#111827' }]} />
-        <View style={[styles.tasksContainer, { backgroundColor: isDarkMode ? '#1f2937' : 'white' }]}>
-          <Text style={[styles.h1, { color: isDarkMode ? '#d1d5db' : '#848fa9ff' }]}>Today</Text>
-          <View style={[styles.row, { opacity: 0.5 }]}>
-            <View style={[styles.checkbox, styles.checkboxOff]} />
-            <View style={{ flex: 1, height: 18, backgroundColor: isDarkMode ? '#4b5563' : '#eee', borderRadius: 4 }} />
-          </View>
-        </View>
-      </View>
-    );
   }
 
   const mainContent = (

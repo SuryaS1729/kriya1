@@ -16,7 +16,7 @@ import Feather from "@react-native-vector-icons/feather/static";
 import FontAwesome5 from "@react-native-vector-icons/fontawesome5/static";
 import Ionicons from "@react-native-vector-icons/ionicons/static";
 import { useKriya } from '../lib/store';
-import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic } from '../lib/haptics';
+import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic, photoSavedHaptic } from '../lib/haptics';
 import { CaptureView, type CaptureViewRef } from 'react-native-capture-view';
 import * as Sharing from 'expo-sharing';
 import { Asset, getPermissionsAsync, requestPermissionsAsync } from 'expo-media-library';
@@ -630,7 +630,7 @@ export default function Share2() {
       uri = await captureCardUri();
       await Asset.create(uri);
 
-      taskCompleteHaptic();
+      photoSavedHaptic();
       showAppToast({
         type: 'success',
         text1: 'Saved to gallery',

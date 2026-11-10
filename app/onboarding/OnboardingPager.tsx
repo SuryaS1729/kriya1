@@ -41,6 +41,7 @@ type OnboardingPagerProps = {
   onFinish: () => void;
   /** 0 on the first page → 1 on the last, following the swipe continuously. */
   onScrollProgress?: (progress: number) => void;
+  onActivePageChange?: (page: number) => void;
 };
 
 export default function OnboardingPager({
@@ -56,6 +57,7 @@ export default function OnboardingPager({
   onSaveReminder,
   onFinish,
   onScrollProgress,
+  onActivePageChange,
 }: OnboardingPagerProps) {
   const pagerRef = useRef<PagerView>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -79,9 +81,10 @@ export default function OnboardingPager({
     (e: PagerViewOnPageSelectedEvent) => {
       const page = e.nativeEvent.position;
       setCurrentPage(page);
+      onActivePageChange?.(page);
       selectionHaptic();
     },
-    [],
+    [onActivePageChange],
   );
 
   const lastPageIndex = onboardingSteps.length - 1;

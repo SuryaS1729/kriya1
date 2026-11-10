@@ -6,7 +6,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 SplashScreen.setOptions({ fade: true, duration: 350 });
 
 /** Matches the native splash background in app.json. */
-export const SPLASH_BACKGROUND = '#2e455f';
+export const SPLASH_BACKGROUND = '#000000';
 
 let hidden = false;
 

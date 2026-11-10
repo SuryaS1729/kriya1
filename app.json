@@ -16,12 +16,8 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#2e455f",
-          "image": "./assets/icons/splash-icon-dark.png",
-          "dark": {
-            "image": "./assets/icons/splash-icon-light.png",
-            "backgroundColor": "#2e455f"
-          },
+          "backgroundColor": "#000000",
+          "image": "./assets/icons/splash-icon-light.png",
           "imageWidth": 200
         }
       ],
@@ -254,6 +250,6 @@
       }
     },
     "owner": "surya7314",
-    "backgroundColor": "#2e455f"
+    "backgroundColor": "#000000"
   }
 }

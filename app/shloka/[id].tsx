@@ -24,7 +24,7 @@ import {
 
 import { StatusBar } from 'expo-status-bar';
 import { useKriya } from '../../lib/store';
-import { buttonPressHaptic, errorHaptic, selectionHaptic, taskCompleteHaptic } from '../../lib/haptics';
+import { buttonPressHaptic, errorHaptic, selectionHaptic, taskCompleteHaptic, bookmarkHaptic } from '../../lib/haptics';
 import { shlokaRecitation, voiceoverAudio, type VoiceoverLanguage } from '../../lib/tts';
 import { useAudioPlayer } from 'expo-audio';
 import * as FileSystem from 'expo-file-system/legacy';
@@ -267,7 +267,7 @@ const handleBookPress = () => {
     if (bookmarked) {
       selectionHaptic(); // Light haptic for removing bookmark
     } else {
-      taskCompleteHaptic(); // Success haptic for adding bookmark
+      bookmarkHaptic(); // Stamp for adding a bookmark
     }
 
     // Snappier animation sequence - no rotation

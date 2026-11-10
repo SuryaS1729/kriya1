@@ -15,6 +15,8 @@ import {
   AUDIO_INITIAL_VOLUME,
   AUDIO_START_DELAY,
   AUDIO_TARGET_VOLUME,
+  AUDIO_DUCK_RATIO,
+  AUDIO_DUCK_DURATION,
 } from './constants';
 
 /**
@@ -92,6 +94,23 @@ export function useAmbientAudio() {
     };
   }, [volume, safelyPause]);
 
+  /**
+   * Lower the ambient bed while something with its own sound plays
+   * (the Voice Dictations demo video), then bring it back.
+   */
+  const setDucked = useCallback(
+    (ducked: boolean) => {
+      if (!hasStartedRef.current) return;
+      volume.set(
+        withTiming(
+          ducked ? AUDIO_TARGET_VOLUME * AUDIO_DUCK_RATIO : AUDIO_TARGET_VOLUME,
+          { duration: AUDIO_DUCK_DURATION },
+        ),
+      );
+    },
+    [volume],
+  );
+
   /** Smoothly fade out audio then pause the player. */
   const fadeOut = useCallback(() => {
     if (!audioPlayer) return;
@@ -104,5 +123,5 @@ export function useAmbientAudio() {
     }, AUDIO_FADE_OUT_DURATION + 50);
   }, [audioPlayer, volume, safelyPause]);
 
-  return { fadeOut, audioPlayer };
+  return { fadeOut, setDucked, audioPlayer };
 }

@@ -21,7 +21,7 @@ import {
   SHIMMER_PAUSE_DURATION,
   SHIMMER_START_DELAY,
 } from '../../lib/onboarding/constants';
-import { taskCompleteHaptic } from '../../lib/haptics';
+import { beginJourneyHaptic } from '../../lib/haptics';
 
 // ─── Motion spec (per animate-expo skill) ──────────────────────────
 // Exits stay gentle: slow ease-out for a calm, unhurried farewell.
@@ -91,7 +91,7 @@ export default function WelcomeScreen({ theme, onBegin }: WelcomeScreenProps) {
 
   // ─── Handle "Begin the Journey" ────────────────────────────────
   const handleBegin = () => {
-    taskCompleteHaptic();
+    beginJourneyHaptic();
 
     // Reduced motion: keep the opacity state change, drop all translation.
     if (reducedMotion) {

@@ -22,6 +22,8 @@ import {
   ADD_TASKS_VIDEO_URL,
   COMPLETE_TASKS_VIDEO_URL,
   VOICE_BY_SARVAM_VIDEO_URL,
+  AUDIO_FADE_OUT_DURATION,
+  onboardingSteps,
 } from '../../lib/onboarding/constants';
 import { useAmbientAudio } from '../../lib/onboarding/useAmbientAudio';
 import WelcomeScreen from './WelcomeScreen';
@@ -68,16 +70,16 @@ export default function Onboarding() {
 
   useEffect(() => {
     if (phase === 'onboarding') {
-      slate.value = withTiming(SLATE_FIRST_PAGE, { duration: 600, easing: SLATE_EASE });
+      slate.set(withTiming(SLATE_FIRST_PAGE, { duration: 600, easing: SLATE_EASE }));
     } else if (phase === 'loading') {
-      slate.value = withTiming(SLATE_LOADING, { duration: 1800, easing: SLATE_EASE });
+      slate.set(withTiming(SLATE_LOADING, { duration: 1800, easing: SLATE_EASE }));
     }
   }, [phase, slate]);
 
   const handleScrollProgress = useCallback(
     (progress: number) => {
       // Follows the finger directly — no timing, so it tracks the swipe.
-      slate.value = SLATE_FIRST_PAGE + progress * (SLATE_LAST_PAGE - SLATE_FIRST_PAGE);
+      slate.set(SLATE_FIRST_PAGE + progress * (SLATE_LAST_PAGE - SLATE_FIRST_PAGE));
     },
     [slate],
   );
@@ -85,19 +87,28 @@ export default function Onboarding() {
   const slateStyle = useAnimatedStyle(() => ({ opacity: slate.value }));
 
   // ─── Audio ─────────────────────────────────────────────────────
-  const { fadeOut } = useAmbientAudio();
+  const { fadeOut, setDucked } = useAmbientAudio();
 
   // ─── Asset prefetch ────────────────────────────────────────────
   // Create video players while the user is still on the welcome screen,
   // so buffering starts before the pager mounts and slides appear instantly.
+  // Every player mixes with others: by default a starting video takes
+  // audio focus, which silenced the ambient track as soon as the first
+  // slide played. The first two clips have silent audio tracks, so they're
+  // muted outright; the voice demo keeps its sound.
   const addTasksPlayer = useVideoPlayer(ADD_TASKS_VIDEO_URL, (p) => {
     p.loop = true;
+    p.muted = true;
+    p.audioMixingMode = 'mixWithOthers';
   });
   const completeTasksPlayer = useVideoPlayer(COMPLETE_TASKS_VIDEO_URL, (p) => {
     p.loop = true;
+    p.muted = true;
+    p.audioMixingMode = 'mixWithOthers';
   });
   const voicePlayer = useVideoPlayer(VOICE_BY_SARVAM_VIDEO_URL, (p) => {
     p.loop = true;
+    p.audioMixingMode = 'mixWithOthers';
   });
 
   const players = useMemo(
@@ -126,13 +137,25 @@ export default function Onboarding() {
 
   const finishOnboarding = useCallback(() => {
     setPhase('loading');
-    fadeOut();
+    setDucked(false);
 
+    // Keep the ambient track through the Partha-Sarathi screen; fade it out
+    // only as we hand off to the main app.
+    setTimeout(fadeOut, Math.max(0, CONTEMPLATION_DELAY - AUDIO_FADE_OUT_DURATION));
     setTimeout(() => {
       completeOnboarding();
       router.replace('/');
     }, CONTEMPLATION_DELAY);
-  }, [fadeOut, completeOnboarding]);
+  }, [fadeOut, setDucked, completeOnboarding]);
+
+  // Duck the ambient bed while the voice demo (which has real audio) plays.
+  const handleActivePageChange = useCallback(
+    (page: number) => {
+      const step = onboardingSteps[page];
+      setDucked(step?.type === 'feature' && step.videoUrl === VOICE_BY_SARVAM_VIDEO_URL);
+    },
+    [setDucked],
+  );
 
   const handleSaveReminder = useCallback(async () => {
     // User explicitly tapped "Set Reminder" → save time + request permission
@@ -202,6 +225,7 @@ export default function Onboarding() {
             onSaveReminder={handleSaveReminder}
             onFinish={finishOnboarding}
             onScrollProgress={handleScrollProgress}
+            onActivePageChange={handleActivePageChange}
           />
         )}
 

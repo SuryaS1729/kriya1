@@ -33,7 +33,7 @@ import {
   setTaskCompleted,
   type Task,
 } from '../lib/tasks';
-import { buttonPressHaptic, errorHaptic, selectionHaptic, taskCompleteHaptic } from '../lib/haptics';
+import { buttonPressHaptic, deleteHaptic, selectionHaptic, useTaskDoneHaptic } from '../lib/haptics';
 import { StatusBar } from 'expo-status-bar';
 
 const EMPTY_TASKS: Task[] = [];
@@ -654,6 +654,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
   const selectedDate = useCalendarTaskStore((s) => s.selectedDate);
   const tasks = useCalendarTaskStore((s) => s.tasksByDate[s.selectedDate] ?? EMPTY_TASKS);
   const toggleTask = useCalendarTaskStore((s) => s.toggleTask);
+  const taskDoneHaptic = useTaskDoneHaptic();
   const deleteTask = useCalendarTaskStore((s) => s.deleteTask);
   const [pendingDeleteTaskId, setPendingDeleteTaskId] = useState<number | null>(null);
 
@@ -683,7 +684,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
   const handleToggleTask = useCallback((task: Task) => {
     const next = !task.completed;
     if (next) {
-      taskCompleteHaptic();
+      taskDoneHaptic();
     } else {
       selectionHaptic();
     }
@@ -692,7 +693,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
     if (selectedDate === toDateId(new Date())) {
       onWriteForToday();
     }
-  }, [onWriteForToday, selectedDate, toggleTask]);
+  }, [onWriteForToday, selectedDate, toggleTask, taskDoneHaptic]);
 
   const handleDeleteTask = useCallback((id: number) => {
     setPendingDeleteTaskId(id);
@@ -702,7 +703,7 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
     const id = pendingDeleteTaskId;
     setPendingDeleteTaskId(null);
     if (id == null) return;
-    errorHaptic();
+    deleteHaptic();
     deleteTask(id, selectedDate);
     if (selectedDate === toDateId(new Date())) {
       onWriteForToday();

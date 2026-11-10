@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Feather from "@react-native-vector-icons/feather/static";
 // Remove this line: import * as Haptics from 'expo-haptics';
 // Add this instead:
-import { buttonPressHaptic, selectionHaptic, taskCompleteHaptic, errorHaptic } from '../lib/haptics';
+import { buttonPressHaptic, selectionHaptic, errorHaptic, focusCompleteHaptic } from '../lib/haptics';
 import { useLocalSearchParams, router } from 'expo-router';
 import Animated, { useSharedValue, withTiming, useAnimatedStyle, interpolateColor, Easing, runOnJS } from 'react-native-reanimated';
 
@@ -46,7 +46,7 @@ export default function FocusMode() {
 
   const handleSessionComplete = useCallback(() => {
     // Changed from direct Haptics call
-    taskCompleteHaptic(); // Strong success haptic for session completion
+    focusCompleteHaptic(); // Bell toll — the session is complete
     setIsRunning(false);
     setSessionCompleted(true);
     addFocusSession();

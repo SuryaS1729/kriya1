@@ -36,6 +36,7 @@ import { showAppToast } from '../../lib/appToast';
 import {
   buttonPressHaptic,
   errorHaptic,
+  deleteHaptic,
   selectionHaptic,
   taskCompleteHaptic,
 } from '../../lib/haptics';
@@ -200,7 +201,7 @@ export default function TaskDetails() {
 
   const onDeleteReminder = useCallback(
     async (reminderId: number) => {
-      errorHaptic();
+      deleteHaptic();
       await removeTaskReminder(reminderId);
       syncReminders();
     },

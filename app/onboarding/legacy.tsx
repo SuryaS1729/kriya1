@@ -6,6 +6,7 @@ import { useVideoPlayer } from 'expo-video';
 import BlurBackground from '../../components/BlurBackground';
 import { useKriya } from '../../lib/store';
 import { buttonPressHaptic, selectionHaptic } from '../../lib/haptics';
+import { hideSplash } from '../../lib/splash';
 
 import {
   themes,
@@ -67,6 +68,11 @@ export default function Onboarding() {
     [addTasksPlayer, completeTasksPlayer, voicePlayer],
   );
 
+  // Reveal onboarding from the native splash (fresh installs land here).
+  useEffect(() => {
+    hideSplash();
+  }, []);
+
   // Warm the loading-screen image cache during welcome too.
   useEffect(() => {
     RNImage.prefetch(GITA_IMAGE_URL).catch(() => {});
@@ -124,7 +130,7 @@ export default function Onboarding() {
       <StatusBar hidden />
 
       <View style={StyleSheet.absoluteFill}>
-        <BlurBackground />
+        <BlurBackground vivid />
       </View>
 
       <View style={[styles.overlay, { backgroundColor: theme.overlay }]} />

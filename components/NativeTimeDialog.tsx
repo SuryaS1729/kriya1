@@ -7,6 +7,8 @@ type Props = {
   is24Hour?: boolean;
   accentColor?: string;
   dark?: boolean;
+  /** Android-only styling option; ignored here. */
+  palette?: 'default' | 'teal';
 };
 
 /** Web fallback — community time picker. */

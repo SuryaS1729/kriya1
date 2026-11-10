@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Circle } from "@shopify/react-native-skia";
 import {
+  Easing,
   interpolateColor,
   useDerivedValue,
   useSharedValue,
@@ -28,22 +29,38 @@ const BlurCircleColors = [
 //   "#0E43EE80",  // Dark blue
 // ];
 
+// Richer, more saturated palette for hero surfaces (onboarding).
+// Stays in a narrow teal ↔ aqua band so shifts read as subtle;
+// one faint, muted saffron for a rare warm hint.
+const VividBlurCircleColors = [
+  "#0891b2e6",  // Aqua blue
+  "#14b8a6e6",  // Teal
+  "#0e7490f2",  // Deep teal
+  "#06b6d4d9",  // Bright aqua
+  "#c2410c59",  // Saffron hint (low alpha)
+  "#0d9488e6",  // Mid teal
+  "#115e59f2",  // Dark teal
+];
+
 interface BlurCircleProps {
   cx: number;
   cy: number;
   r: number;
   delay?: number;
+  vivid?: boolean;
 }
 
-const BlurCircle: React.FC<BlurCircleProps> = ({ cx, cy, r, delay = 0 }) => {
+const BlurCircle: React.FC<BlurCircleProps> = ({ cx, cy, r, delay = 0, vivid = false }) => {
   const colors = useRef(
-    [...BlurCircleColors].sort(() => Math.random() - 0.5)
+    [...(vivid ? VividBlurCircleColors : BlurCircleColors)].sort(() => Math.random() - 0.5)
   ).current;
 
-  const colorAnimationDuration = useRef(colors.length * 3000).current; // Faster: 1000ms instead of 4000ms
+  // Vivid mode moves slower and breathes less, so the brighter colors stay calm.
+  const colorAnimationDuration = useRef(colors.length * (vivid ? 6000 : 3000)).current;
+  const pulseDuration = vivid ? 7000 : 3000;
   const color = useSharedValue(0);
   const radius = useSharedValue(r);
-  const radiusAnimationSize = useRef(r + r * 0.15).current;
+  const radiusAnimationSize = useRef(r + r * (vivid ? 0.06 : 0.15)).current;
 
   const animatedColor = useDerivedValue(() =>
     interpolateColor(
@@ -58,8 +75,8 @@ const BlurCircle: React.FC<BlurCircleProps> = ({ cx, cy, r, delay = 0 }) => {
       delay,
       withRepeat(
         withSequence(
-          withTiming(radiusAnimationSize, { duration: 3000 }), // Faster: 100ms instead of 6000ms
-          withTiming(r, { duration: 3000 })
+          withTiming(radiusAnimationSize, { duration: pulseDuration, easing: Easing.inOut(Easing.sin) }),
+          withTiming(r, { duration: pulseDuration, easing: Easing.inOut(Easing.sin) })
         ),
         -1
       )
@@ -75,7 +92,7 @@ const BlurCircle: React.FC<BlurCircleProps> = ({ cx, cy, r, delay = 0 }) => {
         -1
       )
     );
-  }, [r, delay, radiusAnimationSize, colorAnimationDuration, color, radius]);
+  }, [r, delay, radiusAnimationSize, colorAnimationDuration, pulseDuration, color, radius]);
 
   return (
     <Circle 
@@ -83,7 +100,7 @@ const BlurCircle: React.FC<BlurCircleProps> = ({ cx, cy, r, delay = 0 }) => {
       cy={cy} 
       r={radius} 
       color={animatedColor}
-      opacity={0.5}
+      opacity={vivid ? 0.85 : 0.5}
     />
   );
 };

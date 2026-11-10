@@ -217,6 +217,9 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     letterSpacing: 2,
     fontWeight: '200',
+    textShadowColor: 'rgba(0, 0, 0, 0.25)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 12,
   },
   tagline: {
     fontSize: 12,
@@ -225,6 +228,9 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     marginTop: 10,
     fontFamily: 'Source Serif Pro',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
   },
   subtitleContainer: {
     padding: 10,

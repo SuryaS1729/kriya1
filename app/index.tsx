@@ -24,6 +24,7 @@ import Feather from "@react-native-vector-icons/feather/static";
 import Ionicons from "@react-native-vector-icons/ionicons/static";
 import { taskCompleteHaptic, selectionHaptic, buttonPressHaptic, errorHaptic } from '../lib/haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+import { hideSplash, SPLASH_BACKGROUND } from '../lib/splash';
 
 import * as Notifications from 'expo-notifications';
 import { PressableScale } from 'pressto';
@@ -563,10 +564,10 @@ export default function Home() {
       // console.log('🔍 Checking onboarding status:', hasCompletedOnboarding);
 
       if (!hasCompletedOnboarding) {
-        // console.log('🔍 Redirecting to onboarding...');
+        // Onboarding hides the splash itself once it has mounted.
         router.replace('/onboarding');
       } else {
-        // console.log('🔍 Onboarding already completed, staying on main app');
+        hideSplash();
       }
     }
   }, [ready, hasHydrated, hasCompletedOnboarding]);
@@ -799,9 +800,9 @@ export default function Home() {
     );
   }
 
-  // Don't render main content if going to onboarding
+  // Going to onboarding: hold the splash colour, never a blank white frame.
   if (!hasCompletedOnboarding) {
-    return null;
+    return <View style={{ flex: 1, backgroundColor: SPLASH_BACKGROUND }} />;
   }
 
   // Minimal skeleton while DB/store warm up
@@ -905,7 +906,7 @@ export default function Home() {
                       <View style={styles.emptyStateStepRow}>
                         <Feather name="plus" size={14} color={isDarkMode ? '#959eb1ff' : '#475569'} />
                         <Text style={[styles.emptyStateStepText, { color: isDarkMode ? '#959eb1ff' : '#475569' }]}>
-                          Add your tasks for today
+                          Add your tasks
                         </Text>
                       </View>
                       <View style={styles.emptyStateStepRow}>

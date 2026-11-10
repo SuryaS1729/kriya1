@@ -5,7 +5,12 @@ import BlurCircle from "./BlurCircle";
 
 const { width: WINDOW_WIDTH, height: WINDOW_HEIGHT } = Dimensions.get('window');
 
-const BlurBackground: React.FC = () => {
+type BlurBackgroundProps = {
+  /** Brighter, more saturated orbs — used on onboarding. */
+  vivid?: boolean;
+};
+
+const BlurBackground: React.FC<BlurBackgroundProps> = ({ vivid = false }) => {
   const r = useRef(WINDOW_WIDTH / 2.5).current;
   const circles = useRef(new Array(6).fill(1)).current;
   const step = WINDOW_HEIGHT / circles.length;
@@ -21,6 +26,7 @@ const BlurBackground: React.FC = () => {
             cy={step * index}
             r={r}
             delay={index * 1000}
+            vivid={vivid}
           />
         ))}
       </Group>

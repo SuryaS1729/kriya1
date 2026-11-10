@@ -109,8 +109,8 @@ export default function ReminderSlide({
                 onValueChange={onValueChange}
                 onDismiss={onDismiss}
                 is24Hour={false}
-                accentColor={isDarkMode ? '#36c9d6' : '#2b4971'}
                 dark={isDarkMode}
+                palette="teal"
               />
             )}
           </View>

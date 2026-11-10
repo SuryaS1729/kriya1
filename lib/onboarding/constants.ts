@@ -38,7 +38,7 @@ export const LOADING_TEXTS = [
 export const themes = {
   dark: {
     background: '#0a6b7add',
-    overlay: 'rgba(0, 0, 0, 0.3)',
+    overlay: 'rgba(2, 32, 38, 0.5)',
     text: 'white',
     textSecondary: 'rgba(255, 255, 255, 0.8)',
     textTertiary: 'rgba(255, 255, 255, 0.7)',
@@ -57,7 +57,7 @@ export const themes = {
   },
   light: {
     background: '#e8f4f8',
-    overlay: 'rgba(76, 121, 180, 0.22)',
+    overlay: 'rgba(8, 70, 78, 0.3)',
     text: '#2b4971ff',
     textSecondary: 'rgba(26, 54, 93, 0.8)',
     textTertiary: 'rgba(26, 54, 93, 0.7)',

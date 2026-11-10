@@ -10,6 +10,11 @@ import * as NavigationBar from 'expo-navigation-bar';
 import { Platform } from 'react-native';
 import AppToastHost from '../components/AppToastHost';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as SystemUI from 'expo-system-ui';
+import { hideSplash, SPLASH_BACKGROUND } from '../lib/splash';
+
+// Safety net: never leave the splash up if startup stalls.
+const SPLASH_MAX_MS = 6000;
 
 const DB_NAME = 'gita.db';
 const DB_ASSET = require('../assets/db/gita.db');
@@ -157,6 +162,10 @@ export default function Root() {
     if (Platform.OS === 'android') {
       NavigationBar.setStyle('auto');
     }
+    // Root view shows through whenever nothing is drawn; match the splash
+    // instead of the default white.
+    SystemUI.setBackgroundColorAsync(SPLASH_BACKGROUND).catch(() => {});
+    const splashTimeout = setTimeout(hideSplash, SPLASH_MAX_MS);
     (async () => {
       try {
         await ensureDatabasePresent(DB_NAME, DB_ASSET, { forceReplace: false });
@@ -166,6 +175,7 @@ export default function Root() {
         setBooted(true);
       }
     })();
+    return () => clearTimeout(splashTimeout);
   }, []);
 
   if (!booted) return null;

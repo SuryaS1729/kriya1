@@ -1,7 +1,10 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import PagerView from 'react-native-pager-view';
-import type { PagerViewOnPageSelectedEvent } from 'react-native-pager-view';
+import type {
+  PagerViewOnPageSelectedEvent,
+  PagerViewOnPageScrollEvent,
+} from 'react-native-pager-view';
 import { PressableScale } from 'pressto';
 import AntDesign from "@react-native-vector-icons/ant-design/static";
 
@@ -36,6 +39,8 @@ type OnboardingPagerProps = {
   onOpenTimePicker: () => void;
   onSaveReminder: () => Promise<void>;
   onFinish: () => void;
+  /** 0 on the first page → 1 on the last, following the swipe continuously. */
+  onScrollProgress?: (progress: number) => void;
 };
 
 export default function OnboardingPager({
@@ -50,6 +55,7 @@ export default function OnboardingPager({
   onOpenTimePicker,
   onSaveReminder,
   onFinish,
+  onScrollProgress,
 }: OnboardingPagerProps) {
   const pagerRef = useRef<PagerView>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -76,6 +82,16 @@ export default function OnboardingPager({
       selectionHaptic();
     },
     [],
+  );
+
+  const lastPageIndex = onboardingSteps.length - 1;
+  const onPageScroll = useCallback(
+    (e: PagerViewOnPageScrollEvent) => {
+      if (!onScrollProgress) return;
+      const { position, offset } = e.nativeEvent;
+      onScrollProgress(Math.min(1, Math.max(0, (position + offset) / lastPageIndex)));
+    },
+    [onScrollProgress, lastPageIndex],
   );
 
   const goBack = () => {
@@ -120,6 +136,7 @@ export default function OnboardingPager({
         style={styles.pager}
         initialPage={0}
         onPageSelected={onPageSelected}
+        onPageScroll={onPageScroll}
       >
         {onboardingSteps.map((step, index) => (
           <View key={index} style={styles.pageContainer}>

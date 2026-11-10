@@ -3,6 +3,13 @@ import { View, StyleSheet, StatusBar, Platform, Image as RNImage } from 'react-n
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useVideoPlayer } from 'expo-video';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import BlurBackground from '../../components/BlurBackground';
 import { useKriya } from '../../lib/store';
 import { buttonPressHaptic, selectionHaptic } from '../../lib/haptics';
@@ -23,6 +30,19 @@ import LoadingScreen from './LoadingScreen';
 
 type Phase = 'welcome' | 'onboarding' | 'loading';
 
+// ─── Teal → slate hand-off ─────────────────────────────────────────
+// Onboarding opens in teal and drifts toward the main app's slate-blue
+// as the user swipes, so landing on the home screen feels continuous.
+// Same gradient as the home screen in app/index.tsx.
+const SLATE_GRADIENT = {
+  dark: ['#2e455fff', '#000000ff'] as const,
+  light: ['#ffffffd2', '#ced7ec'] as const,
+};
+const SLATE_FIRST_PAGE = 0.12; // first feature page: a faint hint
+const SLATE_LAST_PAGE = 0.7;   // reminder page: mostly slate
+const SLATE_LOADING = 0.92;    // painting/loading screen: almost there
+const SLATE_EASE = Easing.bezier(0.33, 1, 0.68, 1);
+
 export default function Onboarding() {
   // ─── Store ─────────────────────────────────────────────────────
   const isDarkMode = useKriya(s => s.isDarkMode);
@@ -42,6 +62,27 @@ export default function Onboarding() {
     t.setHours(reminderTime.hour, reminderTime.minute, 0, 0);
     return t;
   });
+
+  // ─── Slate overlay ─────────────────────────────────────────────
+  const slate = useSharedValue(0);
+
+  useEffect(() => {
+    if (phase === 'onboarding') {
+      slate.value = withTiming(SLATE_FIRST_PAGE, { duration: 600, easing: SLATE_EASE });
+    } else if (phase === 'loading') {
+      slate.value = withTiming(SLATE_LOADING, { duration: 1800, easing: SLATE_EASE });
+    }
+  }, [phase, slate]);
+
+  const handleScrollProgress = useCallback(
+    (progress: number) => {
+      // Follows the finger directly — no timing, so it tracks the swipe.
+      slate.value = SLATE_FIRST_PAGE + progress * (SLATE_LAST_PAGE - SLATE_FIRST_PAGE);
+    },
+    [slate],
+  );
+
+  const slateStyle = useAnimatedStyle(() => ({ opacity: slate.value }));
 
   // ─── Audio ─────────────────────────────────────────────────────
   const { fadeOut } = useAmbientAudio();
@@ -135,6 +176,13 @@ export default function Onboarding() {
 
       <View style={[styles.overlay, { backgroundColor: theme.overlay }]} />
 
+      <Animated.View pointerEvents="none" style={[styles.overlay, slateStyle]}>
+        <LinearGradient
+          colors={isDarkMode ? SLATE_GRADIENT.dark : SLATE_GRADIENT.light}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+
       <SafeAreaView style={styles.safeArea}>
         {phase === 'welcome' && (
           <WelcomeScreen theme={theme} onBegin={handleBeginJourney} />
@@ -153,6 +201,7 @@ export default function Onboarding() {
             onOpenTimePicker={handleOpenTimePicker}
             onSaveReminder={handleSaveReminder}
             onFinish={finishOnboarding}
+            onScrollProgress={handleScrollProgress}
           />
         )}
 

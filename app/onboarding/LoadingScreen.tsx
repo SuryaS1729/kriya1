@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ActivityIndicator, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, useWindowDimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -13,6 +13,7 @@ import {
   GITA_IMAGE_URL,
   LOADING_TEXTS,
 } from '../../lib/onboarding/constants';
+import WaveDotsLoader from '../../components/WaveDotsLoader';
 
 type LoadingScreenProps = {
   theme: Theme;
@@ -119,7 +120,7 @@ export default function LoadingScreen({ theme }: LoadingScreenProps) {
       </Animated.Text>
 
       <View style={styles.spinnerWrapper}>
-        <ActivityIndicator size="small" color={theme.spinnerColor} />
+        <WaveDotsLoader color={theme.text} />
       </View>
     </Animated.View>
   );

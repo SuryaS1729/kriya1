@@ -33,6 +33,7 @@ import {
   type TaskReminder,
 } from '../../lib/reminders';
 import { showAppToast } from '../../lib/appToast';
+import { formatTime } from '../../lib/formatTime';
 import {
   buttonPressHaptic,
   errorHaptic,
@@ -42,12 +43,6 @@ import {
 } from '../../lib/haptics';
 
 const DEFAULT_REMINDER_HOUR = 9;
-
-function formatTime(hour: number, minute: number) {
-  const d = new Date();
-  d.setHours(hour, minute, 0, 0);
-  return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-}
 
 export default function TaskDetails() {
   const params = useLocalSearchParams<{ id: string }>();

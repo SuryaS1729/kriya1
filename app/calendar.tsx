@@ -809,9 +809,13 @@ const TasksSection = React.memo(function TasksSection({ isDarkMode, onWriteForTo
               </Text>
             </Pressable>
 
-            <Pressable onPress={() => handleDeleteTask(item.id)} hitSlop={10} style={styles.deleteButton}>
-              <Feather name="x" size={16} color={isDarkMode ? '#94a3b8' : '#64748b'} />
-            </Pressable>
+            {/* Completed tasks can't be deleted: they hold the link to the
+                shloka they unlocked (same rule as Home and Add). */}
+            {!item.completed && (
+              <Pressable onPress={() => handleDeleteTask(item.id)} hitSlop={10} style={styles.deleteButton}>
+                <Feather name="x" size={16} color={isDarkMode ? '#94a3b8' : '#64748b'} />
+              </Pressable>
+            )}
 
             <Pressable
               onPress={() => handleOpenDetails(item.id)}

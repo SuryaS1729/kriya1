@@ -1,5 +1,5 @@
-import { memo, useEffect, useState, useCallback } from 'react';
-import { StyleSheet, Text, View, Pressable, ScrollView, Alert, Modal, Platform, Linking, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { memo, useEffect, useState, useCallback, useMemo } from 'react';
+import { StyleSheet, Text, View, Pressable, ScrollView, Modal, Platform, Linking, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useKriya } from '../lib/store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -8,22 +8,17 @@ import FontAwesome5 from "@react-native-vector-icons/fontawesome5/static";
 import { Image } from 'expo-image';
 import BlurBackground from '@/components/BlurBackground';
 import { LinearGradient } from 'expo-linear-gradient';
-// import * as Haptics from 'expo-haptics';
 import { DateTimePicker } from '@expo/ui/community/datetime-picker';
 import * as Notifications from 'expo-notifications';
 import { NativeTimeDialog } from '../components/NativeTimeDialog';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { StatusBar } from 'expo-status-bar';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
-import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic } from '../lib/haptics';
+import Animated, { useReducedMotion } from 'react-native-reanimated';
+import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic, deleteHaptic } from '../lib/haptics';
 import { showAppToast } from '../lib/appToast';
+import { formatTime } from '../lib/formatTime';
+import { PressableScale } from 'pressto';
+import Constants from 'expo-constants';
 import {
   TRANSLATION_LANGUAGE_LIST,
   downloadTranslation,
@@ -34,7 +29,6 @@ import {
 } from '../lib/translationService';
 
 
-// Recitation Settings Component
 // Translation Settings Component
 // Manages downloaded Indian-language translation files (R2 JSON, kept out of
 // SQLite). Download/remove is the only responsibility of this section.
@@ -99,7 +93,7 @@ function TranslationSettings() {
 
   const doRemove = async (code: TranslationLanguageCode) => {
     if (busyLang) return;
-    selectionHaptic();
+    deleteHaptic();
     setBusyLang(code);
     try {
       await removeTranslation(code);
@@ -168,6 +162,9 @@ function TranslationSettings() {
           style={[
             styles.translationPill,
             !isDarkMode && styles.lightTranslationPill,
+            // English is always available, so it looks "downloaded".
+            styles.translationPillDownloaded,
+            !isDarkMode && styles.lightTranslationPillDownloaded,
             translationLanguage === 'en' && styles.translationPillActive,
             translationLanguage === 'en' && !isDarkMode && styles.lightTranslationPillActive,
           ]}
@@ -175,7 +172,7 @@ function TranslationSettings() {
           <Feather
             name="check"
             size={14}
-            color={translationLanguage === 'en' ? '#b3862f' : isDarkMode ? '#9ca3af' : '#64748b'}
+            color={translationLanguage === 'en' ? '#ffffff' : isDarkMode ? '#9ca3af' : '#64748b'}
           />
           <Text
             style={[
@@ -213,7 +210,7 @@ function TranslationSettings() {
                 <Feather
                   name="check"
                   size={14}
-                  color={active ? '#b3862f' : isDarkMode ? '#8ba5e1' : '#4a6a9a'}
+                  color={active ? '#ffffff' : isDarkMode ? '#8ba5e1' : '#3b5fb0'}
                 />
               ) : (
                 <Feather name="download" size={14} color={isDarkMode ? '#9ca3af' : '#64748b'} />
@@ -251,9 +248,6 @@ function TranslationSettings() {
   );
 }
 
-// Updated NotificationSettings component with proper Modal
-// Updated NotificationSettings component with native DateTimePicker
-// Updated NotificationSettings component with proper Android handling
 function NotificationSettings() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const notificationsEnabled = useKriya(s => s.notificationsEnabled);
@@ -262,6 +256,7 @@ function NotificationSettings() {
   const setReminderTime = useKriya(s => s.setReminderTime);
 
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const reducedMotion = useReducedMotion();
   const [selectedTime, setSelectedTime] = useState(new Date());
 
   // Initialize selectedTime with current reminder time
@@ -272,26 +267,16 @@ function NotificationSettings() {
     setSelectedTime(newTime);
   }, [reminderTime]);
 
-  // New API: onValueChange for set, onDismiss for cancel (replaces deprecated onChange)
-  const handleValueChange = async (_event: any, date: Date) => {
-    if (Platform.OS === 'android') {
-      setShowTimePicker(false);
-    }
-    setSelectedTime(date);
-
+  const saveReminderTime = async (date: Date) => {
     const hours = date.getHours();
     const minutes = date.getMinutes();
+    if (hours === reminderTime.hour && minutes === reminderTime.minute) return;
 
     try {
       await setReminderTime(hours, minutes);
-      const timeString = date.toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      });
       showAppToast({
         type: 'success',
-        text1: `Reminder · ${timeString}`,
+        text1: `Reminder · ${formatTime(hours, minutes)}`,
         duration: 2200,
         position: 'bottom',
       });
@@ -307,13 +292,24 @@ function NotificationSettings() {
     }
   };
 
+  // Android's dialog reports once, on OK → save right away. The iOS wheel
+  // reports every tick while spinning → keep it as a draft until Done.
+  const handleValueChange = (_event: any, date: Date) => {
+    setSelectedTime(date);
+    if (Platform.OS === 'android') {
+      setShowTimePicker(false);
+      void saveReminderTime(date);
+    }
+  };
+
+  const handleConfirmIOS = () => {
+    setShowTimePicker(false);
+    void saveReminderTime(selectedTime);
+  };
+
   const handleDismiss = useCallback(() => {
     setShowTimePicker(false);
   }, []);
-
-  const getDisplayTime = () => {
-    return `${reminderTime.hour.toString().padStart(2, '0')}:${reminderTime.minute.toString().padStart(2, '0')}`;
-  };
 
   const handleOpenTimePicker = () => {
     // Sync selectedTime with current reminderTime before opening picker
@@ -321,12 +317,12 @@ function NotificationSettings() {
     currentTime.setHours(reminderTime.hour, reminderTime.minute, 0, 0);
     setSelectedTime(currentTime);
 
-    buttonPressHaptic(); // Changed from direct Haptics call
+    buttonPressHaptic();
     setShowTimePicker(true);
   };
 
   const handleToggleNotifications = async () => {
-    selectionHaptic(); // Changed from direct Haptics call
+    selectionHaptic();
     const attemptedEnable = !notificationsEnabled;
 
     if (attemptedEnable) {
@@ -381,9 +377,10 @@ function NotificationSettings() {
             notificationsEnabled && styles.toggleActive,
             notificationsEnabled && !isDarkMode && styles.lightToggleActive
           ]}>
-            <View style={[
+            <Animated.View style={[
               styles.toggleKnob,
-              notificationsEnabled && styles.toggleKnobActive
+              notificationsEnabled && styles.toggleKnobActive,
+              !reducedMotion && { transitionProperty: 'transform', transitionDuration: 180 },
             ]} />
           </View>
         </Pressable>
@@ -405,7 +402,7 @@ function NotificationSettings() {
             </View>
             <View style={styles.timeDisplay}>
               <Text style={[styles.timeDisplayText, !isDarkMode && styles.lightText]}>
-                {getDisplayTime()}
+                {formatTime(reminderTime.hour, reminderTime.minute)}
               </Text>
               <Feather name="chevron-right" size={16} color={isDarkMode ? '#9ca3af' : '#64748b'} />
             </View>
@@ -413,7 +410,7 @@ function NotificationSettings() {
         )}
       </View>
 
-      {/* Native Time Picker - unchanged */}
+      {/* Native time picker: iOS wheel in a modal, Android dialog */}
       {Platform.OS === 'ios' ? (
         <Modal
           visible={showTimePicker}
@@ -442,7 +439,7 @@ function NotificationSettings() {
 
               <View style={styles.nativeTimePickerActions}>
                 <Pressable
-                  onPress={() => setShowTimePicker(false)}
+                  onPress={handleConfirmIOS}
                   accessibilityRole="button"
                   accessibilityLabel="Confirm reminder time"
                   style={[
@@ -497,25 +494,6 @@ function QuickActions() {
 
 function SupportLink() {
   const isDarkMode = useKriya(s => s.isDarkMode);
-  const reducedMotion = useReducedMotion();
-  const pulse = useSharedValue(0);
-
-  useEffect(() => {
-    if (reducedMotion) {
-      pulse.value = 0.55;
-      return;
-    }
-    pulse.value = withRepeat(
-      withTiming(1, { duration: 1300, easing: Easing.inOut(Easing.ease) }),
-      -1,
-      true,
-    );
-  }, [pulse, reducedMotion]);
-
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: reducedMotion ? 0.55 : 0.2 + pulse.value * 0.65,
-    transform: [{ scale: 1 + pulse.value * 0.012 }],
-  }));
 
   const openSupportLink = async () => {
     buttonPressHaptic();
@@ -531,73 +509,72 @@ function SupportLink() {
     }
   };
 
+  // Quiet and editorial rather than attention-seeking: serif copy, a
+  // hairline border and one warm accent — no glow, no pulse.
+  const accent = isDarkMode ? '#e0a96d' : '#b25e00';
+
   return (
     <View style={[styles.section, !isDarkMode && styles.lightSection]}>
       <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Contribute</Text>
-      <View style={styles.supportButtonWrap}>
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            styles.supportGlow,
-            { borderColor: isDarkMode ? '#69d2ff' : '#0070e6' },
-            glowStyle,
-          ]}
-        />
-        <Pressable
-          style={[styles.supportButton, !isDarkMode && styles.lightSupportButton]}
-          onPress={openSupportLink}
-          android_ripple={{ color: '#b3862f22' }}
-        >
-          <Text style={[styles.supportButtonText, !isDarkMode && styles.lightSupportButtonText]}>
-            If Kriya has been useful, consider supporting its continued growth
-          </Text>
-          <Feather
-            name="arrow-right"
-            size={20}
-            color={isDarkMode ? '#69d2ff' : '#006fda'}
-          />
-        </Pressable>
-      </View>
+      <PressableScale
+        style={[styles.supportCard, !isDarkMode && styles.lightSupportCard]}
+        onPress={openSupportLink}
+        rippleColor="transparent"
+        accessibilityRole="link"
+        accessibilityLabel="Support Kriya"
+        accessibilityHint="Opens the donation page in your browser"
+      >
+        <Text style={[styles.supportBody, !isDarkMode && styles.lightSupportBody]}>
+          Kriya is free, offline and open source. If it has been useful, consider supporting its continued growth.
+        </Text>
+        <View style={styles.supportFooter}>
+          <View style={[styles.supportRule, { backgroundColor: accent }]} />
+          <Text style={[styles.supportCta, { color: accent }]}>SUPPORT KRIYA</Text>
+          <Feather name="arrow-up-right" size={14} color={accent} />
+        </View>
+      </PressableScale>
     </View>
   );
 }
 
-// Gita Progress Component
-const GitaProgress = memo(function GitaProgress() {
-  const isDarkMode = useKriya(s => s.isDarkMode);
-  const getTotalCompletedTasks = useKriya(s => s.getTotalCompletedTasks);
+// Verses per chapter of the Bhagavad Gita (sums to 701).
+const GITA_CHAPTER_LENGTHS = [
+  47, 72, 43, 42, 29, 47, 30, 28, 34, 42, 55, 20, 35, 27, 20, 24, 28, 78,
+];
+const GITA_TOTAL_VERSES = GITA_CHAPTER_LENGTHS.reduce((a, b) => a + b, 0);
 
-  // Assuming 700 total shlokas in Bhagavad Gita
-  const totalShlokas = 701;
-  const completedTasks = getTotalCompletedTasks ? getTotalCompletedTasks() : 0;
-  const unlockedShlokas = Math.min(completedTasks, totalShlokas);
-  const progressPercentage = Math.round((unlockedShlokas / totalShlokas) * 100);
+/**
+ * Where the reader is in the Gita, taken from the same shloka the home
+ * screen shows (store.currentShloka), so the two can never disagree.
+ * `index` is 0-based, i.e. the number of verses already passed.
+ */
+type GitaPosition = { index: number; chapter: number; verse: number };
 
-  // Calculate which chapter and verse they're currently on
-  const chaptersAndVerses = [
-    47, 72, 43, 42, 29, 47, 30, 28, 34, 42, 55, 20, 35, 27, 20, 24, 28, 78
-  ];
-
-  let currentChapter = 1;
-  let currentVerse = 1;
-  let remainingShlokas = unlockedShlokas;
-
-  for (let i = 0; i < chaptersAndVerses.length && remainingShlokas > 0; i++) {
-    if (remainingShlokas >= chaptersAndVerses[i]) {
-      remainingShlokas -= chaptersAndVerses[i];
-      currentChapter = i + 2; // Next chapter
-      currentVerse = 1;
-    } else {
-      currentChapter = i + 1;
-      currentVerse = remainingShlokas + 1;
-      break;
+function gitaPositionFromIndex(index: number): GitaPosition {
+  let remaining = index;
+  for (let i = 0; i < GITA_CHAPTER_LENGTHS.length; i++) {
+    if (remaining < GITA_CHAPTER_LENGTHS[i]) {
+      return { index, chapter: i + 1, verse: remaining + 1 };
     }
+    remaining -= GITA_CHAPTER_LENGTHS[i];
   }
+  return { index: 0, chapter: 1, verse: 1 };
+}
 
-  if (unlockedShlokas >= totalShlokas) {
-    currentChapter = 18;
-    currentVerse = 78;
-  }
+// Gita Progress Component
+const GitaProgress = memo(function GitaProgress({ position }: { position: GitaPosition }) {
+  const isDarkMode = useKriya(s => s.isDarkMode);
+
+  const totalShlokas = GITA_TOTAL_VERSES;
+  const unlockedShlokas = position.index;
+  const progressPercentage = Math.round((unlockedShlokas / totalShlokas) * 100);
+  const currentChapter = position.chapter;
+  const currentVerse = position.verse;
+
+  // Tasks left to finish the current chapter, counting the verse you're on.
+  const chapterLength = GITA_CHAPTER_LENGTHS[currentChapter - 1];
+  const tasksToChapterEnd = chapterLength - currentVerse + 1;
+  const isFinalChapter = currentChapter === GITA_CHAPTER_LENGTHS.length;
 
   return (
     <View style={[styles.gitaProgressCard, !isDarkMode && styles.lightGitaSection]}>
@@ -637,47 +614,22 @@ const GitaProgress = memo(function GitaProgress() {
           </View>
           <View style={styles.milestoneText}>
             <Text style={[styles.milestoneTitle, !isDarkMode && styles.lightText]}>
-              Chapter {currentChapter === 18 && currentVerse === 78 ? '1 (Restart)' : currentChapter + (currentVerse === chaptersAndVerses[currentChapter - 1] ? 1 : 0)} Complete
+              {isFinalChapter ? 'Complete the Gita' : `Chapter ${currentChapter} Complete`}
             </Text>
             <Text style={[styles.milestoneDesc, !isDarkMode && styles.lightSubText]}>
-              {currentChapter === 18 && currentVerse === 78
-                ? 'You\'ve completed the entire Gita! Start a new journey.'
-                : `${currentVerse === chaptersAndVerses[currentChapter - 1] ? chaptersAndVerses[currentChapter] - currentVerse : chaptersAndVerses[currentChapter - 1] - currentVerse + 1} more tasks to unlock`
-              }
+              {tasksToChapterEnd} more {tasksToChapterEnd === 1 ? 'task' : 'tasks'} to unlock
             </Text>
           </View>
         </View>
       </View>
 
-      {/* {unlockedShlokas > 0 && (
-        <Pressable
-          style={[styles.gitaActionButton, !isDarkMode && styles.lightGitaActionButton]}
-          onPress={() => {
-            // Navigate to gita reader or show current shloka
-            Alert.alert(
-              `Chapter ${currentChapter}, Verse ${currentVerse - 1 > 0 ? currentVerse - 1 : currentVerse}`,
-              'This would open your current shloka in the Gita reader.',
-              [{ text: 'OK' }]
-            );
-          }}
-        >
-          <Text style={[styles.gitaActionText, !isDarkMode && styles.lightText]}>
-            📖 Read Current Shloka
-          </Text>
-          <Feather name="chevron-right" size={16} color={isDarkMode ? "#fff" : "#000"} />
-        </Pressable>
-      )} */}
     </View>
   );
 });
 
 
-// Add this new component after GitaProgress function
-const ScripturesProgress = memo(function ScripturesProgress() {
+const ScripturesProgress = memo(function ScripturesProgress({ gitaPosition }: { gitaPosition: GitaPosition }) {
   const isDarkMode = useKriya(s => s.isDarkMode);
-  const getTotalCompletedTasks = useKriya(s => s.getTotalCompletedTasks);
-
-  const completedTasks = getTotalCompletedTasks ? getTotalCompletedTasks() : 0;
 
    const scriptures = [
     {
@@ -686,11 +638,9 @@ const ScripturesProgress = memo(function ScripturesProgress() {
       subtitle: 'Krishna & Arjuna',
       totalVerses: 701,
       isUnlocked: true,
-      // Different images for dark and light mode
-      darkImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921476/krishnarjuna_npvsot.webp"},
-      lightImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921475/krishnarjunalight_fdqa8x.webp"},
+      darkImage: require('../assets/images/scriptures/gita-dark.webp'),
+      lightImage: require('../assets/images/scriptures/gita-light.webp'),
       description: 'The eternal dialogue between Krishna and Arjuna',
-      progress: Math.min(completedTasks, 701),
     },
     {
       id: 'Nachiketa-upanishad',
@@ -698,11 +648,9 @@ const ScripturesProgress = memo(function ScripturesProgress() {
       subtitle: 'Yama & Nachiketa',
       totalVerses: 108,
       isUnlocked: false,
-      // Different images for dark and light mode
-      darkImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1759794295/Mask_group_3_jbpyxo.webp"},
-      lightImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1759794491/Mask_group_4_xmcp7q.webp"},
+      darkImage: require('../assets/images/scriptures/nachiketa-dark.webp'),
+      lightImage: require('../assets/images/scriptures/nachiketa-light.webp'),
       description: 'Dialogue on death, immortality, and self-realization.',
-      progress: 0,
       unlockRequirement: 'Complete Bhagavad Gita',
     },
     {
@@ -711,11 +659,9 @@ const ScripturesProgress = memo(function ScripturesProgress() {
       subtitle: 'Janaka & Ashtavakra',
       totalVerses: 298,
       isUnlocked: false,
-      // Different images for dark and light mode
-      darkImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921475/ashtavakra_gfmoqa.webp"},
-      lightImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921475/ashtavakralight_qnuqgv.webp"},
+      darkImage: require('../assets/images/scriptures/ashtavakra-dark.webp'),
+      lightImage: require('../assets/images/scriptures/ashtavakra-light.webp'),
       description: 'Pure non-duality and liberation through self-realization.',
-      progress: 0,
       unlockRequirement: 'Complete Nachiketa Upanishad',
     },
     {
@@ -724,31 +670,36 @@ const ScripturesProgress = memo(function ScripturesProgress() {
       subtitle: 'Shankaracharya',
       totalVerses: 32000,
       isUnlocked: false,
-      // Different images for dark and light mode
-      darkImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921476/shankara_j1k104.webp"},
-      lightImage: {uri: "https://res.cloudinary.com/dztfsdmcv/image/upload/v1757921476/shankaralight_lid6ez.webp"},
+      darkImage: require('../assets/images/scriptures/shankara-dark.webp'),
+      lightImage: require('../assets/images/scriptures/shankara-light.webp'),
       description: 'The non-dualistic philosophy of oneness',
-      progress: 0,
       unlockRequirement: 'Complete Ashtavakra Gita',
     },
 
   ];
+  // Images are bundled (assets/images/scriptures) so this works offline.
 
-  const handleScripturePress = (scripture: any) => {
+  const handleScripturePress = (scripture: (typeof scriptures)[number]) => {
     if (scripture.isUnlocked) {
-      selectionHaptic(); // Changed from direct Haptics call
-      // Navigate to scripture reader
-      // router.push(`/scripture/${scripture.id}`);
-      // console.log(`Opening ${scripture.title}`);
-    } else {
-      errorHaptic(); // Changed from direct Haptics call
-      // Show unlock requirement
-      Alert.alert(
-        `🔒 ${scripture.title}`,
-        `This scripture will be unlocked when you ${scripture.unlockRequirement.toLowerCase()}.`,
-        [{ text: 'OK' }]
-      );
+      // Only the Gita is readable today: open the verse you're on, the
+      // same one the home screen shows.
+      buttonPressHaptic();
+      router.push({
+        pathname: '/shloka/[id]',
+        params: { id: String(gitaPosition.index) },
+      });
+      return;
     }
+
+    // Locked isn't an error — a light tap and a gentle note.
+    selectionHaptic();
+    showAppToast({
+      type: 'info',
+      // Toasts render as a single-line pill, so keep it short.
+      text1: `${scripture.unlockRequirement} to unlock`,
+      duration: 2400,
+      position: 'bottom',
+    });
   };
 
   return (
@@ -787,19 +738,12 @@ const ScripturesProgress = memo(function ScripturesProgress() {
     styles.scriptureImage,
     !scripture.isUnlocked && styles.lockedScriptureImage
   ]}>
-    {/* Replace the placeholder with actual Image */}
    <Image
                   source={isDarkMode ? scripture.darkImage : scripture.lightImage}
                   style={styles.scriptureImageStyle}
                   contentFit="cover"
                 />
 
-    {/* Lock Overlay */}
-    {/* {!scripture.isUnlocked && (
-      <View style={styles.lockOverlay}>
-        <Feather name="lock" size={24} color="#fff" />
-      </View>
-    )} */}
   </View>
 </View>
 
@@ -829,26 +773,12 @@ const ScripturesProgress = memo(function ScripturesProgress() {
                 {scripture.description}
               </Text>
 
-              {/* Progress Section */}
+              {/* Where you are (overall progress lives in the Journey card above) */}
               {scripture.isUnlocked ? (
                 <View style={styles.scriptureProgress}>
-                  <View style={styles.scriptureProgressInfo}>
-                    <Text style={[styles.scriptureProgressText, !isDarkMode && styles.lightText]}>
-                      {scripture.progress} / {scripture.totalVerses}
-                    </Text>
-                    <Text style={[styles.scriptureProgressPercentage, !isDarkMode && styles.lightSubText]}>
-                      {Math.round((scripture.progress / scripture.totalVerses) * 100)}%
-                    </Text>
-                  </View>
-
-                  <View style={[styles.scriptureProgressBar, !isDarkMode && styles.lightProgressBar]}>
-                    <View
-                      style={[
-                        styles.scriptureProgressFilled,
-                        { width: `${(scripture.progress / scripture.totalVerses) * 100}%` }
-                      ]}
-                    />
-                  </View>
+                  <Text style={[styles.scriptureProgressText, !isDarkMode && styles.lightText]}>
+                    Now on Chapter {gitaPosition.chapter}, Verse {gitaPosition.verse}
+                  </Text>
                 </View>
               ) : (
                 <View style={styles.unlockRequirement}>
@@ -881,15 +811,21 @@ const ScripturesProgress = memo(function ScripturesProgress() {
   );
 });
 
+// Read from app.json so the footer never drifts from the shipped version.
+const APP_VERSION = Constants.expoConfig?.version ?? '';
+const FIRST_RELEASE_YEAR = 2024;
+const CURRENT_YEAR = new Date().getFullYear();
+const COPYRIGHT_YEARS =
+  CURRENT_YEAR > FIRST_RELEASE_YEAR ? `${FIRST_RELEASE_YEAR}–${CURRENT_YEAR}` : `${FIRST_RELEASE_YEAR}`;
+
 function Footer() {
   const isDarkMode = useKriya(s => s.isDarkMode);
 
   const openLink = async (url: string) => {
-    buttonPressHaptic(); // Add haptic for link opening
+    buttonPressHaptic();
 
     try {
       await Linking.openURL(url); // Opens the provided URL
-      // console.log('Opening:', url);
     } catch {
       // No handler for the URL (e.g. the iOS Simulator has no Mail app for
       // mailto:) — report it instead of throwing an uncaught rejection.
@@ -919,13 +855,6 @@ function Footer() {
       <View style={styles.footerSocials}>
         <Text style={[styles.footerSocialTitle, !isDarkMode && styles.lightSubText]}>Connect</Text>
         <View style={styles.socialButtons}>
-          {/* <Pressable
-            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
-            onPress={() => openLink('https://twitter.com/SuryaS_1729')}
-            android_ripple={{ color: '#cccccc18', radius: 22 }}
-          >
-            <Feather name="twitter" size={18} color={isDarkMode ? "#1da1f2" : "#1da1f2"} />
-          </Pressable> */}
           <Pressable
             style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
             onPress={() => openLink('mailto:bitwisedharma@gmail.com')}
@@ -938,14 +867,8 @@ function Footer() {
             onPress={() => openLink('https://github.com/SuryaS1729/kriya1')}
             android_ripple={{ color: '#cccccc18', radius: 22 }}
           >
-            <Feather name="github" size={18} color={isDarkMode ? "#fff" : "#000"} />
+            <Feather name="github" size={18} color={isDarkMode ? "#fff" : "#0f172a"} />
           </Pressable>
-          {/* <Pressable
-            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
-            onPress={() => openLink('https://instagram.com/thebitwisedharma')}
-          >
-            <Feather name="instagram" size={18} color={isDarkMode ? "#e4405f" : "#e4405f"} />
-          </Pressable> */}
         </View>
       </View>
 
@@ -953,10 +876,10 @@ function Footer() {
       <View style={styles.feedbackSection}>
         <Pressable
           style={[styles.feedbackButton, !isDarkMode && styles.lightFeedbackButton]}
-          onPress={() => openLink('https://forms.gle/iLQH7vjNZuY27Du17')} // Replace with your Google Form link
+          onPress={() => openLink('https://forms.gle/iLQH7vjNZuY27Du17')}
           android_ripple={{ color: '#cccccc18'}}
         >
-          <Feather name="message-square" size={20} color={isDarkMode ? "#fff" : "#000"} />
+          <Feather name="message-square" size={20} color={isDarkMode ? "#fff" : "#0f172a"} />
           <Text style={[styles.feedbackButtonText, !isDarkMode && styles.lightText]}>
             Share Feedback
           </Text>
@@ -965,7 +888,7 @@ function Footer() {
 
       {/* App Info */}
       <View style={styles.footerInfo}>
-        <Text style={[styles.footerVersion, !isDarkMode && styles.lightSubText]}>Version 3.0.0</Text>
+        <Text style={[styles.footerVersion, !isDarkMode && styles.lightSubText]}>Version {APP_VERSION}</Text>
         <View style={styles.footerLinks}>
           <Pressable onPress={() => openLink('https://kriya.bitwisedharma.com/privacy')}>
             <Text style={[styles.footerLink, !isDarkMode && styles.lightFooterLink]}>Privacy Policy</Text>
@@ -986,7 +909,7 @@ function Footer() {
       {/* Copyright */}
       <View style={styles.footerCopyright}>
         <Text style={[styles.footerCopyrightText, !isDarkMode && styles.lightSubText]}>
-          © 2024 Kriya. No rights reserved. 🙏
+          © {COPYRIGHT_YEARS} Kriya. No rights reserved. 🙏
         </Text>
       </View>
     </View>
@@ -997,6 +920,18 @@ function Footer() {
 export default function History() {
   const isDarkMode = useKriya(s => s.isDarkMode);
   const toggleDarkMode = useKriya(s => s.toggleDarkMode);
+  const currentShloka = useKriya(s => s.currentShloka);
+
+  // Read once per visit and shared by both progress sections. Nothing here
+  // writes to the store while rendering.
+  const gitaPosition = useMemo(() => {
+    const { index, data } = currentShloka();
+    const position = gitaPositionFromIndex(index);
+    // Trust the DB row's chapter/verse when available.
+    return data
+      ? { ...position, chapter: data.chapter_number, verse: data.verse_number }
+      : position;
+  }, [currentShloka]);
 
   return (
     <View style={[styles.container, !isDarkMode && styles.lightContainer]}>
@@ -1004,12 +939,14 @@ export default function History() {
       {/* BlurBackground */}
       <BlurBackground />
 
-      {/* Linear Gradient Overlay with reduced opacity */}
+      {/* Tint over the moving background. Light mode stays mostly white and
+          only drifts into a soft periwinkle near the bottom. */}
       <LinearGradient
         colors={isDarkMode
           ? ['rgba(52, 76, 103, 0.8)', 'rgba(0, 0, 0, 0.6)']
-          : ['rgba(255, 255, 255, 0.3)', 'rgba(139, 165, 225, 0.4)']
+          : ['rgba(255, 255, 255, 0.88)', 'rgba(255, 255, 255, 0.82)', 'rgba(139, 165, 225, 0.6)']
         }
+        locations={isDarkMode ? [0, 1] : [0, 0.65, 1]}
         style={StyleSheet.absoluteFill}
       />
 
@@ -1017,15 +954,15 @@ export default function History() {
         {/* Header - Always render immediately */}
         <View style={styles.headerRow}>
           <Pressable onPress={() => {
-            buttonPressHaptic(); // Changed from direct Haptics call
+            buttonPressHaptic();
                             router.back();
                           }}   hitSlop={16}>
-            <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#000"} />
+            <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#0f172a"} />
           </Pressable>
               <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>My Journey</Text>
           <TouchableOpacity
           onPress={() => {
-              selectionHaptic(); // Changed from direct Haptics call
+              selectionHaptic();
                             toggleDarkMode();
                           }}
           hitSlop={16}
@@ -1033,17 +970,17 @@ export default function History() {
             <Feather
               name={isDarkMode ? "sun" : "moon"}
               size={24}
-              color={isDarkMode ? "#fff" : "#000"}
+              color={isDarkMode ? "#fff" : "#0f172a"}
             />
           </TouchableOpacity>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Gita Progress */}
-          <GitaProgress />
+          <GitaProgress position={gitaPosition} />
 
           {/* Scriptures Progress List */}
-          <ScripturesProgress />
+          <ScripturesProgress gitaPosition={gitaPosition} />
 
           {/* Notification Settings */}
           <NotificationSettings />
@@ -1065,7 +1002,6 @@ export default function History() {
   );
 }
 
-// ...existing code...
 
 const styles = StyleSheet.create({
   container: {
@@ -1091,11 +1027,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
+  // Light mode uses the app's slate palette (matches Home and Calendar).
   lightText: {
-    color: '#000',
+    color: '#0f172a',
   },
   lightSubText: {
-    color: '#666',
+    color: '#64748b',
   },
     toggle: {
     width: 44,
@@ -1125,7 +1062,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   lightSection: {
-    // Light mode specific styles if needed
   },
   sectionTitle: {
     color: '#fff',
@@ -1150,16 +1086,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(248, 250, 252, 0.8)',
     borderColor: 'transparent',
   },
-  settingRowSelected: {
-    borderColor: '#b3862f',
-    borderWidth: 1,
-    backgroundColor: 'rgba(179, 134, 47, 0.16)',
-  },
-  lightSettingRowSelected: {
-    borderColor: '#b25e00',
-    borderWidth: 1,
-    backgroundColor: 'rgba(178, 94, 0, 0.08)',
-  },
   settingInfo: {
     flex: 1,
   },
@@ -1180,47 +1106,6 @@ const styles = StyleSheet.create({
     marginTop: -8,
     fontStyle: 'italic',
   },
-  previewButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  previewButtonPressed: {
-    opacity: 0.7,
-  },
-  previewButtonActive: {
-  },
-  previewButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#8ba5e1',
-  },
-  previewButtonTextActive: {
-    color: '#fff',
-  },
-  translationActionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(139, 165, 225, 0.10)',
-  },
-  lightTranslationActionButton: {
-    backgroundColor: 'rgba(74, 106, 154, 0.10)',
-  },
-  translationRemoveButton: {
-    backgroundColor: 'rgba(248, 113, 113, 0.10)',
-  },
-  lightTranslationRemoveButton: {
-    backgroundColor: 'rgba(220, 38, 38, 0.08)',
-  },
-  translationActionText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
   translationPillsWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -1237,24 +1122,27 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
     backgroundColor: 'rgba(52, 76, 103, 0.3)',
   },
+  // Three clear states, solid fills so they read over the moving background:
+  // not downloaded (quiet) → downloaded (slate card) → selected (accent).
   lightTranslationPill: {
-    backgroundColor: 'rgba(248, 250, 252, 0.8)',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    borderColor: '#e2e8f0',
   },
   translationPillDownloaded: {
-    borderColor: 'rgba(139, 165, 225, 0.35)',
-    backgroundColor: 'rgba(139, 165, 225, 0.12)',
+    borderColor: 'rgba(139, 165, 225, 0.45)',
+    backgroundColor: '#16283d',
   },
   lightTranslationPillDownloaded: {
-    borderColor: 'rgba(74, 106, 154, 0.35)',
-    backgroundColor: 'rgba(74, 106, 154, 0.10)',
+    borderColor: '#b9c8ea',
+    backgroundColor: '#e9effa',
   },
   translationPillActive: {
-    borderColor: '#b3862f',
-    backgroundColor: 'rgba(179, 134, 47, 0.18)',
+    borderColor: '#2e4fa3',
+    backgroundColor: '#2e4fa3',
   },
   lightTranslationPillActive: {
-    borderColor: '#b25e00',
-    backgroundColor: 'rgba(178, 94, 0, 0.10)',
+    borderColor: '#2e4fa3',
+    backgroundColor: '#2e4fa3',
   },
   translationPillText: {
     fontSize: 14,
@@ -1268,8 +1156,10 @@ const styles = StyleSheet.create({
   lightTranslationPillTextMuted: {
     color: '#64748b',
   },
+  // Listed after lightText, so the selected pill stays white in light mode.
   translationPillTextActive: {
     fontWeight: '700',
+    color: '#ffffff',
   },
   timeDisplay: {
     flexDirection: 'row',
@@ -1289,9 +1179,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 
-  lightTimePickerModal: {
-    backgroundColor: '#fff',
-  },
   timePickerTitle: {
     fontSize: 18,
     fontWeight: '600',
@@ -1350,9 +1237,6 @@ const styles = StyleSheet.create({
   // Quick Actions
   actionsSection: {
     marginBottom: 12,
-  },
-  actionButtons: {
-    gap: 12,
   },
   actionButton: {
     flexDirection: 'row',
@@ -1426,7 +1310,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   lightProgressContainer: {
-    // Light mode specific styles if needed
   },
   progressBar: {
     height: 8,
@@ -1489,25 +1372,6 @@ const styles = StyleSheet.create({
     color: '#888',
     fontSize: 12,
   },
-  gitaActionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(36, 60, 85, 0.8)',
-    borderRadius: 12,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(93, 123, 158, 0.5)',
-  },
-  lightGitaActionButton: {
-    backgroundColor: '#f0f0f0',
-    borderColor: '#d0d0d0',
-  },
-  gitaActionText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
-  },
     footerContainer: {
     marginTop: 20,
     marginBottom: 20,
@@ -1531,12 +1395,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     letterSpacing: 0,
     fontWeight: '200',
-  },
-  footerCompany: {
-    color: '#888',
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 10,
   },
   footerTagline: {
     alignItems: 'center',
@@ -1603,10 +1461,6 @@ const styles = StyleSheet.create({
   lightFooterLink: {
     color: '#5a7a9a',
   },
-  footerDivider: {
-    color: '#666',
-    fontSize: 12,
-  },
   footerQuote: {
     alignItems: 'center',
     marginBottom: 20,
@@ -1636,37 +1490,7 @@ const styles = StyleSheet.create({
     color: '#555',
     fontSize: 10,
   },
-   testSection: {
-    marginBottom: 30,
-  },
-  testButton: {
-    backgroundColor: 'rgba(52, 76, 103, 0.5)',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(93, 123, 158, 0.4)',
-  },
-  lightTestButton: {
-    backgroundColor: 'rgba(245, 245, 245, 0.7)',
-    borderColor: 'rgba(224, 224, 224, 0.6)',
-  },
-  testButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 8,
-  },
-  testButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  testButtonDesc: {
-    color: '#888',
-    fontSize: 12,
-    fontStyle: 'italic',
-  },
-   feedbackSection: {
+  feedbackSection: {
     alignItems: 'center',
     marginBottom: 24,
   },
@@ -1689,51 +1513,43 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
-  supportButton: {
+  supportCard: {
+    marginTop: 12,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255, 255, 255, 0.14)',
+    backgroundColor: 'rgba(22, 40, 61, 0.55)',
+    gap: 16,
+  },
+  lightSupportCard: {
+    borderColor: '#e2e8f0',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  supportBody: {
+    color: '#e2e8f0',
+    fontSize: 15,
+    lineHeight: 23,
+    fontFamily: 'Source Serif Pro',
+  },
+  lightSupportBody: {
+    color: '#1e293b',
+  },
+  supportFooter: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    borderRadius: 12,
-    backgroundColor: 'rgba(0, 153, 255, 0.14)',
-    borderWidth: 1,
-    borderColor: 'rgba(57, 181, 255, 0.8)',
+    gap: 10,
   },
-  supportButtonWrap: {
-    position: 'relative',
-    marginHorizontal: 8,
-    marginTop: 12,
-    marginBottom: 8,
+  supportRule: {
+    width: 18,
+    height: StyleSheet.hairlineWidth * 2,
+    opacity: 0.8,
   },
-  supportGlow: {
-    position: 'absolute',
-    top: -3,
-    right: -3,
-    bottom: -3,
-    left: -3,
-    borderRadius: 15,
-    borderWidth: 2,
-    shadowColor: '#39b5ff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 12,
-    shadowOpacity: 0.8,
-    elevation: 5,
-  },
-  lightSupportButton: {
-    backgroundColor: 'rgba(0, 132, 255, 0.09)',
-    borderColor: 'rgba(0, 112, 230, 0.55)',
-  },
-  supportButtonText: {
-    flex: 1,
-    color: '#69d2ff',
-    fontSize: 13,
-    fontWeight: '600',
-    textAlign: 'left',
-  },
-  lightSupportButtonText: {
-    color: '#006fda',
+  supportCta: {
+    fontFamily: 'Space Mono',
+    fontSize: 11,
+    letterSpacing: 2,
   },
 
    // New Scripture Styles
@@ -1796,7 +1612,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
 
-// Add these new styles:
 scriptureImageStyle: {
   width: 80,
   height: 80,
@@ -1862,11 +1677,6 @@ lockOverlay: {
     marginBottom: 12,
   },
 
-  scriptureProgressInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
 
   scriptureProgressText: {
     color: '#fff',
@@ -1874,23 +1684,8 @@ lockOverlay: {
     fontWeight: '500',
   },
 
-  scriptureProgressPercentage: {
-    color: '#888',
-    fontSize: 12,
-  },
 
-  scriptureProgressBar: {
-    height: 4,
-    backgroundColor: 'rgba(36, 60, 85, 0.6)',
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
 
-  scriptureProgressFilled: {
-    height: '100%',
-    backgroundColor: '#4a90e2',
-    borderRadius: 2,
-  },
 
   unlockRequirement: {
     flexDirection: 'row',

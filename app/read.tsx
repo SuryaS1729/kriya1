@@ -48,7 +48,7 @@ const COLORS = {
     field: 'rgba(52, 76, 103, 0.5)',
     fieldBorder: 'rgba(139, 165, 225, 0.25)',
     card: '#16283d',
-    selected: '#2b4382',
+    selected: 'rgba(52, 76, 103, 0.55)',
     current: 'rgba(52, 76, 103, 0.55)',
     accent: '#8ba5e1',
     sep: 'rgba(93, 123, 158, 0.25)',
@@ -61,7 +61,7 @@ const COLORS = {
     field: 'rgba(255, 255, 255, 0.85)',
     fieldBorder: '#e2e8f0',
     card: 'rgba(255, 255, 255, 0.85)',
-    selected: '#2e4fa3',
+    selected: '#e9effa',
     current: '#e9effa',
     accent: '#2e4fa3',
     sep: '#e2e8f0',
@@ -251,13 +251,13 @@ export default function Read() {
                     >
                       <Text style={[
                         styles.chText,
-                        { color: sel ? '#ffffff' : c.body }
+                        { color: sel ? c.text : c.body }
                       ]}>
                         {item.chapter}
                       </Text>
                       <Text style={[
                         styles.chMeta,
-                        { color: sel ? 'rgba(255, 255, 255, 0.75)' : c.muted }
+                        { color: c.muted }
                       ]}>
                         {item.verses}
                       </Text>

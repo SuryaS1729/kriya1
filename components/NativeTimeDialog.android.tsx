@@ -7,8 +7,8 @@ type Props = {
   is24Hour?: boolean;
   accentColor?: string;
   dark?: boolean;
-  /** 'teal' matches the onboarding aesthetic; default keeps the app-wide look. */
-  palette?: 'default' | 'teal';
+  /** 'slate' matches the onboarding reminder page; default keeps the app-wide look. */
+  palette?: 'default' | 'slate';
 };
 
 const buildEvent = (date: Date) => ({
@@ -20,28 +20,30 @@ const buildEvent = (date: Date) => ({
  * The Host forces the app's own color scheme (instead of the system
  * wallpaper palette) and the dialog surface is themed via elementColors.
  */
-// Onboarding palette: deep teal surfaces, aqua accent, no navy or wallpaper tones.
-const TEAL = {
+// Onboarding palette: the reminder page sits on the slate-blue gradient
+// (#2e455f -> black) that bridges into the home screen, so the dialog uses
+// muted slate surfaces with a soft blue-grey accent instead of teal.
+const SLATE = {
   dark: {
-    accent: '#3cc8c8',
-    container: '#0b2a30',
-    surface: '#12404a',
-    border: '#1d5560',
-    onAccent: '#042f2e',
-    text: '#d6f1f0',
+    accent: '#a9bfd8',
+    container: '#18222f',
+    surface: '#24344a',
+    border: '#344a63',
+    onAccent: '#132030',
+    text: '#e4ebf3',
   },
   light: {
-    accent: '#0e7490',
-    container: '#f2fafa',
-    surface: '#d9eff0',
-    border: '#b5dcde',
+    accent: '#2b4971',
+    container: '#f5f7fb',
+    surface: '#e2e8f3',
+    border: '#ced7ec',
     onAccent: '#ffffff',
-    text: '#134e4a',
+    text: '#2b4971',
   },
 };
 
-function tealElementColors(dark: boolean) {
-  const c = dark ? TEAL.dark : TEAL.light;
+function slateElementColors(dark: boolean) {
+  const c = dark ? SLATE.dark : SLATE.light;
   return {
     accent: c.accent,
     elementColors: {
@@ -64,15 +66,15 @@ function tealElementColors(dark: boolean) {
 }
 
 export function NativeTimeDialog({ value, onValueChange, onDismiss, is24Hour, accentColor, dark, palette = 'default' }: Props) {
-  if (palette === 'teal') {
-    const teal = tealElementColors(!!dark);
+  if (palette === 'slate') {
+    const slate = slateElementColors(!!dark);
     return (
-      <Host colorScheme={dark ? 'dark' : 'light'} seedColor={teal.accent}>
+      <Host colorScheme={dark ? 'dark' : 'light'} seedColor={slate.accent}>
         <TimePickerDialog
           initialDate={value.toISOString()}
           is24Hour={is24Hour}
-          color={teal.accent}
-          elementColors={teal.elementColors}
+          color={slate.accent}
+          elementColors={slate.elementColors}
           onDateSelected={(date) => onValueChange(buildEvent(date), date)}
           onDismissRequest={onDismiss}
         />

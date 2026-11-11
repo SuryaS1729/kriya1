@@ -110,7 +110,7 @@ export default function ReminderSlide({
                 onDismiss={onDismiss}
                 is24Hour={false}
                 dark={isDarkMode}
-                palette="teal"
+                palette="slate"
               />
             )}
           </View>

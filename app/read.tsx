@@ -18,14 +18,77 @@ import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 // Add haptics import
 import { buttonPressHaptic, selectionHaptic } from '../lib/haptics';
+import Feather from '@react-native-vector-icons/feather/static';
+
+// Traditional chapter titles of the Bhagavad Gita (not stored in the DB).
+const CHAPTER_NAMES = [
+  'Arjuna Vishada Yoga',
+  'Sankhya Yoga',
+  'Karma Yoga',
+  'Jnana Karma Sanyasa Yoga',
+  'Karma Sanyasa Yoga',
+  'Dhyana Yoga',
+  'Jnana Vijnana Yoga',
+  'Akshara Brahma Yoga',
+  'Raja Vidya Raja Guhya Yoga',
+  'Vibhuti Yoga',
+  'Vishvarupa Darshana Yoga',
+  'Bhakti Yoga',
+  'Kshetra Kshetrajna Vibhaga Yoga',
+  'Gunatraya Vibhaga Yoga',
+  'Purushottama Yoga',
+  'Daivasura Sampad Vibhaga Yoga',
+  'Shraddhatraya Vibhaga Yoga',
+  'Moksha Sanyasa Yoga',
+];
+
+// App palette (matches History): slate cards, navy for the selected state.
+const COLORS = {
+  dark: {
+    field: 'rgba(52, 76, 103, 0.5)',
+    fieldBorder: 'rgba(139, 165, 225, 0.25)',
+    card: '#16283d',
+    selected: '#2b4382',
+    current: 'rgba(52, 76, 103, 0.55)',
+    accent: '#8ba5e1',
+    sep: 'rgba(93, 123, 158, 0.25)',
+    divider: 'rgba(139, 165, 225, 0.2)',
+    text: '#f9fafb',
+    body: '#d1d5db',
+    muted: '#9ca3af',
+  },
+  light: {
+    field: 'rgba(255, 255, 255, 0.85)',
+    fieldBorder: '#e2e8f0',
+    card: 'rgba(255, 255, 255, 0.85)',
+    selected: '#2e4fa3',
+    current: '#e9effa',
+    accent: '#2e4fa3',
+    sep: '#e2e8f0',
+    divider: '#d5dceb',
+    text: '#0f172a',
+    body: '#334155',
+    muted: '#64748b',
+  },
+};
 
 export default function Read() {
   const isDarkMode = useKriya(s => s.isDarkMode);
+  const currentShloka = useKriya(s => s.currentShloka);
+  const c = isDarkMode ? COLORS.dark : COLORS.light;
   const chapters = useMemo(() => getChapterCounts(), []);
-  const initialChapter = chapters.length ? chapters[0].chapter : 1;
 
-  const [chapter, setChapter] = useState<number>(initialChapter);
+  // Where the reader is (same shloka Home and History show). Read once per visit.
+  const current = useMemo(() => {
+    const { data } = currentShloka();
+    return data
+      ? { chapter: data.chapter_number, verse: data.verse_number }
+      : { chapter: chapters.length ? chapters[0].chapter : 1, verse: 1 };
+  }, [currentShloka, chapters]);
+
+  const [chapter, setChapter] = useState<number>(current.chapter);
   const [query, setQuery] = useState('');
+  const trimmedQuery = query.trim();
 
   // TELUGU DISABLED: language selector hidden while Telugu features are paused.
   // const language = useKriya(s => s.language);
@@ -50,8 +113,8 @@ export default function Read() {
     return indexMapRef.current.get(`${chapterNumber}.${verseNumber}`) ?? 0;
   };
   const results = useMemo(
-    () => (query.trim() ? searchShlokasLike(query.trim()) : []),
-    [query]
+    () => (trimmedQuery ? searchShlokasLike(trimmedQuery) : []),
+    [trimmedQuery]
   );
 
   // Add haptic feedback for chapter selection
@@ -86,29 +149,47 @@ export default function Read() {
           </Text>
         </Pressable>
         */}
-        <TextInput
-          placeholder="Search shlokas . . ."
-          value={query}
-          onChangeText={setQuery}
-          style={[
-            styles.search,
-            {
-              backgroundColor: isDarkMode ? '#1f2937' : 'white',
-              borderColor: isDarkMode ? '#374151' : '#e5e7eb',
-              color: isDarkMode ? '#f9fafb' : '#000000',
-            }
-          ]}
-          returnKeyType="search"
-          autoCorrect={false}
-          placeholderTextColor={isDarkMode ? "#9ca3af" : "#6b7280"}
-        />
+        <View style={[styles.search, { backgroundColor: c.field, borderColor: c.fieldBorder }]}>
+          <TextInput
+            placeholder="Search shlokas . . ."
+            value={query}
+            onChangeText={setQuery}
+            style={[styles.searchInput, { color: c.text }]}
+            returnKeyType="search"
+            autoCorrect={false}
+            placeholderTextColor={c.muted}
+          />
+          {query.length > 0 && (
+            <Pressable
+              onPress={() => {
+                selectionHaptic();
+                setQuery('');
+              }}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Clear search"
+            >
+              <Feather name="x" size={18} color={c.muted} />
+            </Pressable>
+          )}
+        </View>
 
-        {query.trim() ? (
+        {trimmedQuery ? (
           // SEARCH RESULTS
           <FlashList
             data={results}
             keyExtractor={(r) => `${r.chapter_number}.${r.verse_number}`}
             keyboardShouldPersistTaps="handled"
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <Text style={[styles.emptyTitle, { color: c.text }]}>
+                  No verses match “{trimmedQuery}”
+                </Text>
+                <Text style={[styles.emptyHint, { color: c.muted }]}>
+                  Try a different word or a shorter phrase.
+                </Text>
+              </View>
+            }
             renderItem={({ item }) => {
               const idx = lookupGlobalIndex(item.chapter_number, item.verse_number);
               return (
@@ -117,23 +198,24 @@ export default function Read() {
                   replace asChild
                 >
                   <Pressable
-                    style={[
+                    // Link asChild needs a single style object, not an array.
+                    style={StyleSheet.flatten([
                       styles.resultRow,
-                      { backgroundColor: isDarkMode ? '#1f2937' : 'white' }
-                    ]}
+                      { backgroundColor: c.card }
+                    ])}
                     android_ripple={{ color: '#cccccc18'}}
                     onPress={() => buttonPressHaptic()} // Add haptic for search result tap
                   >
                     <Text style={[
                       styles.resultMeta,
-                      { color: isDarkMode ? '#9ca3af' : '#64748b' }
+                      { color: c.accent }
                     ]}>
                       {item.chapter_number}.{item.verse_number}
                     </Text>
                     <Text style={[
                       styles.resultText,
                       // TELUGU DISABLED: language === 'te' && styles.teluguText,
-                      { color: isDarkMode ? '#e5e7eb' : '#0f172a' }
+                      { color: c.text }
                     ]} numberOfLines={2}>
                       {textFor(item)}
                     </Text>
@@ -141,12 +223,6 @@ export default function Read() {
                 </Link>
               );
             }}
-            ItemSeparatorComponent={() => (
-              <View style={[
-                styles.sep,
-                { backgroundColor: isDarkMode ? '#374151' : '#f1f5f9' }
-              ]} />
-            )}
             contentContainerStyle={{ paddingBottom: 40 }}
           />
         ) : (
@@ -155,64 +231,65 @@ export default function Read() {
             <View style={styles.left}>
               <FlashList
                 data={chapters}
-                keyExtractor={(c) => String(c.chapter)}
+                keyExtractor={(ch) => String(ch.chapter)}
                 showsVerticalScrollIndicator={false}
+                // Open with the reader's chapter in view.
+                initialScrollIndex={Math.max(0, chapters.findIndex(ch => ch.chapter === current.chapter) - 2)}
                 renderItem={({ item }) => {
                   const sel = item.chapter === chapter;
                   return (
                     <Pressable
-                      onPress={() => handleChapterSelect(item.chapter)} // Use haptic function
+                      onPress={() => handleChapterSelect(item.chapter)}
                       style={[
                         styles.chRow,
-                        {
-                          backgroundColor: sel
-                            ? (isDarkMode ? '#374151' : '#f1f5f9')
-                            : 'transparent'
-                        }
+                        { backgroundColor: sel ? c.selected : 'transparent' }
                       ]}
                       android_ripple={{ color: '#cccccc18'}}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Chapter ${item.chapter}, ${item.verses} verses`}
+                      accessibilityState={{ selected: sel }}
                     >
                       <Text style={[
                         styles.chText,
-                        {
-                          color: sel
-                            ? (isDarkMode ? '#f9fafb' : '#111827')
-                            : (isDarkMode ? '#d1d5db' : '#0f172a')
-                        }
+                        { color: sel ? '#ffffff' : c.body }
                       ]}>
                         {item.chapter}
                       </Text>
                       <Text style={[
                         styles.chMeta,
-                        { color: isDarkMode ? '#9ca3af' : '#64748b' }
+                        { color: sel ? 'rgba(255, 255, 255, 0.75)' : c.muted }
                       ]}>
                         {item.verses}
                       </Text>
                     </Pressable>
                   );
                 }}
-                ItemSeparatorComponent={() => (
-                  <View style={[
-                    styles.sep,
-                    { backgroundColor: isDarkMode ? '#374151' : '#f1f5f9' }
-                  ]} />
-                )}
               />
             </View>
 
-             {/* DIVIDER LINE */}
-            <View style={[
-              styles.divider,
-              { backgroundColor: isDarkMode ? '#a5abb7ff' : '#d1d5db' }
-            ]} />
+            {/* Hairline between the two columns */}
+            <View style={[styles.divider, { backgroundColor: c.divider }]} />
 
             {/* VERSES LIST FOR SELECTED CHAPTER */}
             <View style={styles.right}>
+              <View style={[styles.chapterHeader, { borderBottomColor: c.sep }]}>
+                <Text style={[styles.chapterHeaderTitle, { color: c.text }]}>
+                  Chapter {chapter} · {CHAPTER_NAMES[chapter - 1] ?? ''}
+                </Text>
+                <Text style={[styles.chapterHeaderMeta, { color: c.muted }]}>
+                  {verses.length} verses
+                </Text>
+              </View>
               <FlashList
+                // Remount per chapter: each chapter starts at the top, and the
+                // reader's chapter opens scrolled to the verse they're on.
+                key={chapter}
                 data={verses}
                 keyExtractor={(v) => `${chapter}.${v.verse_number}`}
+                initialScrollIndex={chapter === current.chapter ? Math.max(0, current.verse - 3) : undefined}
                 renderItem={({ item }) => {
                   const idx = baseIndex + item.verse_number - 1;
+                  const isCurrent = chapter === current.chapter && item.verse_number === current.verse;
                   return (
                     <Link
                       href={{ pathname: '/shloka/[id]', params: { id: String(idx) } }}
@@ -220,13 +297,15 @@ export default function Read() {
                       asChild
                     >
                       <Pressable
-                        style={styles.vRow}
+                        // Link asChild needs a single style object, not an array.
+                        style={StyleSheet.flatten([styles.vRow, isCurrent && { backgroundColor: c.current }])}
                         android_ripple={{ color: '#cccccc18'}}
-                        onPress={() => buttonPressHaptic()} // Add haptic for verse tap
+                        onPress={() => buttonPressHaptic()}
+                        accessibilityLabel={isCurrent ? `Verse ${item.verse_number}, where you are now` : undefined}
                       >
                         <Text style={[
                           styles.vNum,
-                          { color: isDarkMode ? '#f9fafb' : '#0f172a' }
+                          { color: isCurrent ? c.accent : c.text }
                         ]}
                         >
                           {item.verse_number}
@@ -234,7 +313,7 @@ export default function Read() {
                         <Text style={[
                           styles.vText,
                           // TELUGU DISABLED: language === 'te' && styles.teluguText,
-                          { color: isDarkMode ? '#d1d5db' : '#334155' }
+                          { color: c.body }
                         ]} numberOfLines={2}>
                           {textFor(item)}
                         </Text>
@@ -245,7 +324,7 @@ export default function Read() {
                 ItemSeparatorComponent={() => (
                   <View style={[
                     styles.sep,
-                    { backgroundColor: isDarkMode ? '#374151' : '#f1f5f9' }
+                    { backgroundColor: c.sep }
                   ]} />
                 )}
               />
@@ -270,13 +349,33 @@ const styles = StyleSheet.create({
     fontStyle:'italic'
   },
   search: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
     borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 10,
     marginBottom: 10,
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 10,
     fontSize: 16,
+  },
+  empty: {
+    alignItems: 'center',
+    paddingTop: 48,
+    paddingHorizontal: 24,
+    gap: 6,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontFamily: 'Source Serif Pro',
+    textAlign: 'center',
+  },
+  emptyHint: {
+    fontSize: 13,
+    textAlign: 'center',
   },
   langToggle: {
     alignSelf: 'flex-end',
@@ -301,12 +400,27 @@ const styles = StyleSheet.create({
   chText: {
     fontSize: 18,
     fontWeight: '600',
-    fontFamily: "SourceSerifPro",
+    fontFamily: "Source Serif Pro",
   },
   divider: {
-    width: 3,
-    backgroundColor: '#ffffffff',
+    width: StyleSheet.hairlineWidth,
     marginHorizontal: 12,
+  },
+  chapterHeader: {
+    paddingHorizontal: 8,
+    paddingTop: 6,
+    paddingBottom: 10,
+    marginBottom: 4,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  chapterHeaderTitle: {
+    fontSize: 16,
+    fontFamily: 'Source Serif Pro',
+    fontWeight: '600',
+  },
+  chapterHeaderMeta: {
+    fontSize: 12,
+    marginTop: 2,
   },
   chMeta: {
     fontSize: 12,
@@ -317,13 +431,14 @@ const styles = StyleSheet.create({
     gap: 10,
     alignItems: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 8
+    paddingHorizontal: 8,
+    borderRadius: 10,
   },
   vNum: {
     width: 24,
     textAlign: 'center',
     fontWeight: '700',
-    fontFamily: "SourceSerifPro",
+    fontFamily: "Source Serif Pro",
   },
   vText: {
     flex: 1,

@@ -149,7 +149,7 @@ function TranslationSettings() {
 
   return (
     <View style={[styles.section, !isDarkMode && styles.lightSection]}>
-      <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Translations / Languages</Text>
+      <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Languages</Text>
       <Text style={[styles.recitationHint, !isDarkMode && styles.lightSubText]}>
         Tap to download or select. Long-press a downloaded language to remove it.
       </Text>
@@ -354,7 +354,7 @@ function NotificationSettings() {
 
   return (
     <View style={[styles.section, !isDarkMode && styles.lightSection]}>
-      <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Notification Settings</Text>
+      <Text style={[styles.sectionTitle, !isDarkMode && styles.lightText]}>Reminders</Text>
 
       <View style={styles.notificationSettings}>
         {/* Toggle Notifications */}
@@ -362,6 +362,10 @@ function NotificationSettings() {
           style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
           onPress={handleToggleNotifications}
           android_ripple={{ color: '#cccccc18' }}
+          accessibilityRole="switch"
+          accessibilityLabel="Daily Task Reminder"
+          accessibilityHint="Get reminded to plan your day"
+          accessibilityState={{ checked: notificationsEnabled }}
 
         >
           <View style={styles.settingInfo}>
@@ -391,6 +395,9 @@ function NotificationSettings() {
             style={[styles.settingRow, !isDarkMode && styles.lightSettingRow]}
             onPress={handleOpenTimePicker}
             android_ripple={{ color: '#cccccc18' }}
+            accessibilityRole="button"
+            accessibilityLabel={`Reminder time, ${formatTime(reminderTime.hour, reminderTime.minute)}`}
+            accessibilityHint="Opens the time picker"
           >
             <View style={styles.settingInfo}>
               <Text style={[styles.settingTitle, !isDarkMode && styles.lightText]}>
@@ -462,32 +469,11 @@ function NotificationSettings() {
             onValueChange={handleValueChange}
             onDismiss={handleDismiss}
             is24Hour={false}
-            accentColor={isDarkMode ? '#5a7d84' : '#8ea0b5'}
             dark={isDarkMode}
+            palette="slate"
           />
         )
       )}
-    </View>
-  );
-}
-
-// Quick Actions Component
-function QuickActions() {
-  const isDarkMode = useKriya(s => s.isDarkMode);
-
-  return (
-    <View style={styles.actionsSection}>
-      <Pressable
-        style={[styles.actionButton, !isDarkMode && styles.lightCard]}
-        onPress={() => {
-          buttonPressHaptic();
-          router.push('/bookmarks');
-        }}
-        android_ripple={{ color: '#cccccc18' }}
-      >
-        <Feather name="bookmark" size={24} color="#fbbf24" />
-        <Text style={[styles.actionButtonText, !isDarkMode && styles.lightText]}>Your Bookmarks</Text>
-      </Pressable>
     </View>
   );
 }
@@ -706,7 +692,7 @@ const ScripturesProgress = memo(function ScripturesProgress({ gitaPosition }: { 
     <View style={[styles.scripturesSection, !isDarkMode && styles.lightGitaSection]}>
       <View style={styles.scripturesHeader}>
         <Text style={[styles.scripturesSectionTitle, !isDarkMode && styles.lightText]}>
-          📚 Sacred Scriptures
+          Scriptures
         </Text>
         <Text style={[styles.scripturesSubtitle, !isDarkMode && styles.lightSubText]}>
           Your journey through ancient wisdom
@@ -728,9 +714,7 @@ const ScripturesProgress = memo(function ScripturesProgress({ gitaPosition }: { 
               !isDarkMode && styles.lightScriptureCard
             ]}
             onPress={() => handleScripturePress(scripture)}
-            android_ripple={{
-              color: scripture.isUnlocked ? '#cccccc18' : '#ff000018'
-            }}
+            android_ripple={{ color: '#cccccc18' }}
           >
             {/* Scripture Image */}
           <View style={styles.scriptureImageContainer}>
@@ -773,14 +757,8 @@ const ScripturesProgress = memo(function ScripturesProgress({ gitaPosition }: { 
                 {scripture.description}
               </Text>
 
-              {/* Where you are (overall progress lives in the Journey card above) */}
-              {scripture.isUnlocked ? (
-                <View style={styles.scriptureProgress}>
-                  <Text style={[styles.scriptureProgressText, !isDarkMode && styles.lightText]}>
-                    Now on Chapter {gitaPosition.chapter}, Verse {gitaPosition.verse}
-                  </Text>
-                </View>
-              ) : (
+              {/* Chapter/verse lives in the Journey card above; locked cards say how to unlock. */}
+              {!scripture.isUnlocked && (
                 <View style={styles.unlockRequirement}>
                   <Feather name="info" size={12} color="#888" />
                   <Text style={[styles.unlockText, !isDarkMode && styles.lightSubText]}>
@@ -792,8 +770,8 @@ const ScripturesProgress = memo(function ScripturesProgress({ gitaPosition }: { 
               {/* Action Button */}
               {scripture.isUnlocked && (
                 <View style={styles.scriptureAction}>
-                  <Feather name="book-open" size={16} color="#4a90e2" />
-                  <Text style={styles.scriptureActionText}>Continue Reading</Text>
+                  <Feather name="book-open" size={16} color={isDarkMode ? '#8ba5e1' : '#2e4fa3'} />
+                  <Text style={[styles.scriptureActionText, !isDarkMode && styles.lightScriptureActionText]}>Continue Reading</Text>
                 </View>
               )}
             </View>
@@ -813,10 +791,7 @@ const ScripturesProgress = memo(function ScripturesProgress({ gitaPosition }: { 
 
 // Read from app.json so the footer never drifts from the shipped version.
 const APP_VERSION = Constants.expoConfig?.version ?? '';
-const FIRST_RELEASE_YEAR = 2024;
 const CURRENT_YEAR = new Date().getFullYear();
-const COPYRIGHT_YEARS =
-  CURRENT_YEAR > FIRST_RELEASE_YEAR ? `${FIRST_RELEASE_YEAR}–${CURRENT_YEAR}` : `${FIRST_RELEASE_YEAR}`;
 
 function Footer() {
   const isDarkMode = useKriya(s => s.isDarkMode);
@@ -851,51 +826,6 @@ function Footer() {
           </Text>
         </View>
       </View>
-       {/* Social Links */}
-      <View style={styles.footerSocials}>
-        <Text style={[styles.footerSocialTitle, !isDarkMode && styles.lightSubText]}>Connect</Text>
-        <View style={styles.socialButtons}>
-          <Pressable
-            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
-            onPress={() => openLink('mailto:bitwisedharma@gmail.com')}
-            android_ripple={{ color: '#cccccc18', radius: 22 }}
-          >
-            <Feather name="mail" size={18} color={isDarkMode ? "#ff6b6b" : "#ff6b6b"} />
-          </Pressable>
-          <Pressable
-            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
-            onPress={() => openLink('https://github.com/SuryaS1729/kriya1')}
-            android_ripple={{ color: '#cccccc18', radius: 22 }}
-          >
-            <Feather name="github" size={18} color={isDarkMode ? "#fff" : "#0f172a"} />
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Feedback Form Button */}
-      <View style={styles.feedbackSection}>
-        <Pressable
-          style={[styles.feedbackButton, !isDarkMode && styles.lightFeedbackButton]}
-          onPress={() => openLink('https://forms.gle/iLQH7vjNZuY27Du17')}
-          android_ripple={{ color: '#cccccc18'}}
-        >
-          <Feather name="message-square" size={20} color={isDarkMode ? "#fff" : "#0f172a"} />
-          <Text style={[styles.feedbackButtonText, !isDarkMode && styles.lightText]}>
-            Share Feedback
-          </Text>
-        </Pressable>
-      </View>
-
-      {/* App Info */}
-      <View style={styles.footerInfo}>
-        <Text style={[styles.footerVersion, !isDarkMode && styles.lightSubText]}>Version {APP_VERSION}</Text>
-        <View style={styles.footerLinks}>
-          <Pressable onPress={() => openLink('https://kriya.bitwisedharma.com/privacy')}>
-            <Text style={[styles.footerLink, !isDarkMode && styles.lightFooterLink]}>Privacy Policy</Text>
-          </Pressable>
-        </View>
-      </View>
-
       {/* Quote */}
       <View style={styles.footerQuote}>
         <Text style={[styles.footerQuoteText, !isDarkMode && styles.lightSubText]}>
@@ -906,10 +836,54 @@ function Footer() {
         </Text>
       </View>
 
-      {/* Copyright */}
+      {/* Connect: mail, GitHub and feedback in one row */}
+      <View style={styles.footerSocials}>
+        <Text style={[styles.footerSocialTitle, !isDarkMode && styles.lightSubText]}>Connect</Text>
+        <View style={styles.socialButtons}>
+          <Pressable
+            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
+            onPress={() => openLink('mailto:bitwisedharma@gmail.com')}
+            android_ripple={{ color: '#cccccc18', radius: 22 }}
+            accessibilityRole="link"
+            accessibilityLabel="Email Kriya"
+          >
+            <Feather name="mail" size={18} color={isDarkMode ? "#fff" : "#0f172a"} />
+          </Pressable>
+          <Pressable
+            style={[styles.socialButton, !isDarkMode && styles.lightSocialButton]}
+            onPress={() => openLink('https://github.com/SuryaS1729/kriya1')}
+            android_ripple={{ color: '#cccccc18', radius: 22 }}
+            accessibilityRole="link"
+            accessibilityLabel="Kriya on GitHub"
+          >
+            <Feather name="github" size={18} color={isDarkMode ? "#fff" : "#0f172a"} />
+          </Pressable>
+          <Pressable
+            style={[styles.feedbackButton, !isDarkMode && styles.lightFeedbackButton]}
+            onPress={() => openLink('https://forms.gle/iLQH7vjNZuY27Du17')}
+            android_ripple={{ color: '#cccccc18' }}
+            accessibilityRole="link"
+          >
+            <Feather name="message-square" size={16} color={isDarkMode ? "#fff" : "#0f172a"} />
+            <Text style={[styles.feedbackButtonText, !isDarkMode && styles.lightText]}>
+              Share Feedback
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Fine print: version, privacy and copyright on one quiet line */}
       <View style={styles.footerCopyright}>
         <Text style={[styles.footerCopyrightText, !isDarkMode && styles.lightSubText]}>
-          © {COPYRIGHT_YEARS} Kriya. No rights reserved. 🙏
+          Version {APP_VERSION}
+        </Text>
+        <Text style={[styles.footerCopyrightText, !isDarkMode && styles.lightSubText]}>·</Text>
+        <Pressable onPress={() => openLink('https://kriya.bitwisedharma.com/privacy')} hitSlop={10} accessibilityRole="link">
+          <Text style={[styles.footerLink, !isDarkMode && styles.lightFooterLink]}>Privacy Policy</Text>
+        </Pressable>
+        <Text style={[styles.footerCopyrightText, !isDarkMode && styles.lightSubText]}>·</Text>
+        <Text style={[styles.footerCopyrightText, !isDarkMode && styles.lightSubText]}>
+          © {CURRENT_YEAR} Kriya. No rights reserved. 🙏
         </Text>
       </View>
     </View>
@@ -953,26 +927,51 @@ export default function History() {
       <SafeAreaView style={styles.safeAreaContent}>
         {/* Header - Always render immediately */}
         <View style={styles.headerRow}>
-          <Pressable onPress={() => {
-            buttonPressHaptic();
-                            router.back();
-                          }}   hitSlop={16}>
-            <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#0f172a"} />
-          </Pressable>
-              <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>My Journey</Text>
-          <TouchableOpacity
-          onPress={() => {
-              selectionHaptic();
-                            toggleDarkMode();
-                          }}
-          hitSlop={16}
-          activeOpacity={0.7}>
-            <Feather
-              name={isDarkMode ? "sun" : "moon"}
-              size={24}
-              color={isDarkMode ? "#fff" : "#0f172a"}
-            />
-          </TouchableOpacity>
+          {/* Equal-width sides keep the title centred with two icons on the right. */}
+          <View style={styles.headerSide}>
+            <Pressable
+              onPress={() => {
+                buttonPressHaptic();
+                router.back();
+              }}
+              hitSlop={16}
+              accessibilityRole="button"
+              accessibilityLabel="Back"
+            >
+              <Feather name="arrow-left" size={24} color={isDarkMode ? "#fff" : "#0f172a"} />
+            </Pressable>
+          </View>
+          <Text style={[styles.headerTitle, !isDarkMode && styles.lightText]}>My Journey</Text>
+          <View style={[styles.headerSide, styles.headerActions]}>
+            <TouchableOpacity
+              onPress={() => {
+                buttonPressHaptic();
+                router.push('/bookmarks');
+              }}
+              hitSlop={10}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Your bookmarks"
+            >
+              <Feather name="bookmark" size={22} color={isDarkMode ? "#fff" : "#0f172a"} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                selectionHaptic();
+                toggleDarkMode();
+              }}
+              hitSlop={10}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              <Feather
+                name={isDarkMode ? "sun" : "moon"}
+                size={24}
+                color={isDarkMode ? "#fff" : "#0f172a"}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -987,9 +986,6 @@ export default function History() {
 
           {/* Translation Settings */}
           <TranslationSettings />
-
-          {/* Quick Actions */}
-          <QuickActions />
 
           {/* Support Link */}
           <SupportLink />
@@ -1022,6 +1018,15 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     marginTop: 30,
   },
+  headerSide: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerActions: {
+    justifyContent: 'flex-end',
+    gap: 22,
+  },
   headerTitle: {
     color: '#fff',
     fontSize: 18,
@@ -1043,7 +1048,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   toggleActive: {
-    backgroundColor: '#2e4fa3',
+    backgroundColor: '#2b4382',
   },
   lightToggleActive: {
     backgroundColor: '#2e4fa3',
@@ -1137,8 +1142,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#e9effa',
   },
   translationPillActive: {
-    borderColor: '#2e4fa3',
-    backgroundColor: '#2e4fa3',
+    borderColor: '#2b4382',
+    backgroundColor: '#2b4382',
   },
   lightTranslationPillActive: {
     borderColor: '#2e4fa3',
@@ -1229,29 +1234,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  lightCard: {
-    backgroundColor: 'rgba(245, 245, 245, 0.7)',
-    borderColor: 'rgba(224, 224, 224, 0.6)',
-  },
-
-  // Quick Actions
-  actionsSection: {
-    marginBottom: 12,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(52, 76, 103, 0.5)',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 0,
-  },
-  actionButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 12,
-  },
   modalBackdrop: {
     position: 'absolute',
     top: 0,
@@ -1414,7 +1396,7 @@ const styles = StyleSheet.create({
   },
   footerSocials: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 28,
   },
   footerSocialTitle: {
     color: '#888',
@@ -1426,7 +1408,8 @@ const styles = StyleSheet.create({
   },
   socialButtons: {
     flexDirection: 'row',
-    gap: 16,
+    alignItems: 'center',
+    gap: 12,
   },
   socialButton: {
     width: 44,
@@ -1439,23 +1422,9 @@ const styles = StyleSheet.create({
   lightSocialButton: {
     backgroundColor: 'rgba(245, 245, 245, 0.7)',
   },
-  footerInfo: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  footerVersion: {
-    color: '#666',
-    fontSize: 11,
-    marginBottom: 8,
-  },
-  footerLinks: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
   footerLink: {
     color: '#8ba5e1',
-    fontSize: 12,
+    fontSize: 11,
     textDecorationLine: 'underline',
   },
   lightFooterLink: {
@@ -1463,7 +1432,7 @@ const styles = StyleSheet.create({
   },
   footerQuote: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 28,
     paddingHorizontal: 20,
   },
   footerQuoteText: {
@@ -1481,28 +1450,29 @@ const styles = StyleSheet.create({
     fontFamily: 'Source Serif Pro',
   },
   footerCopyright: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     alignItems: 'center',
+    columnGap: 6,
+    rowGap: 4,
     paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: 'rgba(93, 123, 158, 0.2)',
   },
   footerCopyrightText: {
-    color: '#555',
-    fontSize: 10,
+    color: '#666',
+    fontSize: 11,
   },
-  feedbackSection: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
+  // Pill sized to sit in the same row as the 44px round social buttons.
   feedbackButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    height: 44,
+    paddingHorizontal: 18,
+    borderRadius: 22,
     backgroundColor: 'rgba(52, 76, 103, 0.5)',
-    borderRadius: 12,
-    padding: 18,
-    borderWidth: 0,
-    borderColor: 'rgba(93, 123, 158, 0.4)',
-    gap: 12,
+    gap: 8,
   },
   lightFeedbackButton: {
     backgroundColor: 'rgba(245, 245, 245, 0.7)',
@@ -1673,16 +1643,6 @@ lockOverlay: {
     color: '#555',
   },
 
-  scriptureProgress: {
-    marginBottom: 12,
-  },
-
-
-  scriptureProgressText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '500',
-  },
 
 
 
@@ -1707,9 +1667,12 @@ lockOverlay: {
   },
 
   scriptureActionText: {
-    color: '#4a90e2',
+    color: '#8ba5e1',
     fontSize: 12,
     fontWeight: '500',
+  },
+  lightScriptureActionText: {
+    color: '#2e4fa3',
   },
 
   comingSoonBadge: {

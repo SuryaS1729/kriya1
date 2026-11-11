@@ -8,7 +8,7 @@ type Props = {
   accentColor?: string;
   dark?: boolean;
   /** Android-only styling option; ignored here. */
-  palette?: 'default' | 'teal';
+  palette?: 'default' | 'slate';
 };
 
 /** Web fallback — community time picker. */

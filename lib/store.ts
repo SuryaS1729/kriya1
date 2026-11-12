@@ -446,7 +446,8 @@ export const useKriya = create<KriyaState>()(
         } else {
           set({ notificationsEnabled: false, notificationToken: null });
           await Notifications.cancelAllScheduledNotificationsAsync();
-          // console.log('🔕 All notifications cancelled');
+          // cancelAll above wiped per-task reminders too — bring them back.
+          await rescheduleTaskReminders();
           return false;
         }
       },

@@ -43,3 +43,8 @@ app-example
 
 # Command Code (local agent config)
 .commandcode/
+
+# EAS / local build artifacts
+*.aab
+*.apk
+*.ipa

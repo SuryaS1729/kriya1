@@ -820,7 +820,7 @@ function PulsingHeart() {
   }, [reducedMotion, pulse]);
 
   const glowStyle = useAnimatedStyle(() => ({
-    opacity: 0.3 + pulse.value * 0.7,
+    opacity: 0.45 + pulse.value * 0.55,
     transform: [{ scale: 0.85 + pulse.value * 0.3 }],
   }));
 
@@ -834,7 +834,8 @@ function PulsingHeart() {
         <Svg width="100%" height="100%" viewBox="0 0 28 28">
           <Defs>
             <RadialGradient id="heartGlow" cx="50%" cy="50%" r="50%">
-              <Stop offset="0%" stopColor="#FF6E26" stopOpacity={0.7} />
+              <Stop offset="0%" stopColor="#FF6E26" stopOpacity={1} />
+              <Stop offset="45%" stopColor="#FF6E26" stopOpacity={0.45} />
               <Stop offset="100%" stopColor="#FF6E26" stopOpacity={0} />
             </RadialGradient>
           </Defs>

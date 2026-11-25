@@ -4,7 +4,6 @@ import { useKriya } from '../lib/store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Feather from "@react-native-vector-icons/feather/static";
-import FontAwesome5 from "@react-native-vector-icons/fontawesome5/static";
 import { Image } from 'expo-image';
 import BlurBackground from '@/components/BlurBackground';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,12 +12,21 @@ import * as Notifications from 'expo-notifications';
 import { NativeTimeDialog } from '../components/NativeTimeDialog';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { StatusBar } from 'expo-status-bar';
-import Animated, { useReducedMotion } from 'react-native-reanimated';
+import Animated, {
+  useReducedMotion,
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  cancelAnimation,
+  Easing,
+} from 'react-native-reanimated';
 import { buttonPressHaptic, selectionHaptic, errorHaptic, taskCompleteHaptic, deleteHaptic } from '../lib/haptics';
 import { showAppToast } from '../lib/appToast';
 import { formatTime } from '../lib/formatTime';
 import { PressableScale } from 'pressto';
 import Constants from 'expo-constants';
+import Svg, { Path, Defs, RadialGradient, Stop, Circle } from 'react-native-svg';
 import {
   TRANSLATION_LANGUAGE_LIST,
   downloadTranslation,
@@ -789,6 +797,59 @@ const ScripturesProgress = memo(function ScripturesProgress({ gitaPosition }: { 
   );
 });
 
+// SVG heart with a slow breathing glow: a radial-gradient halo behind the heart
+// fades and swells while the heart beats gently. Holds still when reduced motion is on.
+const HEART_PATH =
+  'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z';
+
+function PulsingHeart() {
+  const reducedMotion = useReducedMotion();
+  const pulse = useSharedValue(0);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      pulse.value = 0.5;
+      return;
+    }
+    pulse.value = withRepeat(
+      withTiming(1, { duration: 1400, easing: Easing.inOut(Easing.sin) }),
+      -1,
+      true,
+    );
+    return () => cancelAnimation(pulse);
+  }, [reducedMotion, pulse]);
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: 0.3 + pulse.value * 0.7,
+    transform: [{ scale: 0.85 + pulse.value * 0.3 }],
+  }));
+
+  const heartStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 + pulse.value * 0.1 }],
+  }));
+
+  return (
+    <View style={styles.footerHeart}>
+      <Animated.View style={[StyleSheet.absoluteFill, glowStyle]}>
+        <Svg width="100%" height="100%" viewBox="0 0 28 28">
+          <Defs>
+            <RadialGradient id="heartGlow" cx="50%" cy="50%" r="50%">
+              <Stop offset="0%" stopColor="#FF6E26" stopOpacity={0.7} />
+              <Stop offset="100%" stopColor="#FF6E26" stopOpacity={0} />
+            </RadialGradient>
+          </Defs>
+          <Circle cx="14" cy="14" r="14" fill="url(#heartGlow)" />
+        </Svg>
+      </Animated.View>
+      <Animated.View style={heartStyle}>
+        <Svg width={13} height={13} viewBox="0 0 24 24">
+          <Path d={HEART_PATH} fill="#FF6E26" />
+        </Svg>
+      </Animated.View>
+    </View>
+  );
+}
+
 // Read from app.json so the footer never drifts from the shipped version.
 const APP_VERSION = Constants.expoConfig?.version ?? '';
 const CURRENT_YEAR = new Date().getFullYear();
@@ -820,9 +881,18 @@ function Footer() {
         <Text style={[styles.footerAppName, !isDarkMode && styles.lightText]}>kriya</Text>
 
         <View style={styles.footerTagline}>
-          <Text style={[styles.footerMadeIn, !isDarkMode && styles.lightSubText]}>Crafted with  {<FontAwesome5 name="heart" size={12} iconStyle="solid" color="#FF6E26" />}  in Bharāt</Text>
-          <Text style={[styles.footerInspiration, !isDarkMode && styles.lightSubText]}>
-            Inspired by the timeless wisdom of the Bhagavad Gita
+          <View style={styles.footerMadeInRow}>
+            <Text style={[styles.footerMadeIn, !isDarkMode && styles.lightSubText]}>Crafted with</Text>
+            <PulsingHeart />
+            <Text style={[styles.footerMadeIn, !isDarkMode && styles.lightSubText]}>in Bharāt</Text>
+          </View>
+          <Text style={[styles.footerCompany, !isDarkMode && styles.lightSubText]}>by</Text>
+          <Text
+            style={[styles.footerCompany, styles.footerCompanyLink, !isDarkMode && styles.lightSubText]}
+            onPress={() => openLink('https://bitwisedharma.com/')}
+            accessibilityRole="link"
+          >
+            The BitwiseDharma Company
           </Text>
         </View>
       </View>
@@ -1372,7 +1442,7 @@ const styles = StyleSheet.create({
   footerAppName: {
     color: '#fff',
     fontSize: 58,
-    marginBottom: 18, // Reduced margin to make room for company name
+    marginBottom: 12,
     fontFamily: 'Instrument Serif',
     fontStyle: 'italic',
     letterSpacing: 0,
@@ -1382,17 +1452,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
+  footerMadeInRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 0,
+  },
+  // Room around the icon so the glow is not clipped.
+  footerHeart: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   footerMadeIn: {
     color: '#888',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '500',
-  },
-  footerInspiration: {
-    color: '#666',
-    fontSize: 12,
-    textAlign: 'center',
-    fontStyle: 'italic',
-    fontFamily: 'Source Serif Pro',
   },
   footerSocials: {
     alignItems: 'center',
@@ -1459,6 +1534,17 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: 'rgba(93, 123, 158, 0.2)',
+  },
+  footerCompany: {
+    color: '#999',
+    fontSize: 12,
+    textAlign: 'center',
+    fontFamily: 'Source Serif Pro',
+    fontStyle: 'italic',
+  },
+  footerCompanyLink: {
+    textDecorationLine: 'underline',
+    marginTop: 4,
   },
   footerCopyrightText: {
     color: '#666',
